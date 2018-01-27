@@ -139,7 +139,7 @@ class InputFocuspointElement extends AbstractFormElement
 
         if ($arguments['isAllowedFileExtension']) {
             $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/BwFocuspointImages/FocuspointImages' => ''
+                'TYPO3/CMS/BwFocuspointImages/FocuspointImages' => 'function (FocuspointImages) {top.require(["cropper"], function() { FocuspointImages.initializeTrigger(); }); }'
             ];
             $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
             if (GeneralUtility::inList($config['eval'], 'required')) {
