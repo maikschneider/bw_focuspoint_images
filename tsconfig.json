@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "amd",
+        "sourceMap": false,
+        "removeComments": false,
+        "pretty": true,
+        "paths": {
+	        "TYPO3/CMS/BwFocuspointImagaes/*": [
+	            "Resources/Public/JavaScript/"
+	        ]
+        }
+    }
+}
