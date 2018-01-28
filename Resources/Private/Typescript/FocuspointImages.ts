@@ -35,6 +35,26 @@ class FocuspointImages {
 
   private trigger: JQuery;
   private currentModal: JQuery;
+  private cropImageSelector: string = '#t3js-crop-image';
+
+
+  private init(): void {
+    alert('yes!');
+  }
+
+  /**
+   * @method initializeFocuspointModal
+   * @desc Initialize the focuspoint modal and dispatch the focuspoint init
+   * @private
+   */
+  private initializeFocuspointModal(): void {
+    const image: JQuery = this.currentModal.find(this.cropImageSelector);
+    ImagesLoaded(image, (): void => {
+      setTimeout((): void => {
+        this.init();
+      }, 100);
+    });
+  }
 
 
   public show(): void {
@@ -44,15 +64,64 @@ class FocuspointImages {
     const buttonDismissText: string = this.trigger.data('buttonDismissText');
     const buttonSaveText: string = this.trigger.data('buttonSaveText');
     const imageUri: string = this.trigger.data('url');
-    //const initCropperModal: Function = this.initializeCropperModal.bind(this);
+    const initFocuspointModal: Function = this.initializeFocuspointModal.bind(this);
 
     this.currentModal = Modal.advanced({
+      type: 'ajax',
       content: imageUri,
       size: Modal.sizes.full,
       style: Modal.styles.dark,
-      title: 'test',
+      title: modalTitle,
+      ajaxCallback: initFocuspointModal,
+      buttons: [
+          {
+              btnClass: 'btn-default pull-left',
+              dataAttributes: {
+                  method: 'preview',
+              },
+              icon: 'actions-view',
+              text: buttonPreviewText,
+          },
+          {
+              btnClass: 'btn-default',
+              dataAttributes: {
+                  method: 'dismiss',
+              },
+              icon: 'actions-close',
+              text: buttonDismissText,
+          },
+          {
+              btnClass: 'btn-primary',
+              dataAttributes: {
+                  method: 'save',
+              },
+              icon: 'actions-document-save',
+              text: buttonSaveText,
+          },
+      ],
+      callback: function (currentModal) {
+          currentModal.find('.t3js-modal-body')
+              .addClass('cropper');
+      }
     });
+    this.currentModal.on('hide.bs.modal', (e: JQueryEventObject): void => {
+      this.destroy();
+    });
+    // Do not dismiss the modal when clicking beside it to avoid data loss
+    this.currentModal.data('bs.modal').options.backdrop = 'static';
 
+  }
+
+  /**
+   * @method destroy
+   * @desc Destroy the FocuspointImage
+   * @private
+   */
+  private destroy(): void {
+    if (this.currentModal) {
+      this.currentModal = null;
+      this.data = null;
+    }
   }
 
 
@@ -62,7 +131,7 @@ class FocuspointImages {
       this.trigger = $(e.currentTarget);
       this.show();
     };
-    $('.t3js-image-focuspoint-trigger').off('click').click(triggerHandler);
+    $('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
   }
 
 }

@@ -22,7 +22,7 @@
                                         data-crop-variant-id="{cropVariant.id}"
                                         data-crop-variant>
                                 <span><i class="fa fa-chevron-{f:if(condition:cropVariantIterator.isFirst, then:'up', else:'down')}"
-                                                    aria-hidden="true"></i> {cropVariant.title -> f:translate(id: cropVariant.title)}</span>
+                                                    aria-hidden="true"></i> cropvariante . title</span>
                                     <div
                                         class="cropper-preview-thumbnail {f:if(condition:'{image.properties.width}>{image.properties.height}', then:'wide', else: 'tall')}">
                                         <img class="cropper-preview-thumbnail-image"
@@ -55,7 +55,7 @@
                                                             class="sr-only" id="aspectRatio-{cropVariantIterator.cycle}-{ratioIterator.cycle}"
                                                             name="aspectRatio-{cropVariantIterator.cycle}-{ratioIterator.cycle}" value="{cropVariant.id}"
                                                             type="radio">
-                                                        <span class="t3-js-ratio-title" data-ratio-id="{cropVariant.id}{ratio.id}">{ratio.title -> f:translate(id: ratio.title)}</span> <i class="fa fa-check"></i></label>
+                                                        <span class="t3-js-ratio-title" data-ratio-id="{cropVariant.id}{ratio.id}"> crop title </span> <i class="fa fa-check"></i></label>
                                                 </f:for>
                                             </div>
                                         </f:if>

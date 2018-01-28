@@ -3,6 +3,8 @@ defined('TYPO3_MODE') || die('Access denied');
 
 $_EXTKEY = 'bw_focuspoint_images';
 
+// @TODO: Move in sysext/core/configuration/tca/sys_file_reference!!!!!
+
 $additionalColumns = [
     'focus_points' => [
         'exclude' => 1,

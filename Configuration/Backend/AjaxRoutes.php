@@ -9,7 +9,7 @@
   */
  return [
     'wizard_focuspoint' => [
-         'path' => 'tx_bwfocuspointimages/focuspoint_ajax',
+         'path' => '/tx_bwfocuspointimages/focuspoint_ajax',
          'target' => \Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard::class .'::getWizardAction'
      ],
  ];

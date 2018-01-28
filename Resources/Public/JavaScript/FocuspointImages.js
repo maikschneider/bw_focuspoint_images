@@ -19,20 +19,87 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
      */
     var FocuspointImages = (function () {
         function FocuspointImages() {
+            this.cropImageSelector = '#t3js-crop-image';
         }
+        FocuspointImages.prototype.init = function () {
+            alert('yes!');
+        };
+        /**
+         * @method initializeFocuspointModal
+         * @desc Initialize the focuspoint modal and dispatch the focuspoint init
+         * @private
+         */
+        FocuspointImages.prototype.initializeFocuspointModal = function () {
+            var _this = this;
+            var image = this.currentModal.find(this.cropImageSelector);
+            ImagesLoaded(image, function () {
+                setTimeout(function () {
+                    _this.init();
+                }, 100);
+            });
+        };
         FocuspointImages.prototype.show = function () {
+            var _this = this;
             var modalTitle = this.trigger.data('modalTitle');
             var buttonPreviewText = this.trigger.data('buttonPreviewText');
             var buttonDismissText = this.trigger.data('buttonDismissText');
             var buttonSaveText = this.trigger.data('buttonSaveText');
             var imageUri = this.trigger.data('url');
-            //const initCropperModal: Function = this.initializeCropperModal.bind(this);
+            var initFocuspointModal = this.initializeFocuspointModal.bind(this);
             this.currentModal = Modal.advanced({
+                type: 'ajax',
                 content: imageUri,
                 size: Modal.sizes.full,
                 style: Modal.styles.dark,
-                title: 'test',
+                title: modalTitle,
+                ajaxCallback: initFocuspointModal,
+                buttons: [
+                    {
+                        btnClass: 'btn-default pull-left',
+                        dataAttributes: {
+                            method: 'preview',
+                        },
+                        icon: 'actions-view',
+                        text: buttonPreviewText,
+                    },
+                    {
+                        btnClass: 'btn-default',
+                        dataAttributes: {
+                            method: 'dismiss',
+                        },
+                        icon: 'actions-close',
+                        text: buttonDismissText,
+                    },
+                    {
+                        btnClass: 'btn-primary',
+                        dataAttributes: {
+                            method: 'save',
+                        },
+                        icon: 'actions-document-save',
+                        text: buttonSaveText,
+                    },
+                ],
+                callback: function (currentModal) {
+                    currentModal.find('.t3js-modal-body')
+                        .addClass('cropper');
+                }
             });
+            this.currentModal.on('hide.bs.modal', function (e) {
+                _this.destroy();
+            });
+            // Do not dismiss the modal when clicking beside it to avoid data loss
+            this.currentModal.data('bs.modal').options.backdrop = 'static';
+        };
+        /**
+         * @method destroy
+         * @desc Destroy the FocuspointImage
+         * @private
+         */
+        FocuspointImages.prototype.destroy = function () {
+            if (this.currentModal) {
+                this.currentModal = null;
+                this.data = null;
+            }
         };
         FocuspointImages.prototype.initializeTrigger = function () {
             var _this = this;
