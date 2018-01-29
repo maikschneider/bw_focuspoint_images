@@ -4,7 +4,6 @@ namespace Blueways\BwFocuspointImages\Form\Element;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -35,40 +34,26 @@ class InputFocuspointElement extends AbstractFormElement
     protected static $defaultConfig = [
         'file_field' => 'uid_local',
         'allowedExtensions' => null, // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-        'cropVariants' => [
-            'default' => [
-                'title' => 'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.crop_variant.default',
-                'allowedAspectRatios' => [
-                    '16:9' => [
-                        'title' => 'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.ratio.16_9',
-                        'value' => 16 / 9
+        'focusPoints' => [
+            'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
+            'singlePoint' => [
+                'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
+                'fields' => [
+                    'name' => [
+                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.name.title',
+                        'type' => 'input',
                     ],
-                    '3:2' => [
-                        'title' => 'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.ratio.3_2',
-                        'value' => 3 / 2
+                    'description' => [
+                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.description.title',
+                        'type' => 'textarea',
                     ],
-                    '4:3' => [
-                        'title' => 'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.ratio.4_3',
-                        'value' => 4 / 3
-                    ],
-                    '1:1' => [
-                        'title' => 'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.ratio.1_1',
-                        'value' => 1.0
-                    ],
-                    'NaN' => [
-                        'title' => 'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.ratio.free',
-                        'value' => 0.0
-                    ],
-                ],
-                'selectedRatio' => 'NaN',
-                'cropArea' => [
-                    'x' => 0.0,
-                    'y' => 0.0,
-                    'width' => 1.0,
-                    'height' => 1.0,
-                ],
-            ],
-        ]
+                    'link' => [
+                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.name.title',
+                        'type' => 'url',
+                    ]
+                ]
+            ]
+        ],
     ];
 
 
@@ -133,7 +118,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'validation' => '[]'
             ],
             'config' => $config,
-            'wizardUri' => $this->getWizardUri(['@todo: $focusPoints rein'], $file),
+            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file),
             'previewUrl' => $this->getPreviewUrl($this->data['databaseRow'], $file),
         ];
 
@@ -167,7 +152,8 @@ class InputFocuspointElement extends AbstractFormElement
         //     $elementValue = (string)$cropVariantCollection;
         // }
         // $config['cropVariants'] = $cropVariantCollection->asArray();
-        // $config['allowedExtensions'] = implode(', ', GeneralUtility::trimExplode(',', $config['allowedExtensions'], true));
+        $config['allowedExtensions'] = implode(', ', GeneralUtility::trimExplode(',', $config['allowedExtensions'], true));
+
         return $config;
     }
 
@@ -204,7 +190,7 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $routeName = 'ajax_wizard_focuspoint';
         $arguments = [
-            'cropVariants' => $focusPoints,
+            'focusPoints' => $focusPoints,
             'image' => $image->getUid(),
         ];
         $uriArguments['arguments'] = json_encode($arguments);
@@ -243,31 +229,16 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $defaultConfig = self::$defaultConfig;
 
-        // If ratios are set do not add default options
-        if (isset($baseConfiguration['cropVariants'])) {
-            unset($defaultConfig['cropVariants']);
+        // If single point configuration is set do not include deafult ones
+        if (isset($baseConfiguration['focusPoints']['singlePoint']['fields'])) {
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']);
         }
 
         $config = array_replace_recursive($defaultConfig, $baseConfiguration);
 
-        if (!is_array($config['cropVariants'])) {
-            throw new InvalidConfigurationException('Crop variants configuration must be an array', 1485377267);
+        if (!is_array($config['focusPoints'])) {
+            throw new InvalidConfigurationException('Focus points configuration must be an array', 1517157895);
         }
-
-        $cropVariants = [];
-        foreach ($config['cropVariants'] as $id => $cropVariant) {
-            // Ignore disabled crop variants
-            if (!empty($cropVariant['disabled'])) {
-                continue;
-            }
-            // Enforce a crop area (default is full image)
-            if (empty($cropVariant['cropArea'])) {
-                $cropVariant['cropArea'] = Area::createEmpty()->asArray();
-            }
-            $cropVariants[$id] = $cropVariant;
-        }
-
-        $config['cropVariants'] = $cropVariants;
 
         // By default we allow all image extensions that can be handled by the GFX functionality
         if ($config['allowedExtensions'] === null) {

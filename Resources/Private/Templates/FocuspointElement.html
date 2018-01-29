@@ -20,7 +20,7 @@
                                     data-severity="notice"
                                     data-modal-title="{f:render(partial: 'ModalTitle', section:'Main', arguments: _all)}"
                                     data-image-uid="{image.uid}"
-                                    data-crop-variants="{config.cropVariants -> f:format.json()}"
+                                    data-focus-points="{config.focusPoints -> f:format.json()}"
                                     data-button-preview-text="{f:translate(key:'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.preview')}"
                                     data-button-dismiss-text="{f:translate(key:'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.cancel')}"
                                     data-button-save-text="{f:translate(key:'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.accept')}"
@@ -33,23 +33,9 @@
                     </f:else>
                 </f:if>
                 <div class="row media-gallery__list">
-                    <f:for each="{config.cropVariants}" as="cropVariant">
-                        <div class="col-xs-6 col-sm-4 col-md-3 media-gallery__item">
-                            <p>
-                                <b><f:translate id="{cropVariant.title}" default="{cropVariant.title}" /></b><br/>
-                                <f:translate id="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.aspect-ratio"/>: <span class="t3js-image-manipulation-selected-ratio" data-crop-variant-id="{cropVariant.id}"><f:translate id="{cropVariant.allowedAspectRatios.{cropVariant.selectedRatio}.title}" default="{cropVariant.allowedAspectRatios.{cropVariant.selectedRatio}.title}" /></span>
-                            </p>
-                            <div class="t3js-image-manipulation-preview media-object"
-                                data-preview-height="150"
-                                data-crop-variant-id="{cropVariant.id}">
-                                <f:image image="{image}" crop="{formEngine.field.value}"
-                                         cropVariant="{cropVariant.id}"
-                                         maxHeight="150"
-                                         class="thumbnail thumbnail-status"
-                                         additionalAttributes="{data-crop-variant: '{cropVariant -> f:format.json()}', data-crop-variant-id: cropVariant.id}"/>
-                            </div>
-                        </div>
-                    </f:for>
+                    <f:comment><f:for each="{image.metaDataProperties.focusPoints}" as ="focuspoint">
+                        point!
+                    </f:for></f:comment>
                 </div>
             </f:then>
             <f:else>
