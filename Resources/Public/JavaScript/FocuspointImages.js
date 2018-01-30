@@ -119,9 +119,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(newPanel).find('[data-focuspointPanelId]').attr('data-focuspointPanelId', focuspointBoxId);
             // update panel elements that need unique id (e.g. for accordion)
             $(newPanel).find('[data-append-id]').each(function (i, el) {
-                console.log(el);
                 $(el).attr('data-append-id').split(',').forEach(function (attr) {
-                    console.log(attr);
                     $(el).attr(attr, $(el).attr(attr) + (focuspointBoxId + 1));
                 });
             });
@@ -183,7 +181,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var imageWidth = $(image).width();
             var data = this.trigger.attr('data-focus-points-value');
             if (!data) {
-                throw new TypeError('FocusPoints: No focuspoint data found for image');
+                data = "[]";
             }
             // If we have data already set we assume an internal reinit eg. after resizing
             this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;

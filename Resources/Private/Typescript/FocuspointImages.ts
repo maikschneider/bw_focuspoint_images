@@ -156,9 +156,7 @@ class FocuspointImages {
         $(newPanel).find('[data-focuspointPanelId]').attr('data-focuspointPanelId', focuspointBoxId);
         // update panel elements that need unique id (e.g. for accordion)
         $(newPanel).find('[data-append-id]').each((i, el) => {
-          console.log(el);
           $(el).attr('data-append-id').split(',').forEach((attr) => {
-            console.log(attr);
             $(el).attr(attr, $(el).attr(attr)+(focuspointBoxId + 1));
           });
         });
@@ -231,7 +229,7 @@ class FocuspointImages {
     const data: string = this.trigger.attr('data-focus-points-value');
 
     if (!data) {
-      throw new TypeError('FocusPoints: No focuspoint data found for image');
+      data = "[]";
     }
 
     // If we have data already set we assume an internal reinit eg. after resizing
@@ -252,7 +250,7 @@ class FocuspointImages {
     this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
 
     this.initFocusBoxes();
-    this.initInputPanels()
+    this.initInputPanels();
 
     this.initEvents();
   }
