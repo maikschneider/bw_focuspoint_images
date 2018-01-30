@@ -7,6 +7,9 @@
             <div id="t3js-crop-image-container" class="cropper-image-container">
                 <div id="focuspoint-container">
                     <f:image image="{image}" maxWidth="1280" maxHeight="1280" id="t3js-crop-image" class="cropper-image-container-image" additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}" />
+                    <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
+                        <div class="focuspoint-item ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} {f:if(condition:i.isLast, then:'focuspoint-item-dummy')}" style="width: {focusPoints.singlePoint.defaultWidth}; height: {focusPoints.singlePoint.defaultHeight};">{i.cycle}</div>
+                    </f:for>
                 </div>
             </div>
         </div>
@@ -76,6 +79,25 @@
                 max-height: 100%;
                 width: auto;
                 height: auto;
+            }
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container #focuspoint-container{
+                position: relative;
+            }
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item{
+                position: absolute;
+                background-color: rgba(0,0,0,0.6);
+                color: #FFF;
+                display: flex;
+                border: 1px dotted rgba(255,255,255,0.6);
+                padding: 5px;
+                line-height: 7.6px;
+                justify-content: center;
+                align-items: center;
+                top: 0;
+                left: 0;
+            }
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-dummy{
+                display: none;
             }
 
 
