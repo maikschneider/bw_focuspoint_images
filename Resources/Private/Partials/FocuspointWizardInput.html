@@ -1,19 +1,19 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
     <f:if condition="{field.title}">
-        <label class="element{i.cycle}">{f:translate(id:'{field.title}')}</label>
+        <label class="element{j.cycle}">{f:translate(id:'{field.title}')}</label>
     </f:if>
     <div class="input-group">
         <f:switch expression="{field.type}">
             <f:case value="text">
-                <input type="text" name="{fieldname}" />
+                <input type="text" name="{fieldname}" data-focuspointPanelId="{i.index}" />
             </f:case>
             <f:case value="textarea">
-                <textarea name="{fieldname}"></textarea>
+                <textarea name="{fieldname}" data-focuspointPanelId="{i.index}"></textarea>
             </f:case>
             <f:case value="select">
-                <select name="{fieldname}">
-                    <f:for each="{field.options}" as="option" key="optionname" iteration="j">
+                <select name="{fieldname}" data-focuspointPanelId="{i.index}">
+                    <f:for each="{field.options}" as="option" key="optionname" iteration="k">
                         <option name="{optionname}">{f:translate(id:'{option}')}</option>
                     </f:for>
                 </select>

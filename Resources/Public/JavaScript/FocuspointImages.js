@@ -71,28 +71,52 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             });
         };
         FocuspointImages.prototype.addNewFocuspoint = function () {
-            var newId = this.data.length;
-            this.data[newId] = {};
+            var focuspointBoxId = this.data.length;
+            this.data[focuspointBoxId] = {};
             // copy dummys
             var newBox = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
                 .clone()
                 .appendTo(this.focusPointContainerSelector)
-                .attr('data-focuspointBoxId', newId)
+                .attr('data-focuspointBoxId', focuspointBoxId)
                 .addClass('focuspoint-item-hidden')
                 .removeClass('focuspoint-item-dummy')
                 .find('span')
-                .html(newId + 1)
+                .html(focuspointBoxId + 1)
                 .parent();
-            console.log(newBox);
             this.initFocusBox(newBox);
         };
         FocuspointImages.prototype.initEvents = function () {
             var _this = this;
-            console.log('initEvents');
             // Add new Focus Box Button
             this.newButton.off('click').on('click', function (e) {
                 e.preventDefault();
                 _this.addNewFocuspoint();
+            });
+        };
+        FocuspointImages.prototype.initInputPanel = function (panel) {
+            var _this = this;
+            // for all inputs: set data and eventListener
+            $(panel).find('[data-focuspointPanelId]').each(function (i, input) {
+                var focuspointPanelId = $(input).attr('data-focuspointPanelId');
+                var focuspoint = _this.data[focuspointPanelId] ? _this.data[focuspointPanelId] : {};
+                var inputValue = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+                switch ($(input).prop('tagName')) {
+                    case 'INPUT':
+                    case 'TEXTAREA':
+                        $(input).val(inputValue);
+                        break;
+                    case 'SELECT':
+                        $('option', input).prop('selected', false);
+                        $('option[value="' + inputValue + '"]', input).prop('selected', true);
+                        break;
+                }
+            });
+            $(panel).removeClass('panel-hidden');
+        };
+        FocuspointImages.prototype.initInputPanels = function () {
+            var _this = this;
+            this.inputPanels.each(function (i, panel) {
+                _this.initInputPanel(panel);
             });
         };
         /**
@@ -122,7 +146,9 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
             // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
             this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
+            this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
             this.initFocusBoxes();
+            this.initInputPanels();
             this.initEvents();
             // /**
             //  * Assign EventListener to cropVariantTriggers

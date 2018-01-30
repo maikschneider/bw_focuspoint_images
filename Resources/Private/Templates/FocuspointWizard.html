@@ -16,7 +16,7 @@
         <div class="modal-panel-sidebar">
             <div class="panel-group" id="accordion-cropper-variants" role="tablist" aria-multiselectable="true">
                 <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
-                    <div class="panel panel-default {f:if(condition:i.isLast, then:'panel-dummy')}">
+                    <div class="panel panel-default panel-hidden {f:if(condition:i.isLast, then:'panel-dummy')}">
                         <div class="panel-heading" role="tab" id="cropper-accordion-heading-{i.cycle}">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion-cropper-variants"
@@ -37,12 +37,12 @@
                                     aria-labelledby="cropper-accordion-heading-{i.cycle}">
                             <div class="panel-body">
                                 <form>
-                                    <input type="hidden" name="x" />
-                                    <input type="hidden" name="y" />
-                                    <input type="hidden" name="height" />
-                                    <input type="hidden" name="width" />
-                                    <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="i">
-                                        <f:render partial="FocuspointWizardInput" arguments="{field: field, fieldname: fieldname, i: i}" />
+                                    <input type="hidden" name="x" data-focuspointPanelId="{i.index}" />
+                                    <input type="hidden" name="y" data-focuspointPanelId="{i.index}" />
+                                    <input type="hidden" name="height" data-focuspointPanelId="{i.index}" />
+                                    <input type="hidden" name="width" data-focuspointPanelId="{i.index}" />
+                                    <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="j">
+                                        <f:render partial="FocuspointWizardInput" arguments="{field: field, fieldname: fieldname, i: i, j: j}" />
                                     </f:for>
                                     <div class="input-group pull-right">
                                         <button class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.delete"/></button>
@@ -115,7 +115,9 @@
             }
             .modal-body-focuspoints .modal-panel-sidebar .panel-group{
                 margin: 0;
+                min-width: 332px;
             }
+            .modal-body-focuspoints .modal-panel-sidebar .panel-hidden,
             .modal-body-focuspoints .modal-panel-sidebar .panel-dummy{
                 display: none;
             }

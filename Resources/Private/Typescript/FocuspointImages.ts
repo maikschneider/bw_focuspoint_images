@@ -36,6 +36,7 @@ class FocuspointImages {
   private trigger: JQuery;
   private currentModal: JQuery;
   private focusBoxes: JQuery;
+  private inputPanels: JQuery;
   private cropImageSelector: string = '#t3js-crop-image';
   private focusPointContainerSelector: string = '#focuspoint-container';
 
@@ -99,33 +100,61 @@ class FocuspointImages {
 
   private addNewFocuspoint(): void {
 
-    const newId: number = this.data.length;
+    const focuspointBoxId: number = this.data.length;
 
-    this.data[newId] = {};
+    this.data[focuspointBoxId] = {};
 
     // copy dummys
     const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
       .clone()
       .appendTo(this.focusPointContainerSelector)
-      .attr('data-focuspointBoxId', newId)
+      .attr('data-focuspointBoxId', focuspointBoxId)
       .addClass('focuspoint-item-hidden')
       .removeClass('focuspoint-item-dummy')
       .find('span')
-      .html(newId + 1)
+      .html(focuspointBoxId + 1)
       .parent();
-
-    console.log(newBox);
 
     this.initFocusBox(newBox);
   }
 
   private initEvents(): void {
-    console.log('initEvents');
 
     // Add new Focus Box Button
     this.newButton.off('click').on('click', (e: JQueryEventObject) => {
       e.preventDefault();
       this.addNewFocuspoint();
+    });
+  }
+
+  private initInputPanel(panel): void {
+
+    // for all inputs: set data and eventListener
+    $(panel).find('[data-focuspointPanelId]').each((i, input) => {
+
+      const focuspointPanelId = $(input).attr('data-focuspointPanelId');
+      const focuspoint: object = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
+      const inputValue: string = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+
+      switch($(input).prop('tagName')){
+        case 'INPUT':
+        case 'TEXTAREA':
+          $(input).val(inputValue);
+          break;
+        case 'SELECT':
+          $('option', input).prop('selected', false);
+          $('option[value="'+inputValue+'"]', input).prop('selected', true);
+        break;
+      }
+
+    });
+
+    $(panel).removeClass('panel-hidden');
+  }
+
+  private initInputPanels(): void {
+    this.inputPanels.each((i, panel) => {
+      this.initInputPanel(panel);
     });
   }
 
@@ -159,8 +188,10 @@ class FocuspointImages {
     // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
 
     this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
+    this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
 
     this.initFocusBoxes();
+    this.initInputPanels()
 
     this.initEvents();
 
