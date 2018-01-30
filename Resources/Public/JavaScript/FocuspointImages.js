@@ -28,10 +28,22 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var imageWidth = $(image).width();
             return (width / imageWidth).toFixed(3);
         };
+        FocuspointImages.prototype.calculateAbsoluteX = function (width) {
+            var width = width ? width : 0.33;
+            var image = this.currentModal.find(this.cropImageSelector);
+            var imageWidth = $(image).width();
+            return (width * imageWidth).toFixed(0);
+        };
         FocuspointImages.prototype.calculateRelativeY = function (height) {
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
             return (height / imageHeight).toFixed(3);
+        };
+        FocuspointImages.prototype.calculateAbsoluteY = function (height) {
+            var height = height ? height : 0.33;
+            var image = this.currentModal.find(this.cropImageSelector);
+            var imageHeight = $(image).height();
+            return (height * imageHeight).toFixed(0);
         };
         FocuspointImages.prototype.onBoxChange = function (box) {
             var width = $(box).width();
@@ -50,6 +62,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var fieldname = $(input).attr('name');
             this.data[focuspointPanelId][fieldname] = $(input).val();
         };
+        FocuspointImages.prototype.onDeleteButton = function (button) {
+        };
         FocuspointImages.prototype.initFocusBox = function (box) {
             // register jquery-ui/draggable
             $(box).draggable({
@@ -67,6 +81,11 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 });
             }
             // set onload position and size
+            var focuspoint = this.data[$(box).attr('data-focuspointBoxId')];
+            $(box).css('width', this.calculateAbsoluteX(focuspoint.width) + 'px');
+            $(box).css('height', this.calculateAbsoluteY(focuspoint.height) + 'px');
+            $(box).css('top', this.calculateAbsoluteY(focuspoint.y) + 'px');
+            $(box).css('left', this.calculateAbsoluteX(focuspoint.x) + 'px');
             // show element
             $(box).removeClass('focuspoint-item-hidden');
         };
@@ -137,10 +156,11 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                         break;
                 }
                 // bind events
-                $(input).on('input', _this.onInputChange.bind(_this, input));
+                $(input).off('input').on('input', _this.onInputChange.bind(_this, input));
             });
             // bind delete button event
-            $(panel).find('[data-delete]').on('click', function (e, button) {
+            $(panel).find('[data-delete]').off('click').on('click', function (e, button) {
+                e.preventDefault();
                 _this.onDeleteButton(button);
             });
             // show panel
@@ -183,99 +203,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.initFocusBoxes();
             this.initInputPanels();
             this.initEvents();
-            // /**
-            //  * Assign EventListener to cropVariantTriggers
-            //  */
-            // this.cropVariantTriggers.off('click').on('click', (e: JQueryEventObject): void => {
-            //   /**
-            //    * Is the current cropVariantTrigger is active, bail out.
-            //    * Bootstrap doesn't provide this functionality when collapsing the Collaps panels
-            //    */
-            //   if ($(e.currentTarget).hasClass('is-active')) {
-            //     e.stopPropagation();
-            //     e.preventDefault();
-            //     return;
-            //   }
-            //   this.activeCropVariantTrigger.removeClass('is-active');
-            //   $(e.currentTarget).addClass('is-active');
-            //   this.activeCropVariantTrigger = $(e.currentTarget);
-            //   let cropVariant: CropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
-            //   const imageData: CropperImageData = this.cropper.cropper('getImageData');
-            //   cropVariant.cropArea = this.convertRelativeToAbsoluteCropArea(cropVariant.cropArea, imageData);
-            //   this.currentCropVariant = $.extend(true, {}, cropVariant);
-            //   this.update(cropVariant);
-            // });
-            // /**
-            //  * Assign EventListener to aspectRatioTrigger
-            //  */
-            // this.aspectRatioTrigger.off('click').on('click', (e: JQueryEventObject): void => {
-            //   const ratioId: string = $(e.currentTarget).attr('data-option');
-            //   const temp: CropVariant = $.extend(true, {}, this.currentCropVariant);
-            //   const ratio: Ratio = temp.allowedAspectRatios[ratioId];
-            //   this.setAspectRatio(ratio);
-            //   // Set data explicitly or setAspectRatio upscales the crop
-            //   this.setCropArea(temp.cropArea);
-            //   this.currentCropVariant = $.extend(true, {}, temp, {selectedRatio: ratioId});
-            //   this.update(this.currentCropVariant);
-            // });
-            // /**
-            //  * Assign EventListener to saveButton
-            //  */
-            // this.saveButton.off('click').on('click', (): void => {
-            //   this.save(this.data);
-            // });
-            // /**
-            //  * Assign EventListener to previewButton if preview url exists
-            //  */
-            // if (this.trigger.attr('data-preview-url')) {
-            //   this.previewButton.off('click').on('click', (): void => {
-            //     this.openPreview(this.data);
-            //   });
-            // } else {
-            //   this.previewButton.hide();
-            // }
-            // /**
-            //  * Assign EventListener to dismissButton
-            //  */
-            // this.dismissButton.off('click').on('click', (): void => {
-            //   this.currentModal.modal('hide');
-            // });
-            // /**
-            //  * Assign EventListener to resetButton
-            //  */
-            // this.resetButton.off('click').on('click', (e: JQueryEventObject): void => {
-            //   const imageData: CropperImageData = this.cropper.cropper('getImageData');
-            //   const resetCropVariantString: string = $(e.currentTarget).attr('data-crop-variant');
-            //   e.preventDefault();
-            //   e.stopPropagation();
-            //   if (!resetCropVariantString) {
-            //     throw new TypeError('TYPO3 Cropper: No cropVariant data attribute found on reset element.');
-            //   }
-            //   const resetCropVariant: CropVariant = JSON.parse(resetCropVariantString);
-            //   const absoluteCropArea: Area = this.convertRelativeToAbsoluteCropArea(resetCropVariant.cropArea, imageData);
-            //   this.currentCropVariant = $.extend(true, {}, resetCropVariant, {cropArea: absoluteCropArea});
-            //   this.update(this.currentCropVariant);
-            // });
-            // // If we start without an cropArea, maximize the cropper
-            // if (ImageManipulation.isEmptyArea(this.currentCropVariant.cropArea)) {
-            //   this.defaultOpts = $.extend({
-            //     autoCropArea: 1,
-            //   }, this.defaultOpts);
-            // }
-            // /**
-            //  * Initialise the cropper
-            //  *
-            //  * Note: We use the extraneous jQuery object here, as CropperJS won't work inside the <iframe>
-            //  * The top.require is now inlined @see ImageManipulationElemen.php:143
-            //  * TODO: Find a better solution for cross iframe communications
-            //  */
-            // this.cropper = (<any> top.TYPO3.jQuery(image)).cropper($.extend(this.defaultOpts, {
-            //   built: this.cropBuiltHandler,
-            //   crop: this.cropMoveHandler,
-            //   cropend: this.cropEndHandler,
-            //   cropstart: this.cropStartHandler,
-            //   data: this.currentCropVariant.cropArea,
-            // }));
         };
         /**
         * @method initializeFocuspointModal
