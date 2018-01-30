@@ -17,24 +17,25 @@
             <div class="panel-group" id="accordion-cropper-variants" role="tablist" aria-multiselectable="true">
                 <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
                     <div class="panel panel-default panel-hidden {f:if(condition:i.isLast, then:'panel-dummy')}">
-                        <div class="panel-heading" role="tab" id="cropper-accordion-heading-{i.cycle}">
+                        <div class="panel-heading" role="tab" data-append-id="id" id="cropper-accordion-heading-{f:if(condition:i.isLast, else:'{i.cycle}')}">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion-cropper-variants"
-                                        href="#cropper-collapse-{i.cycle}"
+                                        href="#cropper-collapse-{f:if(condition:i.isLast, else:'{i.cycle}')}"
                                         aria-expanded="{f:if(condition:i.isFirst, then:'true', else:'false')}"
-                                        aria-controls="cropper-collapse-{i.cycle}"
+                                        aria-controls="cropper-collapse-{f:if(condition:i.isLast, else:'{i.cycle}')}"
                                         class="t3js-crop-variant-trigger {f:if(condition:i.isFirst, then:'is-active', else:'collapsed')}"
-                                        data-crop-variant-id="###id###"
+                                        data-append-id="href,aria-controls"
                                         data-crop-variant>
-                                <span><i class="fa fa-chevron-down"
-                                                    aria-hidden="true"></i> {f:translate(id:'{focusPoints.singlePoint.title}')} {i.cycle}</span>
+                                <span data-nr="{f:if(condition:i.isLast, else:'{i.cycle}')}" data-append-id="data-nr"><i class="fa fa-chevron-down"
+                                                    aria-hidden="true"></i> {f:translate(id:'{focusPoints.singlePoint.title}')} </span>
                                 </a>
                             </h4>
                         </div>
-                        <div id="cropper-collapse-{i.cycle}"
+                        <div id="cropper-collapse-{f:if(condition:i.isLast, else:'{i.cycle}')}"
                                     class="panel-collapse collapse {f:if(condition:i.isFirst, then:'in')}"
                                     role="tabpanel"
-                                    aria-labelledby="cropper-accordion-heading-{i.cycle}">
+                                    aria-labelledby="cropper-accordion-heading-{f:if(condition:i.isLast, else:'{i.cycle}')}"
+                                    data-append-id="id,aria-labelledby">
                             <div class="panel-body">
                                 <form>
                                     <input type="hidden" name="x" data-focuspointPanelId="{i.index}" />
@@ -120,6 +121,9 @@
             .modal-body-focuspoints .modal-panel-sidebar .panel-hidden,
             .modal-body-focuspoints .modal-panel-sidebar .panel-dummy{
                 display: none;
+            }
+            .modal-body-focuspoints .modal-panel-sidebar span[data-nr]:after{
+                content: attr(data-nr);
             }
             .modal-body-focuspoints .modal-panel-sidebar a[aria-expanded="true"] .fa-chevron-down{
                 transform: rotate(180deg);

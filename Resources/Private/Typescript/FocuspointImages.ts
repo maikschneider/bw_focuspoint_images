@@ -37,6 +37,7 @@ class FocuspointImages {
   private currentModal: JQuery;
   private focusBoxes: JQuery;
   private inputPanels: JQuery;
+  private panelGroupSelector: string = '#accordion-cropper-variants';
   private cropImageSelector: string = '#t3js-crop-image';
   private focusPointContainerSelector: string = '#focuspoint-container';
 
@@ -64,6 +65,12 @@ class FocuspointImages {
     this.data[focuspointBoxId].height = this.calculateRelativeY(height);
     this.data[focuspointBoxId].x = this.calculateRelativeX(left);
     this.data[focuspointBoxId].y = this.calculateRelativeY(top);
+  }
+
+  private onInputChange(input): void {
+    const focuspointPanelId: number = $(input).attr('data-focuspointPanelId');
+    const fieldname = $(input).attr('name');
+    this.data[focuspointPanelId][fieldname] = $(input).val();
   }
 
   private initFocusBox(box): void {
@@ -105,17 +112,37 @@ class FocuspointImages {
     this.data[focuspointBoxId] = {};
 
     // copy dummys
-    const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
-      .clone()
-      .appendTo(this.focusPointContainerSelector)
-      .attr('data-focuspointBoxId', focuspointBoxId)
-      .addClass('focuspoint-item-hidden')
-      .removeClass('focuspoint-item-dummy')
-      .find('span')
-      .html(focuspointBoxId + 1)
-      .parent();
+      // 1. box dummy
+      const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
+        .clone()
+        .appendTo(this.focusPointContainerSelector)
+        .attr('data-focuspointBoxId', focuspointBoxId)
+        .addClass('focuspoint-item-hidden')
+        .removeClass('focuspoint-item-dummy')
+        .find('span')
+        .html(focuspointBoxId + 1)
+        .parent();
 
+      // 2. panel dummy
+      const newPanel: JQuery = this.currentModal.find('.panel.panel-dummy')
+        .clone()
+        .appendTo(this.panelGroupSelector)
+        .addClass('panel-hidden')
+        .removeClass('panel-dummy');
+        // update all input inside panel: set new id (= offset in this.data)
+        $(newPanel).find('[data-focuspointPanelId]').attr('data-focuspointPanelId', focuspointBoxId);
+        // update panel elements that need unique id (e.g. for accordion)
+        $(newPanel).find('[data-append-id]').each((i, el) => {
+          console.log(el);
+          $(el).attr('data-append-id').split(',').forEach((attr) => {
+            console.log(attr);
+            $(el).attr(attr, $(el).attr(attr)+(focuspointBoxId + 1));
+          });
+        });
+
+    // init new elements
     this.initFocusBox(newBox);
+    this.initInputPanel(newPanel);
   }
 
   private initEvents(): void {
@@ -136,6 +163,7 @@ class FocuspointImages {
       const focuspoint: object = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
       const inputValue: string = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
 
+      // set value
       switch($(input).prop('tagName')){
         case 'INPUT':
         case 'TEXTAREA':
@@ -147,8 +175,17 @@ class FocuspointImages {
         break;
       }
 
+      // bind events
+      $(input).on('input', this.onInputChange.bind(this, input));
+
     });
 
+    // bind delete button event
+    $(panel).find('[data-delete]').on('click', (e, button) => {
+      this.onDeleteButton(button);
+    });
+
+    // show panel
     $(panel).removeClass('panel-hidden');
   }
 

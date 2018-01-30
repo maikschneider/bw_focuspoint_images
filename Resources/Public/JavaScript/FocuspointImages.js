@@ -19,6 +19,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
      */
     var FocuspointImages = (function () {
         function FocuspointImages() {
+            this.panelGroupSelector = '#accordion-cropper-variants';
             this.cropImageSelector = '#t3js-crop-image';
             this.focusPointContainerSelector = '#focuspoint-container';
         }
@@ -43,6 +44,11 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.data[focuspointBoxId].height = this.calculateRelativeY(height);
             this.data[focuspointBoxId].x = this.calculateRelativeX(left);
             this.data[focuspointBoxId].y = this.calculateRelativeY(top);
+        };
+        FocuspointImages.prototype.onInputChange = function (input) {
+            var focuspointPanelId = $(input).attr('data-focuspointPanelId');
+            var fieldname = $(input).attr('name');
+            this.data[focuspointPanelId][fieldname] = $(input).val();
         };
         FocuspointImages.prototype.initFocusBox = function (box) {
             // register jquery-ui/draggable
@@ -74,6 +80,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var focuspointBoxId = this.data.length;
             this.data[focuspointBoxId] = {};
             // copy dummys
+            // 1. box dummy
             var newBox = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
                 .clone()
                 .appendTo(this.focusPointContainerSelector)
@@ -83,7 +90,25 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 .find('span')
                 .html(focuspointBoxId + 1)
                 .parent();
+            // 2. panel dummy
+            var newPanel = this.currentModal.find('.panel.panel-dummy')
+                .clone()
+                .appendTo(this.panelGroupSelector)
+                .addClass('panel-hidden')
+                .removeClass('panel-dummy');
+            // update all input inside panel: set new id (= offset in this.data)
+            $(newPanel).find('[data-focuspointPanelId]').attr('data-focuspointPanelId', focuspointBoxId);
+            // update panel elements that need unique id (e.g. for accordion)
+            $(newPanel).find('[data-append-id]').each(function (i, el) {
+                console.log(el);
+                $(el).attr('data-append-id').split(',').forEach(function (attr) {
+                    console.log(attr);
+                    $(el).attr(attr, $(el).attr(attr) + (focuspointBoxId + 1));
+                });
+            });
+            // init new elements
             this.initFocusBox(newBox);
+            this.initInputPanel(newPanel);
         };
         FocuspointImages.prototype.initEvents = function () {
             var _this = this;
@@ -100,6 +125,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 var focuspointPanelId = $(input).attr('data-focuspointPanelId');
                 var focuspoint = _this.data[focuspointPanelId] ? _this.data[focuspointPanelId] : {};
                 var inputValue = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+                // set value
                 switch ($(input).prop('tagName')) {
                     case 'INPUT':
                     case 'TEXTAREA':
@@ -110,7 +136,14 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                         $('option[value="' + inputValue + '"]', input).prop('selected', true);
                         break;
                 }
+                // bind events
+                $(input).on('input', _this.onInputChange.bind(_this, input));
             });
+            // bind delete button event
+            $(panel).find('[data-delete]').on('click', function (e, button) {
+                _this.onDeleteButton(button);
+            });
+            // show panel
             $(panel).removeClass('panel-hidden');
         };
         FocuspointImages.prototype.initInputPanels = function () {
