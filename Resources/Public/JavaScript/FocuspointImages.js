@@ -22,7 +22,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.cropImageSelector = '#t3js-crop-image';
         }
         FocuspointImages.prototype.init = function () {
-            alert('yes!');
         };
         /**
          * @method initializeFocuspointModal
@@ -55,14 +54,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 ajaxCallback: initFocuspointModal,
                 buttons: [
                     {
-                        btnClass: 'btn-default pull-left',
-                        dataAttributes: {
-                            method: 'preview',
-                        },
-                        icon: 'actions-view',
-                        text: buttonPreviewText,
-                    },
-                    {
                         btnClass: 'btn-default',
                         dataAttributes: {
                             method: 'dismiss',
@@ -81,7 +72,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 ],
                 callback: function (currentModal) {
                     currentModal.find('.t3js-modal-body')
-                        .addClass('cropper');
+                        .addClass('cropper')
+                        .addClass('modal-body-focuspoints');
                 }
             });
             this.currentModal.on('hide.bs.modal', function (e) {

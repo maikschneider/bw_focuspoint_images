@@ -39,7 +39,7 @@ class FocuspointImages {
 
 
   private init(): void {
-    alert('yes!');
+
   }
 
   /**
@@ -75,14 +75,6 @@ class FocuspointImages {
       ajaxCallback: initFocuspointModal,
       buttons: [
           {
-              btnClass: 'btn-default pull-left',
-              dataAttributes: {
-                  method: 'preview',
-              },
-              icon: 'actions-view',
-              text: buttonPreviewText,
-          },
-          {
               btnClass: 'btn-default',
               dataAttributes: {
                   method: 'dismiss',
@@ -101,7 +93,8 @@ class FocuspointImages {
       ],
       callback: function (currentModal) {
           currentModal.find('.t3js-modal-body')
-              .addClass('cropper');
+              .addClass('cropper')
+              .addClass('modal-body-focuspoints');
       }
     });
     this.currentModal.on('hide.bs.modal', (e: JQueryEventObject): void => {

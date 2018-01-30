@@ -5,73 +5,42 @@
 
         <div class="modal-panel-main">
             <div id="t3js-crop-image-container" class="cropper-image-container">
-                <f:image image="{image}" maxWidth="1000" maxHeight="1000" id="t3js-crop-image" class="cropper-image-container-image" additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}" />
+                <f:image image="{image}" maxWidth="1280" maxHeight="1280" id="t3js-crop-image" class="cropper-image-container-image" additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}" />
             </div>
         </div>
         <div class="modal-panel-sidebar">
             <div class="panel-group" id="accordion-cropper-variants" role="tablist" aria-multiselectable="true">
-                <f:for each="{cropVariants}" as="cropVariant" iteration="cropVariantIterator">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="cropper-accordion-heading-{cropVariantIterator.cycle}">
+                <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
+                    <div class="panel panel-default {f:if(condition:i.isLast, then:'panel-dummy')}">
+                        <div class="panel-heading" role="tab" id="cropper-accordion-heading-{i.cycle}">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion-cropper-variants"
-                                        href="#cropper-collapse-{cropVariantIterator.cycle}"
-                                        aria-expanded="{f:if(condition:cropVariantIterator.isFirst, then:'true', else:'false')}"
-                                        aria-controls="cropper-collapse-{cropVariantIterator.cycle}"
-                                        class="t3js-crop-variant-trigger {f:if(condition:cropVariantIterator.isFirst, then:'is-active', else:'collapsed')}"
-                                        data-crop-variant-id="{cropVariant.id}"
+                                        href="#cropper-collapse-{i.cycle}"
+                                        aria-expanded="{f:if(condition:i.isFirst, then:'true', else:'false')}"
+                                        aria-controls="cropper-collapse-{i.cycle}"
+                                        class="t3js-crop-variant-trigger {f:if(condition:i.isFirst, then:'is-active', else:'collapsed')}"
+                                        data-crop-variant-id="###id###"
                                         data-crop-variant>
-                                <span><i class="fa fa-chevron-{f:if(condition:cropVariantIterator.isFirst, then:'up', else:'down')}"
-                                                    aria-hidden="true"></i> cropvariante . title</span>
-                                    <div
-                                        class="cropper-preview-thumbnail {f:if(condition:'{image.properties.width}>{image.properties.height}', then:'wide', else: 'tall')}">
-                                        <img class="cropper-preview-thumbnail-image"
-                                                    src="{f:uri.image(image:image, maxWidth:'300', maxHeight: '300')}">
-                                        <div class="cropper-preview-thumbnail-crop-area t3js-cropper-preview-thumbnail-crop-area">
-                                            <img src="{f:uri.image(image:image, maxWidth:'300', maxHeight: '300')}"
-                                                        class="cropper-preview-thumbnail-crop-image t3js-cropper-preview-thumbnail-crop-image">
-                                            <div class="cropper-preview-thumbnail-focus-area t3js-cropper-preview-thumbnail-focus-area"></div>
-                                        </div>
-                                    </div>
+                                <span><i class="fa fa-chevron-down"
+                                                    aria-hidden="true"></i> {f:translate(id:'{focusPoints.singlePoint.title}')} {i.cycle}</span>
                                 </a>
                             </h4>
                         </div>
-                        <div id="cropper-collapse-{cropVariantIterator.cycle}"
-                                    class="panel-collapse collapse {f:if(condition:cropVariantIterator.isFirst, then:'in')}"
+                        <div id="cropper-collapse-{i.cycle}"
+                                    class="panel-collapse collapse {f:if(condition:i.isFirst, then:'in')}"
                                     role="tabpanel"
-                                    aria-labelledby="cropper-accordion-heading-{cropVariantIterator.cycle}">
+                                    aria-labelledby="cropper-accordion-heading-{i.cycle}">
                             <div class="panel-body">
-                                <form class="form">
-                                    <div class="form-group">
-                                        <f:if condition="{cropVariant.allowedAspectRatios}">
-                                            <label for="ratio-{cropVariantIterator.cycle}">
-                                                <f:translate id="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.aspect-ratio"/>
-                                            </label>
-                                            <div id="ratio-{cropVariantIterator.cycle}" class="ratio-buttons t3js-ratio-buttons"
-                                                        data-toggle="buttons">
-                                                <f:for each="{cropVariant.allowedAspectRatios}" as="ratio" iteration="ratioIterator">
-                                                    <label class="btn btn-secondary" data-method="setAspectRatio" data-option="{ratio.id}" title="{f:translate(id:'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.set-aspect-ratio')}">
-                                                        <input
-                                                            class="sr-only" id="aspectRatio-{cropVariantIterator.cycle}-{ratioIterator.cycle}"
-                                                            name="aspectRatio-{cropVariantIterator.cycle}-{ratioIterator.cycle}" value="{cropVariant.id}"
-                                                            type="radio">
-                                                        <span class="t3-js-ratio-title" data-ratio-id="{cropVariant.id}{ratio.id}"> crop title </span> <i class="fa fa-check"></i></label>
-                                                </f:for>
-                                            </div>
-                                        </f:if>
-                                        <label><f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.selection" /></label>
-                                        <div class="table-fit-block">
-                                            <table class="table table-no-borders table-transparent">
-                                                <tr>
-                                                    <td class="t3js-cropper-info-crop"></td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                        <button class="btn btn-secondary" data-method="reset" data-crop-variant="{cropVariant -> f:format.json()}"
-                                                        title="{f:translate(key:'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.reset')}">
-                                            <i class="fa fa-refresh"></i>
-                                            {f:translate(key:'LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.reset')}
-                                        </button>
+                                <form>
+                                    <input type="hidden" name="x" />
+                                    <input type="hidden" name="y" />
+                                    <input type="hidden" name="height" />
+                                    <input type="hidden" name="width" />
+                                    <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="i">
+                                        <f:render partial="FocuspointWizardInput" arguments="{field: field, fieldname: fieldname, i: i}" />
+                                    </f:for>
+                                    <div class="input-group pull-right">
+                                        <button class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.delete"/></button>
                                     </div>
                                 </form>
                             </div>
@@ -79,7 +48,54 @@
                     </div>
                 </f:for>
             </div>
+            <div class="panel-body">
+                <button class="btn btn-success btn-block"><i class="fa fa-plus"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/></button>
+            </div>
         </div>
+
+        <style type="text/css">
+            .modal-body-focuspoints{
+                display: flex;
+                padding: 0;
+            }
+            .modal-body-focuspoints .modal-panel-main{
+                flex-grow: 1;
+                padding: 15px;
+                max-width: calc(100vw - 372px);
+            }
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container{
+                text-align: center;
+                max-width: none;
+            }
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container img{
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+            }
+
+
+
+            .modal-body-focuspoints .modal-panel-sidebar{
+                background-color: #333;
+            }
+            .modal-body-focuspoints .modal-panel-sidebar .panel-group{
+                margin: 0;
+            }
+            .modal-body-focuspoints .modal-panel-sidebar .panel-dummy{
+                display: none;
+            }
+            .modal-body-focuspoints .modal-panel-sidebar a[aria-expanded="true"] .fa-chevron-down{
+                transform: rotate(180deg);
+            }
+            .modal-body-focuspoints .modal-panel-sidebar input, .modal-body-focuspoints .modal-panel-sidebar textarea, .modal-body-focuspoints .modal-panel-sidebar select{
+                color: #333;
+                width: 300px;
+            }
+            .modal-body-focuspoints .modal-panel-sidebar label:not(.element1), .modal-body-focuspoints .modal-panel-sidebar .singlepoint-delete{
+                margin-top: 15px;
+            }
+        </style>
 
     </f:section>
 </html>

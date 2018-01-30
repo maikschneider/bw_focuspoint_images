@@ -68,7 +68,8 @@ class FocusPointWizard
             }
             $viewData = [
                 'image' => $image,
-                'cropVariants' => $queryParams['cropVariants']
+                'focusPoints' => $queryParams['focusPoints'],
+                'focusPointsCount' => $queryParams['focusPointsCount']
             ];
             $content = $this->templateView->renderSection('Main', $viewData);
             $response->getBody()->write($content);

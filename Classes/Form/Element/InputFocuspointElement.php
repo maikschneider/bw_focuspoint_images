@@ -40,20 +40,26 @@ class InputFocuspointElement extends AbstractFormElement
                 'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
                 'fields' => [
                     'name' => [
-                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.name.title',
-                        'type' => 'input',
+                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.name.title',
+                        'type' => 'text',
                     ],
                     'description' => [
-                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.description.title',
+                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.description.title',
                         'type' => 'textarea',
                     ],
-                    'link' => [
-                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.name.title',
-                        'type' => 'url',
+                    'color' => [
+                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.title',
+                        'type' => 'select',
+                        'options' => [
+                            'green' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.green.title',
+                            'blue' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.blue.title',
+                            '0' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.0.title',
+                            '1' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.1.title'
+                        ]
                     ]
                 ]
             ]
-        ],
+        ]
     ];
 
 
@@ -104,6 +110,30 @@ class InputFocuspointElement extends AbstractFormElement
         $fieldWizardHtml = $fieldWizardResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
+
+        // just for testing purposes
+        $focusPointsExampleData = [
+            [
+                'name' => 'headline text',
+                'description' => 'here a longer description text',
+                'color' => 'green',
+                'x' => '0.1',
+                'y' => '0.2',
+                'width' => '0.3',
+                'height' => '0.1'
+            ],
+            [
+                'name' => 'another headlinetext',
+                'description' => 'lorem ipsum dolor si almet onmet',
+                'color' => 'blue',
+                'x' => '0.6',
+                'y' => '0',
+                'width' => '0.1',
+                'height' => '1'
+            ]
+        ];
+        $parameterArray['itemFormElValue'] = json_encode($focusPointsExampleData);
+
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
@@ -118,7 +148,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'validation' => '[]'
             ],
             'config' => $config,
-            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file),
+            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $parameterArray['itemFormElValue']),
             'previewUrl' => $this->getPreviewUrl($this->data['databaseRow'], $file),
         ];
 
@@ -186,11 +216,12 @@ class InputFocuspointElement extends AbstractFormElement
      * @param File $image
      * @return string
      */
-    protected function getWizardUri(array $focusPoints, File $image): string
+    protected function getWizardUri(array $focusPoints, File $image, string $itemFormElValue): string
     {
         $routeName = 'ajax_wizard_focuspoint';
         $arguments = [
             'focusPoints' => $focusPoints,
+            'focusPointsCount' => range(1, count(json_decode($itemFormElValue))+1),
             'image' => $image->getUid(),
         ];
         $uriArguments['arguments'] = json_encode($arguments);
@@ -229,9 +260,11 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $defaultConfig = self::$defaultConfig;
 
-        // If single point configuration is set do not include deafult ones
+        // If single point configuration is set do not include deafult ones (not hidden fields!)
         if (isset($baseConfiguration['focusPoints']['singlePoint']['fields'])) {
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']);
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']['name']);
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']['description']);
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']['color']);
         }
 
         $config = array_replace_recursive($defaultConfig, $baseConfiguration);

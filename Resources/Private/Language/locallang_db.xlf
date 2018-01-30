@@ -7,6 +7,41 @@
             <trans-unit id="sys_file_metadata.focus_points">
                 <source>Focus Points</source>
             </trans-unit>
+
+            <trans-unit id="wizard.focuspoints.title">
+                <source>Focus Points</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.title">
+                <source>Focus Point</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.button.delete">
+                <source>Delete</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.button.addnew">
+                <source>Add new Focus Point</source>
+            </trans-unit>
+
+            <trans-unit id="wizard.single_point.field.name.title">
+                <source>Name</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.field.description.title">
+                <source>Description</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.field.color.title">
+                <source>Color</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.field.color.options.green.title">
+                <source>Green</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.field.color.options.blue.title">
+                <source>Blue</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.field.color.options.0.title">
+                <source>0 Example</source>
+            </trans-unit>
+            <trans-unit id="wizard.single_point.field.color.options.1.title">
+                <source>1 Example</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>
