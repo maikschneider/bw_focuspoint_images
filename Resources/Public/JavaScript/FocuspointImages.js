@@ -38,19 +38,19 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var position = $(box).position();
             var left = position.left;
             var top = position.top;
-            console.log(position);
             var focuspointBoxId = $(box).attr('data-focuspointBoxId');
             this.data[focuspointBoxId].width = this.calculateRelativeX(width);
             this.data[focuspointBoxId].height = this.calculateRelativeY(height);
             this.data[focuspointBoxId].x = this.calculateRelativeX(left);
             this.data[focuspointBoxId].y = this.calculateRelativeY(top);
-            console.log(this.data[focuspointBoxId]);
         };
         FocuspointImages.prototype.initFocusBox = function (box) {
+            // register jquery-ui/draggable
             $(box).draggable({
                 containment: "parent",
                 stop: this.onBoxChange.bind(this, box),
             });
+            // register jquery-ui/resizable
             if ($(box).hasClass('ui-resizable')) {
                 $(box).resizable({
                     handles: "n, e, w, s, se, sw, nw, ne",
@@ -60,11 +60,39 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                     stop: this.onBoxChange.bind(this, box),
                 });
             }
+            // set onload position and size
+            // show element
+            $(box).removeClass('focuspoint-item-hidden');
         };
         FocuspointImages.prototype.initFocusBoxes = function () {
             var _this = this;
             this.focusBoxes.each(function (i, box) {
                 _this.initFocusBox(box);
+            });
+        };
+        FocuspointImages.prototype.addNewFocuspoint = function () {
+            var newId = this.data.length;
+            this.data[newId] = {};
+            // copy dummys
+            var newBox = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
+                .clone()
+                .appendTo(this.focusPointContainerSelector)
+                .attr('data-focuspointBoxId', newId)
+                .addClass('focuspoint-item-hidden')
+                .removeClass('focuspoint-item-dummy')
+                .find('span')
+                .html(newId + 1)
+                .parent();
+            console.log(newBox);
+            this.initFocusBox(newBox);
+        };
+        FocuspointImages.prototype.initEvents = function () {
+            var _this = this;
+            console.log('initEvents');
+            // Add new Focus Box Button
+            this.newButton.off('click').on('click', function (e) {
+                e.preventDefault();
+                _this.addNewFocuspoint();
             });
         };
         /**
@@ -86,6 +114,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.currentModal.find(this.focusPointContainerSelector).css({ height: imageHeight, width: imageWidth });
             // this.cropVariantTriggers = this.currentModal.find('.t3js-crop-variant-trigger');
             // this.activeCropVariantTrigger = this.currentModal.find('.t3js-crop-variant-trigger.is-active');
+            this.newButton = this.currentModal.find('[data-method=new]');
             // this.saveButton = this.currentModal.find('[data-method=save]');
             // this.dismissButton = this.currentModal.find('[data-method=dismiss]');
             // this.resetButton = this.currentModal.find('[data-method=reset]');
@@ -94,6 +123,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
             this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
             this.initFocusBoxes();
+            this.initEvents();
             // /**
             //  * Assign EventListener to cropVariantTriggers
             //  */

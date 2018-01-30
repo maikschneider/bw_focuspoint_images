@@ -8,7 +8,7 @@
                 <div id="focuspoint-container">
                     <f:image image="{image}" maxWidth="1280" maxHeight="1280" id="t3js-crop-image" class="cropper-image-container-image" additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}" />
                     <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
-                        <div data-focuspointBoxId="{i.index}" class="focuspoint-item ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} {f:if(condition:i.isLast, then:'focuspoint-item-dummy')}" style="width: {focusPoints.singlePoint.defaultWidth}; height: {focusPoints.singlePoint.defaultHeight};"><span>{i.cycle}</span></div>
+                        <div data-focuspointBoxId="{i.index}" class="focuspoint-item focuspoint-item-hidden ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} {f:if(condition:i.isLast, then:'focuspoint-item-dummy')}" style="width: {focusPoints.singlePoint.defaultWidth}; height: {focusPoints.singlePoint.defaultHeight};"><span>{i.cycle}</span></div>
                     </f:for>
                 </div>
             </div>
@@ -54,7 +54,7 @@
                 </f:for>
             </div>
             <div class="panel-body">
-                <button class="btn btn-success btn-block"><i class="fa fa-plus"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/></button>
+                <button data-method="new" class="btn btn-success btn-block"><i class="fa fa-plus"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/></button>
             </div>
         </div>
 
@@ -94,7 +94,8 @@
                 left: 0;
                 cursor: move;
             }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-dummy{
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-dummy,
+            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-hidden{
                 display: none;
             }
             .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item span{

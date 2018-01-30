@@ -57,26 +57,23 @@ class FocuspointImages {
     const position: object = $(box).position();
     const left: number = position.left;
     const top: number = position.top;
-
-    console.log(position);
-
     const focuspointBoxId: number = $(box).attr('data-focuspointBoxId');
 
     this.data[focuspointBoxId].width = this.calculateRelativeX(width);
     this.data[focuspointBoxId].height = this.calculateRelativeY(height);
     this.data[focuspointBoxId].x = this.calculateRelativeX(left);
     this.data[focuspointBoxId].y = this.calculateRelativeY(top);
-
-    console.log(this.data[focuspointBoxId]);
   }
 
   private initFocusBox(box): void {
 
+    // register jquery-ui/draggable
     $(box).draggable({
       containment: "parent",
       stop: this.onBoxChange.bind(this, box),
     });
 
+    // register jquery-ui/resizable
     if($(box).hasClass('ui-resizable')){
       $(box).resizable({
         handles: "n, e, w, s, se, sw, nw, ne",
@@ -87,11 +84,48 @@ class FocuspointImages {
       });
     }
 
+    // set onload position and size
+
+    // show element
+    $(box).removeClass('focuspoint-item-hidden');
+
   }
 
   private initFocusBoxes(): void {
     this.focusBoxes.each((i, box) => {
       this.initFocusBox(box);
+    });
+  }
+
+  private addNewFocuspoint(): void {
+
+    const newId: number = this.data.length;
+
+    this.data[newId] = {};
+
+    // copy dummys
+    const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
+      .clone()
+      .appendTo(this.focusPointContainerSelector)
+      .attr('data-focuspointBoxId', newId)
+      .addClass('focuspoint-item-hidden')
+      .removeClass('focuspoint-item-dummy')
+      .find('span')
+      .html(newId + 1)
+      .parent();
+
+    console.log(newBox);
+
+    this.initFocusBox(newBox);
+  }
+
+  private initEvents(): void {
+    console.log('initEvents');
+
+    // Add new Focus Box Button
+    this.newButton.off('click').on('click', (e: JQueryEventObject) => {
+      e.preventDefault();
+      this.addNewFocuspoint();
     });
   }
 
@@ -116,6 +150,7 @@ class FocuspointImages {
     this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});
     // this.cropVariantTriggers = this.currentModal.find('.t3js-crop-variant-trigger');
     // this.activeCropVariantTrigger = this.currentModal.find('.t3js-crop-variant-trigger.is-active');
+    this.newButton = this.currentModal.find('[data-method=new]');
     // this.saveButton = this.currentModal.find('[data-method=save]');
     // this.dismissButton = this.currentModal.find('[data-method=dismiss]');
     // this.resetButton = this.currentModal.find('[data-method=reset]');
@@ -126,6 +161,10 @@ class FocuspointImages {
     this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
 
     this.initFocusBoxes();
+
+    this.initEvents();
+
+
 
 
     // /**
