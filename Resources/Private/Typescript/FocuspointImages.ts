@@ -35,8 +35,65 @@ class FocuspointImages {
 
   private trigger: JQuery;
   private currentModal: JQuery;
+  private focusBoxes: JQuery;
   private cropImageSelector: string = '#t3js-crop-image';
   private focusPointContainerSelector: string = '#focuspoint-container';
+
+  private calculateRelativeX(width): number {
+    const image: JQuery = this.currentModal.find(this.cropImageSelector);
+    const imageWidth: number = $(image).width();
+    return (width / imageWidth).toFixed(3);
+  }
+
+  private calculateRelativeY(height): number {
+    const image: JQuery = this.currentModal.find(this.cropImageSelector);
+    const imageHeight: number = $(image).height();
+    return (height / imageHeight).toFixed(3);
+  }
+
+  private onBoxChange(box): void {
+    const width: number = $(box).width();
+    const height: number = $(box).height();
+    const position: object = $(box).position();
+    const left: number = position.left;
+    const top: number = position.top;
+
+    console.log(position);
+
+    const focuspointBoxId: number = $(box).attr('data-focuspointBoxId');
+
+    this.data[focuspointBoxId].width = this.calculateRelativeX(width);
+    this.data[focuspointBoxId].height = this.calculateRelativeY(height);
+    this.data[focuspointBoxId].x = this.calculateRelativeX(left);
+    this.data[focuspointBoxId].y = this.calculateRelativeY(top);
+
+    console.log(this.data[focuspointBoxId]);
+  }
+
+  private initFocusBox(box): void {
+
+    $(box).draggable({
+      containment: "parent",
+      stop: this.onBoxChange.bind(this, box),
+    });
+
+    if($(box).hasClass('ui-resizable')){
+      $(box).resizable({
+        handles: "n, e, w, s, se, sw, nw, ne",
+        containment: "parent",
+        minWidth: "20",
+        minHeight: "20",
+        stop: this.onBoxChange.bind(this, box),
+      });
+    }
+
+  }
+
+  private initFocusBoxes(): void {
+    this.focusBoxes.each((i, box) => {
+      this.initFocusBox(box);
+    });
+  }
 
   /**
    * @method init
@@ -66,18 +123,10 @@ class FocuspointImages {
     // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
     // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
 
-    const focusboxes: JQuery = this.currentModal.find('.focuspoint-item.ui-draggable');
-    focusboxes.draggable({
-        containment: "parent",
-        //scroll: false,
-        drag: function() {
-          //mapr.updateCoords(this);
-        },
-        stop: function(){
-          //mapr.writeHTML();
-          //localStorage.setItem('mapHTML',mapr.wrapper.html());
-        }
-      });
+    this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
+
+    this.initFocusBoxes();
+
 
     // /**
     //  * Assign EventListener to cropVariantTriggers

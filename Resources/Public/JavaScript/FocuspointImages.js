@@ -22,6 +22,51 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.cropImageSelector = '#t3js-crop-image';
             this.focusPointContainerSelector = '#focuspoint-container';
         }
+        FocuspointImages.prototype.calculateRelativeX = function (width) {
+            var image = this.currentModal.find(this.cropImageSelector);
+            var imageWidth = $(image).width();
+            return (width / imageWidth).toFixed(3);
+        };
+        FocuspointImages.prototype.calculateRelativeY = function (height) {
+            var image = this.currentModal.find(this.cropImageSelector);
+            var imageHeight = $(image).height();
+            return (height / imageHeight).toFixed(3);
+        };
+        FocuspointImages.prototype.onBoxChange = function (box) {
+            var width = $(box).width();
+            var height = $(box).height();
+            var position = $(box).position();
+            var left = position.left;
+            var top = position.top;
+            console.log(position);
+            var focuspointBoxId = $(box).attr('data-focuspointBoxId');
+            this.data[focuspointBoxId].width = this.calculateRelativeX(width);
+            this.data[focuspointBoxId].height = this.calculateRelativeY(height);
+            this.data[focuspointBoxId].x = this.calculateRelativeX(left);
+            this.data[focuspointBoxId].y = this.calculateRelativeY(top);
+            console.log(this.data[focuspointBoxId]);
+        };
+        FocuspointImages.prototype.initFocusBox = function (box) {
+            $(box).draggable({
+                containment: "parent",
+                stop: this.onBoxChange.bind(this, box),
+            });
+            if ($(box).hasClass('ui-resizable')) {
+                $(box).resizable({
+                    handles: "n, e, w, s, se, sw, nw, ne",
+                    containment: "parent",
+                    minWidth: "20",
+                    minHeight: "20",
+                    stop: this.onBoxChange.bind(this, box),
+                });
+            }
+        };
+        FocuspointImages.prototype.initFocusBoxes = function () {
+            var _this = this;
+            this.focusBoxes.each(function (i, box) {
+                _this.initFocusBox(box);
+            });
+        };
         /**
          * @method init
          * @desc Initializes the Focus Point UI and sets up all the event indings for the UI
@@ -47,18 +92,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // this.cropperCanvas = this.currentModal.find('#js-crop-canvas');
             // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
             // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
-            var focusboxes = this.currentModal.find('.focuspoint-item.ui-draggable');
-            focusboxes.draggable({
-                containment: "parent",
-                //scroll: false,
-                drag: function () {
-                    //mapr.updateCoords(this);
-                },
-                stop: function () {
-                    //mapr.writeHTML();
-                    //localStorage.setItem('mapHTML',mapr.wrapper.html());
-                }
-            });
+            this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
+            this.initFocusBoxes();
             // /**
             //  * Assign EventListener to cropVariantTriggers
             //  */
