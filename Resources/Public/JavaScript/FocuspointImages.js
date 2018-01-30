@@ -97,7 +97,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         };
         FocuspointImages.prototype.addNewFocuspoint = function () {
             var focuspointBoxId = this.data.length;
-            this.data[focuspointBoxId] = {};
+            this.data[focuspointBoxId] = this.emptyFocuspoint;
             // copy dummys
             // 1. box dummy
             var newBox = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
@@ -126,6 +126,9 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // init new elements
             this.initFocusBox(newBox);
             this.initInputPanel(newPanel);
+            // add elements to the class
+            this.focusBoxes.push(newBox);
+            this.inputPanels.push(newPanel);
         };
         FocuspointImages.prototype.initEvents = function () {
             var _this = this;
@@ -134,6 +137,20 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 e.preventDefault();
                 _this.addNewFocuspoint();
             });
+            // Dismiss button
+            this.dismissButton.off('click').on('click', function (e) {
+                e.preventDefault();
+                _this.currentModal.modal('hide');
+                _this.destroy();
+            });
+            // Dismiss button
+            this.saveButton.off('click').on('click', function (e) {
+                e.preventDefault();
+                _this.save();
+                _this.currentModal.modal('hide');
+            });
+        };
+        FocuspointImages.prototype.save = function () {
         };
         FocuspointImages.prototype.initInputPanel = function (panel) {
             var _this = this;
@@ -170,6 +187,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 _this.initInputPanel(panel);
             });
         };
+        FocuspointImages.prototype.getEmptyFocuspoint = function () {
+            var o = {};
+            this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId]').each(function (i, input) {
+                o[$(input).attr('name')] = '';
+            });
+            return o;
+        };
         /**
          * @method init
          * @desc Initializes the Focus Point UI and sets up all the event indings for the UI
@@ -187,15 +211,10 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
             // Initialize our class members
             this.currentModal.find(this.focusPointContainerSelector).css({ height: imageHeight, width: imageWidth });
-            // this.cropVariantTriggers = this.currentModal.find('.t3js-crop-variant-trigger');
-            // this.activeCropVariantTrigger = this.currentModal.find('.t3js-crop-variant-trigger.is-active');
             this.newButton = this.currentModal.find('[data-method=new]');
-            // this.saveButton = this.currentModal.find('[data-method=save]');
-            // this.dismissButton = this.currentModal.find('[data-method=dismiss]');
-            // this.resetButton = this.currentModal.find('[data-method=reset]');
-            // this.cropperCanvas = this.currentModal.find('#js-crop-canvas');
-            // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
-            // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
+            this.saveButton = this.currentModal.find('[data-method=save]');
+            this.dismissButton = this.currentModal.find('[data-method=dismiss]');
+            this.emptyFocuspoint = this.getEmptyFocuspoint();
             this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
             this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
             this.initFocusBoxes();

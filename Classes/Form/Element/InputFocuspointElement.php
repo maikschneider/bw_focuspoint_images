@@ -135,7 +135,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'height' => '1'
             ]
         ];
-        $parameterArray['itemFormElValue'] = json_encode($focusPointsExampleData);
+        //$parameterArray['itemFormElValue'] = json_encode($focusPointsExampleData);
 
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,

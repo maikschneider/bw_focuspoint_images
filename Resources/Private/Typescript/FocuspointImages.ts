@@ -132,7 +132,7 @@ class FocuspointImages {
 
     const focuspointBoxId: number = this.data.length;
 
-    this.data[focuspointBoxId] = {};
+    this.data[focuspointBoxId] = this.emptyFocuspoint;
 
     // copy dummys
       // 1. box dummy
@@ -164,6 +164,10 @@ class FocuspointImages {
     // init new elements
     this.initFocusBox(newBox);
     this.initInputPanel(newPanel);
+
+    // add elements to the class
+    this.focusBoxes.push(newBox);
+    this.inputPanels.push(newPanel);
   }
 
   private initEvents(): void {
@@ -173,6 +177,26 @@ class FocuspointImages {
       e.preventDefault();
       this.addNewFocuspoint();
     });
+
+    // Dismiss button
+    this.dismissButton.off('click').on('click', (e: JQueryEventObject) => {
+      e.preventDefault();
+      this.currentModal.modal('hide');
+      this.destroy();
+    });
+
+    // Dismiss button
+    this.saveButton.off('click').on('click', (e: JQueryEventObject) => {
+      e.preventDefault();
+      this.save();
+      this.currentModal.modal('hide');
+    });
+
+
+  }
+
+  private save(): void {
+
   }
 
   private initInputPanel(panel): void {
@@ -217,6 +241,14 @@ class FocuspointImages {
     });
   }
 
+  private getEmptyFocuspoint(): object {
+    const o = {};
+    this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId]').each((i, input) => {
+      o[$(input).attr('name')] = '';
+    });
+    return o;
+  }
+
   /**
    * @method init
    * @desc Initializes the Focus Point UI and sets up all the event indings for the UI
@@ -234,24 +266,18 @@ class FocuspointImages {
 
     // If we have data already set we assume an internal reinit eg. after resizing
     this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
+
     // Initialize our class members
     this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});
-    // this.cropVariantTriggers = this.currentModal.find('.t3js-crop-variant-trigger');
-    // this.activeCropVariantTrigger = this.currentModal.find('.t3js-crop-variant-trigger.is-active');
     this.newButton = this.currentModal.find('[data-method=new]');
-    // this.saveButton = this.currentModal.find('[data-method=save]');
-    // this.dismissButton = this.currentModal.find('[data-method=dismiss]');
-    // this.resetButton = this.currentModal.find('[data-method=reset]');
-    // this.cropperCanvas = this.currentModal.find('#js-crop-canvas');
-    // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
-    // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
-
+    this.saveButton = this.currentModal.find('[data-method=save]');
+    this.dismissButton = this.currentModal.find('[data-method=dismiss]');
+    this.emptyFocuspoint = this.getEmptyFocuspoint();
     this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
     this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
 
     this.initFocusBoxes();
     this.initInputPanels();
-
     this.initEvents();
   }
 
