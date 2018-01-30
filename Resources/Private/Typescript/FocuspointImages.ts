@@ -66,6 +66,19 @@ class FocuspointImages {
     // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
     // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
 
+    const focusboxes: JQuery = this.currentModal.find('.focuspoint-item.ui-draggable');
+    focusboxes.draggable({
+        containment: "parent",
+        //scroll: false,
+        drag: function() {
+          //mapr.updateCoords(this);
+        },
+        stop: function(){
+          //mapr.writeHTML();
+          //localStorage.setItem('mapHTML',mapr.wrapper.html());
+        }
+      });
+
     // /**
     //  * Assign EventListener to cropVariantTriggers
     //  */
@@ -181,8 +194,8 @@ class FocuspointImages {
       setTimeout((): void => {
         this.init();
       }, 100);
-    }
-  });
+    });
+  };
 
 
   public show(): void {

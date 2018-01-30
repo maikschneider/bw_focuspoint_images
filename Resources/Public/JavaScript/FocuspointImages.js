@@ -47,6 +47,18 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // this.cropperCanvas = this.currentModal.find('#js-crop-canvas');
             // this.aspectRatioTrigger = this.currentModal.find('[data-method=setAspectRatio]');
             // this.currentCropVariant = this.data[this.activeCropVariantTrigger.attr('data-crop-variant-id')];
+            var focusboxes = this.currentModal.find('.focuspoint-item.ui-draggable');
+            focusboxes.draggable({
+                containment: "parent",
+                //scroll: false,
+                drag: function () {
+                    //mapr.updateCoords(this);
+                },
+                stop: function () {
+                    //mapr.writeHTML();
+                    //localStorage.setItem('mapHTML',mapr.wrapper.html());
+                }
+            });
             // /**
             //  * Assign EventListener to cropVariantTriggers
             //  */
