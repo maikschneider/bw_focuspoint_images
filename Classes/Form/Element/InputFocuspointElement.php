@@ -145,7 +145,6 @@ class InputFocuspointElement extends AbstractFormElement
             'image' => $file,
             'formEngine' => [
                 'field' => [
-                    'id' => 'formengine-focus-points-',
                     'value' => $parameterArray['itemFormElValue'],
                     'name' => $parameterArray['itemFormElName']
                 ],
