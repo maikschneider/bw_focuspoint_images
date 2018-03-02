@@ -64,20 +64,23 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             console.log('onInputChange', this.data);
         };
         FocuspointImages.prototype.deleteFocuspoint = function (focuspointId) {
-            $(this.focusBoxes).each(function (i, e) {
-                $(e).remove();
-            });
-            this.focusBoxes = [];
-            $(this.inputPanels).each(function (i, e) {
-                $(e).remove();
-            });
-            this.inputPanels = [];
+            console.log(this);
+            console.log(focuspointId);
+            // remove html elements
+            $(this.focusBoxes[focuspointId]).trigger('remove');
+            $(this.inputPanels[focuspointId]).trigger('remove');
+            // remove from class members
+            this.focusBoxes.splice(focuspointId, 1);
+            this.inputPanels.splice(focuspointId, 1);
             this.data.splice(focuspointId, 1);
-            for (var i = 0; i < this.data.length; i++) {
-                //this.addNewFocuspoint(i);
-            }
-            this.addNewFocuspoint(0);
-            console.log(this.data);
+            // rename remaining focus points
+            $(this.focusBoxes).each(function (i, e) {
+                $(e).find('span').html(i + 1);
+            });
+            $(this.inputPanels).each(function (i, e) {
+                $(e).find('span[data-nr]').attr('data-nr', i + 1);
+            });
+            console.log(this);
         };
         FocuspointImages.prototype.initFocusBox = function (box) {
             // register jquery-ui/draggable
@@ -103,17 +106,17 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(box).css('left', this.calculateAbsoluteX(focuspoint.x) + 'px');
             // show element
             $(box).removeClass('focuspoint-item-hidden');
-        };
-        FocuspointImages.prototype.initFocusBoxes = function () {
-            var _this = this;
-            this.focusBoxes.each(function (i, box) {
-                _this.initFocusBox(box);
-            });
+            // bind delete event
+            var removeEvent = function () {
+                $(box).off();
+                $(box).remove();
+            };
+            $(box).bind('delete', removeEvent.bind(null, box));
         };
         FocuspointImages.prototype.addNewFocuspoint = function (focuspointBoxId) {
             if (focuspointBoxId === void 0) { focuspointBoxId = false; }
             // check if appended or created from data
-            if (!focuspointBoxId) {
+            if (focuspointBoxId === false) {
                 focuspointBoxId = this.data.length;
                 this.data[focuspointBoxId] = this.emptyFocuspoint;
             }
@@ -175,9 +178,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         FocuspointImages.prototype.save = function (data) {
             var focusPoints = JSON.stringify(data);
             var hiddenField = $("#" + this.trigger.attr('data-field'));
-            this.trigger.attr('data-focus-points-value', JSON.stringify(data));
-            // @todo update preview next to trigger button
             hiddenField.val(focusPoints);
+            // @todo update preview next to trigger button
         };
         FocuspointImages.prototype.initInputPanel = function (panel) {
             var _this = this;
@@ -187,6 +189,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // for all inputs: set data and eventListener
             panelInputs.each(function (i, input) {
                 var inputValue = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+                console.log(inputValue);
                 // set value
                 switch ($(input).prop('tagName')) {
                     case 'INPUT':
@@ -201,11 +204,16 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 // bind events
                 $(input).off('input').on('input', _this.onInputChange.bind(_this, input));
             });
+            // bind remove event
+            var removeEvent = function () {
+                $(panel).off();
+                $(panel).remove();
+            };
+            $(panel).bind('remove', removeEvent.bind(null, panel));
             // bind delete button event
             $(panel).find('[data-delete]').off('click').on('click', function (e, button) {
                 e.preventDefault();
-                console.log('delete nr', focuspointPanelId);
-                _this.deleteFocuspoint(focuspointPanelId - 1);
+                _this.deleteFocuspoint(focuspointPanelId);
             });
             // show panel
             $(panel).removeClass('panel-hidden');
@@ -232,8 +240,9 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
             var imageWidth = $(image).width();
-            var data = this.trigger.attr('data-focus-points-value');
-            if (!data) {
+            var hiddenField = $("#" + this.trigger.attr('data-field'));
+            var data = hiddenField.val();
+            if (!data || data == "") {
                 data = "[]";
             }
             // If we have data already set we assume an internal reinit eg. after resizing
@@ -245,10 +254,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.newButton = this.currentModal.find('[data-method=new]');
             this.saveButton = this.currentModal.find('[data-method=save]');
             this.dismissButton = this.currentModal.find('[data-method=dismiss]');
-            this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
-            this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
-            this.initFocusBoxes();
-            this.initInputPanels();
+            this.focusBoxes = [];
+            this.inputPanels = [];
+            // create focuspoints from data
+            for (var i = 0; i < this.data.length; i++) {
+                this.addNewFocuspoint(i);
+            }
+            // init events
             this.initEvents();
         };
         /**

@@ -6,13 +6,13 @@
     <div class="input-group">
         <f:switch expression="{field.type}">
             <f:case value="text">
-                <input type="text" name="{fieldname}" data-focuspointPanelId="{i.index}" />
+                <input type="text" name="{fieldname}" data-focuspointPanelId="x" />
             </f:case>
             <f:case value="textarea">
-                <textarea name="{fieldname}" data-focuspointPanelId="{i.index}"></textarea>
+                <textarea name="{fieldname}" data-focuspointPanelId="x"></textarea>
             </f:case>
             <f:case value="select">
-                <select name="{fieldname}" data-focuspointPanelId="{i.index}">
+                <select name="{fieldname}" data-focuspointPanelId="x">
                     <f:for each="{field.options}" as="option" key="optionname" iteration="k">
                         <option value="{optionname}">{f:translate(id:'{option}')}</option>
                     </f:for>

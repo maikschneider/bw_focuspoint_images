@@ -7,43 +7,42 @@
             <div id="t3js-crop-image-container" class="cropper-image-container">
                 <div id="focuspoint-container">
                     <f:image image="{image}" maxWidth="1280" maxHeight="1280" id="t3js-crop-image" class="cropper-image-container-image" additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}" />
-                    <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
-                        <div data-focuspointBoxId="{i.index}" class="focuspoint-item focuspoint-item-hidden ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} {f:if(condition:i.isLast, then:'focuspoint-item-dummy')}" style="width: {focusPoints.singlePoint.defaultWidth}; height: {focusPoints.singlePoint.defaultHeight};"><span>{i.cycle}</span></div>
-                    </f:for>
+
+                        <div data-focuspointBoxId="x" class="focuspoint-item focuspoint-item-hidden ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} focuspoint-item-dummy" style="width: {focusPoints.singlePoint.defaultWidth}; height: {focusPoints.singlePoint.defaultHeight};"><span>x</span></div>
                 </div>
             </div>
         </div>
         <div class="modal-panel-sidebar">
             <div class="panel-group" id="accordion-cropper-variants" role="tablist" aria-multiselectable="true">
-                <f:for each="{focusPointsCount}" as="singlepoint" iteration="i">
-                    <div class="panel panel-default panel-hidden {f:if(condition:i.isLast, then:'panel-dummy')}">
-                        <div class="panel-heading" role="tab" data-append-id="id" id="cropper-accordion-heading-{f:if(condition:i.isLast, else:'{i.cycle}')}">
+
+                    <div class="panel panel-default panel-hidden panel-dummy">
+                        <div class="panel-heading" role="tab" data-append-id="id" id="cropper-accordion-heading-">
                             <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion-cropper-variants"
-                                        href="#cropper-collapse-{f:if(condition:i.isLast, else:'{i.cycle}')}"
-                                        aria-expanded="{f:if(condition:i.isFirst, then:'true', else:'false')}"
-                                        aria-controls="cropper-collapse-{f:if(condition:i.isLast, else:'{i.cycle}')}"
-                                        class="t3js-crop-variant-trigger {f:if(condition:i.isFirst, then:'is-active', else:'collapsed')}"
+                                        href="#cropper-collapse-"
+                                        aria-expanded="true"
+                                        aria-controls="cropper-collapse-"
+                                        class="t3js-crop-variant-trigger collapsed"
                                         data-append-id="href,aria-controls"
                                         data-crop-variant>
-                                <span data-nr="{f:if(condition:i.isLast, else:'{i.cycle}')}" data-append-id="data-nr"><i class="fa fa-chevron-down"
+                                <span data-nr="" data-append-id="data-nr"><i class="fa fa-chevron-down"
                                                     aria-hidden="true"></i> {f:translate(id:'{focusPoints.singlePoint.title}')} </span>
                                 </a>
                             </h4>
                         </div>
-                        <div id="cropper-collapse-{f:if(condition:i.isLast, else:'{i.cycle}')}"
-                                    class="panel-collapse collapse {f:if(condition:i.isFirst, then:'in')}"
+                        <div id="cropper-collapse-"
+                                    class="panel-collapse collapse in"
                                     role="tabpanel"
-                                    aria-labelledby="cropper-accordion-heading-{f:if(condition:i.isLast, else:'{i.cycle}')}"
+                                    aria-labelledby="cropper-accordion-heading-"
                                     data-append-id="id,aria-labelledby">
                             <div class="panel-body">
                                 <form>
-                                    <input type="hidden" name="x" data-focuspointPanelId="{i.index}" />
-                                    <input type="hidden" name="y" data-focuspointPanelId="{i.index}" />
-                                    <input type="hidden" name="height" data-focuspointPanelId="{i.index}" />
-                                    <input type="hidden" name="width" data-focuspointPanelId="{i.index}" />
+                                    <input type="hidden" name="x" data-focuspointPanelId="x" />
+                                    <input type="hidden" name="y" data-focuspointPanelId="x" />
+                                    <input type="hidden" name="height" data-focuspointPanelId="x" />
+                                    <input type="hidden" name="width" data-focuspointPanelId="x" />
                                     <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="j">
-                                        <f:render partial="FocuspointWizardInput" arguments="{field: field, fieldname: fieldname, i: i, j: j}" />
+                                        <f:render partial="FocuspointWizardInput" arguments="{field: field, fieldname: fieldname, j: j}" />
                                     </f:for>
                                     <div class="input-group pull-right">
                                         <button data-delete class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.delete"/></button>
@@ -52,7 +51,7 @@
                             </div>
                         </div>
                     </div>
-                </f:for>
+
             </div>
             <div class="panel-body">
                 <button data-method="new" class="btn btn-success btn-block"><i class="fa fa-plus"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/></button>
@@ -62,7 +61,7 @@
         <style type="text/css">
             .modal-body-focuspoints{
                 display: flex;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 padding: 0;
             }
             .modal-body-focuspoints .modal-panel-main{

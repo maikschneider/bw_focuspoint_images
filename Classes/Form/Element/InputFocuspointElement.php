@@ -151,7 +151,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'validation' => '[]'
             ],
             'config' => $config,
-            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $parameterArray['itemFormElValue']),
+            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file),
             'previewUrl' => $this->getPreviewUrl($this->data['databaseRow'], $file),
         ];
 
@@ -219,12 +219,11 @@ class InputFocuspointElement extends AbstractFormElement
      * @param File $image
      * @return string
      */
-    protected function getWizardUri(array $focusPoints, File $image, string $itemFormElValue): string
+    protected function getWizardUri(array $focusPoints, File $image): string
     {
         $routeName = 'ajax_wizard_focuspoint';
         $arguments = [
             'focusPoints' => $focusPoints,
-            'focusPointsCount' => range(1, count(json_decode($itemFormElValue))+1),
             'image' => $image->getUid(),
         ];
         $uriArguments['arguments'] = json_encode($arguments);
