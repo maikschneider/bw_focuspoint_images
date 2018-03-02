@@ -42,6 +42,13 @@
             <trans-unit id="wizard.single_point.field.color.options.1.title">
                 <source>1 Example</source>
             </trans-unit>
+
+            <trans-unit id="tca.wizard.svg.title">
+                <source>SVG Focuspoints</source>
+            </trans-unit>
+            <trans-unit id="tca.wizard.svg.description">
+                <source>Displays the focus points of an image using SVG</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

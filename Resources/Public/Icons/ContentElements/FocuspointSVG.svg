@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>FocuspointSVG</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="FocuspointSVG">
+            <polygon id="Shape" fill="#FFFFFF" fill-rule="nonzero" points="0 0 14 0 14 14 0 14"></polygon>
+            <rect id="Rectangle-2" fill="#337F99" x="2" y="2" width="10" height="10"></rect>
+            <rect id="Rectangle-2" fill="#FFFFFF" opacity="0.698539402" x="2" y="3" width="4" height="8"></rect>
+            <path d="M0,0 L0,14 L14,14 L14,0 L0,0 Z M1,1 L13,1 L13,13 L1,13 L1,1 Z" id="Shape" fill="#999999" fill-rule="nonzero"></path>
+            <rect id="Rectangle-2" fill="#494949" x="4" y="5" width="7" height="1"></rect>
+            <rect id="Rectangle-2" fill="#494949" x="7" y="4" width="4" height="5"></rect>
+            <rect id="Rectangle-2" fill="#E0E0E0" x="8" y="5" width="2" height="1"></rect>
+            <rect id="Rectangle-2" fill="#E0E0E0" x="8" y="7" width="2" height="1"></rect>
+        </g>
+    </g>
+</svg>

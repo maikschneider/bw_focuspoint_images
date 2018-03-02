@@ -1,0 +1,14 @@
+tt_content {
+   bw_focuspoint_images_svg < lib.fluidContent
+   bw_focuspoint_images_svg {
+      templateName = Generic
+      dataProcessing {
+	      10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
+	      10 {
+	          references.fieldName = assets
+	      }
+	      # https://usetypo3.com/custom-fsc-element.html
+	      #20 = DanielGoerz\FluidStyledSlider\DataProcessing\FluidStyledSliderProcessor
+	  }
+   }
+}
