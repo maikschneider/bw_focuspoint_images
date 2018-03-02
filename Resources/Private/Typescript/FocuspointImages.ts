@@ -85,13 +85,9 @@ class FocuspointImages {
     const focuspointPanelId: number = $(input).attr('data-focuspointPanelId');
     const fieldname = $(input).attr('name');
     this.data[focuspointPanelId][fieldname] = $(input).val();
-    console.log('onInputChange', this.data);
   }
 
   private deleteFocuspoint(focuspointId): void {
-
-    console.log(this);
-    console.log(focuspointId);
 
     // remove html elements
     $(this.focusBoxes[focuspointId]).trigger('remove');
@@ -109,8 +105,6 @@ class FocuspointImages {
     $(this.inputPanels).each(function(i, e){
       $(e).find('span[data-nr]').attr('data-nr', i+1);
     });
-
-    console.log(this);
 
   }
 
@@ -221,10 +215,6 @@ class FocuspointImages {
 
   }
 
-  // private static serializeFocusPoints(focusPoints: Object) : string {
-  //   return JSON.stringify(focusPoints);
-  // }
-
   private save(data: Object): void {
     const focusPoints: string = JSON.stringify(data);
     const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
@@ -242,8 +232,6 @@ class FocuspointImages {
     panelInputs.each((i, input) => {
 
       const inputValue: string = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
-
-      console.log(inputValue);
 
       // set value
       switch($(input).prop('tagName')){
@@ -312,8 +300,6 @@ class FocuspointImages {
     // If we have data already set we assume an internal reinit eg. after resizing
     this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
     this.emptyFocuspoint = this.getEmptyFocuspoint();
-
-    console.log('init, this.data', data);
 
     // Initialize our class members
     this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});

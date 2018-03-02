@@ -61,11 +61,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var focuspointPanelId = $(input).attr('data-focuspointPanelId');
             var fieldname = $(input).attr('name');
             this.data[focuspointPanelId][fieldname] = $(input).val();
-            console.log('onInputChange', this.data);
         };
         FocuspointImages.prototype.deleteFocuspoint = function (focuspointId) {
-            console.log(this);
-            console.log(focuspointId);
             // remove html elements
             $(this.focusBoxes[focuspointId]).trigger('remove');
             $(this.inputPanels[focuspointId]).trigger('remove');
@@ -80,7 +77,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(this.inputPanels).each(function (i, e) {
                 $(e).find('span[data-nr]').attr('data-nr', i + 1);
             });
-            console.log(this);
         };
         FocuspointImages.prototype.initFocusBox = function (box) {
             // register jquery-ui/draggable
@@ -172,9 +168,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 _this.currentModal.modal('hide');
             });
         };
-        // private static serializeFocusPoints(focusPoints: Object) : string {
-        //   return JSON.stringify(focusPoints);
-        // }
         FocuspointImages.prototype.save = function (data) {
             var focusPoints = JSON.stringify(data);
             var hiddenField = $("#" + this.trigger.attr('data-field'));
@@ -189,7 +182,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // for all inputs: set data and eventListener
             panelInputs.each(function (i, input) {
                 var inputValue = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
-                console.log(inputValue);
                 // set value
                 switch ($(input).prop('tagName')) {
                     case 'INPUT':
@@ -248,7 +240,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // If we have data already set we assume an internal reinit eg. after resizing
             this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
             this.emptyFocuspoint = this.getEmptyFocuspoint();
-            console.log('init, this.data', data);
             // Initialize our class members
             this.currentModal.find(this.focusPointContainerSelector).css({ height: imageHeight, width: imageWidth });
             this.newButton = this.currentModal.find('[data-method=new]');
