@@ -85,9 +85,31 @@ class FocuspointImages {
     const focuspointPanelId: number = $(input).attr('data-focuspointPanelId');
     const fieldname = $(input).attr('name');
     this.data[focuspointPanelId][fieldname] = $(input).val();
+    console.log('onInputChange', this.data);
   }
 
-  private onDeleteButton(button): void {
+  private deleteFocuspoint(focuspointId): void {
+
+    $(this.focusBoxes).each((i, e) => {
+      $(e).remove();
+    });
+    this.focusBoxes = [];
+    $(this.inputPanels).each((i, e) => {
+      $(e).remove();
+    });
+    this.inputPanels = [];
+
+    this.data.splice(focuspointId, 1);
+
+    for(const i=0; i<this.data.length; i++){
+      //this.addNewFocuspoint(i);
+    }
+
+    this.addNewFocuspoint(0);
+
+    console.log(this.data);
+
+
 
   }
 
@@ -128,15 +150,17 @@ class FocuspointImages {
     });
   }
 
-  private addNewFocuspoint(): void {
+  private addNewFocuspoint(focuspointBoxId = false): void {
 
-    const focuspointBoxId: number = this.data.length;
-
-    this.data[focuspointBoxId] = this.emptyFocuspoint;
+    // check if appended or created from data
+    if(!focuspointBoxId) {
+      focuspointBoxId = this.data.length;
+      this.data[focuspointBoxId] = this.emptyFocuspoint;
+    }
 
     // copy dummys
       // 1. box dummy
-      const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy')
+      const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy').first()
         .clone()
         .appendTo(this.focusPointContainerSelector)
         .attr('data-focuspointBoxId', focuspointBoxId)
@@ -147,7 +171,7 @@ class FocuspointImages {
         .parent();
 
       // 2. panel dummy
-      const newPanel: JQuery = this.currentModal.find('.panel.panel-dummy')
+      const newPanel: JQuery = this.currentModal.find('.panel.panel-dummy').first()
         .clone()
         .appendTo(this.panelGroupSelector)
         .addClass('panel-hidden')
@@ -175,7 +199,7 @@ class FocuspointImages {
     // Add new Focus Box Button
     this.newButton.off('click').on('click', (e: JQueryEventObject) => {
       e.preventDefault();
-      this.addNewFocuspoint();
+      this.addNewFocuspoint(false);
     });
 
     // Dismiss button
@@ -185,27 +209,37 @@ class FocuspointImages {
       this.destroy();
     });
 
-    // Dismiss button
+    // Save button
     this.saveButton.off('click').on('click', (e: JQueryEventObject) => {
       e.preventDefault();
-      this.save();
+      this.save(this.data);
       this.currentModal.modal('hide');
     });
 
 
   }
 
-  private save(): void {
+  // private static serializeFocusPoints(focusPoints: Object) : string {
+  //   return JSON.stringify(focusPoints);
+  // }
 
+  private save(data: Object): void {
+    const focusPoints: string = JSON.stringify(data);
+    const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
+    this.trigger.attr('data-focus-points-value', JSON.stringify(data));
+    // @todo update preview next to trigger button
+    hiddenField.val(focusPoints);
   }
 
   private initInputPanel(panel): void {
 
-    // for all inputs: set data and eventListener
-    $(panel).find('[data-focuspointPanelId]').each((i, input) => {
+    const panelInputs: JQuery = $(panel).find('[data-focuspointPanelId]');
+    const focuspointPanelId: number = panelInputs.first().attr('data-focuspointPanelId');
+    const focuspoint: object = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
 
-      const focuspointPanelId = $(input).attr('data-focuspointPanelId');
-      const focuspoint: object = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
+    // for all inputs: set data and eventListener
+    panelInputs.each((i, input) => {
+
       const inputValue: string = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
 
       // set value
@@ -228,7 +262,8 @@ class FocuspointImages {
     // bind delete button event
     $(panel).find('[data-delete]').off('click').on('click', (e, button) => {
       e.preventDefault();
-      this.onDeleteButton(button);
+      console.log('delete nr', focuspointPanelId);
+      this.deleteFocuspoint(focuspointPanelId - 1);
     });
 
     // show panel
@@ -266,13 +301,15 @@ class FocuspointImages {
 
     // If we have data already set we assume an internal reinit eg. after resizing
     this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
+    this.emptyFocuspoint = this.getEmptyFocuspoint();
+
+    console.log('init, this.data', data);
 
     // Initialize our class members
     this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});
     this.newButton = this.currentModal.find('[data-method=new]');
     this.saveButton = this.currentModal.find('[data-method=save]');
     this.dismissButton = this.currentModal.find('[data-method=dismiss]');
-    this.emptyFocuspoint = this.getEmptyFocuspoint();
     this.focusBoxes = this.currentModal.find('.focuspoint-item.ui-draggable').not('.focuspoint-item-dummy');
     this.inputPanels = this.currentModal.find('.panel.panel-default').not('.panel-dummy');
 

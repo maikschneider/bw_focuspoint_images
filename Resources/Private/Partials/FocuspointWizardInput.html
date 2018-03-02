@@ -14,7 +14,7 @@
             <f:case value="select">
                 <select name="{fieldname}" data-focuspointPanelId="{i.index}">
                     <f:for each="{field.options}" as="option" key="optionname" iteration="k">
-                        <option name="{optionname}">{f:translate(id:'{option}')}</option>
+                        <option value="{optionname}">{f:translate(id:'{option}')}</option>
                     </f:for>
                 </select>
             </f:case>
