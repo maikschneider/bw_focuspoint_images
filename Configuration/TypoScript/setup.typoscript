@@ -1,7 +1,12 @@
 tt_content {
    bw_focuspoint_images_svg < lib.fluidContent
    bw_focuspoint_images_svg {
-      templateName = Generic
+   		templateRootPaths {
+   		    20 = EXT:bw_focuspoint_images/Resources/Private/Templates
+   		}
+   		layoutRootPaths < lib.contentElement.layoutRootPaths
+   		partialRootPaths < lib.contentElement.partialRootPaths
+      templateName = FocuspointSVG
       dataProcessing {
 	      10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
 	      10 {
