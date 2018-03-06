@@ -34,3 +34,18 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = array(
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.access;access,
       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:tabs.extended
 ');
+
+// override the imageoverlayPalette to show only the focus_points widget
+$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = array(
+        'assets' => [
+            'config' => [
+                'overrideChildTca' => [
+                    'types' => [
+                        \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                            'showitem' => 'focus_points'
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    );

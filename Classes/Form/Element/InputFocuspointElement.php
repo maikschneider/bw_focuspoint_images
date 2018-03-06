@@ -82,6 +82,29 @@ class InputFocuspointElement extends AbstractFormElement
     }
 
     /**
+     * Default field wizards enabled for this element.
+     *
+     * @var array
+     */
+    protected $defaultFieldWizard = [
+        'localizationStateSelector' => [
+            'renderType' => 'localizationStateSelector',
+        ],
+        'otherLanguageContent' => [
+            'renderType' => 'otherLanguageContent',
+            'after' => [
+                'localizationStateSelector'
+            ],
+        ],
+        'defaultLanguageDifferences' => [
+            'renderType' => 'defaultLanguageDifferences',
+            'after' => [
+                'otherLanguageContent',
+            ],
+        ],
+    ];
+
+    /**
      * This will render an imageManipulation field
      *
      * @return array As defined in initializeResultArray() of AbstractNode
@@ -93,7 +116,7 @@ class InputFocuspointElement extends AbstractFormElement
         $parameterArray = $this->data['parameterArray'];
         $config = $this->populateConfiguration($parameterArray['fieldConf']['config']);
 
-        $file = $this->getFile($this->data['databaseRow'], 'file');
+        $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
         if (!$file) {
             // Early return in case we do not find a file
             return $resultArray;
@@ -201,8 +224,8 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $file = null;
         $fileUid = !empty($row[$fieldName]) ? $row[$fieldName] : null;
-        if (is_array($fileUid) && isset($fileUid[0])) {
-            $fileUid = $fileUid[0];
+        if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
+            $fileUid = $fileUid[0]['uid'];
         }
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {

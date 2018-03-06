@@ -1,10 +1,42 @@
 <f:layout name="Default" />
 
 <f:section name="Main">
-    <f:debug>{_all}</f:debug>
-    <f:for each="{files}" as="{file}">
+
+    {namespace fi=Blueways\BwFocuspointImages\ViewHelpers}
+
+    <f:variable name="w" value="800"/>
+
+    <f:for each="{files}" as="file">
+
+        <f:variable name="points" value="{fi:points(file: file)}"/>
+
+        <div class="focuspoint">
+
+            <f:image image="{file.originalFile}" width="{w}" />
+
+            <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <f:for each="{points}" as="point">
+                    <rect x="{point.x}%" y="{point.y}%" width="{point.width}%" height="{point.height}%" fill="#FF0000" opacity="0.4" stroke="#000" />
+                </f:for>
+            </svg>
+        </div>
 
     </f:for>
+
+    <style type="text/css">
+        .focuspoint{
+            position: relative;
+            display: inline-block;
+        }
+        .focuspoint__svg{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 100%;
+            top:0;
+            left:0;
+        }
+    </style>
 
 </f:section>
 </html>

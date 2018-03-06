@@ -3,8 +3,6 @@ defined('TYPO3_MODE') || die('Access denied');
 
 $_EXTKEY = 'bw_focuspoint_images';
 
-// @TODO: Move in sysext/core/configuration/tca/sys_file_reference!!!!!
-
 $additionalColumns = [
     'focus_points' => [
         'exclude' => 1,
@@ -18,11 +16,10 @@ $additionalColumns = [
     ],
 ];
 
-
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('sys_file_metadata', $additionalColumns);
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('sys_file_reference', $additionalColumns);
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
-    'sys_file_metadata',
+    'sys_file_reference',
     'focus_points',
     TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE,
-    'after:publisher'
+    ''
 );
