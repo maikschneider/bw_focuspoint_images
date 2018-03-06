@@ -8,7 +8,7 @@ tt_content {
    		partialRootPaths < lib.contentElement.partialRootPaths
       templateName = FocuspointSVG
       dataProcessing {
-	      10 = TYPO3\CMS\Frontend\DataProcessing\FluidStyledSliderProcessor
+	      10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
 	      10 {
 	          references.fieldName = assets
 	      }
