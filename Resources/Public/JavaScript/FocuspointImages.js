@@ -221,6 +221,11 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId]').each(function (i, input) {
                 o[$(input).attr('name')] = '';
             });
+            var defaultWidth = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="width"]').val();
+            var defaultHeight = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="height"]').val();
+            var defaultSize = defaultWidth > defaultHeight ? defaultWidth : defaultHeight;
+            o['width'] = defaultSize;
+            o['height'] = defaultSize;
             return o;
         };
         /**

@@ -39,8 +39,8 @@ class InputFocuspointElement extends AbstractFormElement
             'singlePoint' => [
                 'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
                 'resizable' => '1',
-                'defaultWidth' => '20px',
-                'defaultHeight' => '20px',
+                'defaultWidth' => '0.2',
+                'defaultHeight' => '0.2',
                 'fields' => [
                     'name' => [
                         'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.name.title',
