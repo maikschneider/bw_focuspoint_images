@@ -16,7 +16,10 @@
 
             <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <f:for each="{points}" as="point">
-                    <rect x="{point.x}%" y="{point.y}%" width="{point.width}%" height="{point.height}%" fill="#FF0000" opacity="0.4" stroke="#000" />
+                    <rect class="focuspoint__svg__area" x="{point.x}%" y="{point.y}%" stroke="#000" width="{point.width}%" height="{point.height}%" fill="transparent" />
+                    <text class="focuspoint__svg__text" x="{point.textX}%" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
+                        {point.name}
+                    </text>
                 </f:for>
             </svg>
         </div>

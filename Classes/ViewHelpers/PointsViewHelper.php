@@ -24,6 +24,9 @@ class PointsViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelp
             $point->y = $point->y * 100;
             $point->height = $point->height * 100;
             $point->width = $point->width * 100;
+            // calculate center of each point for text positioning
+            $point->textX = $point->x + ($point->width / 2);
+            $point->textY = $point->y + ($point->height / 2);
         }
 
         return $points;
