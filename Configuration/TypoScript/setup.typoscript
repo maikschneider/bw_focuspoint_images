@@ -2,18 +2,14 @@ tt_content {
    bw_focuspoint_images_svg < lib.fluidContent
    bw_focuspoint_images_svg {
    		templateRootPaths {
-   		    20 = EXT:bw_focuspoint_images/Resources/Private/Templates
+   		    5 = EXT:bw_focuspoint_images/Resources/Private/Templates/
    		}
-   		layoutRootPaths < lib.contentElement.layoutRootPaths
-   		partialRootPaths < lib.contentElement.partialRootPaths
       templateName = FocuspointSVG
       dataProcessing {
 	      10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
 	      10 {
 	          references.fieldName = assets
 	      }
-	      # https://usetypo3.com/custom-fsc-element.html
-	      #20 = DanielGoerz\FluidStyledSlider\DataProcessing\FluidStyledSliderProcessor
 	  }
    }
 }
