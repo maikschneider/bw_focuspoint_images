@@ -27,7 +27,6 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = array(
    'showitem' => '
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.general;general,
          header;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:header_formlabel,
-         bodytext;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:bodytext_formlabel,
          assets,
       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:tabs.access,
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.visibility;visibility,
