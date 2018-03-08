@@ -136,30 +136,6 @@ class InputFocuspointElement extends AbstractFormElement
         $fieldWizardHtml = $fieldWizardResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
-
-        // just for testing purposes
-        $focusPointsExampleData = [
-            [
-                'name' => 'headline text',
-                'description' => 'here a longer description text',
-                'color' => 'green',
-                'x' => '0.1',
-                'y' => '0.2',
-                'width' => '0.3',
-                'height' => '0.1'
-            ],
-            [
-                'name' => 'another headlinetext',
-                'description' => 'lorem ipsum dolor si almet onmet',
-                'color' => 'blue',
-                'x' => '0.6',
-                'y' => '0',
-                'width' => '0.1',
-                'height' => '1'
-            ]
-        ];
-        //$parameterArray['itemFormElValue'] = json_encode($focusPointsExampleData);
-
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
