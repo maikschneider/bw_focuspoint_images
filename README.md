@@ -2,7 +2,7 @@
 
 Create image map like elements using SVG.
 
-![Example Image](Documentation/Preview.png)
+![Example Image](Documentation/preview.png)
 
 ## Configure Typoscript
 
