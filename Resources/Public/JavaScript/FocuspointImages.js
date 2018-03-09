@@ -26,24 +26,24 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         FocuspointImages.prototype.calculateRelativeX = function (width) {
             var image = this.currentModal.find(this.cropImageSelector);
             var imageWidth = $(image).width();
-            return (width / imageWidth).toFixed(3);
+            return Math.round((width / imageWidth) * 1e3) / 1e3;
         };
         FocuspointImages.prototype.calculateAbsoluteX = function (width) {
-            var width = width ? width : 0.33;
+            if (width === void 0) { width = 0.33; }
             var image = this.currentModal.find(this.cropImageSelector);
             var imageWidth = $(image).width();
-            return (width * imageWidth).toFixed(0);
+            return Math.round((width * imageWidth) * 1e3) / 1e3;
         };
         FocuspointImages.prototype.calculateRelativeY = function (height) {
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
-            return (height / imageHeight).toFixed(3);
+            return Math.round((height / imageHeight) * 1e3) / 1e3;
         };
         FocuspointImages.prototype.calculateAbsoluteY = function (height) {
-            var height = height ? height : 0.33;
+            if (height === void 0) { height = 0.33; }
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
-            return (height * imageHeight).toFixed(0);
+            return Math.round((height * imageHeight) * 1e3) / 1e3;
         };
         FocuspointImages.prototype.onBoxChange = function (box) {
             var width = $(box).width();
@@ -51,14 +51,14 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var position = $(box).position();
             var left = position.left;
             var top = position.top;
-            var focuspointBoxId = $(box).attr('data-focuspointBoxId');
+            var focuspointBoxId = parseInt($(box).attr('data-focuspointBoxId'));
             this.data[focuspointBoxId].width = this.calculateRelativeX(width);
             this.data[focuspointBoxId].height = this.calculateRelativeY(height);
             this.data[focuspointBoxId].x = this.calculateRelativeX(left);
             this.data[focuspointBoxId].y = this.calculateRelativeY(top);
         };
         FocuspointImages.prototype.onInputChange = function (input) {
-            var focuspointPanelId = $(input).attr('data-focuspointPanelId');
+            var focuspointPanelId = parseInt($(input).attr('data-focuspointPanelId'));
             var fieldname = $(input).attr('name');
             this.data[focuspointPanelId][fieldname] = $(input).val();
         };
@@ -67,12 +67,12 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(this.focusBoxes[focuspointId]).trigger('remove');
             $(this.inputPanels[focuspointId]).trigger('remove');
             // remove from class members
-            this.focusBoxes.splice(focuspointId, 1);
-            this.inputPanels.splice(focuspointId, 1);
+            this.focusBoxes.slice(focuspointId, 1);
+            this.inputPanels.slice(focuspointId, 1);
             this.data.splice(focuspointId, 1);
             // rename remaining focus points
             $(this.focusBoxes).each(function (i, e) {
-                $(e).find('span').html(i + 1);
+                $(e).find('span').html((i + 1).toString());
             });
             $(this.inputPanels).each(function (i, e) {
                 $(e).find('span[data-nr]').attr('data-nr', i + 1);
@@ -89,8 +89,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 $(box).resizable({
                     handles: "n, e, w, s, se, sw, nw, ne",
                     containment: "parent",
-                    minWidth: "20",
-                    minHeight: "20",
+                    minWidth: 20,
+                    minHeight: 20,
                     stop: this.onBoxChange.bind(this, box),
                 });
             }
@@ -110,12 +110,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(box).bind('delete', removeEvent.bind(null, box));
         };
         FocuspointImages.prototype.addNewFocuspoint = function (focuspointBoxId) {
-            if (focuspointBoxId === void 0) { focuspointBoxId = false; }
+            if (focuspointBoxId === void 0) { focuspointBoxId = -1; }
             // check if appended or created from data
-            if (focuspointBoxId === false) {
+            if (focuspointBoxId === -1) {
                 focuspointBoxId = this.data.length;
                 this.data[focuspointBoxId] = this.emptyFocuspoint;
             }
+            var focuspointBoxIdReadableString = (focuspointBoxId + 1).toString();
             // copy dummys
             // 1. box dummy
             var newBox = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy').first()
@@ -125,7 +126,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 .addClass('focuspoint-item-hidden')
                 .removeClass('focuspoint-item-dummy')
                 .find('span')
-                .html(focuspointBoxId + 1)
+                .html(focuspointBoxIdReadableString)
                 .parent();
             // 2. panel dummy
             var newPanel = this.currentModal.find('.panel.panel-dummy').first()
@@ -153,7 +154,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // Add new Focus Box Button
             this.newButton.off('click').on('click', function (e) {
                 e.preventDefault();
-                _this.addNewFocuspoint(false);
+                _this.addNewFocuspoint(-1);
             });
             // Dismiss button
             this.dismissButton.off('click').on('click', function (e) {
@@ -177,7 +178,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         FocuspointImages.prototype.initInputPanel = function (panel) {
             var _this = this;
             var panelInputs = $(panel).find('[data-focuspointPanelId]');
-            var focuspointPanelId = panelInputs.first().attr('data-focuspointPanelId');
+            var focuspointPanelId = parseInt(panelInputs.first().attr('data-focuspointPanelId'));
             var focuspoint = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
             // for all inputs: set data and eventListener
             panelInputs.each(function (i, input) {
@@ -212,20 +213,26 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         };
         FocuspointImages.prototype.initInputPanels = function () {
             var _this = this;
-            this.inputPanels.each(function (i, panel) {
+            this.inputPanels.forEach(function (panel) {
                 _this.initInputPanel(panel);
             });
         };
         FocuspointImages.prototype.getEmptyFocuspoint = function () {
-            var o = {};
-            this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId]').each(function (i, input) {
-                o[$(input).attr('name')] = '';
-            });
+            var o = {
+                x: 0.3,
+                y: 0.3,
+                width: 0.3,
+                height: 0.3
+            };
             var defaultWidth = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="width"]').val();
             var defaultHeight = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="height"]').val();
             var defaultSize = defaultWidth > defaultHeight ? defaultWidth : defaultHeight;
-            o['width'] = defaultSize;
-            o['height'] = defaultSize;
+            o.width = defaultSize;
+            o.height = defaultSize;
+            if (defaultSize != 0.3) {
+                o.x = (1 - o.width) / 2;
+                o.y = (1 - o.height) / 2;
+            }
             return o;
         };
         /**

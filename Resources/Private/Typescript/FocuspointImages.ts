@@ -26,6 +26,13 @@ declare global {
   }
 }
 
+interface Focuspoint {
+  width: number
+  height: number
+  x: number
+  y: number
+}
+
 /**
  * Module: TYPO3/CMS/BwFocuspointImages/FocuspointImages
  * Contains all logic for the image crop GUI including setting focusAreas
@@ -33,47 +40,50 @@ declare global {
  */
 class FocuspointImages {
 
-  private trigger: JQuery;
-  private currentModal: JQuery;
-  private focusBoxes: JQuery;
-  private inputPanels: JQuery;
   private panelGroupSelector: string = '#accordion-cropper-variants';
   private cropImageSelector: string = '#t3js-crop-image';
   private focusPointContainerSelector: string = '#focuspoint-container';
+  private trigger: JQuery;
+  private currentModal: JQuery;
+  private newButton: JQuery;
+  private dismissButton: JQuery;
+  private saveButton: JQuery;
+  private focusBoxes: Array<JQuery>;
+  private inputPanels: Array<JQuery>;
+  private data: Array<Focuspoint>;
+  private emptyFocuspoint: Focuspoint;
 
-  private calculateRelativeX(width): number {
+  private calculateRelativeX(width: number): number {
     const image: JQuery = this.currentModal.find(this.cropImageSelector);
     const imageWidth: number = $(image).width();
-    return (width / imageWidth).toFixed(3);
+    return Math.round((width / imageWidth) * 1e3) / 1e3
   }
 
-  private calculateAbsoluteX(width): number {
-    const width: number = width ? width : 0.33;
+  private calculateAbsoluteX(width: number = 0.33): number {
     const image: JQuery = this.currentModal.find(this.cropImageSelector);
     const imageWidth: number = $(image).width();
-    return (width * imageWidth).toFixed(0);
+    return Math.round((width * imageWidth) * 1e3) / 1e3
   }
 
-  private calculateRelativeY(height): number {
+  private calculateRelativeY(height: number): number {
     const image: JQuery = this.currentModal.find(this.cropImageSelector);
     const imageHeight: number = $(image).height();
-    return (height / imageHeight).toFixed(3);
+    return Math.round((height / imageHeight) * 1e3) / 1e3
   }
 
-  private calculateAbsoluteY(height): number {
-    const height: number = height ? height : 0.33;
+  private calculateAbsoluteY(height: number = 0.33): number {
     const image: JQuery = this.currentModal.find(this.cropImageSelector);
     const imageHeight: number = $(image).height();
-    return (height * imageHeight).toFixed(0);
+    return Math.round((height * imageHeight) * 1e3) / 1e3
   }
 
-  private onBoxChange(box): void {
+  private onBoxChange(box: JQuery): void {
     const width: number = $(box).width();
     const height: number = $(box).height();
-    const position: object = $(box).position();
+    const position: JQueryCoordinates = $(box).position();
     const left: number = position.left;
     const top: number = position.top;
-    const focuspointBoxId: number = $(box).attr('data-focuspointBoxId');
+    const focuspointBoxId: number = parseInt($(box).attr('data-focuspointBoxId'));
 
     this.data[focuspointBoxId].width = this.calculateRelativeX(width);
     this.data[focuspointBoxId].height = this.calculateRelativeY(height);
@@ -81,26 +91,26 @@ class FocuspointImages {
     this.data[focuspointBoxId].y = this.calculateRelativeY(top);
   }
 
-  private onInputChange(input): void {
-    const focuspointPanelId: number = $(input).attr('data-focuspointPanelId');
+  private onInputChange(input: string): void {
+    const focuspointPanelId: number = parseInt($(input).attr('data-focuspointPanelId'));
     const fieldname = $(input).attr('name');
     this.data[focuspointPanelId][fieldname] = $(input).val();
   }
 
-  private deleteFocuspoint(focuspointId): void {
+  private deleteFocuspoint(focuspointId: number): void {
 
     // remove html elements
     $(this.focusBoxes[focuspointId]).trigger('remove');
     $(this.inputPanels[focuspointId]).trigger('remove');
 
     // remove from class members
-    this.focusBoxes.splice(focuspointId, 1);
-    this.inputPanels.splice(focuspointId, 1);
+    this.focusBoxes.slice(focuspointId, 1);
+    this.inputPanels.slice(focuspointId, 1);
     this.data.splice(focuspointId, 1);
 
     // rename remaining focus points
     $(this.focusBoxes).each(function(i, e){
-      $(e).find('span').html(i+1);
+      $(e).find('span').html((i+1).toString());
     });
     $(this.inputPanels).each(function(i, e){
       $(e).find('span[data-nr]').attr('data-nr', i+1);
@@ -108,7 +118,7 @@ class FocuspointImages {
 
   }
 
-  private initFocusBox(box): void {
+  private initFocusBox(box: JQuery): void {
 
     // register jquery-ui/draggable
     $(box).draggable({
@@ -121,8 +131,8 @@ class FocuspointImages {
       $(box).resizable({
         handles: "n, e, w, s, se, sw, nw, ne",
         containment: "parent",
-        minWidth: "20",
-        minHeight: "20",
+        minWidth: 20,
+        minHeight: 20,
         stop: this.onBoxChange.bind(this, box),
       });
     }
@@ -138,7 +148,7 @@ class FocuspointImages {
     $(box).removeClass('focuspoint-item-hidden');
 
     // bind delete event
-    const removeEvent = function(){
+    const removeEvent: Function = function(){
       $(box).off();
       $(box).remove();
     };
@@ -146,13 +156,15 @@ class FocuspointImages {
 
   }
 
-  private addNewFocuspoint(focuspointBoxId = false): void {
+  private addNewFocuspoint(focuspointBoxId: number = -1): void {
 
     // check if appended or created from data
-    if(focuspointBoxId === false) {
+    if(focuspointBoxId === -1) {
       focuspointBoxId = this.data.length;
       this.data[focuspointBoxId] = this.emptyFocuspoint;
     }
+
+    const focuspointBoxIdReadableString: string = (focuspointBoxId + 1).toString()
 
     // copy dummys
       // 1. box dummy
@@ -163,7 +175,7 @@ class FocuspointImages {
         .addClass('focuspoint-item-hidden')
         .removeClass('focuspoint-item-dummy')
         .find('span')
-        .html(focuspointBoxId + 1)
+        .html(focuspointBoxIdReadableString)
         .parent();
 
       // 2. panel dummy
@@ -195,7 +207,7 @@ class FocuspointImages {
     // Add new Focus Box Button
     this.newButton.off('click').on('click', (e: JQueryEventObject) => {
       e.preventDefault();
-      this.addNewFocuspoint(false);
+      this.addNewFocuspoint(-1);
     });
 
     // Dismiss button
@@ -222,10 +234,10 @@ class FocuspointImages {
     // @todo update preview next to trigger button
   }
 
-  private initInputPanel(panel): void {
+  private initInputPanel(panel: JQuery): void {
 
     const panelInputs: JQuery = $(panel).find('[data-focuspointPanelId]');
-    const focuspointPanelId: number = panelInputs.first().attr('data-focuspointPanelId');
+    const focuspointPanelId: number = parseInt(panelInputs.first().attr('data-focuspointPanelId'));
     const focuspoint: object = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
 
     // for all inputs: set data and eventListener
@@ -268,21 +280,27 @@ class FocuspointImages {
   }
 
   private initInputPanels(): void {
-    this.inputPanels.each((i, panel) => {
+    this.inputPanels.forEach((panel) => {
       this.initInputPanel(panel);
     });
   }
 
-  private getEmptyFocuspoint(): object {
-    const o = {};
-    this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId]').each((i, input) => {
-      o[$(input).attr('name')] = '';
-    });
+  private getEmptyFocuspoint(): Focuspoint {
+    const o: Focuspoint = {
+      x: 0.3,
+      y: 0.3,
+      width: 0.3,
+      height: 0.3
+    };
     var defaultWidth = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="width"]').val();
     var defaultHeight = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="height"]').val();
     var defaultSize = defaultWidth > defaultHeight ? defaultWidth : defaultHeight;
-    o['width'] = defaultSize;
-    o['height'] = defaultSize;
+    o.width = defaultSize;
+    o.height = defaultSize;
+    if (defaultSize!=0.3){
+      o.x = (1 - o.width) / 2
+      o.y = (1 - o.height) / 2
+    }
     return o;
   }
 
@@ -296,7 +314,7 @@ class FocuspointImages {
     const imageHeight: number = $(image).height();
     const imageWidth: number = $(image).width();
     const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
-    const data = hiddenField.val();
+    let data = hiddenField.val();
 
     if (!data || data=="") {
       data = "[]";
@@ -315,7 +333,7 @@ class FocuspointImages {
     this.inputPanels = [];
 
     // create focuspoints from data
-    for(const i=0; i<this.data.length; i++){
+    for(let i=0; i<this.data.length; i++){
       this.addNewFocuspoint(i);
     }
 
