@@ -6,7 +6,7 @@ Create image map like elements using SVG.
 
 ## Configure Typoscript
 
-The extension uses the default ```fluid_styled_content`` template, partial and layout path. If you want to override it, you just need to include the following in your typoscript setup:
+The extension uses the default ```fluid_styled_content``` template, partial and layout path. If you want to override it, you just need to include the following in your typoscript setup:
 
 ```
 tt_content.bw_focuspoint_images_svg.bw_focuspoint_images_svg.templateRootPaths.5 = EXT:bw_focuspoint_images/Resources/Private/Templates/

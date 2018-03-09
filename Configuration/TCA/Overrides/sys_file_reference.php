@@ -17,9 +17,3 @@ $additionalColumns = [
 ];
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('sys_file_reference', $additionalColumns);
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
-    'sys_file_reference',
-    'focus_points',
-    TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE,
-    ''
-);
