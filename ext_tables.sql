@@ -1,4 +1,6 @@
 #
-# Table structure for table 'sys_file_metadata'
+# Table structure for table 'sys_file_reference'
 #
-ALTER TABLE sys_file_reference ADD focus_points TEXT DEFAULT NULL;
+CREATE TABLE sys_file_reference (
+    focus_points TEXT DEFAULT NULL
+);
