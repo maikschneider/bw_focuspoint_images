@@ -22,8 +22,9 @@ $_EXTKEY = $GLOBALS['_EXTKEY'] = 'bw_focuspoint_images';
     'textmedia', // position in select box (=after textmedia)
     'after'
 );
+
 // set paletts and input fields
-$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = array(
+$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
    'showitem' => '
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.general;general,
         --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.headers;headers,
@@ -32,20 +33,20 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = array(
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.visibility;visibility,
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.access;access,
       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:tabs.extended
-');
+'];
 
 // override the imageoverlayPalette to show only the focus_points widget
-$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = array(
-        'assets' => [
-            'config' => [
-                'overrideChildTca' => [
-                    'types' => [
-                        \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                            'showitem' => 'focus_points,
-                                --palette--;;filePalette'
-                        ]
+$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = [
+    'assets' => [
+        'config' => [
+            'overrideChildTca' => [
+                'types' => [
+                    \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                        'showitem' => 'focus_points,
+                            --palette--;;filePalette'
                     ]
                 ]
             ]
         ]
-    );
+    ]
+];

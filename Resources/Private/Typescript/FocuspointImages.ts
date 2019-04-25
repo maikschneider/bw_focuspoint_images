@@ -306,7 +306,7 @@ class FocuspointImages {
 
   /**
    * @method init
-   * @desc Initializes the Focus Point UI and sets up all the event indings for the UI
+   * @desc Initializes the Focus Point UI and sets up all the event bindings for the UI
    * @private
    */
   private init(): void {
