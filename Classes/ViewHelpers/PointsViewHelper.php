@@ -19,6 +19,8 @@ class PointsViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelp
 
         $points = json_decode($fileRef->getProperty('focus_points'));
 
+        if(!$points) return [];
+
         foreach ($points as $point) {
             $point->x = $point->x * 100;
             $point->y = $point->y * 100;
