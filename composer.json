@@ -13,5 +13,13 @@
         "psr-4": {
             "Blueways\\BwFocuspointImages\\": "Classes"
         }
-    }
+    },
+    "authors": [
+        {
+            "homepage": "https://twitter/maik_tailor",
+            "name": "Maik Schneider",
+            "role": "Developer",
+            "email": "m.schneider@blueways.de"
+        }
+    ]
 }
