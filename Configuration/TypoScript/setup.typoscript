@@ -1,15 +1,16 @@
 tt_content {
-   bw_focuspoint_images_svg < lib.fluidContent
-   bw_focuspoint_images_svg {
-   		templateRootPaths {
-   		    5 = EXT:bw_focuspoint_images/Resources/Private/Templates/
-   		}
-      templateName = FocuspointSVG
-      dataProcessing {
-	      10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
-	      10 {
-	          references.fieldName = assets
-	      }
-	  }
-   }
+	bw_focuspoint_images_svg =< lib.contentElement
+	bw_focuspoint_images_svg {
+		templateRootPaths {
+			5 = EXT:bw_focuspoint_images/Resources/Private/Templates/
+		}
+
+		templateName = FocuspointSVG
+		dataProcessing {
+			10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
+			10 {
+				references.fieldName = assets
+			}
+		}
+	}
 }
