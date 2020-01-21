@@ -1,15 +1,17 @@
 mod.wizards.newContentElement.wizardItems.common {
-   elements {
-      bw_focuspoint_images_svg {
-         iconIdentifier = bw_focuspoint_images_svg
-         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title
-         description = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.description
-         tt_content_defValues {
-            CType = bw_focuspoint_images_svg
-         }
-      }
-   }
-   show := addToList(bw_focuspoint_images_svg)
+	elements {
+		bw_focuspoint_images_svg {
+			iconIdentifier = bw_focuspoint_images_svg
+			title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title
+			description = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.description
+			tt_content_defValues {
+				CType = bw_focuspoint_images_svg
+			}
+		}
+	}
+
+	show := addToList(bw_focuspoint_images_svg)
 }
+
 # for simple preview (without images)
 mod.web_layout.tt_content.preview.bw_focuspoint_images_svg = EXT:bw_focuspoint_images/Resources/Private/Preview/FocuspointSVG.html
