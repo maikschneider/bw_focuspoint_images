@@ -5,12 +5,25 @@
     "homepage": "https://blueways.de",
     "license": ["GPL-2.0+"],
     "keywords": ["TYPO3 CMS"],
-    "require": {
-        "typo3/cms-core": "^8.7 || ^9.0"
+    "require-dev": {
+        "typo3/cms-base-distribution": "7.*"
     },
     "autoload": {
         "psr-4": {
             "Blueways\\BwFocuspointImages\\": "Classes"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "web-dir": "public"
+        }
+    },
+    "config": {
+        "bin-dir": "bin",
+        "vendor-dir": "vendor",
+        "platform": {
+            "php": "7.2"
         }
     },
     "authors": [
