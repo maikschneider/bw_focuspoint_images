@@ -8,6 +8,9 @@
                 <source>Focus Points</source>
             </trans-unit>
 
+            <trans-unit id="wizard.button">
+                <source>Open Editor</source>
+            </trans-unit>
             <trans-unit id="wizard.focuspoints.title">
                 <source>Focus Points</source>
             </trans-unit>

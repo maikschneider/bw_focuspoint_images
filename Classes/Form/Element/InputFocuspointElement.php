@@ -1,6 +1,8 @@
 <?php
+
 namespace Blueways\BwFocuspointImages\Form\Element;
 
+use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
@@ -11,20 +13,11 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 
 class InputFocuspointElement extends AbstractFormElement
 {
-    /**
-     * @var StandaloneView
-     */
-    protected $templateView;
-
-    /**
-     * @var UriBuilder
-     */
-    protected $uriBuilder;
 
     /**
      * Default element configuration
@@ -65,21 +58,15 @@ class InputFocuspointElement extends AbstractFormElement
         ]
     ];
 
+    /**
+     * @var StandaloneView
+     */
+    protected $templateView;
 
     /**
-     * @param NodeFactory $nodeFactory
-     * @param array $data
+     * @var UriBuilder
      */
-    public function __construct(NodeFactory $nodeFactory, array $data)
-    {
-        parent::__construct($nodeFactory, $data);
-        // Would be great, if we could inject the view here, but since the constructor is in the interface, we can't
-        $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->templateView->setLayoutRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Layouts/')]);
-        $this->templateView->setPartialRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Partials/')]);
-        $this->templateView->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'));
-        $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-    }
+    protected $uriBuilder;
 
     /**
      * Default field wizards enabled for this element.
@@ -105,6 +92,21 @@ class InputFocuspointElement extends AbstractFormElement
     ];
 
     /**
+     * @param NodeFactory $nodeFactory
+     * @param array $data
+     */
+    public function __construct(NodeFactory $nodeFactory, array $data)
+    {
+        parent::__construct($nodeFactory, $data);
+        // Would be great, if we could inject the view here, but since the constructor is in the interface, we can't
+        $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
+        $this->templateView->setLayoutRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Layouts/')]);
+        $this->templateView->setPartialRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Partials/')]);
+        $this->templateView->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'));
+        $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+    }
+
+    /**
      * This will render an imageManipulation field
      *
      * @return array As defined in initializeResultArray() of AbstractNode
@@ -124,23 +126,33 @@ class InputFocuspointElement extends AbstractFormElement
 
         $config = $this->processConfiguration($config, $parameterArray['itemFormElValue'], $file);
 
-        $fieldInformationResult = $this->renderFieldInformation();
-        $fieldInformationHtml = $fieldInformationResult['html'];
-        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
+        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
+        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
 
-        $fieldControlResult = $this->renderFieldControl();
-        $fieldControlHtml = $fieldControlResult['html'];
-        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldControlResult, false);
+        if($version['version_main'] > 7) {
+            $fieldInformationResult = $this->renderFieldInformation();
+            $fieldInformationHtml = $fieldInformationResult['html'];
+            $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
 
-        $fieldWizardResult = $this->renderFieldWizard();
-        $fieldWizardHtml = $fieldWizardResult['html'];
-        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
+            $fieldControlResult = $this->renderFieldControl();
+            $fieldControlHtml = $fieldControlResult['html'];
+            $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldControlResult, false);
+
+            $fieldWizardResult = $this->renderFieldWizard();
+            $fieldWizardHtml = $fieldWizardResult['html'];
+            $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
+        }
+
+        if ($version['version_main'] <= 7) {
+
+        }
 
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
-            'isAllowedFileExtension' => in_array(strtolower($file->getExtension()), GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])), true),
+            'isAllowedFileExtension' => in_array(strtolower($file->getExtension()),
+                GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])), true),
             'image' => $file,
             'formEngine' => [
                 'field' => [
@@ -170,22 +182,31 @@ class InputFocuspointElement extends AbstractFormElement
     }
 
     /**
-     * @param array $config
-     * @param string $elementValue
-     * @param File $file
+     * @param array $baseConfiguration
      * @return array
-     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
+     * @throws InvalidConfigurationException
      */
-    protected function processConfiguration(array $config, string &$elementValue, File $file)
+    protected function populateConfiguration(array $baseConfiguration)
     {
-        // $cropVariantCollection = CropVariantCollection::create($elementValue, $config['cropVariants']);
-        // if (empty($config['readOnly']) && !empty($file->getProperty('width'))) {
-        //     $cropVariantCollection = $cropVariantCollection->applyRatioRestrictionToSelectedCropArea($file);
-        //     $elementValue = (string)$cropVariantCollection;
-        // }
-        // $config['cropVariants'] = $cropVariantCollection->asArray();
-        $config['allowedExtensions'] = implode(', ', GeneralUtility::trimExplode(',', $config['allowedExtensions'], true));
+        $defaultConfig = self::$defaultConfig;
 
+        // If single point configuration is set do not include deafult ones (not hidden fields!)
+        if (isset($baseConfiguration['focusPoints']['singlePoint']['fields'])) {
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']['name']);
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']['description']);
+            unset($defaultConfig['focusPoints']['singlePoint']['fields']['color']);
+        }
+
+        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
+
+        if (!is_array($config['focusPoints'])) {
+            throw new InvalidConfigurationException('Focus points configuration must be an array', 1517157895);
+        }
+
+        // By default we allow all image extensions that can be handled by the GFX functionality
+        if ($config['allowedExtensions'] === null) {
+            $config['allowedExtensions'] = $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'];
+        }
         return $config;
     }
 
@@ -200,6 +221,12 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $file = null;
         $fileUid = !empty($row[$fieldName]) ? $row[$fieldName] : null;
+        // v7: get file uid via explode of crazy uid string (e.g. "sys_file_7|myimagename.jpg")
+        if ($fileUid && !is_array($fileUid)) {
+            $fileUidParts = explode('|', $fileUid);
+            $fileUid = strpos($fileUidParts[0], 'sys_file_') === 0 ? str_replace('sys_file_', '',
+                $fileUidParts[0]) : $fileUid;
+        }
         if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
             $fileUid = $fileUid[0]['uid'];
         }
@@ -211,6 +238,27 @@ class InputFocuspointElement extends AbstractFormElement
             }
         }
         return $file;
+    }
+
+    /**
+     * @param array $config
+     * @param string $elementValue
+     * @param File $file
+     * @return array
+     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
+     */
+    protected function processConfiguration(array $config, string &$elementValue, File $file)
+    {
+        // $cropVariantCollection = CropVariantCollection::create($elementValue, $config['cropVariants']);
+        // if (empty($config['readOnly']) && !empty($file->getProperty('width'))) {
+        //     $cropVariantCollection = $cropVariantCollection->applyRatioRestrictionToSelectedCropArea($file);
+        //     $elementValue = (string)$cropVariantCollection;
+        // }
+        // $config['cropVariants'] = $cropVariantCollection->asArray();
+        $config['allowedExtensions'] = implode(', ',
+            GeneralUtility::trimExplode(',', $config['allowedExtensions'], true));
+
+        return $config;
     }
 
     /**
@@ -250,34 +298,5 @@ class InputFocuspointElement extends AbstractFormElement
             }
         }
         return $previewUrl;
-    }
-
-    /**
-     * @param array $baseConfiguration
-     * @return array
-     * @throws InvalidConfigurationException
-     */
-    protected function populateConfiguration(array $baseConfiguration)
-    {
-        $defaultConfig = self::$defaultConfig;
-
-        // If single point configuration is set do not include deafult ones (not hidden fields!)
-        if (isset($baseConfiguration['focusPoints']['singlePoint']['fields'])) {
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']['name']);
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']['description']);
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']['color']);
-        }
-
-        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
-
-        if (!is_array($config['focusPoints'])) {
-            throw new InvalidConfigurationException('Focus points configuration must be an array', 1517157895);
-        }
-
-        // By default we allow all image extensions that can be handled by the GFX functionality
-        if ($config['allowedExtensions'] === null) {
-            $config['allowedExtensions'] = $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'];
-        }
-        return $config;
     }
 }
