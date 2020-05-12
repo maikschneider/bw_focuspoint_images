@@ -141,10 +141,16 @@ class InputFocuspointElement extends AbstractFormElement
             $fieldWizardResult = $this->renderFieldWizard();
             $fieldWizardHtml = $fieldWizardResult['html'];
             $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
+
+            $resultArray['requireJsModules'][] = [
+                'TYPO3/CMS/BwFocuspointImages/FocuspointImages' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(); }); }',
+            ];
         }
 
         if ($version['version_main'] <= 7) {
-
+            $resultArray['requireJsModules'][] = [
+                'TYPO3/CMS/BwFocuspointImages/FocuspointImagesV7' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(); }); }',
+            ];
         }
 
         $arguments = [
@@ -167,9 +173,6 @@ class InputFocuspointElement extends AbstractFormElement
         ];
 
         if ($arguments['isAllowedFileExtension']) {
-            $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/BwFocuspointImages/FocuspointImages' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(); }); }',
-            ];
             $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
             if (GeneralUtility::inList($config['eval'], 'required')) {
                 $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
