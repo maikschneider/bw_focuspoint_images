@@ -267,10 +267,10 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.initEvents();
         };
         /**
-        * @method initializeFocuspointModal
-        * @desc Initialize the focuspoint modal and dispatch the focuspoint init
-        * @private
-        */
+         * @method initializeFocuspointModal
+         * @desc Initialize the focuspoint modal and dispatch the focuspoint init
+         * @private
+         */
         FocuspointImages.prototype.initializeFocuspointModal = function () {
             var _this = this;
             var image = this.currentModal.find(this.cropImageSelector);
@@ -284,41 +284,31 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         FocuspointImages.prototype.show = function () {
             var _this = this;
             var modalTitle = this.trigger.data('modalTitle');
-            var buttonPreviewText = this.trigger.data('buttonPreviewText');
             var buttonDismissText = this.trigger.data('buttonDismissText');
             var buttonSaveText = this.trigger.data('buttonSaveText');
             var imageUri = this.trigger.data('url');
             var initFocuspointModal = this.initializeFocuspointModal.bind(this);
-            this.currentModal = Modal.advanced({
-                type: 'ajax',
-                content: imageUri,
-                size: Modal.sizes.full,
-                style: Modal.styles.dark,
-                title: modalTitle,
-                ajaxCallback: initFocuspointModal,
-                buttons: [
-                    {
-                        btnClass: 'btn-default',
-                        dataAttributes: {
-                            method: 'dismiss',
-                        },
-                        icon: 'actions-close',
-                        text: buttonDismissText,
+            this.currentModal = Modal.loadUrl(modalTitle, -2, [
+                {
+                    btnClass: 'btn-default',
+                    dataAttributes: {
+                        method: 'dismiss',
                     },
-                    {
-                        btnClass: 'btn-primary',
-                        dataAttributes: {
-                            method: 'save',
-                        },
-                        icon: 'actions-document-save',
-                        text: buttonSaveText,
+                    icon: 'actions-close',
+                    text: buttonDismissText,
+                },
+                {
+                    btnClass: 'btn-primary',
+                    dataAttributes: {
+                        method: 'save',
                     },
-                ],
-                callback: function (currentModal) {
-                    currentModal.find('.t3js-modal-body')
-                        .addClass('cropper')
-                        .addClass('modal-body-focuspoints');
-                }
+                    icon: 'actions-document-save',
+                    text: buttonSaveText,
+                },
+            ], imageUri, function (currentModal) {
+                currentModal.find('.t3js-modal-body')
+                    .addClass('cropper')
+                    .addClass('modal-body-focuspoints');
             });
             this.currentModal.on('hide.bs.modal', function (e) {
                 _this.destroy();
