@@ -70,7 +70,8 @@ class FocusPointWizard
                 'image' => $image,
                 'focusPoints' => $queryParams['focusPoints']
             ];
-            $content = $this->templateView->renderSection('Main', $viewData);
+            $this->templateView->assignMultiple($viewData);
+            $content = $this->templateView->render();
             $response->getBody()->write($content);
 
             return $response;
