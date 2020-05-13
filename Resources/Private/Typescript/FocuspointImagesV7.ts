@@ -46,13 +46,9 @@ class FocuspointImages {
 	private focusPointContainerSelector: string = '#focuspoint-container';
 	private trigger: JQuery;
 	private currentModal: JQuery;
-	private newButton: JQuery;
-	private dismissButton: JQuery;
-	private saveButton: JQuery;
 	private focusBoxes: Array<JQuery>;
 	private inputPanels: Array<JQuery>;
 	private data: Array<Focuspoint>;
-	private emptyFocuspoint: Focuspoint;
 
 	private calculateRelativeX(width: number): number {
 		const image: JQuery = this.currentModal.find(this.cropImageSelector);
@@ -122,7 +118,6 @@ class FocuspointImages {
 	private initFocusBox(box: JQuery): void {
 
 		// register jquery-ui/draggable
-
 		$(box).draggable({
 			containment: "parent",
 			stop: this.onBoxChange.bind(this, box),
@@ -163,10 +158,10 @@ class FocuspointImages {
 		// check if appended or created from data
 		if (focuspointBoxId === -1) {
 			focuspointBoxId = this.data.length;
-			this.data[focuspointBoxId] = this.emptyFocuspoint;
+			this.data[focuspointBoxId] = this.getEmptyFocuspoint();
 		}
 
-		const focuspointBoxIdReadableString: string = (focuspointBoxId + 1).toString()
+		const focuspointBoxIdReadableString: string = (focuspointBoxId + 1).toString();
 
 		// copy dummys
 		// 1. box dummy
@@ -311,7 +306,6 @@ class FocuspointImages {
 
 		// If we have data already set we assume an internal reinit eg. after resizing
 		this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
-		this.emptyFocuspoint = this.getEmptyFocuspoint();
 
 		// Initialize our class members
 		this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});

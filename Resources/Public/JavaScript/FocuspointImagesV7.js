@@ -114,7 +114,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // check if appended or created from data
             if (focuspointBoxId === -1) {
                 focuspointBoxId = this.data.length;
-                this.data[focuspointBoxId] = this.emptyFocuspoint;
+                this.data[focuspointBoxId] = this.getEmptyFocuspoint();
             }
             var focuspointBoxIdReadableString = (focuspointBoxId + 1).toString();
             // copy dummys
@@ -242,7 +242,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             }
             // If we have data already set we assume an internal reinit eg. after resizing
             this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
-            this.emptyFocuspoint = this.getEmptyFocuspoint();
             // Initialize our class members
             this.currentModal.find(this.focusPointContainerSelector).css({ height: imageHeight, width: imageWidth });
             this.focusBoxes = [];
