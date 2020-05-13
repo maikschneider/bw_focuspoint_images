@@ -1,7 +1,7 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
     <f:if condition="{field.title}">
-        <label class="element{j.cycle}">{f:translate(id:'{field.title}')}</label>
+        <label class="element{j.cycle}"><f:translate key="{field.title}">{field.title}</f:translate></label>
     </f:if>
     <div class="input-group">
         <f:switch expression="{field.type}">
