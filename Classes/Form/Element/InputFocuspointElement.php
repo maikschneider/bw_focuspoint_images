@@ -83,8 +83,6 @@ class InputFocuspointElement extends AbstractFormElement
             return $resultArray;
         }
 
-        $config = $this->processConfiguration($config, $parameterArray['itemFormElValue'], $file);
-
         $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
         $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
 
@@ -199,27 +197,6 @@ class InputFocuspointElement extends AbstractFormElement
             }
         }
         return $file;
-    }
-
-    /**
-     * @param array $config
-     * @param string $elementValue
-     * @param File $file
-     * @return array
-     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
-     */
-    protected function processConfiguration(array $config, string &$elementValue, File $file)
-    {
-        // $cropVariantCollection = CropVariantCollection::create($elementValue, $config['cropVariants']);
-        // if (empty($config['readOnly']) && !empty($file->getProperty('width'))) {
-        //     $cropVariantCollection = $cropVariantCollection->applyRatioRestrictionToSelectedCropArea($file);
-        //     $elementValue = (string)$cropVariantCollection;
-        // }
-        // $config['cropVariants'] = $cropVariantCollection->asArray();
-        $config['allowedExtensions'] = implode(', ',
-            GeneralUtility::trimExplode(',', $config['allowedExtensions'], true));
-
-        return $config;
     }
 
     /**
