@@ -54,7 +54,3 @@ plugin.tx_bwfocuspointimages.settings {
     }
 }
 ```
-
-## Copy Template
-
-Put FocuspointSVG.html in your template path and start editing.
