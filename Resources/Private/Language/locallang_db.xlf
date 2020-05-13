@@ -14,9 +14,6 @@
             <trans-unit id="wizard.button">
                 <source>Open Editor</source>
             </trans-unit>
-            <trans-unit id="wizard.button.preview">
-                <source>Preview</source>
-            </trans-unit>
             <trans-unit id="wizard.button.cancel">
                 <source>Cancel</source>
             </trans-unit>

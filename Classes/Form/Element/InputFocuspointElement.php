@@ -126,7 +126,6 @@ class InputFocuspointElement extends AbstractFormElement
             ],
             'config' => $config,
             'wizardUri' => $this->getWizardUri($config['focusPoints'], $file),
-            'previewUrl' => $this->getPreviewUrl($this->data['databaseRow'], $file),
         ];
 
         if ($arguments['isAllowedFileExtension']) {
@@ -214,27 +213,5 @@ class InputFocuspointElement extends AbstractFormElement
         $uriArguments['arguments'] = json_encode($arguments);
         $uriArguments['signature'] = GeneralUtility::hmac($uriArguments['arguments'], $routeName);
         return (string)$this->uriBuilder->buildUriFromRoute($routeName, $uriArguments);
-    }
-
-    /**
-     * @param array $databaseRow
-     * @param File $file
-     * @return string
-     */
-    protected function getPreviewUrl(array $databaseRow, File $file): string
-    {
-        $previewUrl = '';
-        // Hook to generate a preview URL
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['Backend/Form/Element/ImageManipulationElement']['previewUrl']) && is_array($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['Backend/Form/Element/ImageManipulationElement']['previewUrl'])) {
-            $hookParameters = [
-                'databaseRow' => $databaseRow,
-                'file' => $file,
-                'previewUrl' => $previewUrl,
-            ];
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['Backend/Form/Element/ImageManipulationElement']['previewUrl'] as $listener) {
-                $previewUrl = GeneralUtility::callUserFunction($listener, $hookParameters, $this);
-            }
-        }
-        return $previewUrl;
     }
 }

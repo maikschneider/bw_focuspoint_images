@@ -215,7 +215,6 @@ class FocuspointImages {
 		const focusPoints: string = JSON.stringify(data);
 		const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
 		hiddenField.val(focusPoints);
-		// @todo update preview next to trigger button
 	}
 
 	private initInputPanel(panel: JQuery): void {

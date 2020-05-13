@@ -163,7 +163,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var focusPoints = JSON.stringify(data);
             var hiddenField = $("#" + this.trigger.attr('data-field'));
             hiddenField.val(focusPoints);
-            // @todo update preview next to trigger button
         };
         FocuspointImages.prototype.initInputPanel = function (panel) {
             var _this = this;
