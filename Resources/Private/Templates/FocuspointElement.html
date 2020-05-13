@@ -1,60 +1,69 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
-    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers">
-    <f:layout name="Focuspoint" />
+<div class="t3js-formengine-field-item">
+    {fieldInformation -> f:format.raw()}
+    <div class="form-wizards-wrap">
+        <div class="form-wizards-element">
 
-    <f:section name="Main">
+            <f:if condition="{isAllowedFileExtension} && {image.properties.width}">
+                <f:then>
+                    <f:if condition="{config.readOnly}">
+                        <f:else>
+                            <div class="form-control-wrap">
+                                <input type="hidden"
+                                       id="{formEngine.field.id}"
+                                       name="{formEngine.field.name}"
+                                       value="{formEngine.field.value}"
+                                       data-formengine-validation-rules="{formEngine.validation}"/>
+                                <button class="btn btn-default t3js-focuspoint-trigger"
+                                        data-url="{wizardUri}"
+                                        data-severity="notice"
+                                        data-modal-title="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.focus_points')}"
+                                        data-image-uid="{image.uid}"
+                                        data-focus-points-value="{formEngine.field.value}"
+                                        data-button-dismiss-text="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button.cancel')}"
+                                        data-button-save-text="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button.save')}"
+                                        data-file-field="{config.file_field}"
+                                        data-field="{formEngine.field.id}">
+                                    <span class="t3-icon fa fa-bullseye"></span>
+                                    <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button"/>
+                                </button>
+                            </div>
+                        </f:else>
+                    </f:if>
+                    <div class="row media-gallery__list">
+                        <f:comment></f:comment>
+                    </div>
+                </f:then>
+                <f:else>
+                    <div class="media-body">
+                        <f:if condition="{image.properties.width}">
+                            <f:then>
+                                <p>
+                                    <em>
+                                        <f:translate id="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.supported-types-message"/>
+                                        <br/> {config.allowedExtensions -> f:format.case(mode: 'upper')} </em>
+                                </p>
+                            </f:then>
+                            <f:else>
+                                <h4 class="alert-title">
+                                    <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions"/>
+                                </h4>
+                                <p class="alert-message">
+                                    <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions-message"/>
+                                </p>
+                            </f:else>
+                        </f:if>
+                    </div>
+                </f:else>
+            </f:if>
 
-        <f:if condition="{isAllowedFileExtension} && {image.properties.width}">
-            <f:then>
-                <f:if condition="{config.readOnly}">
-                    <f:else>
-                        <div class="form-control-wrap">
-                            <input type="hidden" id="{formEngine.field.id}"
-                                    name="{formEngine.field.name}"
-                                    value="{formEngine.field.value}"
-                                    data-formengine-validation-rules="{formEngine.validation}"/>
-                            <button class="btn btn-default t3js-focuspoint-trigger"
-                                    data-url="{wizardUri}"
-                                    data-severity="notice"
-                                    data-modal-title="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.focus_points')}"
-                                    data-image-uid="{image.uid}"
-                                    data-focus-points-value="{formEngine.field.value}"
-                                    data-button-dismiss-text="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button.cancel')}"
-                                    data-button-save-text="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button.save')}"
-                                    data-file-field="{config.file_field}"
-                                    data-field="{formEngine.field.id}">
-                                <span class="t3-icon fa fa-bullseye"></span>
-                                <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button"/>
-                            </button>
-                        </div>
-                    </f:else>
-                </f:if>
-                <div class="row media-gallery__list">
-                    <f:comment></f:comment>
-                </div>
-            </f:then>
-            <f:else>
-                <div class="media-body">
-                <f:if condition="{image.properties.width}">
-                    <f:then>
-                        <p>
-                            <em>
-                                <f:translate id="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.supported-types-message" /><br/>
-                                {config.allowedExtensions -> f:format.case(mode: 'upper')}
-                            </em>
-                        </p>
-                    </f:then>
-                    <f:else>
-                        <h4 class="alert-title">
-                            <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions"/>
-                        </h4>
-                        <p class="alert-message">
-                            <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions-message"/>
-                        </p>
-                    </f:else>
-                </f:if>
-                </div>
-            </f:else>
-        </f:if>
-    </f:section>
-</html>
+        </div>
+        <div class="form-wizards-items-aside">
+            <div class="btn-group">
+                {fieldControl -> f:format.raw()}
+            </div>
+        </div>
+        <div class="form-wizards-items-bottom">
+            {fieldWizard -> f:format.raw()}
+        </div>
+    </div>
+</div>

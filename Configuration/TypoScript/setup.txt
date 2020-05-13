@@ -1,45 +1,34 @@
+plugin.tx_bwfocuspointimages {
+	view {
+		templateRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Templates/
+		templateRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.templateRootPath}
+		partialRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Partials/
+		partialRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.partialRootPath}
+		layoutRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Layouts/
+		layoutRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.layoutRootPath}
+	}
+	settings {
+		resizable = 1
+		defaultWidth = 0.2
+		defaultHeight = 0.2
+		fields {
+
+		}
+	}
+}
+
 tt_content {
 	bw_focuspoint_images_svg =< lib.contentElement
 	bw_focuspoint_images_svg {
-		templateRootPaths {
-			5 = EXT:bw_focuspoint_images/Resources/Private/Templates/
-		}
+		templateRootPaths < plugin.tx_bwfocuspointimages.view.templateRootPaths
+		partialRootPaths < plugin.tx_bwfocuspointimages.view.partialRootPaths
+		templateRootPaths < plugin.tx_bwfocuspointimages.view.templateRootPaths
 
 		templateName = FocuspointSVG
 		dataProcessing {
 			10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
 			10 {
 				references.fieldName = assets
-			}
-		}
-	}
-}
-
-plugin.tx_bwfocuspointimages {
-	settings {
-		resizable = 1
-		defaultWidth = 0.2
-		defaultHeight = 0.2
-		fields {
-			name {
-				title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.name.title
-				type = text
-			}
-
-			description {
-				title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.description.title
-				type = textarea
-			}
-
-			color {
-				title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.title
-				type = select
-				options {
-					green = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.green.title
-					blue = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.blue.title
-					0 = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.0.title
-					1 = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.1.title
-				}
 			}
 		}
 	}

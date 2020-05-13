@@ -119,6 +119,7 @@ class InputFocuspointElement extends AbstractFormElement
             'image' => $file,
             'formEngine' => [
                 'field' => [
+                    'id' => 'bwfocuspointwizard' . random_int(1, 9999),
                     'value' => $parameterArray['itemFormElValue'],
                     'name' => $parameterArray['itemFormElName']
                 ],
@@ -143,6 +144,7 @@ class InputFocuspointElement extends AbstractFormElement
     /**
      * @param array $baseConfiguration
      * @return array
+     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      */
     protected function populateConfiguration(array $baseConfiguration)
     {
@@ -158,6 +160,10 @@ class InputFocuspointElement extends AbstractFormElement
         return $config;
     }
 
+    /**
+     * @return array
+     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
+     */
     protected function getConfigurationFromTypoScript()
     {
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
@@ -200,8 +206,9 @@ class InputFocuspointElement extends AbstractFormElement
 
     /**
      * @param array $focusPoints
-     * @param File $image
+     * @param \TYPO3\CMS\Core\Resource\File $image
      * @return string
+     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     protected function getWizardUri(array $focusPoints, File $image): string
     {
