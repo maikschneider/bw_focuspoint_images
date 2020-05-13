@@ -7,6 +7,9 @@
             <trans-unit id="sys_file_metadata.focus_points">
                 <source>Focus Points</source>
             </trans-unit>
+            <trans-unit id="sys_file_metadata.label">
+                <source>Focus Point Image</source>
+            </trans-unit>
 
             <trans-unit id="wizard.button">
                 <source>Open Editor</source>

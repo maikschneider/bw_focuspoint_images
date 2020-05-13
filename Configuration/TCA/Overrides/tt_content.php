@@ -25,7 +25,7 @@ $_EXTKEY = $GLOBALS['_EXTKEY'] = 'bw_focuspoint_images';
 
 // set paletts and input fields
 $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
-   'showitem' => '
+    'showitem' => '
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.general;general,
         --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:palette.headers;headers,
          assets,
@@ -33,20 +33,37 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.visibility;visibility,
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.access;access,
       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:tabs.extended
-'];
+'
+];
 
 // override the imageoverlayPalette to show only the focus_points widget
 $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = [
     'assets' => [
+        'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.label',
         'config' => [
-            'overrideChildTca' => [
-                'types' => [
-                    \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                        'showitem' => 'focus_points,
+            'maxitems' => 1,
+            'foreign_types' => [
+                \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                    'showitem' => 'focus_points,
                             --palette--;;filePalette'
+                ]
+            ],
+            'foreign_selector_fieldTcaOverride' => [
+                'config' => [
+                    'appearance' => [
+                        'elementBrowserAllowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+                    ]
+                ]
+            ],
+            'filter' => [
+                [
+                    'parameters' => [
+                        'allowedFileExtensions' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
                     ]
                 ]
             ]
         ]
     ]
 ];
+
+//$GLOBALS['TCA']['sys_file_reference']['palettes']['imageoverlayPalette']['showitem'] = 'focus_points';
