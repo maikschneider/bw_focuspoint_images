@@ -41,6 +41,11 @@ class InputFocuspointElement extends AbstractFormElement
     ];
 
     /**
+     * @var array
+     */
+    protected $typoScript;
+
+    /**
      * @var StandaloneView
      */
     protected $templateView;
@@ -57,12 +62,30 @@ class InputFocuspointElement extends AbstractFormElement
     public function __construct(NodeFactory $nodeFactory, array $data)
     {
         parent::__construct($nodeFactory, $data);
-        // Would be great, if we could inject the view here, but since the constructor is in the interface, we can't
+
+        $this->loadTypoScript();
+
         $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->templateView->setLayoutRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Layouts/')]);
-        $this->templateView->setPartialRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Partials/')]);
-        $this->templateView->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'));
+        $this->templateView->setLayoutRootPaths($this->typoScript['view']['layoutRootPaths']);
+        $this->templateView->setPartialRootPaths($this->typoScript['view']['partialRootPaths']);
+        $this->templateView->setTemplateRootPaths($this->typoScript['view']['templateRootPaths']);
+        $this->templateView->setTemplate('FocuspointElement');
+
         $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+    }
+
+    /**
+     * @return array
+     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
+     */
+    protected function loadTypoScript()
+    {
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $configurationManager = $objectManager->get(ConfigurationManager::class);
+        $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
+        $typoScriptService = $objectManager->get(TypoScriptService::class);
+        $extTypoScript = $typoScript['plugin.']['tx_bwfocuspointimages.'] ?: [];
+        $this->typoScript = $typoScriptService->convertTypoScriptArrayToPlainArray($extTypoScript);
     }
 
     /**
@@ -153,25 +176,10 @@ class InputFocuspointElement extends AbstractFormElement
         $config = ArrayUtility::arrayMergeRecursiveOverrule($defaultConfig, $baseConfiguration);
 
         // override single point settings from typoScript
-        $tsConfig = $this->getConfigurationFromTypoScript();
         $config['focusPoints']['singlePoint'] = ArrayUtility::arrayMergeRecursiveOverrule($config['focusPoints']['singlePoint'],
-            $tsConfig);
+            $this->typoScript['settings']);
 
         return $config;
-    }
-
-    /**
-     * @return array
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
-     */
-    protected function getConfigurationFromTypoScript()
-    {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $configurationManager = $objectManager->get(ConfigurationManager::class);
-        $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        $typoScriptService = $objectManager->get(TypoScriptService::class);
-        $settings = $typoScript['plugin.']['tx_bwfocuspointimages.'] ? $typoScript['plugin.']['tx_bwfocuspointimages.']['settings.'] : [];
-        return $typoScriptService->convertTypoScriptArrayToPlainArray($settings);
     }
 
     /**
