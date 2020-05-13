@@ -1,142 +1,273 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
-    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
 
+<div class="modal-panel-main">
+    <div id="t3js-crop-image-container" class="cropper-image-container">
+        <div id="focuspoint-container">
+            <f:image image="{image}"
+                     maxWidth="1280"
+                     maxHeight="980"
+                     id="t3js-crop-image"
+                     class="cropper-image-container-image"
+                     additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}"/>
 
-        <div class="modal-panel-main">
-            <div id="t3js-crop-image-container" class="cropper-image-container">
-                <div id="focuspoint-container">
-                    <f:image image="{image}" maxWidth="1280" maxHeight="980" id="t3js-crop-image" class="cropper-image-container-image" additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}" />
+            <div data-focuspointBoxId="x"
+                 class="focuspoint-item focuspoint-item-hidden ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} focuspoint-item-dummy">
+                <span>x</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-panel-sidebar">
+    <div class="panel-group" id="accordion-cropper-variants" role="tablist" aria-multiselectable="true">
 
-                        <div data-focuspointBoxId="x" class="focuspoint-item focuspoint-item-hidden ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} focuspoint-item-dummy"><span>x</span></div>
+        <div class="panel panel-default panel-hidden panel-dummy">
+            <div class="panel-heading" role="tab" data-append-id="id" id="cropper-accordion-heading-">
+                <h4 class="panel-title">
+                    <a role="button"
+                       data-toggle="collapse"
+                       data-parent="#accordion-cropper-variants"
+                       href="#cropper-collapse-"
+                       aria-expanded="true"
+                       aria-controls="cropper-collapse-"
+                       class="t3js-crop-variant-trigger collapsed"
+                       data-append-id="href,aria-controls"
+                       data-crop-variant>
+                        <span data-nr="" data-append-id="data-nr"><i class="fa fa-chevron-down" aria-hidden="true"></i>
+                            {f:translate(id:'{focusPoints.singlePoint.title}')}
+                        </span>
+                    </a>
+                </h4>
+            </div>
+            <div id="cropper-collapse-"
+                 class="panel-collapse collapse in"
+                 role="tabpanel"
+                 aria-labelledby="cropper-accordion-heading-"
+                 data-append-id="id,aria-labelledby">
+                <div class="panel-body">
+                    <form>
+                        <input type="hidden" name="x" data-focuspointPanelId="x"/> <input type="hidden"
+                                                                                          name="y"
+                                                                                          data-focuspointPanelId="x"/>
+                        <input type="hidden"
+                               value="{focusPoints.singlePoint.defaultHeight}"
+                               name="height"
+                               data-focuspointPanelId="x"/> <input type="hidden"
+                                                                   value="{focusPoints.singlePoint.defaultWidth}"
+                                                                   name="width"
+                                                                   data-focuspointPanelId="x"/>
+                        <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="j">
+                            <f:render partial="FocuspointWizardInput"
+                                      arguments="{field: field, fieldname: fieldname, j: j}"/>
+                        </f:for>
+                        <div class="input-group pull-right">
+                            <button data-delete class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i>
+                                <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.delete"/>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="modal-panel-sidebar">
-            <div class="panel-group" id="accordion-cropper-variants" role="tablist" aria-multiselectable="true">
 
-                    <div class="panel panel-default panel-hidden panel-dummy">
-                        <div class="panel-heading" role="tab" data-append-id="id" id="cropper-accordion-heading-">
-                            <h4 class="panel-title">
-                                <a role="button" data-toggle="collapse" data-parent="#accordion-cropper-variants"
-                                        href="#cropper-collapse-"
-                                        aria-expanded="true"
-                                        aria-controls="cropper-collapse-"
-                                        class="t3js-crop-variant-trigger collapsed"
-                                        data-append-id="href,aria-controls"
-                                        data-crop-variant>
-                                <span data-nr="" data-append-id="data-nr"><i class="fa fa-chevron-down"
-                                                    aria-hidden="true"></i> {f:translate(id:'{focusPoints.singlePoint.title}')} </span>
-                                </a>
-                            </h4>
-                        </div>
-                        <div id="cropper-collapse-"
-                                    class="panel-collapse collapse in"
-                                    role="tabpanel"
-                                    aria-labelledby="cropper-accordion-heading-"
-                                    data-append-id="id,aria-labelledby">
-                            <div class="panel-body">
-                                <form>
-                                    <input type="hidden" name="x" data-focuspointPanelId="x" />
-                                    <input type="hidden" name="y" data-focuspointPanelId="x" />
-                                    <input type="hidden" value="{focusPoints.singlePoint.defaultHeight}" name="height" data-focuspointPanelId="x" />
-                                    <input type="hidden" value="{focusPoints.singlePoint.defaultWidth}" name="width" data-focuspointPanelId="x" />
-                                    <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="j">
-                                        <f:render partial="FocuspointWizardInput" arguments="{field: field, fieldname: fieldname, j: j}" />
-                                    </f:for>
-                                    <div class="input-group pull-right">
-                                        <button data-delete class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.delete"/></button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+    </div>
+    <div class="panel-body">
+        <button data-method="new" class="btn btn-success btn-block"><i class="fa fa-plus"></i>
+            <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/>
+        </button>
+    </div>
+</div>
 
-            </div>
-            <div class="panel-body">
-                <button data-method="new" class="btn btn-success btn-block"><i class="fa fa-plus"></i> <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/></button>
-            </div>
-        </div>
+<style type="text/css">
+    .modal.modal-focuspoints .modal-dialog {
+        width: auto;
+        max-width: calc(100vw - 60px);
+        max-height: 100vh;
+    }
 
-        <style type="text/css">
-            .modal-body-focuspoints{
-                display: flex;
-                flex-wrap: nowrap;
-                padding: 0;
-            }
-            .modal-body-focuspoints .modal-panel-main{
-                flex-grow: 1;
-                padding: 15px;
-                max-width: calc(100vw - 372px);
-            }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container{
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                max-width: none !important;
-            }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container img{
-                max-width: 100%;
-                max-height: 100%;
-                width: auto;
-                height: auto;
-            }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container #focuspoint-container{
-                position: relative;
-            }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item{
-                position: absolute;
-                background-color: rgba(0,0,0,0.6);
-                color: #FFF;
+    .modal.modal-focuspoints .modal-dialog .modal-content {
+        margin-top: 0 !important;
+    }
 
-                line-height: 7.6px;
-                top: 0;
-                left: 0;
-                cursor: move;
-            }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-dummy,
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-hidden{
-                display: none;
-            }
-            .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item span{
-                border: 1px dotted rgba(255,255,255,0.6);
-                padding: 5px;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: center;
-                align-items: center;
-            }
+    .modal.modal-focuspoints .panel-default, .panel, .modal.modal-focuspoints .panel-default, .panel-default {
+        background-color: inherit;
+        border: 0;
+    }
+
+    .modal-body-focuspoints {
+        display: flex;
+        flex-wrap: nowrap;
+        padding: 0;
+    }
+
+    .modal-body-focuspoints .modal-panel-main {
+        flex-grow: 1;
+        padding: 15px;
+        max-width: calc(100vw - 372px);
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: none !important;
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container img {
+        max-width: 100%;
+        max-height: calc(100vh - 190px);
+        width: auto;
+        height: auto;
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container #focuspoint-container {
+        position: relative;
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #fff;
+
+        line-height: 7.6px;
+        top: 0;
+        left: 0;
+        cursor: move;
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-dummy,
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-hidden {
+        display: none;
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item span {
+        border: 1px dotted rgba(255, 255, 255, 0.6);
+        padding: 5px;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+    }
 
 
+    .modal-body-focuspoints .modal-panel-sidebar {
+        background-color: #333;
+        height: 100%;
+        overflow: scroll;
+    }
 
-            .modal-body-focuspoints .modal-panel-sidebar{
-                background-color: #333;
-                height: 100%;
-                overflow: scroll;
-            }
-            .modal-body-focuspoints .modal-panel-sidebar .panel-group{
-                margin: 0;
-                min-width: 332px;
-            }
-            .modal-body-focuspoints .modal-panel-sidebar .panel-hidden,
-            .modal-body-focuspoints .modal-panel-sidebar .panel-dummy{
-                display: none;
-            }
-            .modal-body-focuspoints .modal-panel-sidebar span[data-nr]:after{
-                content: attr(data-nr);
-            }
-            .modal-body-focuspoints .modal-panel-sidebar a[aria-expanded="true"] .fa-chevron-down{
-                transform: rotate(180deg);
-            }
-            .modal-body-focuspoints .modal-panel-sidebar input, .modal-body-focuspoints .modal-panel-sidebar textarea, .modal-body-focuspoints .modal-panel-sidebar select{
-                color: #333;
-                width: 300px;
-            }
-            .modal-body-focuspoints .modal-panel-sidebar label:not(.element1), .modal-body-focuspoints .modal-panel-sidebar .singlepoint-delete{
-                margin-top: 15px;
-            }
-        </style>
+    .modal-body-focuspoints .modal-panel-sidebar .panel-group {
+        margin: 0;
+        min-width: 332px;
+    }
+
+    .modal-body-focuspoints .modal-panel-sidebar .panel-hidden,
+    .modal-body-focuspoints .modal-panel-sidebar .panel-dummy {
+        display: none;
+    }
+
+    .modal-body-focuspoints .modal-panel-sidebar span[data-nr]:after {
+        content: attr(data-nr);
+    }
+
+    .modal-body-focuspoints .modal-panel-sidebar a[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
+    .modal-body-focuspoints .modal-panel-sidebar input, .modal-body-focuspoints .modal-panel-sidebar textarea, .modal-body-focuspoints .modal-panel-sidebar select {
+        color: #333;
+        width: 300px;
+    }
+
+    .modal-body-focuspoints .modal-panel-sidebar label:not(.element1), .modal-body-focuspoints .modal-panel-sidebar .singlepoint-delete {
+        margin-top: 15px;
+    }
+
+    /*!
+     * jQuery UI Resizable @VERSION
+     */
+    .ui-resizable {
+        position: relative;
+    }
+
+    .ui-resizable-handle {
+        position: absolute;
+        font-size: 0.1px;
+        display: block;
+        -ms-touch-action: none;
+        touch-action: none;
+    }
+
+    .ui-resizable-disabled .ui-resizable-handle,
+    .ui-resizable-autohide .ui-resizable-handle {
+        display: none;
+    }
+
+    .ui-resizable-n {
+        cursor: n-resize;
+        height: 7px;
+        width: 100%;
+        top: -5px;
+        left: 0;
+    }
+
+    .ui-resizable-s {
+        cursor: s-resize;
+        height: 7px;
+        width: 100%;
+        bottom: -5px;
+        left: 0;
+    }
+
+    .ui-resizable-e {
+        cursor: e-resize;
+        width: 7px;
+        right: -5px;
+        top: 0;
+        height: 100%;
+    }
+
+    .ui-resizable-w {
+        cursor: w-resize;
+        width: 7px;
+        left: -5px;
+        top: 0;
+        height: 100%;
+    }
+
+    .ui-resizable-se {
+        cursor: se-resize;
+        width: 12px;
+        height: 12px;
+        right: 1px;
+        bottom: 1px;
+    }
+
+    .ui-resizable-sw {
+        cursor: sw-resize;
+        width: 9px;
+        height: 9px;
+        left: -5px;
+        bottom: -5px;
+    }
+
+    .ui-resizable-nw {
+        cursor: nw-resize;
+        width: 9px;
+        height: 9px;
+        left: -5px;
+        top: -5px;
+    }
+
+    .ui-resizable-ne {
+        cursor: ne-resize;
+        width: 9px;
+        height: 9px;
+        right: -5px;
+        top: -5px;
+    }
+</style>
 
 
 </html>

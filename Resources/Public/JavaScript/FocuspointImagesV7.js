@@ -149,25 +149,15 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.focusBoxes.push(newBox);
             this.inputPanels.push(newPanel);
         };
-        FocuspointImages.prototype.initEvents = function () {
-            var _this = this;
-            // Add new Focus Box Button
-            this.newButton.off('click').on('click', function (e) {
-                e.preventDefault();
-                _this.addNewFocuspoint(-1);
-            });
-            // Dismiss button
-            this.dismissButton.off('click').on('click', function (e) {
-                e.preventDefault();
-                _this.currentModal.modal('hide');
-                _this.destroy();
-            });
-            // Save button
-            this.saveButton.off('click').on('click', function (e) {
-                e.preventDefault();
-                _this.save(_this.data);
-                _this.currentModal.modal('hide');
-            });
+        FocuspointImages.prototype.onCancelButtonClick = function (e) {
+            e.preventDefault();
+            this.currentModal.modal('hide');
+            this.destroy();
+        };
+        FocuspointImages.prototype.onSaveButtonClick = function (e) {
+            e.preventDefault();
+            this.save(this.data);
+            this.currentModal.modal('hide');
         };
         FocuspointImages.prototype.save = function (data) {
             var focusPoints = JSON.stringify(data);
@@ -241,6 +231,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
          * @private
          */
         FocuspointImages.prototype.init = function () {
+            var _this = this;
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
             var imageWidth = $(image).width();
@@ -254,17 +245,17 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.emptyFocuspoint = this.getEmptyFocuspoint();
             // Initialize our class members
             this.currentModal.find(this.focusPointContainerSelector).css({ height: imageHeight, width: imageWidth });
-            this.newButton = this.currentModal.find('[data-method=new]');
-            this.saveButton = this.currentModal.find('[data-method=save]');
-            this.dismissButton = this.currentModal.find('[data-method=dismiss]');
             this.focusBoxes = [];
             this.inputPanels = [];
             // create focuspoints from data
             for (var i = 0; i < this.data.length; i++) {
                 this.addNewFocuspoint(i);
             }
-            // init events
-            this.initEvents();
+            // Bind New button
+            this.currentModal.find('[data-method=new]').off('click').on('click', function (e) {
+                e.preventDefault();
+                _this.addNewFocuspoint(-1);
+            });
         };
         /**
          * @method initializeFocuspointModal
@@ -287,29 +278,27 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var buttonDismissText = this.trigger.data('buttonDismissText');
             var buttonSaveText = this.trigger.data('buttonSaveText');
             var imageUri = this.trigger.data('url');
-            var initFocuspointModal = this.initializeFocuspointModal.bind(this);
             this.currentModal = Modal.loadUrl(modalTitle, -2, [
                 {
                     btnClass: 'btn-default',
                     dataAttributes: {
                         method: 'dismiss',
                     },
-                    icon: 'actions-close',
                     text: buttonDismissText,
+                    trigger: this.onCancelButtonClick.bind(this)
                 },
                 {
                     btnClass: 'btn-primary',
                     dataAttributes: {
                         method: 'save',
                     },
-                    icon: 'actions-document-save',
                     text: buttonSaveText,
+                    trigger: this.onSaveButtonClick.bind(this)
                 },
-            ], imageUri, function (currentModal) {
-                currentModal.find('.t3js-modal-body')
-                    .addClass('cropper')
-                    .addClass('modal-body-focuspoints');
-            });
+            ], imageUri, this.initializeFocuspointModal.bind(this));
+            this.currentModal.addClass('modal-dark');
+            this.currentModal.addClass('modal-focuspoints');
+            this.currentModal.find('.modal-body').addClass('modal-body-focuspoints');
             this.currentModal.on('hide.bs.modal', function (e) {
                 _this.destroy();
             });

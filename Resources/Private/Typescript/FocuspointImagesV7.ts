@@ -122,6 +122,7 @@ class FocuspointImages {
 	private initFocusBox(box: JQuery): void {
 
 		// register jquery-ui/draggable
+
 		$(box).draggable({
 			containment: "parent",
 			stop: this.onBoxChange.bind(this, box),
@@ -203,29 +204,16 @@ class FocuspointImages {
 		this.inputPanels.push(newPanel);
 	}
 
-	private initEvents(): void {
+	private onCancelButtonClick(e): void {
+		e.preventDefault();
+		this.currentModal.modal('hide');
+		this.destroy();
+	}
 
-		// Add new Focus Box Button
-		this.newButton.off('click').on('click', (e: JQueryEventObject) => {
-			e.preventDefault();
-			this.addNewFocuspoint(-1);
-		});
-
-		// Dismiss button
-		this.dismissButton.off('click').on('click', (e: JQueryEventObject) => {
-			e.preventDefault();
-			this.currentModal.modal('hide');
-			this.destroy();
-		});
-
-		// Save button
-		this.saveButton.off('click').on('click', (e: JQueryEventObject) => {
-			e.preventDefault();
-			this.save(this.data);
-			this.currentModal.modal('hide');
-		});
-
-
+	private onSaveButtonClick(e): void {
+		e.preventDefault();
+		this.save(this.data);
+		this.currentModal.modal('hide');
 	}
 
 	private save(data: Object): void {
@@ -327,9 +315,6 @@ class FocuspointImages {
 
 		// Initialize our class members
 		this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});
-		this.newButton = this.currentModal.find('[data-method=new]');
-		this.saveButton = this.currentModal.find('[data-method=save]');
-		this.dismissButton = this.currentModal.find('[data-method=dismiss]');
 		this.focusBoxes = [];
 		this.inputPanels = [];
 
@@ -338,8 +323,11 @@ class FocuspointImages {
 			this.addNewFocuspoint(i);
 		}
 
-		// init events
-		this.initEvents();
+		// Bind New button
+		this.currentModal.find('[data-method=new]').off('click').on('click', (e: JQueryEventObject) => {
+			e.preventDefault();
+			this.addNewFocuspoint(-1);
+		});
 	}
 
 	/**
@@ -363,7 +351,6 @@ class FocuspointImages {
 		const buttonDismissText: string = this.trigger.data('buttonDismissText');
 		const buttonSaveText: string = this.trigger.data('buttonSaveText');
 		const imageUri: string = this.trigger.data('url');
-		const initFocuspointModal: Function = this.initializeFocuspointModal.bind(this);
 
 		this.currentModal = Modal.loadUrl(
 			modalTitle,
@@ -374,25 +361,24 @@ class FocuspointImages {
 					dataAttributes: {
 						method: 'dismiss',
 					},
-					icon: 'actions-close',
 					text: buttonDismissText,
+					trigger: this.onCancelButtonClick.bind(this)
 				},
 				{
 					btnClass: 'btn-primary',
 					dataAttributes: {
 						method: 'save',
 					},
-					icon: 'actions-document-save',
 					text: buttonSaveText,
+					trigger: this.onSaveButtonClick.bind(this)
 				},
 			],
 			imageUri,
-			function (currentModal) {
-				currentModal.find('.t3js-modal-body')
-					.addClass('cropper')
-					.addClass('modal-body-focuspoints');
-			}
+			this.initializeFocuspointModal.bind(this)
 		);
+		this.currentModal.addClass('modal-dark');
+		this.currentModal.addClass('modal-focuspoints');
+		this.currentModal.find('.modal-body').addClass('modal-body-focuspoints');
 		this.currentModal.on('hide.bs.modal', (e: JQueryEventObject): void => {
 			this.destroy();
 		});
