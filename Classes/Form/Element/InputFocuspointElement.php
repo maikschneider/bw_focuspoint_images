@@ -5,8 +5,6 @@ namespace Blueways\BwFocuspointImages\Form\Element;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -14,6 +12,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Service\TypoScriptService;
+use TYPO3\CMS\Extbase\Utility\ArrayUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
@@ -26,7 +28,6 @@ class InputFocuspointElement extends AbstractFormElement
      */
     protected static $defaultConfig = [
         'file_field' => 'uid_local',
-        'allowedExtensions' => null, // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
         'focusPoints' => [
             'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
             'singlePoint' => [
@@ -34,26 +35,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'resizable' => '1',
                 'defaultWidth' => '0.2',
                 'defaultHeight' => '0.2',
-                'fields' => [
-                    'name' => [
-                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.name.title',
-                        'type' => 'text',
-                    ],
-                    'description' => [
-                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.description.title',
-                        'type' => 'textarea',
-                    ],
-                    'color' => [
-                        'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.title',
-                        'type' => 'select',
-                        'options' => [
-                            'green' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.green.title',
-                            'blue' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.blue.title',
-                            '0' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.0.title',
-                            '1' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.field.color.options.1.title'
-                        ]
-                    ]
-                ]
+                'fields' => []
             ]
         ]
     ];
@@ -67,29 +49,6 @@ class InputFocuspointElement extends AbstractFormElement
      * @var UriBuilder
      */
     protected $uriBuilder;
-
-    /**
-     * Default field wizards enabled for this element.
-     *
-     * @var array
-     */
-    protected $defaultFieldWizard = [
-        'localizationStateSelector' => [
-            'renderType' => 'localizationStateSelector',
-        ],
-        'otherLanguageContent' => [
-            'renderType' => 'otherLanguageContent',
-            'after' => [
-                'localizationStateSelector'
-            ],
-        ],
-        'defaultLanguageDifferences' => [
-            'renderType' => 'defaultLanguageDifferences',
-            'after' => [
-                'otherLanguageContent',
-            ],
-        ],
-    ];
 
     /**
      * @param NodeFactory $nodeFactory
@@ -129,7 +88,7 @@ class InputFocuspointElement extends AbstractFormElement
         $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
         $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
 
-        if($version['version_main'] > 7) {
+        if ($version['version_main'] > 7) {
             $fieldInformationResult = $this->renderFieldInformation();
             $fieldInformationHtml = $fieldInformationResult['html'];
             $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
@@ -187,30 +146,29 @@ class InputFocuspointElement extends AbstractFormElement
     /**
      * @param array $baseConfiguration
      * @return array
-     * @throws InvalidConfigurationException
      */
     protected function populateConfiguration(array $baseConfiguration)
     {
+        // override default config from TCA config
         $defaultConfig = self::$defaultConfig;
+        $config = ArrayUtility::arrayMergeRecursiveOverrule($defaultConfig, $baseConfiguration);
 
-        // If single point configuration is set do not include deafult ones (not hidden fields!)
-        if (isset($baseConfiguration['focusPoints']['singlePoint']['fields'])) {
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']['name']);
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']['description']);
-            unset($defaultConfig['focusPoints']['singlePoint']['fields']['color']);
-        }
+        // override single point settings from typoScript
+        $tsConfig = $this->getConfigurationFromTypoScript();
+        $config['focusPoints']['singlePoint'] = ArrayUtility::arrayMergeRecursiveOverrule($config['focusPoints']['singlePoint'],
+            $tsConfig);
 
-        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
-
-        if (!is_array($config['focusPoints'])) {
-            throw new InvalidConfigurationException('Focus points configuration must be an array', 1517157895);
-        }
-
-        // By default we allow all image extensions that can be handled by the GFX functionality
-        if ($config['allowedExtensions'] === null) {
-            $config['allowedExtensions'] = $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'];
-        }
         return $config;
+    }
+
+    protected function getConfigurationFromTypoScript()
+    {
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $configurationManager = $objectManager->get(ConfigurationManager::class);
+        $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
+        $typoScriptService = $objectManager->get(TypoScriptService::class);
+        $settings = $typoScript['plugin.']['tx_bwfocuspointimages.'] ? $typoScript['plugin.']['tx_bwfocuspointimages.']['settings.'] : [];
+        return $typoScriptService->convertTypoScriptArrayToPlainArray($settings);
     }
 
     /**
