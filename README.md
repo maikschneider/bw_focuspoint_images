@@ -22,7 +22,7 @@ plugin.tx_bwfocuspointimages {
 
 ### Setup
 
-To configure the fields in the focus point wizard, use TypoScript settings:
+To configure the fields in the focus point wizard, use the following TypoScript settings. You can choose between **text**, **textarea** and **select** inputs in the wizard.
 
 ```typo3_typoscript
 plugin.tx_bwfocuspointimages.settings {
