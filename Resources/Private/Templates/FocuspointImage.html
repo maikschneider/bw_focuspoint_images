@@ -4,18 +4,13 @@
 
     <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
         <f:for each="{points}" as="point">
-            <rect class="focuspoint__svg__area"
-                  x="{point.x}%"
+            <rect x="{point.x}%"
                   y="{point.y}%"
                   stroke="#000"
                   width="{point.width}%"
                   height="{point.height}%"
                   fill="transparent"/>
-            <text class="focuspoint__svg__text"
-                  x="{point.textX}%"
-                  y="{point.textY}%"
-                  alignment-baseline="middle"
-                  text-anchor="middle">
+            <text x="{point.textX}%" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
                 {point.name}
             </text>
         </f:for>
@@ -42,11 +37,11 @@
         left: 0;
     }
 
-    .focuspoint svg rect:hover {
+    .focuspoint__svg rect:hover {
         fill: rgba(0, 0, 0, 0.5);
     }
 
-    .focuspoint svg rect:hover + text {
+    .focuspoint__svg rect:hover + text {
         fill: #fff;
     }
 </style>
