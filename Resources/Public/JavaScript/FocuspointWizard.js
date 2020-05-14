@@ -13,39 +13,39 @@
 define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "TYPO3/CMS/Backend/Modal", "jquery", "jquery-ui/draggable", "jquery-ui/resizable"], function (require, exports, ImagesLoaded, Modal, $) {
     "use strict";
     /**
-     * Module: TYPO3/CMS/BwFocuspointImages/FocuspointImages
+     * Module: TYPO3/CMS/BwFocuspointImages/FocuspointWizard
      * Contains all logic for the image crop GUI including setting focusAreas
-     * @exports TYPO3/CMS/BwFocuspointImages/FocuspointImages
+     * @exports TYPO3/CMS/BwFocuspointImages/FocuspointWizard
      */
-    var FocuspointImages = (function () {
-        function FocuspointImages() {
+    var FocuspointWizard = (function () {
+        function FocuspointWizard() {
             this.panelGroupSelector = '#accordion-cropper-variants';
             this.cropImageSelector = '#t3js-crop-image';
             this.focusPointContainerSelector = '#focuspoint-container';
         }
-        FocuspointImages.prototype.calculateRelativeX = function (width) {
+        FocuspointWizard.prototype.calculateRelativeX = function (width) {
             var image = this.currentModal.find(this.cropImageSelector);
             var imageWidth = $(image).width();
             return Math.round((width / imageWidth) * 1e3) / 1e3;
         };
-        FocuspointImages.prototype.calculateAbsoluteX = function (width) {
+        FocuspointWizard.prototype.calculateAbsoluteX = function (width) {
             if (width === void 0) { width = 0.33; }
             var image = this.currentModal.find(this.cropImageSelector);
             var imageWidth = $(image).width();
             return Math.round((width * imageWidth) * 1e3) / 1e3;
         };
-        FocuspointImages.prototype.calculateRelativeY = function (height) {
+        FocuspointWizard.prototype.calculateRelativeY = function (height) {
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
             return Math.round((height / imageHeight) * 1e3) / 1e3;
         };
-        FocuspointImages.prototype.calculateAbsoluteY = function (height) {
+        FocuspointWizard.prototype.calculateAbsoluteY = function (height) {
             if (height === void 0) { height = 0.33; }
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
             return Math.round((height * imageHeight) * 1e3) / 1e3;
         };
-        FocuspointImages.prototype.onBoxChange = function (box) {
+        FocuspointWizard.prototype.onBoxChange = function (box) {
             var width = $(box).width();
             var height = $(box).height();
             var position = $(box).position();
@@ -57,12 +57,12 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.data[focuspointBoxId].x = this.calculateRelativeX(left);
             this.data[focuspointBoxId].y = this.calculateRelativeY(top);
         };
-        FocuspointImages.prototype.onInputChange = function (input) {
+        FocuspointWizard.prototype.onInputChange = function (input) {
             var focuspointPanelId = parseInt($(input).attr('data-focuspointPanelId'));
             var fieldname = $(input).attr('name');
             this.data[focuspointPanelId][fieldname] = $(input).val();
         };
-        FocuspointImages.prototype.deleteFocuspoint = function (focuspointId) {
+        FocuspointWizard.prototype.deleteFocuspoint = function (focuspointId) {
             // remove html elements
             $(this.focusBoxes[focuspointId]).trigger('remove');
             $(this.inputPanels[focuspointId]).trigger('remove');
@@ -78,7 +78,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 $(e).find('span[data-nr]').attr('data-nr', i + 1);
             });
         };
-        FocuspointImages.prototype.initFocusBox = function (box) {
+        FocuspointWizard.prototype.initFocusBox = function (box) {
             // register jquery-ui/draggable
             $(box).draggable({
                 containment: "parent",
@@ -109,7 +109,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             };
             $(box).bind('delete', removeEvent.bind(null, box));
         };
-        FocuspointImages.prototype.addNewFocuspoint = function (focuspointBoxId) {
+        FocuspointWizard.prototype.addNewFocuspoint = function (focuspointBoxId) {
             if (focuspointBoxId === void 0) { focuspointBoxId = -1; }
             // check if appended or created from data
             if (focuspointBoxId === -1) {
@@ -149,22 +149,22 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.focusBoxes.push(newBox);
             this.inputPanels.push(newPanel);
         };
-        FocuspointImages.prototype.onCancelButtonClick = function (e) {
+        FocuspointWizard.prototype.onCancelButtonClick = function (e) {
             e.preventDefault();
             this.currentModal.modal('hide');
             this.destroy();
         };
-        FocuspointImages.prototype.onSaveButtonClick = function (e) {
+        FocuspointWizard.prototype.onSaveButtonClick = function (e) {
             e.preventDefault();
             this.save(this.data);
             this.currentModal.modal('hide');
         };
-        FocuspointImages.prototype.save = function (data) {
+        FocuspointWizard.prototype.save = function (data) {
             var focusPoints = JSON.stringify(data);
             var hiddenField = $("#" + this.trigger.attr('data-field'));
             hiddenField.val(focusPoints);
         };
-        FocuspointImages.prototype.initInputPanel = function (panel) {
+        FocuspointWizard.prototype.initInputPanel = function (panel) {
             var _this = this;
             var panelInputs = $(panel).find('[data-focuspointPanelId]');
             var focuspointPanelId = parseInt(panelInputs.first().attr('data-focuspointPanelId'));
@@ -200,13 +200,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // show panel
             $(panel).removeClass('panel-hidden');
         };
-        FocuspointImages.prototype.initInputPanels = function () {
+        FocuspointWizard.prototype.initInputPanels = function () {
             var _this = this;
             this.inputPanels.forEach(function (panel) {
                 _this.initInputPanel(panel);
             });
         };
-        FocuspointImages.prototype.getEmptyFocuspoint = function () {
+        FocuspointWizard.prototype.getEmptyFocuspoint = function () {
             var o = {
                 x: 0.3,
                 y: 0.3,
@@ -229,7 +229,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
          * @desc Initializes the Focus Point UI and sets up all the event bindings for the UI
          * @private
          */
-        FocuspointImages.prototype.init = function () {
+        FocuspointWizard.prototype.init = function () {
             var _this = this;
             var image = this.currentModal.find(this.cropImageSelector);
             var imageHeight = $(image).height();
@@ -260,7 +260,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
          * @desc Initialize the focuspoint modal and dispatch the focuspoint init
          * @private
          */
-        FocuspointImages.prototype.initializeFocuspointModal = function () {
+        FocuspointWizard.prototype.initializeFocuspointModal = function () {
             var _this = this;
             var image = this.currentModal.find(this.cropImageSelector);
             ImagesLoaded(image, function () {
@@ -270,7 +270,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             });
         };
         ;
-        FocuspointImages.prototype.show = function (is7up) {
+        FocuspointWizard.prototype.show = function (is7up) {
             var _this = this;
             var modalTitle = this.trigger.data('modalTitle');
             var buttonDismissText = this.trigger.data('buttonDismissText');
@@ -323,16 +323,16 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         };
         /**
          * @method destroy
-         * @desc Destroy the FocuspointImage
+         * @desc Destroy the FocuspointWizard
          * @private
          */
-        FocuspointImages.prototype.destroy = function () {
+        FocuspointWizard.prototype.destroy = function () {
             if (this.currentModal) {
                 this.currentModal = null;
                 this.data = null;
             }
         };
-        FocuspointImages.prototype.initializeTrigger = function (is7up) {
+        FocuspointWizard.prototype.initializeTrigger = function (is7up) {
             var _this = this;
             var triggerHandler = function (e) {
                 e.preventDefault();
@@ -341,7 +341,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             };
             $('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
         };
-        return FocuspointImages;
+        return FocuspointWizard;
     }());
-    return new FocuspointImages();
+    return new FocuspointWizard();
 });

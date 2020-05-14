@@ -35,11 +35,11 @@ interface Focuspoint {
 }
 
 /**
- * Module: TYPO3/CMS/BwFocuspointImages/FocuspointImages
+ * Module: TYPO3/CMS/BwFocuspointImages/FocuspointWizard
  * Contains all logic for the image crop GUI including setting focusAreas
- * @exports TYPO3/CMS/BwFocuspointImages/FocuspointImages
+ * @exports TYPO3/CMS/BwFocuspointImages/FocuspointWizard
  */
-class FocuspointImages {
+class FocuspointWizard {
 
 	private panelGroupSelector: string = '#accordion-cropper-variants';
 	private cropImageSelector: string = '#t3js-crop-image';
@@ -402,7 +402,7 @@ class FocuspointImages {
 
 	/**
 	 * @method destroy
-	 * @desc Destroy the FocuspointImage
+	 * @desc Destroy the FocuspointWizard
 	 * @private
 	 */
 	private destroy(): void {
@@ -424,4 +424,4 @@ class FocuspointImages {
 
 }
 
-export = new FocuspointImages();
+export = new FocuspointWizard();

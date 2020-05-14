@@ -112,7 +112,7 @@ class InputFocuspointElement extends AbstractFormElement
         }
 
         $resultArray['requireJsModules'][] = [
-            'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(' . $is7up . '); }); }',
+            'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointWizard.initializeTrigger(' . $is7up . '); }); }',
         ];
 
         $arguments = [
