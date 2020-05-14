@@ -1,7 +1,7 @@
 {
     "name": "blueways/bw-focuspoint-images",
     "type": "typo3-cms-extension",
-    "description": "Image Editor for adding focuspoints to images",
+    "description": "Image Editor for adding focus points to images",
     "homepage": "https://blueways.de",
     "license": ["GPL-2.0+"],
     "keywords": ["TYPO3 CMS"],

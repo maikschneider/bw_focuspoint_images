@@ -5,11 +5,11 @@
  */
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Bw Focuspoint Images',
-    'description' => 'Image Editor for adding focuspoints to images',
+    'description' => 'Image Editor for adding focus points to images',
     'category' => 'templates',
     'constraints' => [
         'depends' => [
-            'typo3' => '8.7.0-9.5.99',
+            'typo3' => '7.0.0-9.5.99',
         ],
         'conflicts' => [
         ],

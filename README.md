@@ -6,9 +6,18 @@ Create image map like elements using SVG.
 
 ## Configure TypoScript
 
+Include the **Bw Focuspoint Images** static template or manually include setup and constants.
+
+```typo3_typoscript
+<INCLUDE_TYPOSCRIPT: source="FILE:EXT:bw_focuspoint_images/Configuration/TypoScript/constants.txt">
+```
+```typo3_typoscript
+<INCLUDE_TYPOSCRIPT: source="FILE:EXT:bw_focuspoint_images/Configuration/TypoScript/setup.txt">
+```
+
 ### Constants
 
-To override temnplates, set your own paths via constants:
+To override templates, set your own paths via constants:
 
 ```typo3_typoscript
 plugin.tx_bwfocuspointimages {
@@ -19,6 +28,8 @@ plugin.tx_bwfocuspointimages {
 	}
 }
 ```
+
+To use the default rendering of **fluid_styled_content**, set Layout and Partial path to your styles.content settings and use the Default-Layout in your FocuspointImage template.
 
 ### Setup
 
