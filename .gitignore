@@ -4,3 +4,4 @@ node_modules/
 public
 !Resources/Public
 vendor
+bin
