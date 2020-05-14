@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Blueways\BwFocuspointImages\Form\Wizard;
 
 /*
@@ -15,6 +16,7 @@ namespace Blueways\BwFocuspointImages\Form\Wizard;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
@@ -28,55 +30,47 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
  */
 class FocusPointWizard
 {
-    /**
-     * @var StandaloneView
-     */
-    private $templateView;
 
     /**
-     * @param StandaloneView $templateView
-     */
-    public function __construct(StandaloneView $templateView = null)
-    {
-        if (!$templateView) {
-            $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-            $templateView->setLayoutRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Layouts/')]);
-            $templateView->setPartialRootPaths([GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Partials/')]);
-            $templateView->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointWizard.html'));
-        }
-        $this->templateView = $templateView;
-    }
-
-    /**
-     * Returns the HTML for the wizard inside the modal
-     *
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface $response
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
+     * @throws \TYPO3\CMS\Fluid\View\Exception\InvalidTemplateResourceException
      */
     public function getWizardAction(ServerRequestInterface $request, ResponseInterface $response)
     {
-        if ($this->isSignatureValid($request)) {
-            $queryParams = json_decode($request->getQueryParams()['arguments'], true);
-            $fileUid = $queryParams['image'];
-            $image = null;
-            if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
-                try {
-                    $image = ResourceFactory::getInstance()->getFileObject($fileUid);
-                } catch (FileDoesNotExistException $e) {
-                }
-            }
-            $viewData = [
-                'image' => $image,
-                'focusPoints' => $queryParams['focusPoints']
-            ];
-            $this->templateView->assignMultiple($viewData);
-            $content = $this->templateView->render();
-            $response->getBody()->write($content);
-
-            return $response;
+        if (!$this->isSignatureValid($request)) {
+            return $response->withStatus(403);
         }
-        return $response->withStatus(403);
+
+        $typoScript = HelperUtility::getTypoScript();
+
+        $templateView = GeneralUtility::makeInstance(StandaloneView::class);
+        $templateView->setLayoutRootPaths($typoScript['view']['layoutRootPaths']);
+        $templateView->setPartialRootPaths($typoScript['view']['partialRootPaths']);
+        $templateView->setTemplateRootPaths($typoScript['view']['templateRootPaths']);
+        $templateView->setTemplate('FocuspointWizard');
+
+        $queryParams = json_decode($request->getQueryParams()['arguments'], true);
+        $fileUid = $queryParams['image'];
+        $image = null;
+        if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
+            try {
+                $image = ResourceFactory::getInstance()->getFileObject($fileUid);
+            } catch (FileDoesNotExistException $e) {
+                return $response->withStatus(404);
+            }
+        }
+        $viewData = [
+            'image' => $image,
+            'focusPoints' => $queryParams['focusPoints']
+        ];
+        $templateView->assignMultiple($viewData);
+        $content = $templateView->render();
+        $response->getBody()->write($content);
+
+        return $response;
     }
 
     /**
@@ -85,7 +79,7 @@ class FocusPointWizard
      * @param ServerRequestInterface $request the request with the GET parameters
      * @return bool
      */
-    protected function isSignatureValid(ServerRequestInterface $request)
+    protected function isSignatureValid(ServerRequestInterface $request): bool
     {
         $token = GeneralUtility::hmac($request->getQueryParams()['arguments'], 'ajax_wizard_focuspoint');
         return $token === $request->getQueryParams()['signature'];

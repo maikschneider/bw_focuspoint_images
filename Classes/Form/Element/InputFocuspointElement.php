@@ -2,6 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\Form\Element;
 
+use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -63,7 +64,7 @@ class InputFocuspointElement extends AbstractFormElement
     {
         parent::__construct($nodeFactory, $data);
 
-        $this->loadTypoScript();
+        $this->typoScript = HelperUtility::getTypoScript();
 
         $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
         $this->templateView->setLayoutRootPaths($this->typoScript['view']['layoutRootPaths']);
@@ -72,20 +73,6 @@ class InputFocuspointElement extends AbstractFormElement
         $this->templateView->setTemplate('FocuspointElement');
 
         $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-    }
-
-    /**
-     * @return array
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
-     */
-    protected function loadTypoScript()
-    {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $configurationManager = $objectManager->get(ConfigurationManager::class);
-        $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        $typoScriptService = $objectManager->get(TypoScriptService::class);
-        $extTypoScript = $typoScript['plugin.']['tx_bwfocuspointimages.'] ?: [];
-        $this->typoScript = $typoScriptService->convertTypoScriptArrayToPlainArray($extTypoScript);
     }
 
     /**
