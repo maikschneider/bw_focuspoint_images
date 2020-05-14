@@ -270,33 +270,51 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             });
         };
         ;
-        FocuspointImages.prototype.show = function () {
+        FocuspointImages.prototype.show = function (is7up) {
             var _this = this;
             var modalTitle = this.trigger.data('modalTitle');
             var buttonDismissText = this.trigger.data('buttonDismissText');
             var buttonSaveText = this.trigger.data('buttonSaveText');
             var imageUri = this.trigger.data('url');
-            this.currentModal = Modal.loadUrl(modalTitle, -2, [
+            var buttons = [
                 {
                     btnClass: 'btn-default',
                     dataAttributes: {
                         method: 'dismiss',
                     },
                     text: buttonDismissText,
+                    icon: 'actions-close',
                     trigger: this.onCancelButtonClick.bind(this)
                 },
                 {
                     btnClass: 'btn-primary',
+                    icon: 'actions-document-save',
                     dataAttributes: {
                         method: 'save',
                     },
                     text: buttonSaveText,
                     trigger: this.onSaveButtonClick.bind(this)
                 },
-            ], imageUri, this.initializeFocuspointModal.bind(this));
+            ];
+            if (is7up) {
+                this.currentModal = Modal.advanced({
+                    type: 'ajax',
+                    content: imageUri,
+                    size: Modal.sizes.full,
+                    style: Modal.styles.dark,
+                    title: modalTitle,
+                    ajaxCallback: this.initializeFocuspointModal.bind(this),
+                    buttons: buttons,
+                });
+            }
+            else {
+                this.currentModal = Modal.loadUrl(modalTitle, -2, buttons, imageUri, this.initializeFocuspointModal.bind(this));
+            }
             this.currentModal.addClass('modal-dark');
             this.currentModal.addClass('modal-focuspoints');
-            this.currentModal.find('.modal-body').addClass('modal-body-focuspoints');
+            this.currentModal.find('.modal-body')
+                .addClass('cropper')
+                .addClass('modal-body-focuspoints');
             this.currentModal.on('hide.bs.modal', function (e) {
                 _this.destroy();
             });
@@ -314,12 +332,12 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 this.data = null;
             }
         };
-        FocuspointImages.prototype.initializeTrigger = function () {
+        FocuspointImages.prototype.initializeTrigger = function (is7up) {
             var _this = this;
             var triggerHandler = function (e) {
                 e.preventDefault();
                 _this.trigger = $(e.currentTarget);
-                _this.show();
+                _this.show(is7up);
             };
             $('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
         };

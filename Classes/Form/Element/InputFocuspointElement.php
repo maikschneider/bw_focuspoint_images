@@ -95,6 +95,7 @@ class InputFocuspointElement extends AbstractFormElement
 
         $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
         $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
+        $is7up = $version['version_main'] > 7 ? 'true' : 'false';
 
         if ($version['version_main'] > 7) {
             $fieldInformationResult = $this->renderFieldInformation();
@@ -108,17 +109,11 @@ class InputFocuspointElement extends AbstractFormElement
             $fieldWizardResult = $this->renderFieldWizard();
             $fieldWizardHtml = $fieldWizardResult['html'];
             $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
-
-            $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/BwFocuspointImages/FocuspointImages' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(); }); }',
-            ];
         }
 
-        if ($version['version_main'] <= 7) {
-            $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/BwFocuspointImages/FocuspointImagesV7' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(); }); }',
-            ];
-        }
+        $resultArray['requireJsModules'][] = [
+            'TYPO3/CMS/BwFocuspointImages/FocuspointImagesV7' => 'function(FocuspointImages){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointImages.initializeTrigger(' . $is7up . '); }); }',
+        ];
 
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,

@@ -338,43 +338,63 @@ class FocuspointImages {
 	};
 
 
-	public show(): void {
+	public show(is7up: boolean): void {
 
 		const modalTitle: string = this.trigger.data('modalTitle');
 		const buttonDismissText: string = this.trigger.data('buttonDismissText');
 		const buttonSaveText: string = this.trigger.data('buttonSaveText');
 		const imageUri: string = this.trigger.data('url');
+		const buttons: array = [
+			{
+				btnClass: 'btn-default',
+				dataAttributes: {
+					method: 'dismiss',
+				},
+				text: buttonDismissText,
+				icon: 'actions-close',
+				trigger: this.onCancelButtonClick.bind(this)
+			},
+			{
+				btnClass: 'btn-primary',
+				icon: 'actions-document-save',
+				dataAttributes: {
+					method: 'save',
+				},
+				text: buttonSaveText,
+				trigger: this.onSaveButtonClick.bind(this)
+			},
+		];
 
-		this.currentModal = Modal.loadUrl(
-			modalTitle,
-			-2,
-			[
-				{
-					btnClass: 'btn-default',
-					dataAttributes: {
-						method: 'dismiss',
-					},
-					text: buttonDismissText,
-					trigger: this.onCancelButtonClick.bind(this)
-				},
-				{
-					btnClass: 'btn-primary',
-					dataAttributes: {
-						method: 'save',
-					},
-					text: buttonSaveText,
-					trigger: this.onSaveButtonClick.bind(this)
-				},
-			],
-			imageUri,
-			this.initializeFocuspointModal.bind(this)
-		);
+		if (is7up) {
+			this.currentModal = Modal.advanced({
+				type: 'ajax',
+				content: imageUri,
+				size: Modal.sizes.full,
+				style: Modal.styles.dark,
+				title: modalTitle,
+				ajaxCallback: this.initializeFocuspointModal.bind(this),
+				buttons: buttons,
+			});
+		} else {
+			this.currentModal = Modal.loadUrl(
+				modalTitle,
+				-2,
+				buttons,
+				imageUri,
+				this.initializeFocuspointModal.bind(this)
+			);
+		}
+
 		this.currentModal.addClass('modal-dark');
 		this.currentModal.addClass('modal-focuspoints');
-		this.currentModal.find('.modal-body').addClass('modal-body-focuspoints');
+		this.currentModal.find('.modal-body')
+			.addClass('cropper')
+			.addClass('modal-body-focuspoints');
+
 		this.currentModal.on('hide.bs.modal', (e: JQueryEventObject): void => {
 			this.destroy();
 		});
+
 		// Do not dismiss the modal when clicking beside it to avoid data loss
 		this.currentModal.data('bs.modal').options.backdrop = 'static';
 
@@ -393,11 +413,11 @@ class FocuspointImages {
 	}
 
 
-	public initializeTrigger(): void {
+	public initializeTrigger(is7up: boolean): void {
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
 			e.preventDefault();
 			this.trigger = $(e.currentTarget);
-			this.show();
+			this.show(is7up);
 		};
 		$('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
 	}
