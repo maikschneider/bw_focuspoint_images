@@ -5,7 +5,7 @@ $_EXTKEY = 'bw_focuspoint_images';
 
 $additionalColumns = [
     'focus_points' => [
-        'exclude' => 1,
+        'exclude' => 0,
         'l10n_mode' => 'exclude',
         'l10n_display' => 'defaultAsReadonly',
         'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.focus_points',
