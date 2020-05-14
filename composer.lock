@@ -4,9 +4,71 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3b8234d9725ea360bccb145758b520f2",
+    "content-hash": "97799340a4155bd09355c4cb2341ebbe",
     "packages": [],
     "packages-dev": [
+        {
+            "name": "bk2k/bootstrap-package",
+            "version": "7.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/benjaminkott/bootstrap_package.git",
+                "reference": "484c0d67ddfdd72982ac826690176ce625d5ece0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/benjaminkott/bootstrap_package/zipball/484c0d67ddfdd72982ac826690176ce625d5ece0",
+                "reference": "484c0d67ddfdd72982ac826690176ce625d5ece0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0",
+                "typo3/cms-core": ">=7.6.0,<8.6.0"
+            },
+            "replace": {
+                "bootstrap_package": "self.version",
+                "typo3-ter/bootstrap-package": "self.version"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.2.20"
+            },
+            "type": "typo3-cms-extension",
+            "extra": {
+                "typo3/cms": {
+                    "cms-package-dir": "{$vendor-dir}/typo3/cms",
+                    "web-dir": ".build/web"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BK2K\\BootstrapPackage\\": "Classes"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Benjamin Kott",
+                    "email": "info@bk2k.info",
+                    "homepage": "http://www.bk2k.info/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Bootstrap Package delivers a full configured frontend theme for TYPO3, based on the Bootstrap CSS Framework.",
+            "homepage": "https://github.com/benjaminkott/bootstrap_package",
+            "keywords": [
+                "TYPO3 CMS",
+                "bootstrap",
+                "front-end",
+                "introduction",
+                "responsive",
+                "sitepackage",
+                "web"
+            ],
+            "time": "2018-12-15T15:44:48+00:00"
+        },
         {
             "name": "brumann/polyfill-unserialize",
             "version": "v1.0.4",
@@ -697,16 +759,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.14.0",
+            "version": "v1.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "34094cfa9abe1f0f14f48f490772db7a775559f2"
+                "reference": "fa79b11539418b02fc5e1897267673ba2c19419c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/34094cfa9abe1f0f14f48f490772db7a775559f2",
-                "reference": "34094cfa9abe1f0f14f48f490772db7a775559f2",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/fa79b11539418b02fc5e1897267673ba2c19419c",
+                "reference": "fa79b11539418b02fc5e1897267673ba2c19419c",
                 "shasum": ""
             },
             "require": {
@@ -718,7 +780,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.17-dev"
                 }
             },
             "autoload": {
@@ -752,39 +814,39 @@
                 "portable",
                 "shim"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-05-12T16:47:27+00:00"
         },
         {
             "name": "typo3/class-alias-loader",
-            "version": "1.0.1",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/TYPO3/class-alias-loader.git",
-                "reference": "4972f9f6c2bad07ab1620b5c9717fa626e9b03b0"
+                "reference": "ead04a4d7bc215ca1faa895977c5ea349f0b7383"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TYPO3/class-alias-loader/zipball/4972f9f6c2bad07ab1620b5c9717fa626e9b03b0",
-                "reference": "4972f9f6c2bad07ab1620b5c9717fa626e9b03b0",
+                "url": "https://api.github.com/repos/TYPO3/class-alias-loader/zipball/ead04a4d7bc215ca1faa895977c5ea349f0b7383",
+                "reference": "ead04a4d7bc215ca1faa895977c5ea349f0b7383",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.0",
+                "composer-plugin-api": "^1.0 || ^2.0",
                 "php": ">=5.3.7"
             },
             "replace": {
                 "helhum/class-alias-loader": "*"
             },
             "require-dev": {
-                "composer/composer": "dev-master",
-                "mikey179/vfsstream": "1.4.*@dev",
-                "phpunit/phpunit": "^4.8"
+                "composer/composer": "^1.1@dev || ^2.0@dev",
+                "mikey179/vfsstream": "~1.4.0@dev",
+                "phpunit/phpunit": ">4.8 <8"
             },
             "type": "composer-plugin",
             "extra": {
                 "class": "TYPO3\\ClassAliasLoader\\Plugin",
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -810,7 +872,7 @@
                 "classloader",
                 "composer"
             ],
-            "time": "2018-10-03T12:49:56+00:00"
+            "time": "2020-05-07T12:46:20+00:00"
         },
         {
             "name": "typo3/cms",
@@ -1178,6 +1240,11 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": []
+    "platform": {
+        "ext-json": "*"
+    },
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "7.2"
+    }
 }
