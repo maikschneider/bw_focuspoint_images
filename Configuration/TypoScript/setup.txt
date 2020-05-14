@@ -7,6 +7,7 @@ plugin.tx_bwfocuspointimages {
 		layoutRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Layouts/
 		layoutRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.layoutRootPath}
 	}
+
 	settings {
 		resizable = 1
 		defaultWidth = 0.2
@@ -17,19 +18,20 @@ plugin.tx_bwfocuspointimages {
 	}
 }
 
-tt_content {
-	bw_focuspoint_images_svg =< lib.contentElement
-	bw_focuspoint_images_svg {
-		templateRootPaths < plugin.tx_bwfocuspointimages.view.templateRootPaths
-		partialRootPaths < plugin.tx_bwfocuspointimages.view.partialRootPaths
-		templateRootPaths < plugin.tx_bwfocuspointimages.view.templateRootPaths
+tt_content.bw_focuspoint_images_svg = FLUIDTEMPLATE
+tt_content.bw_focuspoint_images_svg {
 
-		templateName = FocuspointSVG
-		dataProcessing {
-			10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
-			10 {
-				references.fieldName = assets
-			}
+	layoutRootPaths < plugin.tx_bwfocuspointimages.view.layoutRootPaths
+	partialRootPaths < plugin.tx_bwfocuspointimages.view.partialRootPaths
+	templateRootPaths < plugin.tx_bwfocuspointimages.view.templateRootPaths
+
+	templateName = FocuspointImage
+	dataProcessing {
+		10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+		10 {
+			references.fieldName = assets
+			as = image
 		}
 	}
 }
+
