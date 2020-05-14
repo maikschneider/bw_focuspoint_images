@@ -7,7 +7,7 @@ module.exports = function(grunt) {
             },
             default: {
                 watch: "Resources/Private/Typescript",
-                src: ["**/*.ts", "!node_modules/**", "!vendor/**"],
+                src: ["**/*.ts", "!node_modules/**", "!vendor/**", "!public/**"],
                 outDir: "Resources/Public/JavaScript",
                 tsconfig: true
             }
