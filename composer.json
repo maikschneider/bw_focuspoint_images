@@ -6,8 +6,8 @@
     "license": ["GPL-2.0+"],
     "keywords": ["TYPO3 CMS"],
     "require-dev": {
-        "typo3/cms-base-distribution": "^8.0",
-        "bk2k/bootstrap-package": "^8.0"
+        "typo3/cms-base-distribution": "^9.0",
+        "bk2k/bootstrap-package": "^9.0"
     },
     "autoload": {
         "psr-4": {
