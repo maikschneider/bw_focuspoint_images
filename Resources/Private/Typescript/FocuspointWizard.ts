@@ -46,8 +46,8 @@ class FocuspointWizard {
 	private focusPointContainerSelector: string = '#focuspoint-container';
 	private trigger: JQuery;
 	private currentModal: JQuery;
-	private focusBoxes: Array<JQuery>;
-	private inputPanels: Array<JQuery>;
+	private focusBoxes: Array<JQuery> = [];
+	private inputPanels: Array<JQuery> = [];
 	private data: Array<Focuspoint>;
 
 	private calculateRelativeX(width: number): number {
@@ -151,23 +151,25 @@ class FocuspointWizard {
 		};
 		$(box).bind('delete', removeEvent.bind(null, box));
 
+		// bind click event
 		const self = this;
 		const clickEvent: Function = function () {
 			const id = parseInt($(box).attr('data-focuspointboxid'));
 			self.activateFocuspoint(id);
 		};
 		$(box).bind('click', clickEvent.bind(null, box));
-
 	}
 
 	private activateFocuspoint(id: number): void {
 
+		// remove all other activa states
 		for (let i = 0; i < this.data.length; i++) {
 			if (i !== id) {
 				this.focusBoxes[i].removeClass('active');
 			}
 		}
 
+		// toggle state of box and panel
 		this.focusBoxes[id].toggleClass('active');
 		this.inputPanels[id].find('a').trigger('click');
 	}
@@ -317,8 +319,6 @@ class FocuspointWizard {
 	 */
 	private init(): void {
 		const image: JQuery = this.currentModal.find(this.cropImageSelector);
-		const imageHeight: number = $(image).height();
-		const imageWidth: number = $(image).width();
 		const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
 		let data = hiddenField.val();
 
@@ -329,17 +329,15 @@ class FocuspointWizard {
 		// If we have data already set we assume an internal reinit eg. after resizing
 		this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
 
-		// Initialize our class members
-		this.focusBoxes = [];
-		this.inputPanels = [];
+		if (this.data.length) {
+			// create focuspoints from data
+			for (let i = 0; i < this.data.length; i++) {
+				this.addNewFocuspoint(i);
+			}
 
-		// create focuspoints from data
-		for (let i = 0; i < this.data.length; i++) {
-			this.addNewFocuspoint(i);
+			// open first focus point
+			this.activateFocuspoint(0);
 		}
-
-		// open first focus point
-		this.activateFocuspoint(0);
 
 		// Bind New button
 		this.currentModal.find('[data-method=new]').off('click').on('click', (e: JQueryEventObject) => {

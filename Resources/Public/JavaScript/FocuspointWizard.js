@@ -22,6 +22,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             this.panelGroupSelector = '#accordion-cropper-variants';
             this.cropImageSelector = '#t3js-crop-image';
             this.focusPointContainerSelector = '#focuspoint-container';
+            this.focusBoxes = [];
+            this.inputPanels = [];
         }
         FocuspointWizard.prototype.calculateRelativeX = function (width) {
             var image = this.currentModal.find(this.cropImageSelector);
@@ -108,6 +110,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 $(box).remove();
             };
             $(box).bind('delete', removeEvent.bind(null, box));
+            // bind click event
             var self = this;
             var clickEvent = function () {
                 var id = parseInt($(box).attr('data-focuspointboxid'));
@@ -116,11 +119,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(box).bind('click', clickEvent.bind(null, box));
         };
         FocuspointWizard.prototype.activateFocuspoint = function (id) {
+            // remove all other activa states
             for (var i = 0; i < this.data.length; i++) {
                 if (i !== id) {
                     this.focusBoxes[i].removeClass('active');
                 }
             }
+            // toggle state of box and panel
             this.focusBoxes[id].toggleClass('active');
             this.inputPanels[id].find('a').trigger('click');
         };
@@ -249,8 +254,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         FocuspointWizard.prototype.init = function () {
             var _this = this;
             var image = this.currentModal.find(this.cropImageSelector);
-            var imageHeight = $(image).height();
-            var imageWidth = $(image).width();
             var hiddenField = $("#" + this.trigger.attr('data-field'));
             var data = hiddenField.val();
             if (!data || data == "") {
@@ -258,15 +261,14 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             }
             // If we have data already set we assume an internal reinit eg. after resizing
             this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
-            // Initialize our class members
-            this.focusBoxes = [];
-            this.inputPanels = [];
-            // create focuspoints from data
-            for (var i = 0; i < this.data.length; i++) {
-                this.addNewFocuspoint(i);
+            if (this.data.length) {
+                // create focuspoints from data
+                for (var i = 0; i < this.data.length; i++) {
+                    this.addNewFocuspoint(i);
+                }
+                // open first focus point
+                this.activateFocuspoint(0);
             }
-            // open first focus point
-            this.activateFocuspoint(0);
             // Bind New button
             this.currentModal.find('[data-method=new]').off('click').on('click', function (e) {
                 e.preventDefault();
