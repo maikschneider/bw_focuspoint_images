@@ -307,7 +307,6 @@ class FocuspointWizard {
 		this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
 
 		// Initialize our class members
-		this.currentModal.find(this.focusPointContainerSelector).css({height: imageHeight, width: imageWidth});
 		this.focusBoxes = [];
 		this.inputPanels = [];
 
@@ -320,6 +319,22 @@ class FocuspointWizard {
 		this.currentModal.find('[data-method=new]').off('click').on('click', (e: JQueryEventObject) => {
 			e.preventDefault();
 			this.addNewFocuspoint(-1);
+		});
+
+		// Bind resize event
+		$(window).resize(this.onWindowResize.bind(this));
+	}
+
+	private onWindowResize(): void {
+		const self = this;
+
+		// update position and size of every focuspoint
+		$(this.focusBoxes).each(function(i, box){
+			const focuspoint = self.data[i];
+			$(box).css('width', self.calculateAbsoluteX(focuspoint.width) + 'px');
+			$(box).css('height', self.calculateAbsoluteY(focuspoint.height) + 'px');
+			$(box).css('top', self.calculateAbsoluteY(focuspoint.y) + 'px');
+			$(box).css('left', self.calculateAbsoluteX(focuspoint.x) + 'px');
 		});
 	}
 
