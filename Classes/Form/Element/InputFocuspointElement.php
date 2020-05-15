@@ -16,7 +16,6 @@ use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Service\TypoScriptService;
-use TYPO3\CMS\Extbase\Utility\ArrayUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
@@ -155,10 +154,10 @@ class InputFocuspointElement extends AbstractFormElement
     {
         // override default config from TCA config
         $defaultConfig = self::$defaultConfig;
-        $config = ArrayUtility::arrayMergeRecursiveOverrule($defaultConfig, $baseConfiguration);
+        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
 
         // override single point settings from typoScript
-        $config['focusPoints']['singlePoint'] = ArrayUtility::arrayMergeRecursiveOverrule($config['focusPoints']['singlePoint'],
+        $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'],
             $this->typoScript['settings']);
 
         return $config;
