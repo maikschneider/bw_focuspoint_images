@@ -26,7 +26,7 @@
                        data-toggle="collapse"
                        data-parent="#accordion-cropper-variants"
                        href="#cropper-collapse-"
-                       aria-expanded="true"
+                       aria-expanded="false"
                        aria-controls="cropper-collapse-"
                        class="t3js-crop-variant-trigger collapsed"
                        data-append-id="href,aria-controls"
@@ -38,7 +38,7 @@
                 </h4>
             </div>
             <div id="cropper-collapse-"
-                 class="panel-collapse collapse in"
+                 class="panel-collapse collapse"
                  role="tabpanel"
                  aria-labelledby="cropper-accordion-heading-"
                  data-append-id="id,aria-labelledby">
@@ -131,6 +131,10 @@
         top: 0;
         left: 0;
         cursor: move;
+    }
+
+    .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.active {
+        background-color: rgba(0, 0, 0, 0.8);
     }
 
     .modal-body-focuspoints .modal-panel-main .cropper-image-container .focuspoint-item.focuspoint-item-dummy,

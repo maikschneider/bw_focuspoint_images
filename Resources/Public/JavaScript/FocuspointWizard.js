@@ -108,6 +108,21 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 $(box).remove();
             };
             $(box).bind('delete', removeEvent.bind(null, box));
+            var self = this;
+            var clickEvent = function () {
+                var id = parseInt($(box).attr('data-focuspointboxid'));
+                self.activateFocuspoint(id);
+            };
+            $(box).bind('click', clickEvent.bind(null, box));
+        };
+        FocuspointWizard.prototype.activateFocuspoint = function (id) {
+            for (var i = 0; i < this.data.length; i++) {
+                if (i !== id) {
+                    this.focusBoxes[i].removeClass('active');
+                }
+            }
+            this.focusBoxes[id].toggleClass('active');
+            this.inputPanels[id].find('a').trigger('click');
         };
         FocuspointWizard.prototype.addNewFocuspoint = function (focuspointBoxId) {
             if (focuspointBoxId === void 0) { focuspointBoxId = -1; }
@@ -148,6 +163,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             // add elements to the class
             this.focusBoxes.push(newBox);
             this.inputPanels.push(newPanel);
+            return focuspointBoxId;
         };
         FocuspointWizard.prototype.onCancelButtonClick = function (e) {
             e.preventDefault();
@@ -192,6 +208,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 $(panel).remove();
             };
             $(panel).bind('remove', removeEvent.bind(null, panel));
+            // bind open / close event
+            var self = this;
+            var clickEvent = function () {
+                var id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
+                self.activateFocuspoint(id);
+            };
+            $(panel).find('a').bind('click', clickEvent.bind(null, panel));
             // bind delete button event
             $(panel).find('[data-delete]').off('click').on('click', function (e, button) {
                 e.preventDefault();
@@ -199,12 +222,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             });
             // show panel
             $(panel).removeClass('panel-hidden');
-        };
-        FocuspointWizard.prototype.initInputPanels = function () {
-            var _this = this;
-            this.inputPanels.forEach(function (panel) {
-                _this.initInputPanel(panel);
-            });
         };
         FocuspointWizard.prototype.getEmptyFocuspoint = function () {
             var o = {
@@ -248,10 +265,13 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             for (var i = 0; i < this.data.length; i++) {
                 this.addNewFocuspoint(i);
             }
+            // open first focus point
+            this.activateFocuspoint(0);
             // Bind New button
             this.currentModal.find('[data-method=new]').off('click').on('click', function (e) {
                 e.preventDefault();
-                _this.addNewFocuspoint(-1);
+                var newFocuspointId = _this.addNewFocuspoint(-1);
+                _this.activateFocuspoint(newFocuspointId);
             });
             // Bind resize event
             $(window).resize(this.onWindowResize.bind(this));

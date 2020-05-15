@@ -151,9 +151,28 @@ class FocuspointWizard {
 		};
 		$(box).bind('delete', removeEvent.bind(null, box));
 
+		const self = this;
+		const clickEvent: Function = function () {
+			const id = parseInt($(box).attr('data-focuspointboxid'));
+			self.activateFocuspoint(id);
+		};
+		$(box).bind('click', clickEvent.bind(null, box));
+
 	}
 
-	private addNewFocuspoint(focuspointBoxId: number = -1): void {
+	private activateFocuspoint(id: number): void {
+
+		for (let i = 0; i < this.data.length; i++) {
+			if (i !== id) {
+				this.focusBoxes[i].removeClass('active');
+			}
+		}
+
+		this.focusBoxes[id].toggleClass('active');
+		this.inputPanels[id].find('a').trigger('click');
+	}
+
+	private addNewFocuspoint(focuspointBoxId: number = -1): number {
 
 		// check if appended or created from data
 		if (focuspointBoxId === -1) {
@@ -197,6 +216,8 @@ class FocuspointWizard {
 		// add elements to the class
 		this.focusBoxes.push(newBox);
 		this.inputPanels.push(newPanel);
+
+		return focuspointBoxId;
 	}
 
 	private onCancelButtonClick(e): void {
@@ -252,6 +273,14 @@ class FocuspointWizard {
 		};
 		$(panel).bind('remove', removeEvent.bind(null, panel));
 
+		// bind open / close event
+		const self = this;
+		const clickEvent: Function = function () {
+			const id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
+			self.activateFocuspoint(id);
+		};
+		$(panel).find('a').bind('click', clickEvent.bind(null, panel));
+
 		// bind delete button event
 		$(panel).find('[data-delete]').off('click').on('click', (e, button) => {
 			e.preventDefault();
@@ -260,12 +289,6 @@ class FocuspointWizard {
 
 		// show panel
 		$(panel).removeClass('panel-hidden');
-	}
-
-	private initInputPanels(): void {
-		this.inputPanels.forEach((panel) => {
-			this.initInputPanel(panel);
-		});
 	}
 
 	private getEmptyFocuspoint(): Focuspoint {
@@ -315,10 +338,14 @@ class FocuspointWizard {
 			this.addNewFocuspoint(i);
 		}
 
+		// open first focus point
+		this.activateFocuspoint(0);
+
 		// Bind New button
 		this.currentModal.find('[data-method=new]').off('click').on('click', (e: JQueryEventObject) => {
 			e.preventDefault();
-			this.addNewFocuspoint(-1);
+			const newFocuspointId = this.addNewFocuspoint(-1);
+			this.activateFocuspoint(newFocuspointId);
 		});
 
 		// Bind resize event
@@ -329,7 +356,7 @@ class FocuspointWizard {
 		const self = this;
 
 		// update position and size of every focuspoint
-		$(this.focusBoxes).each(function(i, box){
+		$(this.focusBoxes).each(function (i, box) {
 			const focuspoint = self.data[i];
 			$(box).css('width', self.calculateAbsoluteX(focuspoint.width) + 'px');
 			$(box).css('height', self.calculateAbsoluteY(focuspoint.height) + 'px');
