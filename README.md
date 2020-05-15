@@ -1,12 +1,22 @@
 # Bw Focuspoint Images
 
-Create image map like elements using SVG.
+With this TYPO3 extension, you can create responsive image maps in the backend.
 
 ![Example Image](Documentation/preview.png)
 
-## Configure TypoScript
+## Installation
 
-Include the **Bw Focuspoint Images** static template or manually include setup and constants.
+```bash
+composer require blueways/bw-focuspoint-images
+```
+
+## Usage
+
+Add the new content element "SVG Focuspoints" to any page, link a new image and start adding your focus areas.
+
+## Configuration
+
+Include the **Bw Focuspoint Images** static TypoScript template or manually include setup and constants.
 
 ```typo3_typoscript
 <INCLUDE_TYPOSCRIPT: source="FILE:EXT:bw_focuspoint_images/Configuration/TypoScript/constants.txt">
