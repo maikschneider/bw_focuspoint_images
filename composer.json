@@ -3,7 +3,7 @@
     "type": "typo3-cms-extension",
     "description": "Image Editor for adding focus points to images",
     "homepage": "https://blueways.de",
-    "license": ["GPL-2.0+"],
+    "license": ["GPL-2.0-or-later"],
     "keywords": ["TYPO3 CMS"],
     "require-dev": {
         "typo3/cms-base-distribution": "^9.0",
