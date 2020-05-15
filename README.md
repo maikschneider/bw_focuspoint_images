@@ -1,6 +1,7 @@
 # Bw Focuspoint Images
 
-With this TYPO3 extension, you can create responsive image maps in the backend.
+With this TYPO3 extension you can create responsive image maps in the
+backend. This extension ships an image editor that can be used to add areas and information to an image.
 
 ![Example Image](Documentation/preview.png)
 
