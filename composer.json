@@ -1,41 +1,48 @@
 {
-    "name": "blueways/bw-focuspoint-images",
-    "type": "typo3-cms-extension",
-    "description": "Image Editor for adding focus points to images",
-    "homepage": "https://blueways.de",
-    "license": ["GPL-2.0-or-later"],
-    "keywords": ["TYPO3 CMS"],
-    "require-dev": {
-        "typo3/cms-base-distribution": "^9.0",
-        "bk2k/bootstrap-package": "^9.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Blueways\\BwFocuspointImages\\": "Classes"
-        }
-    },
-    "extra": {
-        "typo3/cms": {
-            "cms-package-dir": "{$vendor-dir}/typo3/cms",
-            "web-dir": "public"
-        }
-    },
-    "config": {
-        "bin-dir": "bin",
-        "vendor-dir": "vendor",
-        "platform": {
-            "php": "7.2"
-        }
-    },
-    "authors": [
-        {
-            "homepage": "https://twitter.com/maik_tailor",
-            "name": "Maik Schneider",
-            "role": "Developer",
-            "email": "m.schneider@blueways.de"
-        }
-    ],
+  "name": "blueways/bw-focuspoint-images",
+  "type": "typo3-cms-extension",
+  "description": "Image Editor for adding focus points to images",
+  "homepage": "https://blueways.de",
+  "license": [
+    "GPL-2.0-or-later"
+  ],
+  "keywords": [
+    "TYPO3 CMS"
+  ],
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "typo3/cms-base-distribution": "^9.0",
+    "bk2k/bootstrap-package": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Blueways\\BwFocuspointImages\\": "Classes"
+    }
+  },
+  "extra": {
+    "typo3/cms": {
+      "cms-package-dir": "{$vendor-dir}/typo3/cms",
+      "web-dir": "public"
+    }
+  },
+  "config": {
+    "bin-dir": "bin",
+    "vendor-dir": "vendor",
+    "platform": {
+      "php": "7.2"
+    }
+  },
+  "authors": [
+    {
+      "homepage": "https://twitter.com/maik_tailor",
+      "name": "Maik Schneider",
+      "role": "Developer",
+      "email": "m.schneider@blueways.de"
+    }
+  ],
   "require": {
-    "ext-json": "*"
+    "ext-json": "*",
+    "php": ">=7.0",
+    "typo3/cms-core": ">=7.0.0,<=9.5.99"
   }
 }
