@@ -6,7 +6,7 @@
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Bw Focuspoint Images',
     'description' => 'Image Editor for adding focus points to images',
-    'category' => 'templates',
+    'category' => 'plugin',
     'constraints' => [
         'depends' => [
             'typo3' => '7.0.0-9.5.99',
@@ -21,7 +21,6 @@ $EM_CONF[$_EXTKEY] = [
     ],
     'state' => 'stable',
     'uploadfolder' => 0,
-    'createDirs' => '',
     'clearCacheOnLoad' => 1,
     'author' => 'Maik Schneider',
     'author_email' => 'm.schneider@blueways.de',
