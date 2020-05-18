@@ -1,49 +1,88 @@
+<h1>{data.header}</h1>
+
 <div class="focuspoint">
 
     <f:image image="{image}"/>
 
     <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-        <f:for each="{points}" as="point">
+        <f:for each="{points}" as="point" iteration="i">
             <rect x="{point.x}%"
                   y="{point.y}%"
-                  stroke="#000"
+                  id="focuspoint-{image.uid}-{i.cycle}"
+                  stroke="{point.color}"
+                  stroke-width="2px"
+                  class="focuspoint__svg__rect"
                   width="{point.width}%"
                   height="{point.height}%"
-                  fill="transparent"/>
-            <text x="{point.textX}%" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
+                  opacity="0.7"
+                  fill="{point.color}"/>
+            <text x="{point.textX}%" fill="#FFF" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
                 {point.name}
             </text>
         </f:for>
     </svg>
 
+    <f:for each="{points}" as="point" iteration="i">
+        <div class="focuspoint__description" id="focuspoint-{image.uid}-{i.cycle}-description">
+            <h3>{point.name}</h3>
+            <p>{point.description}</p>
+        </div>
+    </f:for>
+
 </div>
+
+<script>
+    const rects = document.getElementsByClassName('focuspoint__svg__rect');
+    for (let i = 0; i < rects.length; i++) {
+        rects[i].addEventListener('mouseover', function () {
+            document.getElementById(this.getAttribute('id') + '-description').setAttribute('style', 'display:inherit');
+        });
+        rects[i].addEventListener('mouseout', function () {
+            document.getElementById(this.getAttribute('id') + '-description').setAttribute('style', '');
+        });
+    }
+</script>
 
 <style type="text/css">
     .focuspoint {
-        position: relative;
-        display: inline-block;
+        display: grid;
+        grid-template-columns: 100%;
+        grid-template-rows: auto min-content;
     }
 
     .focuspoint img {
+        grid-column: 1 / 2;
+        grid-row: 1 / 3;
         max-width: 100%;
         height: auto;
     }
 
     .focuspoint__svg {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
+        grid-column: 1 / 2;
+        grid-row: 1 / 3;
+        align-self: stretch;
+        justify-self: stretch;
     }
 
     .focuspoint__svg rect:hover {
-        fill: rgba(0, 0, 0, 0.5);
+        opacity: 1;
+        fill: transparent;
+        stroke-dasharray: 2px;
     }
 
     .focuspoint__svg rect:hover + text {
-        fill: #fff;
+        display: none;
     }
+
+    .focuspoint__description {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        padding: 12px 12px 0 12px;
+        display: none;
+    }
+
 </style>
 
 
