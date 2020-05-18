@@ -12,6 +12,3 @@ mod.wizards.newContentElement.wizardItems.common {
 
 	show := addToList(bw_focuspoint_images_svg)
 }
-
-# for simple preview (without images)
-mod.web_layout.tt_content.preview.bw_focuspoint_images_svg = EXT:bw_focuspoint_images/Resources/Private/Preview/FocuspointSVG.html

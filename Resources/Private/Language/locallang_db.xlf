@@ -33,26 +33,23 @@
                 <source>Add new Focus Point</source>
             </trans-unit>
 
-            <trans-unit id="wizard.single_point.field.name.title">
+            <trans-unit id="wizard.fields.name">
                 <source>Name</source>
             </trans-unit>
-            <trans-unit id="wizard.single_point.field.description.title">
+            <trans-unit id="wizard.fields.description">
                 <source>Description</source>
             </trans-unit>
-            <trans-unit id="wizard.single_point.field.color.title">
+            <trans-unit id="wizard.fields.color">
                 <source>Color</source>
             </trans-unit>
-            <trans-unit id="wizard.single_point.field.color.options.green.title">
+            <trans-unit id="wizard.fields.color.green">
                 <source>Green</source>
             </trans-unit>
-            <trans-unit id="wizard.single_point.field.color.options.blue.title">
+            <trans-unit id="wizard.fields.color.blue">
                 <source>Blue</source>
             </trans-unit>
-            <trans-unit id="wizard.single_point.field.color.options.0.title">
-                <source>0 Example</source>
-            </trans-unit>
-            <trans-unit id="wizard.single_point.field.color.options.1.title">
-                <source>1 Example</source>
+            <trans-unit id="wizard.fields.color.red">
+                <source>Red</source>
             </trans-unit>
 
             <trans-unit id="tca.wizard.svg.title">

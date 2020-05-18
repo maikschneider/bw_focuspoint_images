@@ -44,8 +44,7 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverr
             'maxitems' => 1,
             'foreign_types' => [
                 \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                    'showitem' => 'focus_points,
-                            --palette--;;filePalette'
+                    'showitem' => 'focus_points'
                 ]
             ],
             'foreign_selector_fieldTcaOverride' => [
