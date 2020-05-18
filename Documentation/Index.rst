@@ -11,10 +11,12 @@ backend. This extension ships an image editor that can be used to add areas and 
 Examples
 -------
 
+.. _example1:
+
 Example 1: Default output
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Frontend output with included default TypoScript setup
+Frontend output with included :ref:`example TypoScript setup <typoscript_fields>`
 
 .. figure:: ./Images/example_frontend.jpg
    :alt: Frontend output example 1
@@ -22,7 +24,9 @@ Frontend output with included default TypoScript setup
 
 
 Example 2: SVG Animation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this example the focus areas are animated via SVG. The additional information are displayed next to the image with some delay.
 
 .. figure:: ./Images/example_animation.gif
    :alt: Frontend output example 2
@@ -44,7 +48,7 @@ Installation
 
 2. Include TypoScript
 
-   Enable the extension and include the **static TypoScript template** or manually include setup and constants.
+   Enable the extension in the Extension Manager and include the **static TypoScript template** or manually include setup and constants.
 
 3. Define your own wizard fields
 
@@ -68,6 +72,8 @@ Setup
 To configure the fields in the focus point wizard, use the following
 TypoScript settings. You can choose between **text**, **textarea** and
 **select** inputs in the wizard.
+
+This example setup is used to generate the output shown in :ref:`Example 1 <example1>`.
 
 .. code:: typoscript
 
@@ -98,7 +104,7 @@ TypoScript settings. You can choose between **text**, **textarea** and
 Constants
 ~~~~~~~~
 
-To override templates, set your own paths via constants:
+To override templates set your own paths via constants:
 
 .. code:: typoscript
 
@@ -129,8 +135,7 @@ To use the editor in other content elements with FAL images, use the following T
         'config' => [
             'foreign_types' => [
                 \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                    'showitem' => 'focus_points,
-                            --palette--;;filePalette'
+                    'showitem' => 'focus_points'
                 ]
             ]
          ]
