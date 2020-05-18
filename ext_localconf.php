@@ -27,3 +27,8 @@ $iconRegistry->registerIcon(
 
 // Register for hook to show preview of tt_content element of CType="textmedia" in page module
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php']['tt_content_drawItem']['bw_focuspoint_images_svg'] = BwFocuspointSvgPreviewRenderer::class;
+
+// Register PageTS
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig('
+    <INCLUDE_TYPOSCRIPT: source="FILE:EXT:bw_focuspoint_images/Configuration/PageTS/mod.typoscript">
+');
