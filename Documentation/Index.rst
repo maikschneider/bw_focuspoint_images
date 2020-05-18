@@ -124,7 +124,7 @@ To override templates set your own paths via constants:
 For developers
 ==============
 
-The table :file:`sys_file_references` becomes extended by the field :file:`focus_points`. This field is used to save the settings made in the backend editor in json format.
+The table :file:`sys_file_references` becomes extended for the field :file:`focus_points`. This field is used to save the settings made in the backend editor in json format.
 
 To use the editor in other content elements with FAL images, use the following TCA to activate the palette:
 

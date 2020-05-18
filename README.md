@@ -110,7 +110,7 @@ For developers
 ==============
 
 The table `sys_file_references` becomes
-extended by the field `focus_points`. This field is used to save the settings made in the backend editor in json format.
+extended for the field `focus_points`. This field is used to save the settings made in the backend editor in json format.
 
 To use the editor in other content elements with FAL images, use the
 following TCA to activate the palette:
