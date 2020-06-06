@@ -13,6 +13,7 @@
 
 /// <amd-dependency path='TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min' name='ImagesLoaded'>
 /// <amd-dependency path='TYPO3/CMS/Backend/Modal' name='Modal'>
+/// <amd-dependency path='TYPO3/CMS/Recordlist/LinkBrowser' name='LinkBrowser'>
 
 import $ = require('jquery');
 import 'jquery-ui/draggable';
@@ -49,6 +50,8 @@ class FocuspointWizard {
 	private focusBoxes: Array<JQuery> = [];
 	private inputPanels: Array<JQuery> = [];
 	private data: Array<Focuspoint>;
+	private linkBrowser: JQuery;
+	private is7up: boolean;
 
 	private calculateRelativeX(width: number): number {
 		const image: JQuery = this.currentModal.find(this.cropImageSelector);
@@ -242,6 +245,7 @@ class FocuspointWizard {
 
 	private initInputPanel(panel: JQuery): void {
 
+		const self = this;
 		const panelInputs: JQuery = $(panel).find('[data-focuspointPanelId]');
 		const focuspointPanelId: number = parseInt(panelInputs.first().attr('data-focuspointPanelId'));
 		const focuspoint: object = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
@@ -261,12 +265,30 @@ class FocuspointWizard {
 					$('option', input).prop('selected', false);
 					$('option[value="' + inputValue + '"]', input).prop('selected', true);
 					break;
+				case 'A':
+					const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
+					$(input).prev().val(label);
+					break;
 			}
 
 			// bind events
 			$(input).off('input').on('input', this.onInputChange.bind(this, input));
 
 		});
+
+		// bind linkbrowser
+		const linkelement = $(panel).find('.linkbrowser');
+
+		if (linkelement.length) {
+			const onButtonClick = function (e) {
+				e.preventDefault();
+				self.linkBrowser.attr('data-current-focuspointPanelId', focuspointPanelId);
+				self.linkBrowser.attr('data-current-fieldname', $(linkelement).attr('data-fieldname'));
+				self.linkBrowser.addClass('open');
+			};
+			$(linkelement).on('click', onButtonClick.bind(this));
+			$(panel).find('.linkbrowser-input').on('click', onButtonClick.bind(this));
+		}
 
 		// bind remove event
 		const removeEvent = function () {
@@ -281,7 +303,7 @@ class FocuspointWizard {
 			const id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
 			self.activateFocuspoint(id);
 		};
-		$(panel).find('a').bind('click', clickEvent.bind(null, panel));
+		$(panel).find('a.panel-link').bind('click', clickEvent.bind(null, panel));
 
 		// bind delete button event
 		$(panel).find('[data-delete]').off('click').on('click', (e, button) => {
@@ -346,13 +368,105 @@ class FocuspointWizard {
 			this.activateFocuspoint(newFocuspointId);
 		});
 
+		// bind link browser events
+		this.initLinkBrowser();
+
 		// Bind resize event
 		$(window).resize(this.onWindowResize.bind(this));
 	}
 
+	private linkBrowserClick(uid: int, table: string, key: string, label: string) {
+
+		let typolink = uid;
+
+		// construct typolink
+		// @TODO: check syntax for v8+ e.g. t3?id=xx
+		if (table !== 'pages') {
+			typolink = 'record:' + table + ':' + key + ':' + uid;
+		}
+
+		// build data to save
+		const browserlinkvalue = {
+			label: label,
+			uid: uid,
+			table: table,
+			key: key,
+			typolink: typolink
+		};
+
+		// save selected value to data
+		const focuspointPanelId: number = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
+		const fieldname = this.linkBrowser.attr('data-current-fieldname');
+		this.data[focuspointPanelId][fieldname] = browserlinkvalue;
+
+		// insert label into input and close
+		this.inputPanels[focuspointPanelId].find('.linkbrowser-input').val(label);
+		this.linkBrowser.trigger('close');
+	}
+
+	private initLinkBrowser(): void {
+		const self = this;
+		this.linkBrowser = this.currentModal.find('.modal-panel-linkbrowser');
+
+		// click on tab item
+		this.linkBrowser.find('.nav-tabs a').on('click', function (e) {
+			e.preventDefault();
+			const tab = $(e.currentTarget).parent();
+			const browserKey = $(tab).attr('data-browser-key');
+			self.linkBrowser.find('.nav-tabs li').removeClass('active');
+			self.linkBrowser.find('.modal-panel-linkbrowser-item').removeClass('active');
+			$(tab).addClass('active');
+			self.linkBrowser.find('.modal-panel-linkbrowser-item[data-browser-key="' + browserKey + '"]').addClass('active');
+		});
+
+		// hide page children
+		const rootPid = this.linkBrowser.find('tr.db_list_normal[data-pid="0"]').attr('data-uid');
+		this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
+
+		// page tree open children
+		this.linkBrowser.find('tr .treeline-icon').on('click', function (e) {
+			const uid = $(this).parent().attr('data-uid');
+			self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
+		});
+
+		// page tree link click
+		this.linkBrowser.find('tr .pagetree-title').on('click', function (e) {
+			e.preventDefault();
+			const uid = $(e.currentTarget).parent().attr('data-uid');
+			const table = 'pages';
+			const key = 'page';
+			const label = $(e.currentTarget).html();
+			self.linkBrowserClick(uid, table, key, label);
+		});
+
+		// record list click
+		this.linkBrowser.find('.recordlist tr').on('click', function (e) {
+			e.preventDefault();
+			const row = $(e.currentTarget);
+			const uid = row.attr('data-uid');
+			const table = row.closest('.table').attr('data-table');
+			const key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
+			const label = row.find('td:nth-child(2)').html();
+			self.linkBrowserClick(uid, table, key, label);
+		});
+
+		// close button link
+		this.linkBrowser.find('#closelinkbrowser').on('click', function (e) {
+			e.preventDefault();
+			self.linkBrowser.trigger('close');
+		});
+
+		// reset function
+		this.linkBrowser.bind('close', () => {
+			self.linkBrowser.removeClass('open');
+			self.linkBrowser.find('.nav-tabs li:first-child a').trigger('click');
+			self.linkBrowser.attr('data-current-focuspointPanelId', '');
+			self.linkBrowser.attr('data-current-fieldname', '');
+		});
+	}
+
 	private onWindowResize(): void {
 		const self = this;
-
 		// update position and size of every focuspoint
 		$(this.focusBoxes).each(function (i, box) {
 			const focuspoint = self.data[i];
@@ -378,7 +492,7 @@ class FocuspointWizard {
 	};
 
 
-	public show(is7up: boolean): void {
+	public show(): void {
 
 		const modalTitle: string = this.trigger.data('modalTitle');
 		const buttonDismissText: string = this.trigger.data('buttonDismissText');
@@ -405,7 +519,7 @@ class FocuspointWizard {
 			},
 		];
 
-		if (is7up) {
+		if (this.is7up) {
 			this.currentModal = Modal.advanced({
 				type: 'ajax',
 				content: imageUri,
@@ -448,6 +562,8 @@ class FocuspointWizard {
 	private destroy(): void {
 		if (this.currentModal) {
 			this.currentModal = null;
+			this.focusBoxes = [];
+			this.inputPanels = [];
 			this.data = null;
 		}
 	}
@@ -457,7 +573,8 @@ class FocuspointWizard {
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
 			e.preventDefault();
 			this.trigger = $(e.currentTarget);
-			this.show(is7up);
+			this.is7up = is7up
+			this.show();
 		};
 		$('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
 	}

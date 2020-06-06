@@ -1,24 +1,31 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
-    <f:if condition="{field.title}">
-        <label class="element{j.cycle}"><f:translate key="{field.title}">{field.title}</f:translate></label>
-    </f:if>
-    <div class="input-group">
-        <f:switch expression="{field.type}">
-            <f:case value="text">
-                <input type="text" name="{fieldname}" data-focuspointPanelId="x" />
-            </f:case>
-            <f:case value="textarea">
-                <textarea name="{fieldname}" data-focuspointPanelId="x"></textarea>
-            </f:case>
-            <f:case value="select">
-                <select name="{fieldname}" data-focuspointPanelId="x">
-                    <f:for each="{field.options}" as="option" key="optionname" iteration="k">
-                        <option value="{optionname}">{f:translate(id:'{option}')}</option>
-                    </f:for>
-                </select>
-            </f:case>
-        </f:switch>
-    </div>
+<f:if condition="{field.title}">
+    <label class="element{j.cycle}">
+        <f:translate key="{field.title}">{field.title}</f:translate>
+    </label>
+</f:if>
+<div class="input-group">
+    <f:switch expression="{field.type}">
+        <f:case value="text">
+            <input type="text" name="{fieldname}" data-focuspointPanelId="x"/>
+        </f:case>
+        <f:case value="textarea">
+            <textarea name="{fieldname}" data-focuspointPanelId="x"></textarea>
+        </f:case>
+        <f:case value="select">
+            <select name="{fieldname}" data-focuspointPanelId="x">
+                <f:for each="{field.options}" as="option" key="optionname" iteration="k">
+                    <option value="{optionname}">{f:translate(id:'{option}')}</option>
+                </f:for>
+            </select>
+        </f:case>
+        <f:case value="link">
+            <input type="text" class="linkbrowser-input" readonly/>
+            <a href="#" class="linkbrowser btn btn-default" data-fieldname="{fieldname}" data-focuspointPanelId="x"><i
+                class="fa fa-link"></i></a>
+        </f:case>
+    </f:switch>
+</div>
 
 </html>

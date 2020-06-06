@@ -6,16 +6,18 @@
 
     <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
         <f:for each="{points}" as="point" iteration="i">
-            <rect x="{point.x}%"
-                  y="{point.y}%"
-                  id="focuspoint-{image.uid}-{i.cycle}"
-                  stroke="{point.color}"
-                  stroke-width="2px"
-                  class="focuspoint__svg__rect"
-                  width="{point.width}%"
-                  height="{point.height}%"
-                  opacity="0.7"
-                  fill="{point.color}"/>
+            <a xlink:href="{f:uri.typolink(parameter: point.link)}">
+                <rect x="{point.x}%"
+                      y="{point.y}%"
+                      id="focuspoint-{image.uid}-{i.cycle}"
+                      stroke="{point.color}"
+                      stroke-width="2px"
+                      class="focuspoint__svg__rect"
+                      width="{point.width}%"
+                      height="{point.height}%"
+                      opacity="0.7"
+                      fill="{point.color}"/>
+            </a>
             <text x="{point.textX}%" fill="#FFF" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
                 {point.name}
             </text>

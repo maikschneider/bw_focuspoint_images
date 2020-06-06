@@ -10,7 +10,7 @@
  *
  * The TYPO3 project - inspiring people to share!
  */
-define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "TYPO3/CMS/Backend/Modal", "jquery", "jquery-ui/draggable", "jquery-ui/resizable"], function (require, exports, ImagesLoaded, Modal, $) {
+define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Recordlist/LinkBrowser", "jquery", "jquery-ui/draggable", "jquery-ui/resizable"], function (require, exports, ImagesLoaded, Modal, LinkBrowser, $) {
     "use strict";
     /**
      * Module: TYPO3/CMS/BwFocuspointImages/FocuspointWizard
@@ -187,6 +187,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         };
         FocuspointWizard.prototype.initInputPanel = function (panel) {
             var _this = this;
+            var self = this;
             var panelInputs = $(panel).find('[data-focuspointPanelId]');
             var focuspointPanelId = parseInt(panelInputs.first().attr('data-focuspointPanelId'));
             var focuspoint = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
@@ -203,10 +204,26 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                         $('option', input).prop('selected', false);
                         $('option[value="' + inputValue + '"]', input).prop('selected', true);
                         break;
+                    case 'A':
+                        var label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
+                        $(input).prev().val(label);
+                        break;
                 }
                 // bind events
                 $(input).off('input').on('input', _this.onInputChange.bind(_this, input));
             });
+            // bind linkbrowser
+            var linkelement = $(panel).find('.linkbrowser');
+            if (linkelement.length) {
+                var onButtonClick = function (e) {
+                    e.preventDefault();
+                    self.linkBrowser.attr('data-current-focuspointPanelId', focuspointPanelId);
+                    self.linkBrowser.attr('data-current-fieldname', $(linkelement).attr('data-fieldname'));
+                    self.linkBrowser.addClass('open');
+                };
+                $(linkelement).on('click', onButtonClick.bind(this));
+                $(panel).find('.linkbrowser-input').on('click', onButtonClick.bind(this));
+            }
             // bind remove event
             var removeEvent = function () {
                 $(panel).off();
@@ -219,7 +236,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 var id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
                 self.activateFocuspoint(id);
             };
-            $(panel).find('a').bind('click', clickEvent.bind(null, panel));
+            $(panel).find('a.panel-link').bind('click', clickEvent.bind(null, panel));
             // bind delete button event
             $(panel).find('[data-delete]').off('click').on('click', function (e, button) {
                 e.preventDefault();
@@ -275,8 +292,86 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 var newFocuspointId = _this.addNewFocuspoint(-1);
                 _this.activateFocuspoint(newFocuspointId);
             });
+            // bind link browser events
+            this.initLinkBrowser();
             // Bind resize event
             $(window).resize(this.onWindowResize.bind(this));
+        };
+        FocuspointWizard.prototype.linkBrowserClick = function (uid, table, key, label) {
+            var typolink = uid;
+            // construct typolink
+            // @TODO: check syntax for v8+ e.g. t3?id=xx
+            if (table !== 'pages') {
+                typolink = 'record:' + table + ':' + key + ':' + uid;
+            }
+            // build data to save
+            var browserlinkvalue = {
+                label: label,
+                uid: uid,
+                table: table,
+                key: key,
+                typolink: typolink
+            };
+            // save selected value to data
+            var focuspointPanelId = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
+            var fieldname = this.linkBrowser.attr('data-current-fieldname');
+            this.data[focuspointPanelId][fieldname] = browserlinkvalue;
+            // insert label into input and close
+            this.inputPanels[focuspointPanelId].find('.linkbrowser-input').val(label);
+            this.linkBrowser.trigger('close');
+        };
+        FocuspointWizard.prototype.initLinkBrowser = function () {
+            var self = this;
+            this.linkBrowser = this.currentModal.find('.modal-panel-linkbrowser');
+            // click on tab item
+            this.linkBrowser.find('.nav-tabs a').on('click', function (e) {
+                e.preventDefault();
+                var tab = $(e.currentTarget).parent();
+                var browserKey = $(tab).attr('data-browser-key');
+                self.linkBrowser.find('.nav-tabs li').removeClass('active');
+                self.linkBrowser.find('.modal-panel-linkbrowser-item').removeClass('active');
+                $(tab).addClass('active');
+                self.linkBrowser.find('.modal-panel-linkbrowser-item[data-browser-key="' + browserKey + '"]').addClass('active');
+            });
+            // hide page children
+            var rootPid = this.linkBrowser.find('tr.db_list_normal[data-pid="0"]').attr('data-uid');
+            this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
+            // page tree open children
+            this.linkBrowser.find('tr .treeline-icon').on('click', function (e) {
+                var uid = $(this).parent().attr('data-uid');
+                self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
+            });
+            // page tree link click
+            this.linkBrowser.find('tr .pagetree-title').on('click', function (e) {
+                e.preventDefault();
+                var uid = $(e.currentTarget).parent().attr('data-uid');
+                var table = 'pages';
+                var key = 'page';
+                var label = $(e.currentTarget).html();
+                self.linkBrowserClick(uid, table, key, label);
+            });
+            // record list click
+            this.linkBrowser.find('.recordlist tr').on('click', function (e) {
+                e.preventDefault();
+                var row = $(e.currentTarget);
+                var uid = row.attr('data-uid');
+                var table = row.closest('.table').attr('data-table');
+                var key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
+                var label = row.find('td:nth-child(2)').html();
+                self.linkBrowserClick(uid, table, key, label);
+            });
+            // close button link
+            this.linkBrowser.find('#closelinkbrowser').on('click', function (e) {
+                e.preventDefault();
+                self.linkBrowser.trigger('close');
+            });
+            // reset function
+            this.linkBrowser.bind('close', function () {
+                self.linkBrowser.removeClass('open');
+                self.linkBrowser.find('.nav-tabs li:first-child a').trigger('click');
+                self.linkBrowser.attr('data-current-focuspointPanelId', '');
+                self.linkBrowser.attr('data-current-fieldname', '');
+            });
         };
         FocuspointWizard.prototype.onWindowResize = function () {
             var self = this;
@@ -304,7 +399,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             });
         };
         ;
-        FocuspointWizard.prototype.show = function (is7up) {
+        FocuspointWizard.prototype.show = function () {
             var _this = this;
             var modalTitle = this.trigger.data('modalTitle');
             var buttonDismissText = this.trigger.data('buttonDismissText');
@@ -330,7 +425,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                     trigger: this.onSaveButtonClick.bind(this)
                 },
             ];
-            if (is7up) {
+            if (this.is7up) {
                 this.currentModal = Modal.advanced({
                     type: 'ajax',
                     content: imageUri,
@@ -363,6 +458,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
         FocuspointWizard.prototype.destroy = function () {
             if (this.currentModal) {
                 this.currentModal = null;
+                this.focusBoxes = [];
+                this.inputPanels = [];
                 this.data = null;
             }
         };
@@ -371,7 +468,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var triggerHandler = function (e) {
                 e.preventDefault();
                 _this.trigger = $(e.currentTarget);
-                _this.show(is7up);
+                _this.is7up = is7up;
+                _this.show();
             };
             $('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
         };

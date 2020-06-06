@@ -66,6 +66,9 @@
 				<source>Red</source>
 				<target>Rot</target>
 			</trans-unit>
+			<trans-unit id="wizard.linkbrowser.page">
+				<target>Seite</target>
+			</trans-unit>
 
 			<trans-unit id="tca.wizard.svg.title">
 				<source>SVG Focuspoints</source>

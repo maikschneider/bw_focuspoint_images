@@ -6,6 +6,7 @@ use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -130,7 +131,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'validation' => '[]'
             ],
             'config' => $config,
-            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file),
+            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
         ];
 
         if ($arguments['isAllowedFileExtension']) {
@@ -196,15 +197,17 @@ class InputFocuspointElement extends AbstractFormElement
     /**
      * @param array $focusPoints
      * @param \TYPO3\CMS\Core\Resource\File $image
+     * @param int $pid
      * @return string
      * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
-    protected function getWizardUri(array $focusPoints, File $image): string
+    protected function getWizardUri(array $focusPoints, File $image, int $pid): string
     {
         $routeName = 'ajax_wizard_focuspoint';
         $arguments = [
             'focusPoints' => $focusPoints,
             'image' => $image->getUid(),
+            'pid' => $pid,
         ];
         $uriArguments['arguments'] = json_encode($arguments);
         $uriArguments['signature'] = GeneralUtility::hmac($uriArguments['arguments'], $routeName);
