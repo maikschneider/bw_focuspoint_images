@@ -19,11 +19,11 @@ $EM_CONF[$_EXTKEY] = [
             'Blueways\\BwFocuspointImages\\' => 'Classes'
         ],
     ],
-    'state' => 'stable',
+    'state' => 'beta',
     'uploadfolder' => 0,
     'clearCacheOnLoad' => 1,
     'author' => 'Maik Schneider',
     'author_email' => 'm.schneider@blueways.de',
     'author_company' => 'blueways',
-    'version' => '2.1.0',
+    'version' => '2.2.0',
 ];

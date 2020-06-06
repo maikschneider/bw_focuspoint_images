@@ -267,7 +267,7 @@ class FocuspointWizard {
 					break;
 				case 'A':
 					const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
-					$(input).prev().val(label);
+					$(input).prev().prev().val(label);
 					break;
 			}
 
@@ -288,6 +288,11 @@ class FocuspointWizard {
 			};
 			$(linkelement).on('click', onButtonClick.bind(this));
 			$(panel).find('.linkbrowser-input').on('click', onButtonClick.bind(this));
+			$(panel).find('.linkbrowser-remove').on('click', function(e){
+				e.preventDefault();
+				$(panel).find('.linkbrowser-input').val('');
+				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')] = null;
+			});
 		}
 
 		// bind remove event
