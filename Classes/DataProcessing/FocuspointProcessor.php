@@ -50,6 +50,7 @@ class FocuspointProcessor extends FilesProcessor
                         $fieldvalue = $fieldvalue->typolink;
                     }
                 }
+                unset($fieldvalue);
             }
 
             $processedData['image'] = $file;
