@@ -47,6 +47,7 @@
             <div class="modal-panel-linkbrowser-item" data-browser-key="{key}">
                 <f:be.tableList tableName="{linkbrowser.configuration.table}"
                                 clickTitleMode="show"
+                                recordsPerPage="9999"
                                 storagePid="{linkbrowser.configuration.storagePid}"
                                 levels="{linkbrowser.configuration.levels}"/>
             </div>
@@ -199,6 +200,11 @@
     }
 
     .modal-body-focuspoints .modal-panel-linkbrowser-content .recordlist thead .btn-group {
+        display: none;
+    }
+
+    .modal-body-focuspoints .modal-panel-linkbrowser-content .recordlist tbody tr:first-child[data-uid="0"],
+    .modal-body-focuspoints .modal-panel-linkbrowser-content .recordlist tbody tr:last-child[data-uid="0"] {
         display: none;
     }
 
