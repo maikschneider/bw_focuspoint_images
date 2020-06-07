@@ -29,6 +29,9 @@
                                href="#"
                                data-uid="{page.row.uid}"
                                data-pid="{page.row.pid}">
+                                <f:if condition="{page.hasSub}">
+                                    <span class="pagetree-opener"></span>
+                                </f:if>
                                 {page.depthData -> f:format.raw()}
                                 <f:format.raw>{page.HTML}</f:format.raw>
                                 <span class="pagetree-title">{page.row.title}</span>
@@ -199,8 +202,15 @@
         display: none;
     }
 
-    .pagetree-link.has-sub:before {
-        content: '';
+    .pagetree-link.has-sub {
+        position: relative;
+    }
+
+    .pagetree-link.has-sub.active .pagetree-opener {
+        transform: rotate(90deg);
+    }
+
+    .pagetree-opener {
         width: 0;
         height: 0;
         display: inline-block;
@@ -213,6 +223,7 @@
         box-shadow: 0 0 0 1px #fafafa;
         background-color: #fafafa;
         z-index: 1;
+        transition: transform 0.2s ease;
     }
 
     .db_list_normal.is-child:not(.open) {

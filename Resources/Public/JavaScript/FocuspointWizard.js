@@ -342,7 +342,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var rootPid = this.linkBrowser.find('tr.db_list_normal[data-pid="0"]').attr('data-uid');
             this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
             // page tree open children
-            this.linkBrowser.find('tr .treeline-icon').on('click', function (e) {
+            this.linkBrowser.find('tr .pagetree-opener').on('click', function (e) {
+                $(this).parent().toggleClass('active');
                 var uid = $(this).parent().attr('data-uid');
                 self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
             });

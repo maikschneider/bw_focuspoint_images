@@ -429,7 +429,8 @@ class FocuspointWizard {
 		this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
 
 		// page tree open children
-		this.linkBrowser.find('tr .treeline-icon').on('click', function (e) {
+		this.linkBrowser.find('tr .pagetree-opener').on('click', function (e) {
+			$(this).parent().toggleClass('active');
 			const uid = $(this).parent().attr('data-uid');
 			self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
 		});
