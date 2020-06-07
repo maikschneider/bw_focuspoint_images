@@ -352,7 +352,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 var uid = $(e.currentTarget).parent().attr('data-uid');
                 var table = 'pages';
                 var key = 'page';
-                var label = $(e.currentTarget).html();
+                var label = $(e.currentTarget).text();
                 self.linkBrowserClick(uid, table, key, label);
             });
             // record list click
@@ -362,7 +362,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 var uid = row.attr('data-uid');
                 var table = row.closest('.table').attr('data-table');
                 var key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
-                var label = row.find('td:nth-child(2)').html();
+                var label = row.find('td:nth-child(2)').text();
                 self.linkBrowserClick(uid, table, key, label);
             });
             // close button link

@@ -440,7 +440,7 @@ class FocuspointWizard {
 			const uid = $(e.currentTarget).parent().attr('data-uid');
 			const table = 'pages';
 			const key = 'page';
-			const label = $(e.currentTarget).html();
+			const label = $(e.currentTarget).text();
 			self.linkBrowserClick(uid, table, key, label);
 		});
 
@@ -451,7 +451,7 @@ class FocuspointWizard {
 			const uid = row.attr('data-uid');
 			const table = row.closest('.table').attr('data-table');
 			const key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
-			const label = row.find('td:nth-child(2)').html();
+			const label = row.find('td:nth-child(2)').text();
 			self.linkBrowserClick(uid, table, key, label);
 		});
 
