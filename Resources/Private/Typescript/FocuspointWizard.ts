@@ -382,21 +382,12 @@ class FocuspointWizard {
 
 	private linkBrowserClick(uid: int, table: string, key: string, label: string) {
 
-		let typolink = uid;
-
-		// construct typolink
-		// @TODO: check syntax for v8+ e.g. t3?id=xx
-		if (table !== 'pages') {
-			typolink = 'record:' + table + ':' + key + ':' + uid;
-		}
-
 		// build data to save
 		const browserlinkvalue = {
 			label: label,
 			uid: uid,
 			table: table,
 			key: key,
-			typolink: typolink
 		};
 
 		// save selected value to data

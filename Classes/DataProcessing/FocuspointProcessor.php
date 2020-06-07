@@ -46,9 +46,18 @@ class FocuspointProcessor extends FilesProcessor
 
                 // replace link field with typolink value
                 foreach ($point as $fieldname => &$fieldvalue) {
-                    if(is_object($fieldvalue) && $fieldvalue->typolink) {
-                        $fieldvalue = $fieldvalue->typolink;
+                    if (!is_object($fieldvalue) || !property_exists($fieldvalue, 'table')) {
+                        continue;
                     }
+                    // use uid for page links
+                    if ($fieldvalue->table === 'pages') {
+                        $fieldvalue = $fieldvalue->uid;
+                        continue;
+                    }
+
+                    // generic record link
+                    // @TODO: check for TYPO3 version and installed linkhandler ext (e.g. t3?id=xx)
+                    $fieldvalue = 'record:' . $fieldvalue->key . ':' . $fieldvalue->table . ':' . $fieldvalue->uid;
                 }
                 unset($fieldvalue);
             }

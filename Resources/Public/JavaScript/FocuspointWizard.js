@@ -303,19 +303,12 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(window).resize(this.onWindowResize.bind(this));
         };
         FocuspointWizard.prototype.linkBrowserClick = function (uid, table, key, label) {
-            var typolink = uid;
-            // construct typolink
-            // @TODO: check syntax for v8+ e.g. t3?id=xx
-            if (table !== 'pages') {
-                typolink = 'record:' + table + ':' + key + ':' + uid;
-            }
             // build data to save
             var browserlinkvalue = {
                 label: label,
                 uid: uid,
                 table: table,
                 key: key,
-                typolink: typolink
             };
             // save selected value to data
             var focuspointPanelId = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
