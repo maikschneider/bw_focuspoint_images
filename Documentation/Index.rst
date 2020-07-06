@@ -99,6 +99,11 @@ This example setup is used to generate the output shown in :ref:`Example 1 <exam
            }
        }
 
+       link {
+          title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
+          type = link
+       }
+
    }
 
 Constants
@@ -152,8 +157,6 @@ Todos
 Possible improvements:
 
 * More frontend examples (e.g. svg animation, use of canvas element,..)
-* New field types for the wizard (e.g. PageTree)
-* DataProcessor for injecting data into the wizard
 * Better configuration of the custom tt_content element (e.g. template selection, further display configuration)
 * ...
 

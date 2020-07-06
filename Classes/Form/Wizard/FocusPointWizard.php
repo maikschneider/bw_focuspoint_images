@@ -157,7 +157,7 @@ class FocusPointWizard
         );
 
         // Create the page tree, from the starting point, 2 levels deep
-        $depth = 4;
+        $depth = 9;
         $tree->getTree(
             $startingPoint,
             $depth,

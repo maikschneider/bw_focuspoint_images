@@ -136,6 +136,20 @@ $GLOBALS['TCA']['tt_content']['types']['your_list_type']['columnsOverrides'] = [
 
 This snippet assumes that references are done via `assets` column. Change this to your needs.
 
+To decode the JSON data and use the information in your template, use the `FocuspointProcessor`:
+
+```typo3_typoscript
+tt_content.your_element {
+	dataProcessing {
+		10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+		10 {
+			references.fieldName = assets
+			as = image
+		}
+	}
+}
+```
+
 Todos
 =====
 
@@ -143,8 +157,6 @@ Possible improvements:
 
 -   More frontend examples (e.g. svg animation, use of canvas
     element,..)
--   New field types for the wizard (e.g. PageTree)
--   DataProcessor for injecting data into the wizard
 -   Better configuration of the custom tt\_content element (e.g.
     template selection, further display configuration)
 -   \...
@@ -152,6 +164,6 @@ Possible improvements:
 Contribute
 ==========
 
-Feel free to contribute!
+This extension was made by Maik Schneider from [blueways](https://www.blueways.de/). Feel free to contribute!
 
 -   [Bitbucket-Repository](https://bitbucket.org/blueways/bw_focuspoint_images/)
