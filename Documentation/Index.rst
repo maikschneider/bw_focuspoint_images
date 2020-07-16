@@ -9,7 +9,7 @@ backend. This extension ships an image editor that can be used to add areas and 
    :class: with-shadow
 
 Examples
--------
+--------
 
 .. _example1:
 
@@ -67,7 +67,7 @@ Configuration
 .. _typoscript_fields:
 
 Setup
-~~~~
+~~~~~
 
 To configure the fields in the focus point wizard, use the following
 TypoScript settings. You can choose between **text**, **textarea** and
@@ -107,7 +107,7 @@ This example setup is used to generate the output shown in :ref:`Example 1 <exam
    }
 
 Constants
-~~~~~~~~
+~~~~~~~~~
 
 To override templates set your own paths via constants:
 
@@ -147,9 +147,22 @@ To use the editor in other content elements with FAL images, use the following T
       ]
    ];
 
-.. note::
-   This snippet assumes that references are done via :file:`assets` column. Change this to your needs.
+To decode the json format and use relative points in your fluid template, use the :file:`FocuspointProcessor`:
 
+.. code-block:: typoscript
+
+   tt_content.your_custom_element {
+      dataProcessing {
+         10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+         10 {
+            references.fieldName = assets
+            as = image
+         }
+      }
+   }
+
+.. note::
+   These snippets assume that references are done via :file:`assets` column. Change this to your needs.
 
 Todos
 =====
@@ -158,7 +171,7 @@ Possible improvements:
 
 * More frontend examples (e.g. svg animation, use of canvas element,..)
 * Better configuration of the custom tt_content element (e.g. template selection, further display configuration)
-* ...
+* Configuration for link browser
 
 
 Contribute
@@ -167,3 +180,7 @@ Contribute
 Feel free to contribute!
 
 * `Bitbucket-Repository <https://bitbucket.org/blueways/bw_focuspoint_images/>`__
+
+.. versionadded:: 2.2.0
+   New link browser for the Focuspoint Wizard
+

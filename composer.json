@@ -11,8 +11,9 @@
   ],
   "require-dev": {
     "roave/security-advisories": "dev-master",
-    "typo3/cms-base-distribution": "^9.0",
-    "bk2k/bootstrap-package": "^9.0"
+    "typo3/cms-base-distribution": "^7.0",
+    "bk2k/bootstrap-package": "^7.0",
+    "georgringer/news": "^6.0"
   },
   "autoload": {
     "psr-4": {
