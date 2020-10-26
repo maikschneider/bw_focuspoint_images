@@ -149,7 +149,7 @@ class FocusPointWizard
         // Creating the icon for the current page and add it to the tree
         $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
         $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
-        $is7up = $version['version_main'] > 7 ? 'true' : 'false';
+        $is7up = $version['version_main'] > 7;
         if ($is7up) {
             /** @var IconFactory $iconFactory */
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
