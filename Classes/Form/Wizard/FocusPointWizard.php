@@ -20,6 +20,7 @@ use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
@@ -42,8 +43,12 @@ class FocusPointWizard
      * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      * @throws \TYPO3\CMS\Fluid\View\Exception\InvalidTemplateResourceException
      */
-    public function getWizardAction(ServerRequestInterface $request, ResponseInterface $response)
+    public function getWizardAction(ServerRequestInterface $request, ResponseInterface $response = null)
     {
+        if (null === $response) {
+            $response = new Response();
+        }
+
         if (!$this->isSignatureValid($request)) {
             return $response->withStatus(403);
         }
