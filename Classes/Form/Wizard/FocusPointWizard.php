@@ -20,10 +20,13 @@ use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
@@ -144,13 +147,22 @@ class FocusPointWizard
         $tree->init('AND ' . $GLOBALS['BE_USER']->getPagePermsClause(1));
 
         // Creating the icon for the current page and add it to the tree
-        $html = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord(
-            'pages',
-            $pageRecord,
-            array(
-                'title' => $pageRecord['title']
-            )
-        );
+        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
+        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
+        $is7up = $version['version_main'] > 7 ? 'true' : 'false';
+        if ($is7up) {
+            /** @var IconFactory $iconFactory */
+            $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+            $html = $iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL);
+        } else {
+            $html = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord(
+                'pages',
+                $pageRecord,
+                array(
+                    'title' => $pageRecord['title']
+                )
+            );
+        }
         $tree->tree[] = array(
             'row' => $pageRecord,
             'HTML' => $html
