@@ -59,10 +59,10 @@
             </trans-unit>
 
             <trans-unit id="tca.wizard.svg.title">
-                <source>SVG Focuspoints</source>
+                <source>Image with Focuspoints</source>
             </trans-unit>
             <trans-unit id="tca.wizard.svg.description">
-                <source>Displays the focus points of an image using SVG</source>
+                <source>Displays an image with highlighted areas and additional information</source>
             </trans-unit>
         </body>
     </file>
