@@ -1,6 +1,6 @@
 pipelines:
     branches:
-        development:
+        develop:
             -   step:
                     name: Build and Install
                     image: drud/ddev-webserver:v1.16.1
@@ -10,8 +10,8 @@ pipelines:
                         - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
                         - git fetch origin
                         - git checkout master
-                        - git merge -s ours development --no-commit --no-ff
-                        - git checkout development .
+                        - git merge -s ours develop --no-commit --no-ff
+                        - git checkout develop .
                         - composer install
                         - npm install
                         - echo "// @ts-nocheck" | cat - public/typo3/sysext/backend/Resources/Private/TypeScript/Modal.ts > temp && mv temp public/typo3/sysext/backend/Resources/Private/TypeScript/Modal.ts
