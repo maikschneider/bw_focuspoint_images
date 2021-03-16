@@ -7,3 +7,4 @@ vendor
 bin
 var/
 Documentation-GENERATED-temp
+composer.lock

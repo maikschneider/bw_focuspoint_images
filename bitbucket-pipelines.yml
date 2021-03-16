@@ -1,0 +1,22 @@
+pipelines:
+    branches:
+        development:
+            -   step:
+                    name: Build and Install
+                    image: drud/ddev-webserver:v1.16.1
+                    script:
+                        - export BITBUCKET_COMMIT_SHORT=$(echo $BITBUCKET_COMMIT | cut -c1-7)
+                        - git fetch --unshallow
+                        - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+                        - git fetch origin
+                        - git checkout master
+                        - git merge -s ours development --no-commit --no-ff
+                        - git checkout development .
+                        - composer install
+                        - npm install
+                        - echo "// @ts-nocheck" | cat - public/typo3/sysext/backend/Resources/Private/TypeScript/Modal.ts > temp && mv temp public/typo3/sysext/backend/Resources/Private/TypeScript/Modal.ts
+                        - npm run build
+                        - chmod +x Build/Scripts/cleanUp.sh && ./Build/Scripts/cleanUp.sh
+                        - git add *
+                        - 'git commit -a -m "build: $BITBUCKET_COMMIT_SHORT" --allow-empty'
+                        - git push origin master --tags
