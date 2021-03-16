@@ -184,3 +184,6 @@ Feel free to contribute!
 .. versionadded:: 2.2.0
    New link browser for the Focuspoint Wizard
 
+.. versionadded:: 2.3.0
+   Support for TYPO3 v10
+
