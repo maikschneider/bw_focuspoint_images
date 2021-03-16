@@ -1,9 +1,0 @@
-node_modules/
-.idea
-.ddev
-public
-!Resources/Public
-vendor
-bin
-var/
-Documentation-GENERATED-temp

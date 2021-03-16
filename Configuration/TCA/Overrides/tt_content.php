@@ -37,7 +37,10 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
 ];
 
 // override the imageoverlayPalette to show only the focus_points widget
-$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = [
+$versionNumberUtility = TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(TYPO3\CMS\Core\Utility\VersionNumberUtility::class);
+$version = $versionNumberUtility->convertVersionStringToArray($versionNumberUtility->getNumericTypo3Version());
+$is10up = $version['version_main'] >= 10;
+$columnsOverrides = [
     'assets' => [
         'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.label',
         'config' => [
@@ -64,5 +67,31 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverr
         ]
     ]
 ];
+
+if ($is10up) {
+
+    // remove old override declaration
+    unset($columnsOverrides['assets']['config']['foreign_types'], $columnsOverrides['assets']['config']['foreign_selector_fieldTcaOverride']);
+
+    // new syntax
+    $columnsOverrides['assets']['config']['overrideChildTca'] = [
+        'types' => [
+            \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                'showitem' => 'focus_points,--palette--;;filePalette'
+            ],
+        ],
+        'columns' => [
+            'uid_local' => [
+                'config' => [
+                    'appearance' => [
+                        'elementBrowserAllowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+                    ],
+                ],
+            ],
+        ],
+    ];
+}
+
+$GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = $columnsOverrides;
 
 //$GLOBALS['TCA']['sys_file_reference']['palettes']['imageoverlayPalette']['showitem'] = 'focus_points';
