@@ -6,7 +6,6 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Service\TypoScriptService;
 
 class HelperUtility
 {
@@ -30,7 +29,11 @@ class HelperUtility
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $configurationManager = $objectManager->get(ConfigurationManager::class);
         $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        $typoScriptService = $objectManager->get(TypoScriptService::class);
+        if (class_exists('TYPO3\CMS\Extbase\Service\TypoScriptService')) {
+            $typoScriptService = $objectManager->get(\TYPO3\CMS\Extbase\Service\TypoScriptService::class);
+        } else {
+            $typoScriptService = $objectManager->get(\TYPO3\CMS\Core\TypoScript\TypoScriptService::class);
+        }
         return $typoScriptService->convertTypoScriptArrayToPlainArray($typoScript);
     }
 
@@ -38,7 +41,11 @@ class HelperUtility
     {
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $pageTS = BackendUtility::getPagesTSconfig($pid);
-        $typoScriptService = $objectManager->get(TypoScriptService::class);
+        if (class_exists('TYPO3\CMS\Extbase\Service\TypoScriptService')) {
+            $typoScriptService = $objectManager->get(\TYPO3\CMS\Extbase\Service\TypoScriptService::class);
+        } else {
+            $typoScriptService = $objectManager->get(\TYPO3\CMS\Core\TypoScript\TypoScriptService::class);
+        }
         return $typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
     }
 }
