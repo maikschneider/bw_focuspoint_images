@@ -15,7 +15,6 @@ pipelines:
                         - composer install
                         - npm install
                         - echo "// @ts-nocheck" | cat - public/typo3/sysext/backend/Resources/Private/TypeScript/Modal.ts > temp && mv temp public/typo3/sysext/backend/Resources/Private/TypeScript/Modal.ts
-                        - npm run build
                         - chmod +x Build/Scripts/cleanUp.sh && ./Build/Scripts/cleanUp.sh
                         - git add *
                         - 'git commit -a -m "build: $BITBUCKET_COMMIT_SHORT" --allow-empty'
