@@ -53,12 +53,13 @@ class FocusPointWizard
             return $response->withStatus(403);
         }
 
+        // @TODO: do not read TypoScript, use PageTS
         $typoScript = HelperUtility::getTypoScript();
 
         $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $templateView->setLayoutRootPaths($typoScript['view']['layoutRootPaths']);
-        $templateView->setPartialRootPaths($typoScript['view']['partialRootPaths']);
-        $templateView->setTemplateRootPaths($typoScript['view']['templateRootPaths']);
+        $templateView->setLayoutRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Layouts']);
+        $templateView->setPartialRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Partials']);
+        $templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
         $templateView->setTemplate('FocuspointWizard');
 
         $queryParams = json_decode($request->getQueryParams()['arguments'], true);

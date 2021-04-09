@@ -106,6 +106,9 @@ This example setup is used to generate the output shown in :ref:`Example 1 <exam
 
    }
 
+.. attention::
+   You need to add the TypoScript configuration to your main template at root page. In an upcoming version the configuration will be moved to PageTS.
+
 Constants
 ~~~~~~~~~
 
@@ -186,4 +189,7 @@ Feel free to contribute!
 
 .. versionadded:: 2.3.0
    Support for TYPO3 v10
+
+.. versionadded:: 2.3.1
+   Bugfix for missing TypoScript include at root page
 
