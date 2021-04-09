@@ -64,12 +64,13 @@ class InputFocuspointElement extends AbstractFormElement
     {
         parent::__construct($nodeFactory, $data);
 
+        // @TODO: do not read TypoScript, use PageTS
         $this->typoScript = HelperUtility::getTypoScript();
 
         $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->templateView->setLayoutRootPaths($this->typoScript['view']['layoutRootPaths']);
-        $this->templateView->setPartialRootPaths($this->typoScript['view']['partialRootPaths']);
-        $this->templateView->setTemplateRootPaths($this->typoScript['view']['templateRootPaths']);
+        $this->templateView->setLayoutRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Layouts']);
+        $this->templateView->setPartialRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Partials']);
+        $this->templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
         $this->templateView->setTemplate('FocuspointElement');
 
         $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);

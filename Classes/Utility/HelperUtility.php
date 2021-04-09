@@ -16,8 +16,13 @@ class HelperUtility
      */
     public static function getTypoScript(): array
     {
+        $emptyTypoScript = [
+            'settings' => [
+                'fields' => []
+            ]
+        ];
         $typoScript = self::getFullTypoScript();
-        return $typoScript['plugin']['tx_bwfocuspointimages'];
+        return $typoScript['plugin']['tx_bwfocuspointimages'] ?? $emptyTypoScript;
     }
 
     /**
