@@ -57,6 +57,16 @@
             <trans-unit id="wizard.linkbrowser.page">
                 <source>Page</source>
             </trans-unit>
+            <trans-unit id="wizard.link.newWindow">
+                <source>New window</source>
+            </trans-unit>
+            <trans-unit id="wizard.link.default">
+                <source>Default (none)</source>
+            </trans-unit>
+            <trans-unit id="wizard.link.top">
+                <source>Top</source>
+            </trans-unit>
+
 
             <trans-unit id="tca.wizard.svg.title">
                 <source>Image with Focuspoints</source>

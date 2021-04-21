@@ -69,6 +69,18 @@
 			<trans-unit id="wizard.linkbrowser.page">
 				<target>Seite</target>
 			</trans-unit>
+			<trans-unit id="wizard.link.newWindow">
+				<source>New window</source>
+				<target>Neues Fenster</target>
+			</trans-unit>
+			<trans-unit id="wizard.link.default">
+				<source>Default (none)</source>
+				<target>Standard</target>
+			</trans-unit>
+			<trans-unit id="wizard.link.top">
+				<source>Top</source>
+				<target>Oberstes Fenster</target>
+			</trans-unit>
 
 			<trans-unit id="tca.wizard.svg.title">
 				<source>SVG Focuspoints</source>
