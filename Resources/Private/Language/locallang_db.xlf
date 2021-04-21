@@ -57,13 +57,16 @@
             <trans-unit id="wizard.linkbrowser.page">
                 <source>Page</source>
             </trans-unit>
-            <trans-unit id="wizard.link.newWindow">
+            <trans-unit id="wizard.target">
+                <source>Target</source>
+            </trans-unit>
+            <trans-unit id="wizard.target.newWindow">
                 <source>New window</source>
             </trans-unit>
-            <trans-unit id="wizard.link.default">
+            <trans-unit id="wizard.target.default">
                 <source>Default (none)</source>
             </trans-unit>
-            <trans-unit id="wizard.link.top">
+            <trans-unit id="wizard.target.top">
                 <source>Top</source>
             </trans-unit>
 

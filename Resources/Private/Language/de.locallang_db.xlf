@@ -69,15 +69,19 @@
 			<trans-unit id="wizard.linkbrowser.page">
 				<target>Seite</target>
 			</trans-unit>
-			<trans-unit id="wizard.link.newWindow">
+			<trans-unit id="wizard.target">
+				<source>Target</source>
+				<target>Ziel</target>
+			</trans-unit>
+			<trans-unit id="wizard.target.newWindow">
 				<source>New window</source>
 				<target>Neues Fenster</target>
 			</trans-unit>
-			<trans-unit id="wizard.link.default">
+			<trans-unit id="wizard.target.default">
 				<source>Default (none)</source>
 				<target>Standard</target>
 			</trans-unit>
-			<trans-unit id="wizard.link.top">
+			<trans-unit id="wizard.target.top">
 				<source>Top</source>
 				<target>Oberstes Fenster</target>
 			</trans-unit>
