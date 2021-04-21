@@ -305,6 +305,12 @@
         height: 100%;
         max-height: calc(100vh - 137px);
         overflow: scroll;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .modal-body-focuspoints .modal-panel-sidebar::-webkit-scrollbar {
+        display: none;
     }
 
     .modal-body-focuspoints .modal-panel-sidebar .panel-group {
