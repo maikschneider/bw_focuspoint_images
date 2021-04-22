@@ -286,9 +286,16 @@ class FocuspointWizard {
 				self.linkBrowser.attr('data-current-fieldname', $(linkelement).attr('data-fieldname'));
 				self.linkBrowser.addClass('open');
 			};
+			const onLinkTargetChange = function (e) {
+				if (!self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')]) {
+					return;
+				}
+				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')].target = $(e.currentTarget).val();
+			};
 			$(linkelement).on('click', onButtonClick.bind(this));
 			$(panel).find('.linkbrowser-input').on('click', onButtonClick.bind(this));
-			$(panel).find('.linkbrowser-remove').on('click', function(e){
+			$(panel).find('.linkbrowser-target').on('change', onLinkTargetChange.bind(this));
+			$(panel).find('.linkbrowser-remove').on('click', function (e) {
 				e.preventDefault();
 				$(panel).find('.linkbrowser-input').val('');
 				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')] = null;
@@ -380,18 +387,20 @@ class FocuspointWizard {
 		$(window).resize(this.onWindowResize.bind(this));
 	}
 
-	private linkBrowserClick(uid: int, table: string, key: string, label: string) {
+	private linkBrowserClick(uid: number, table: string, key: string, label: string) {
 
 		// build data to save
+		const focuspointPanelId: number = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
+		const target = this.inputPanels[focuspointPanelId].find('.linkbrowser-target').val();
 		const browserlinkvalue = {
 			label: label,
 			uid: uid,
 			table: table,
 			key: key,
+			target: target
 		};
 
 		// save selected value to data
-		const focuspointPanelId: number = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
 		const fieldname = this.linkBrowser.attr('data-current-fieldname');
 		this.data[focuspointPanelId][fieldname] = browserlinkvalue;
 

@@ -49,9 +49,18 @@ class FocuspointProcessor extends FilesProcessor
                     if (!is_object($fieldvalue) || !property_exists($fieldvalue, 'table')) {
                         continue;
                     }
+
+                    // add additional field for target (e.g. use in svg)
+                    $linkTarget = $fieldname . 'Target';
+                    $point->$linkTarget = $fieldvalue->target;
+
                     // use uid for page links
                     if ($fieldvalue->table === 'pages') {
-                        $fieldvalue = $fieldvalue->uid;
+                        $link = 't3://page?uid=' . $fieldvalue->uid;
+                        if ($fieldvalue->target) {
+                            $link .= ' ' . $fieldvalue->target;
+                        }
+                        $fieldvalue = $link;
                         continue;
                     }
 

@@ -25,6 +25,17 @@
             <a href="#" class="linkbrowser-remove"><i class="fa fa-times"></i></a>
             <a href="#" class="linkbrowser btn btn-default" data-fieldname="{fieldname}" data-focuspointPanelId="x"><i
                 class="fa fa-link"></i></a>
+            <div class="linkbrowser__target">
+                <label>
+                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target"/>:</label>
+                <select class="linkbrowser-target" data-fieldname="{fieldname}" data-focuspointPanelId="x">
+                    <option value="">
+                        {f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target.default')}</option>
+                    <option value="_top">
+                        {f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target.top')}</option>
+                    <option value="_blank">{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target.newWindow')}</option>
+                </select>
+            </div>
         </f:case>
     </f:switch>
 </div>
