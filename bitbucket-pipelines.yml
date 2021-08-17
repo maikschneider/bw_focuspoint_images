@@ -18,7 +18,7 @@ pipelines:
                         - composer install
                         - npm install
                         - rm -rf Tests .editorconfig .gitignore .ddev bitbucket-pipelines.yml composer.lock package.json tsconfig.json webpack.*.js  Gruntfile.js vendor public Build package-lock.json bin node_modules Resources/Private/TypeScript Resources/Private/Scss
-                        - git add git add */.*
+                        - git add */.*
                         - 'if [[ $(git status --porcelain --untracked-files=no | wc -l) -gt "0" ]]; then git commit -a -m "build: $BITBUCKET_COMMIT_SHORT" --message "$GIT_LOG" || true; fi'
                         - 'if [ "$TYPO3_EXT_VERSION" != "$LATEST_TAG" ]; then git tag -a "v$TYPO3_EXT_VERSION" -m ""; fi'
                         - git push origin master --tags
