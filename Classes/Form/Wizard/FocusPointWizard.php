@@ -67,7 +67,9 @@ class FocusPointWizard
         $image = null;
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
-                $image = ResourceFactory::getInstance()->getFileObject($fileUid);
+                /** @var ResourceFactory $resourceFactory */
+                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+                $image = $resourceFactory->getFileObject($fileUid);
             } catch (FileDoesNotExistException $e) {
                 return $response->withStatus(404);
             }
