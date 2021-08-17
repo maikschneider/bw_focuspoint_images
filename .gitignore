@@ -1,6 +1,5 @@
 node_modules/
 .idea
-.ddev
 public
 !Resources/Public
 vendor
