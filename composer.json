@@ -23,7 +23,8 @@
   "extra": {
     "typo3/cms": {
       "cms-package-dir": "{$vendor-dir}/typo3/cms",
-      "web-dir": "public"
+      "web-dir": "public",
+      "extension-key": "bw_focuspoint_images"
     }
   },
   "config": {
