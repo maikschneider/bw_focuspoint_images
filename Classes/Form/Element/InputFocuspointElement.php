@@ -183,7 +183,9 @@ class InputFocuspointElement extends AbstractFormElement
         }
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
-                $file = ResourceFactory::getInstance()->getFileObject($fileUid);
+                /** @var ResourceFactory $resourceFactory */
+                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+                $file = $resourceFactory->getFileObject($fileUid);
             } catch (FileDoesNotExistException $e) {
             } catch (\InvalidArgumentException $e) {
             }
