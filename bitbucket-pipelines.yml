@@ -14,7 +14,7 @@ pipelines:
                         - git checkout develop .
                         - composer install
                         - npm install
-                        - chmod +x Build/Scripts/cleanUp.sh && ./Build/Scripts/cleanUp.sh
+                        - rm -rf Tests .editorconfig .gitignore .ddev bitbucket-pipelines.yml composer.lock package.json tsconfig.json webpack.*.js  Gruntfile.js vendor public Build package-lock.json bin node_modules Resources/Private/TypeScript Resources/Private/Scss
                         - git add *
                         - 'git commit -a -m "build: $BITBUCKET_COMMIT_SHORT" --allow-empty'
                         - git push origin master --tags
