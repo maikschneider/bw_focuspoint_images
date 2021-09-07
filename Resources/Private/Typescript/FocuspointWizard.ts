@@ -165,16 +165,23 @@ class FocuspointWizard {
 
 	private activateFocuspoint(id: number): void {
 
-		// remove all other activa states
+		const wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
+		// @TODO: add animation with css class "collapsing" and timeout of .35s
+
+		// remove all other active states
 		for (let i = 0; i < this.data.length; i++) {
-			if (i !== id) {
 				this.focusBoxes[i].removeClass('active');
-			}
+				// v11 fix (accordion not working)
+				this.inputPanels[i].find('a').attr('aria-expanded', 'false');
+				this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
 
-		// toggle state of box and panel
-		this.focusBoxes[id].toggleClass('active');
-		this.inputPanels[id].find('a').trigger('click');
+		// v11 fix (accordion not working)
+		if (!wasOpen) {
+			this.focusBoxes[id].addClass('active');
+			this.inputPanels[id].find('a').attr('aria-expanded', 'true');
+			this.inputPanels[id].find('.panel-collapse').addClass('show');
+		}
 	}
 
 	private addNewFocuspoint(focuspointBoxId: number = -1): number {
@@ -556,7 +563,7 @@ class FocuspointWizard {
 		});
 
 		// Do not dismiss the modal when clicking beside it to avoid data loss
-		this.currentModal.data('bs.modal').options.backdrop = 'static';
+		//this.currentModal.data('bs.modal').options.backdrop = 'static';
 
 	}
 

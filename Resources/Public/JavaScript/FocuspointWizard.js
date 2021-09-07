@@ -119,15 +119,21 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(box).bind('click', clickEvent.bind(null, box));
         };
         FocuspointWizard.prototype.activateFocuspoint = function (id) {
-            // remove all other activa states
+            var wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
+            // @TODO: add animation with css class "collapsing" and timeout of .35s
+            // remove all other active states
             for (var i = 0; i < this.data.length; i++) {
-                if (i !== id) {
-                    this.focusBoxes[i].removeClass('active');
-                }
+                this.focusBoxes[i].removeClass('active');
+                // v11 fix (accordion not working)
+                this.inputPanels[i].find('a').attr('aria-expanded', 'false');
+                this.inputPanels[i].find('.panel-collapse').removeClass('show');
             }
-            // toggle state of box and panel
-            this.focusBoxes[id].toggleClass('active');
-            this.inputPanels[id].find('a').trigger('click');
+            // v11 fix (accordion not working)
+            if (!wasOpen) {
+                this.focusBoxes[id].addClass('active');
+                this.inputPanels[id].find('a').attr('aria-expanded', 'true');
+                this.inputPanels[id].find('.panel-collapse').addClass('show');
+            }
         };
         FocuspointWizard.prototype.addNewFocuspoint = function (focuspointBoxId) {
             if (focuspointBoxId === void 0) { focuspointBoxId = -1; }
@@ -456,7 +462,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 _this.destroy();
             });
             // Do not dismiss the modal when clicking beside it to avoid data loss
-            this.currentModal.data('bs.modal').options.backdrop = 'static';
+            //this.currentModal.data('bs.modal').options.backdrop = 'static';
         };
         /**
          * @method destroy
