@@ -104,8 +104,8 @@ class FocuspointWizard {
 		$(this.inputPanels[focuspointId]).trigger('remove');
 
 		// remove from class members
-		this.focusBoxes.slice(focuspointId, 1);
-		this.inputPanels.slice(focuspointId, 1);
+		this.focusBoxes.splice(focuspointId, 1);
+		this.inputPanels.splice(focuspointId, 1);
 		this.data.splice(focuspointId, 1);
 
 		// rename remaining focus points

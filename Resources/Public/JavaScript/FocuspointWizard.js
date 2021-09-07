@@ -69,8 +69,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(this.focusBoxes[focuspointId]).trigger('remove');
             $(this.inputPanels[focuspointId]).trigger('remove');
             // remove from class members
-            this.focusBoxes.slice(focuspointId, 1);
-            this.inputPanels.slice(focuspointId, 1);
+            this.focusBoxes.splice(focuspointId, 1);
+            this.inputPanels.splice(focuspointId, 1);
             this.data.splice(focuspointId, 1);
             // rename remaining focus points
             $(this.focusBoxes).each(function (i, e) {
