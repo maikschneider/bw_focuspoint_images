@@ -69,15 +69,17 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             $(this.focusBoxes[focuspointId]).trigger('remove');
             $(this.inputPanels[focuspointId]).trigger('remove');
             // remove from class members
-            this.focusBoxes.slice(focuspointId, 1);
-            this.inputPanels.slice(focuspointId, 1);
+            this.focusBoxes.splice(focuspointId, 1);
+            this.inputPanels.splice(focuspointId, 1);
             this.data.splice(focuspointId, 1);
             // rename remaining focus points
             $(this.focusBoxes).each(function (i, e) {
                 $(e).find('span').html((i + 1).toString());
+                $(e).attr('data-focuspointboxid', i);
             });
             $(this.inputPanels).each(function (i, e) {
                 $(e).find('span[data-nr]').attr('data-nr', i + 1);
+                $(e).find('*[data-focuspointpanelid]').attr('data-focuspointpanelid', i);
             });
         };
         FocuspointWizard.prototype.initFocusBox = function (box) {
@@ -118,16 +120,26 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             };
             $(box).bind('click', clickEvent.bind(null, box));
         };
+        /**
+         * Toggle panel open close states + active effect for focus box
+         * @TODO: add animation with css class "collapsing" and timeout of .35s
+         * @param id
+         * @private
+         */
         FocuspointWizard.prototype.activateFocuspoint = function (id) {
-            // remove all other activa states
+            var wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
+            // remove all active states
             for (var i = 0; i < this.data.length; i++) {
-                if (i !== id) {
-                    this.focusBoxes[i].removeClass('active');
-                }
+                this.focusBoxes[i].removeClass('active');
+                this.inputPanels[i].find('a').attr('aria-expanded', 'false');
+                this.inputPanels[i].find('.panel-collapse').removeClass('show');
             }
-            // toggle state of box and panel
-            this.focusBoxes[id].toggleClass('active');
-            this.inputPanels[id].find('a').trigger('click');
+            // add new active state (if it was closed)
+            if (!wasOpen) {
+                this.focusBoxes[id].addClass('active');
+                this.inputPanels[id].find('a').attr('aria-expanded', 'true');
+                this.inputPanels[id].find('.panel-collapse').addClass('show');
+            }
         };
         FocuspointWizard.prototype.addNewFocuspoint = function (focuspointBoxId) {
             if (focuspointBoxId === void 0) { focuspointBoxId = -1; }
@@ -456,7 +468,7 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 _this.destroy();
             });
             // Do not dismiss the modal when clicking beside it to avoid data loss
-            this.currentModal.data('bs.modal').options.backdrop = 'static';
+            //this.currentModal.data('bs.modal').options.backdrop = 'static';
         };
         /**
          * @method destroy
