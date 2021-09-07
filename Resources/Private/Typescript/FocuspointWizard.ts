@@ -165,20 +165,24 @@ class FocuspointWizard {
 		$(box).bind('click', clickEvent.bind(null, box));
 	}
 
+	/**
+	 * Toggle panel open close states + active effect for focus box
+	 * @TODO: add animation with css class "collapsing" and timeout of .35s
+	 * @param id
+	 * @private
+	 */
 	private activateFocuspoint(id: number): void {
 
 		const wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
-		// @TODO: add animation with css class "collapsing" and timeout of .35s
 
-		// remove all other active states
+		// remove all active states
 		for (let i = 0; i < this.data.length; i++) {
 				this.focusBoxes[i].removeClass('active');
-				// v11 fix (accordion not working)
 				this.inputPanels[i].find('a').attr('aria-expanded', 'false');
 				this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
 
-		// v11 fix (accordion not working)
+		// add new active state (if it was closed)
 		if (!wasOpen) {
 			this.focusBoxes[id].addClass('active');
 			this.inputPanels[id].find('a').attr('aria-expanded', 'true');
