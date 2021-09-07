@@ -111,9 +111,11 @@ class FocuspointWizard {
 		// rename remaining focus points
 		$(this.focusBoxes).each(function (i, e) {
 			$(e).find('span').html((i + 1).toString());
+			$(e).attr('data-focuspointboxid', i);
 		});
 		$(this.inputPanels).each(function (i, e) {
 			$(e).find('span[data-nr]').attr('data-nr', i + 1);
+			$(e).find('*[data-focuspointpanelid]').attr('data-focuspointpanelid', i);
 		});
 
 	}
