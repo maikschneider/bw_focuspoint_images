@@ -174,19 +174,19 @@ class FocuspointWizard {
 	 */
 	private activateFocuspoint(id: number): void {
 
-		const wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
+		const wasOpen = this.inputPanels[id].find('a.panel-link').attr('aria-expanded') === 'true';
 
 		// remove all active states
 		for (let i = 0; i < this.data.length; i++) {
 			this.focusBoxes[i].removeClass('active');
-			this.inputPanels[i].find('a').attr('aria-expanded', 'false');
+			this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
 			this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
 
 		// add new active state (if it was closed)
 		if (!wasOpen) {
 			this.focusBoxes[id].addClass('active');
-			this.inputPanels[id].find('a').attr('aria-expanded', 'true');
+			this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
 			this.inputPanels[id].find('.panel-collapse').addClass('show');
 		}
 	}
@@ -285,8 +285,6 @@ class FocuspointWizard {
 			})
 			.get().then(async (response: AjaxResponse): Promise<any> => {
 			const data = await response.resolve();
-			console.log('new url', data.url);
-			console.log($(linkButton).attr('href'));
 			$(linkButton).attr('href', data.url);
 		});
 

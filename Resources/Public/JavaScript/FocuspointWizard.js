@@ -162,17 +162,17 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
          * @private
          */
         FocuspointWizard.prototype.activateFocuspoint = function (id) {
-            var wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
+            var wasOpen = this.inputPanels[id].find('a.panel-link').attr('aria-expanded') === 'true';
             // remove all active states
             for (var i = 0; i < this.data.length; i++) {
                 this.focusBoxes[i].removeClass('active');
-                this.inputPanels[i].find('a').attr('aria-expanded', 'false');
+                this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
                 this.inputPanels[i].find('.panel-collapse').removeClass('show');
             }
             // add new active state (if it was closed)
             if (!wasOpen) {
                 this.focusBoxes[id].addClass('active');
-                this.inputPanels[id].find('a').attr('aria-expanded', 'true');
+                this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
                 this.inputPanels[id].find('.panel-collapse').addClass('show');
             }
         };
@@ -263,8 +263,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                         case 0: return [4 /*yield*/, response.resolve()];
                         case 1:
                             data = _a.sent();
-                            console.log('new url', data.url);
-                            console.log($(linkButton).attr('href'));
                             $(linkButton).attr('href', data.url);
                             return [2 /*return*/];
                     }
