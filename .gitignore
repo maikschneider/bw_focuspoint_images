@@ -7,3 +7,5 @@ bin
 var/
 Documentation-GENERATED-temp
 composer.lock
+tscommand-*.tmp.txt
+.Build

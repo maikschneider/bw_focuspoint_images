@@ -11,23 +11,11 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-/// <amd-dependency path='TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min' name='ImagesLoaded'>
-/// <amd-dependency path='TYPO3/CMS/Backend/Modal' name='Modal'>
-
 import $ = require('jquery');
-import AjaxRequest = require('TYPO3/CMS/Core/Ajax/AjaxRequest');
 import 'jquery-ui/draggable';
 import 'jquery-ui/resizable';
-import {AjaxResponse} from 'TYPO3/CMS/Core/Ajax/AjaxResponse';
-
-declare const Modal: any;
-declare const ImagesLoaded: any;
-
-declare global {
-	interface Window {
-		TYPO3: any;
-	}
-}
+import Modal = require('TYPO3/CMS/Backend/Modal');
+import ImagesLoaded = require('imagesloaded');
 
 interface Focuspoint {
 	width: number
@@ -47,7 +35,7 @@ class FocuspointWizard {
 	private cropImageSelector: string = '#t3js-crop-image';
 	private focusPointContainerSelector: string = '#focuspoint-container';
 	private trigger: JQuery;
-	private currentModal: JQuery;
+	private currentModal: any;
 	private focusBoxes: Array<JQuery> = [];
 	private inputPanels: Array<JQuery> = [];
 	private data: Array<Focuspoint>;
@@ -282,16 +270,23 @@ class FocuspointWizard {
 			$(linkButton).closest('.form-wizards-wrap').find('.form-control-clearable button').css('visibility', 'visible');
 		}
 
+
+		let url = TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl;
+		url += "&fieldName=" + encodeURIComponent(fieldName);
+		url += "&inputValue=" + encodeURIComponent(inputValue);
+		url += "&inputName=" + encodeURIComponent(inputName);
+		url += "&pid=" + encodeURIComponent(pid);
+
+		const request = $.ajax({
+			type: 'GET',
+			url: url,
+			contentType: 'json'
+		});
+
 		// get link browser url + link info
-		new AjaxRequest(TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl)
-			.withQueryArguments({
-				fieldName: fieldName,
-				inputValue: inputValue,
-				inputName: inputName,
-				pid: pid
-			})
-			.get().then(async (response: AjaxResponse): Promise<any> => {
-			const data = await response.resolve();
+		request.done(function (response) {
+			console.log(response)
+			const data = response;
 			// update url
 			$(linkButton).attr('href', data.url);
 
@@ -443,6 +438,7 @@ class FocuspointWizard {
 		}
 
 		// If we have data already set we assume an internal reinit eg. after resizing
+		// @ts-ignore
 		this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
 
 		if (this.data.length) {
@@ -499,7 +495,7 @@ class FocuspointWizard {
 		const buttonDismissText: string = this.trigger.data('buttonDismissText');
 		const buttonSaveText: string = this.trigger.data('buttonSaveText');
 		const imageUri: string = this.trigger.data('url');
-		const buttons: array = [
+		const buttons: Array<Object> = [
 			{
 				btnClass: 'btn-default',
 				dataAttributes: {
@@ -576,7 +572,7 @@ class FocuspointWizard {
 			this.is7up = is7up
 			this.show();
 		};
-		$('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
+		$('.t3js-focuspoint-trigger').off('click').on('click', triggerHandler.bind(this));
 	}
 
 }

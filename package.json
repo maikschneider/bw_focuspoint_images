@@ -10,6 +10,7 @@
     "grunt-contrib-watch": "^1.1.0",
     "grunt-move": "^1.0.3",
     "grunt-ts": "^6.0.0-beta.22",
+    "imagesloaded": "^4.1.4",
     "jquery": "^3.5.1",
     "jquery-ui": "github:jquery/jquery-ui#1.11.4",
     "typescript": "^4.4.2"
