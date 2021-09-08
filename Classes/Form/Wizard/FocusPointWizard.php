@@ -19,7 +19,9 @@ namespace Blueways\BwFocuspointImages\Form\Wizard;
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
@@ -35,6 +37,52 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
  */
 class FocusPointWizard
 {
+
+    public function getLinkWizardUrlAction(ServerRequestInterface $request): JsonResponse
+    {
+        $queryParams = $request->getQueryParams();
+        $fieldName = $queryParams['fieldName'];
+        $inputName = $queryParams['inputName'];
+        $pid = MathUtility::canBeInterpretedAsInteger($queryParams['pid']) ? (int)$queryParams['pid'] : 0;
+
+        // @TODO: do not read TypoScript, use PageTS
+        $typoScript = HelperUtility::getTypoScript();
+
+        $linkBrowserArguments = [];
+        if (isset($typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkOptions'])) {
+            $linkBrowserArguments['blindLinkOptions'] = $typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkOptions'];
+        }
+        if (isset($typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkFields'])) {
+            $linkBrowserArguments['blindLinkFields'] = $typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkFields'];
+        }
+        if (isset($typoScript['settings']['fields'][$fieldName]['linkPopup']['allowedExtensions'])) {
+            $linkBrowserArguments['allowedExtensions'] = $typoScript['settings']['fields'][$fieldName]['linkPopup']['allowedExtensions'];
+        }
+
+        $urlParameters = [
+            'P' => [
+                'params' => $linkBrowserArguments,
+                'table' => 'sys_file_reference',
+                'uid' => '',
+                'pid' => $pid,
+                'field' => $inputName,
+                'formName' => 'editform',
+                'itemName' => $inputName,
+                'hmac' => GeneralUtility::hmac('focusPointForm' . $inputName, 'wizard_js'),
+//                'fieldChangeFunc' => $parameterArray['fieldChangeFunc'],
+//                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parameterArray['fieldChangeFunc']),
+//                    'backend-link-browser'),
+            ],
+        ];
+
+        /** @var \TYPO3\CMS\Backend\Routing\UriBuilder $uriBuilder */
+        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $url = (string)$uriBuilder->buildUriFromRoute('wizard_link', $urlParameters);
+
+        return new JsonResponse([
+            'url' => $url
+        ]);
+    }
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

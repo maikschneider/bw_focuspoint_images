@@ -128,6 +128,7 @@ class InputFocuspointElement extends AbstractFormElement
                 'validation' => '[]'
             ],
             'config' => $config,
+            'pid' => $this->data['databaseRow']['pid'],
             'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
         ];
 

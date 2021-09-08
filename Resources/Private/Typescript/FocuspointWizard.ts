@@ -13,11 +13,12 @@
 
 /// <amd-dependency path='TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min' name='ImagesLoaded'>
 /// <amd-dependency path='TYPO3/CMS/Backend/Modal' name='Modal'>
-/// <amd-dependency path='TYPO3/CMS/Recordlist/LinkBrowser' name='LinkBrowser'>
 
 import $ = require('jquery');
+import AjaxRequest = require('TYPO3/CMS/Core/Ajax/AjaxRequest');
 import 'jquery-ui/draggable';
 import 'jquery-ui/resizable';
+import {AjaxResponse} from 'TYPO3/CMS/Core/Ajax/AjaxResponse';
 
 declare const Modal: any;
 declare const ImagesLoaded: any;
@@ -177,9 +178,9 @@ class FocuspointWizard {
 
 		// remove all active states
 		for (let i = 0; i < this.data.length; i++) {
-				this.focusBoxes[i].removeClass('active');
-				this.inputPanels[i].find('a').attr('aria-expanded', 'false');
-				this.inputPanels[i].find('.panel-collapse').removeClass('show');
+			this.focusBoxes[i].removeClass('active');
+			this.inputPanels[i].find('a').attr('aria-expanded', 'false');
+			this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
 
 		// add new active state (if it was closed)
@@ -279,8 +280,44 @@ class FocuspointWizard {
 					$('option[value="' + inputValue + '"]', input).prop('selected', true);
 					break;
 				case 'A':
-					const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
-					$(input).prev().prev().val(label);
+					//const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
+					//$(input).prev().prev().val(label);
+					const fieldName = $(input).attr('data-fieldname');
+					const inputName = 'linkfield-' + $(input).attr('data-fieldname') + '-' + i;
+					const $hiddenElement = $('<input>').attr({'type': 'text', 'data-formengine-input-name': inputName});
+					if (!$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').length) {
+						$(document).find('form[name="editform"]').append($hiddenElement);
+					}
+					const pid = this.trigger.data('pid');
+
+					// get link browser url + link info
+					new AjaxRequest(TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl)
+						.withQueryArguments({
+							fieldName: fieldName,
+							inputValue: inputValue,
+							inputName: inputName,
+							pid: pid
+						})
+						.get().then(async (response: AjaxResponse): Promise<any> => {
+						const data = await response.resolve();
+						$(input).attr('href', data.url);
+					});
+
+					// bind link browser
+					$(input).on('click', function (e) {
+						e.preventDefault();
+
+						const url = $(input).attr('href')
+							+ '&P[currentValue]=' + encodeURIComponent(inputValue)
+							+ '&P[currentSelectedValues]=' + encodeURIComponent('');
+
+						Modal.advanced({
+							type: Modal.types.iframe,
+							content: url,
+							size: Modal.sizes.large,
+						});
+					})
+
 					break;
 			}
 
@@ -288,32 +325,6 @@ class FocuspointWizard {
 			$(input).off('input').on('input', this.onInputChange.bind(this, input));
 
 		});
-
-		// bind linkbrowser
-		const linkelement = $(panel).find('.linkbrowser');
-
-		if (linkelement.length) {
-			const onButtonClick = function (e) {
-				e.preventDefault();
-				self.linkBrowser.attr('data-current-focuspointPanelId', focuspointPanelId);
-				self.linkBrowser.attr('data-current-fieldname', $(linkelement).attr('data-fieldname'));
-				self.linkBrowser.addClass('open');
-			};
-			const onLinkTargetChange = function (e) {
-				if (!self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')]) {
-					return;
-				}
-				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')].target = $(e.currentTarget).val();
-			};
-			$(linkelement).on('click', onButtonClick.bind(this));
-			$(panel).find('.linkbrowser-input').on('click', onButtonClick.bind(this));
-			$(panel).find('.linkbrowser-target').on('change', onLinkTargetChange.bind(this));
-			$(panel).find('.linkbrowser-remove').on('click', function (e) {
-				e.preventDefault();
-				$(panel).find('.linkbrowser-input').val('');
-				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')] = null;
-			});
-		}
 
 		// bind remove event
 		const removeEvent = function () {
@@ -323,7 +334,6 @@ class FocuspointWizard {
 		$(panel).bind('remove', removeEvent.bind(null, panel));
 
 		// bind open / close event
-		const self = this;
 		const clickEvent: Function = function () {
 			const id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
 			self.activateFocuspoint(id);
