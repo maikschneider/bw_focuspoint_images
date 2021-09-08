@@ -258,9 +258,52 @@ class FocuspointWizard {
 	}
 
 	private onHiddenLinkInputChange(input) {
+		// save data
 		const focuspointPanelId: number = parseInt($(input).attr('data-focuspointPanelId'));
 		const fieldname = $(input).attr('data-fieldname');
 		this.data[focuspointPanelId][fieldname] = $(input).val();
+
+		// update link and preview
+		const linkButton = this.inputPanels[focuspointPanelId].find('a[data-fieldname="' + fieldname + '"]').first();
+		this.refreshLinkButtonUrlAndPreview(linkButton);
+	}
+
+	private refreshLinkButtonUrlAndPreview(linkButton) {
+		const pid = this.trigger.data('pid');
+		const fieldName = $(linkButton).attr('data-fieldname');
+		const focuspointPanelId: number = parseInt($(linkButton).attr('data-focuspointPanelId'));
+		const inputValue: string = this.data[focuspointPanelId][fieldName];
+		const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+
+		// get link browser url + link info
+		new AjaxRequest(TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl)
+			.withQueryArguments({
+				fieldName: fieldName,
+				inputValue: inputValue,
+				inputName: inputName,
+				pid: pid
+			})
+			.get().then(async (response: AjaxResponse): Promise<any> => {
+			const data = await response.resolve();
+			console.log('new url', data.url);
+			console.log($(linkButton).attr('href'));
+			$(linkButton).attr('href', data.url);
+		});
+
+		// bind button event
+		$(linkButton).off('click').on('click', function (e) {
+			e.preventDefault();
+
+			const url = $(linkButton).attr('href')
+				+ '&P[currentValue]=' + encodeURIComponent(inputValue)
+				+ '&P[currentSelectedValues]=' + encodeURIComponent('');
+
+			Modal.advanced({
+				type: Modal.types.iframe,
+				content: url,
+				size: Modal.sizes.large,
+			});
+		})
 	}
 
 	private initInputPanel(panel: JQuery): void {
@@ -287,8 +330,7 @@ class FocuspointWizard {
 					$('option[value="' + inputValue + '"]', input).prop('selected', true);
 					break;
 				case 'A':
-					//const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
-					//$(input).prev().prev().val(label);
+					// create hidden element
 					const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
 					const $hiddenElement = $('<input>')
 						.attr({
@@ -302,35 +344,9 @@ class FocuspointWizard {
 					if (!$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').length) {
 						$(document).find('form[name="editform"]').append($hiddenElement);
 					}
-					const pid = this.trigger.data('pid');
 
-					// get link browser url + link info
-					new AjaxRequest(TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl)
-						.withQueryArguments({
-							fieldName: fieldName,
-							inputValue: inputValue,
-							inputName: inputName,
-							pid: pid
-						})
-						.get().then(async (response: AjaxResponse): Promise<any> => {
-						const data = await response.resolve();
-						$(input).attr('href', data.url);
-					});
-
-					// bind link browser
-					$(input).on('click', function (e) {
-						e.preventDefault();
-
-						const url = $(input).attr('href')
-							+ '&P[currentValue]=' + encodeURIComponent(inputValue)
-							+ '&P[currentSelectedValues]=' + encodeURIComponent('');
-
-						Modal.advanced({
-							type: Modal.types.iframe,
-							content: url,
-							size: Modal.sizes.large,
-						});
-					})
+					// add button link and preview
+					this.refreshLinkButtonUrlAndPreview(input);
 
 					break;
 			}
