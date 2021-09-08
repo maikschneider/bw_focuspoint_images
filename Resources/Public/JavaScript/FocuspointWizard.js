@@ -248,6 +248,12 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var focuspointPanelId = parseInt($(linkButton).attr('data-focuspointPanelId'));
             var inputValue = this.data[focuspointPanelId][fieldName];
             var inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+            // set value in panel input
+            $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-input').val(inputValue);
+            // show remove button
+            if (inputValue) {
+                $(linkButton).closest('.form-wizards-wrap').find('.form-control-clearable button').css('visibility', 'visible');
+            }
             // get link browser url + link info
             new AjaxRequest(TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl)
                 .withQueryArguments({
@@ -257,27 +263,25 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 pid: pid
             })
                 .get().then(function (response) { return __awaiter(_this, void 0, void 0, function () {
-                var data;
+                var data, text, icon, additionalAttributes;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, response.resolve()];
                         case 1:
                             data = _a.sent();
+                            // update url
                             $(linkButton).attr('href', data.url);
-                            if (data.preview.text) {
-                                $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(data.preview.text).attr('title', data.preview.text);
-                            }
-                            if (data.preview.icon) {
-                                $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(data.preview.icon);
-                            }
-                            if (data.preview.additionalAttributes) {
-                                $(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(data.preview.additionalAttributes);
-                            }
+                            text = data.preview.text ? data.preview.text : '';
+                            icon = data.preview.icon ? data.preview.icon : '';
+                            additionalAttributes = data.preview.additionalAttributes ? data.preview.additionalAttributes : '';
+                            $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(text).attr('title', text);
+                            $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(icon);
+                            $(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(additionalAttributes);
                             return [2 /*return*/];
                     }
                 });
             }); });
-            // bind button event
+            // bind link button event
             $(linkButton).off('click').on('click', function (e) {
                 e.preventDefault();
                 var url = $(linkButton).attr('href')
@@ -327,6 +331,20 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                         }
                         // add button link and preview
                         _this.refreshLinkButtonUrlAndPreview(input);
+                        // event for toggling link display
+                        $(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation-toggle').on('click', function (e) {
+                            e.preventDefault();
+                            $(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation, .t3js-form-field-inputlink-input').toggleClass('hidden');
+                        });
+                        // event for deleting link
+                        $(input).closest('.form-wizards-wrap').find('.form-control-clearable button').on('click', function (e) {
+                            e.preventDefault();
+                            $(e.currentTarget).css('visibility', 'hidden');
+                            var focuspointPanelId = parseInt($(input).attr('data-focuspointpanelid'));
+                            var fieldName = $(input).attr('data-fieldname');
+                            var inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+                            $(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').val('').trigger('change');
+                        });
                         break;
                 }
                 // bind events

@@ -275,6 +275,14 @@ class FocuspointWizard {
 		const inputValue: string = this.data[focuspointPanelId][fieldName];
 		const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
 
+		// set value in panel input
+		$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-input').val(inputValue);
+
+		// show remove button
+		if (inputValue) {
+			$(linkButton).closest('.form-wizards-wrap').find('.form-control-clearable button').css('visibility', 'visible');
+		}
+
 		// get link browser url + link info
 		new AjaxRequest(TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl)
 			.withQueryArguments({
@@ -285,19 +293,19 @@ class FocuspointWizard {
 			})
 			.get().then(async (response: AjaxResponse): Promise<any> => {
 			const data = await response.resolve();
+			// update url
 			$(linkButton).attr('href', data.url);
-			if (data.preview.text) {
-				$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(data.preview.text).attr('title', data.preview.text);
-			}
-			if (data.preview.icon) {
-				$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(data.preview.icon);
-			}
-			if (data.preview.additionalAttributes) {
-				$(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(data.preview.additionalAttributes);
-			}
+
+			// update link info
+			const text = data.preview.text ? data.preview.text : '';
+			const icon = data.preview.icon ? data.preview.icon : '';
+			const additionalAttributes = data.preview.additionalAttributes ? data.preview.additionalAttributes : '';
+			$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(text).attr('title', text);
+			$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(icon);
+			$(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(additionalAttributes);
 		});
 
-		// bind button event
+		// bind link button event
 		$(linkButton).off('click').on('click', function (e) {
 			e.preventDefault();
 
@@ -354,6 +362,22 @@ class FocuspointWizard {
 
 					// add button link and preview
 					this.refreshLinkButtonUrlAndPreview(input);
+
+					// event for toggling link display
+					$(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation-toggle').on('click', function (e) {
+						e.preventDefault();
+						$(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation, .t3js-form-field-inputlink-input').toggleClass('hidden');
+					});
+
+					// event for deleting link
+					$(input).closest('.form-wizards-wrap').find('.form-control-clearable button').on('click', function (e) {
+						e.preventDefault();
+						$(e.currentTarget).css('visibility', 'hidden');
+						const focuspointPanelId = parseInt($(input).attr('data-focuspointpanelid'));
+						const fieldName = $(input).attr('data-fieldname');
+						const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+						$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').val('').trigger('change');
+					});
 
 					break;
 			}
