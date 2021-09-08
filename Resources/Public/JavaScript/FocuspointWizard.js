@@ -395,7 +395,6 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
          */
         FocuspointWizard.prototype.init = function () {
             var _this = this;
-            var image = this.currentModal.find(this.cropImageSelector);
             var hiddenField = $("#" + this.trigger.attr('data-field'));
             var data = hiddenField.val();
             if (!data || data == "") {
@@ -417,82 +416,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                 var newFocuspointId = _this.addNewFocuspoint(-1);
                 _this.activateFocuspoint(newFocuspointId);
             });
-            // bind link browser events
-            this.initLinkBrowser();
             // Bind resize event
             $(window).resize(this.onWindowResize.bind(this));
-        };
-        FocuspointWizard.prototype.linkBrowserClick = function (uid, table, key, label) {
-            // build data to save
-            var focuspointPanelId = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
-            var target = this.inputPanels[focuspointPanelId].find('.linkbrowser-target').val();
-            var browserlinkvalue = {
-                label: label,
-                uid: uid,
-                table: table,
-                key: key,
-                target: target
-            };
-            // save selected value to data
-            var fieldname = this.linkBrowser.attr('data-current-fieldname');
-            this.data[focuspointPanelId][fieldname] = browserlinkvalue;
-            // insert label into input and close
-            this.inputPanels[focuspointPanelId].find('.linkbrowser-input').val(label);
-            this.linkBrowser.trigger('close');
-        };
-        FocuspointWizard.prototype.initLinkBrowser = function () {
-            var self = this;
-            this.linkBrowser = this.currentModal.find('.modal-panel-linkbrowser');
-            // click on tab item
-            this.linkBrowser.find('.nav-tabs a').on('click', function (e) {
-                e.preventDefault();
-                var tab = $(e.currentTarget).parent();
-                var browserKey = $(tab).attr('data-browser-key');
-                self.linkBrowser.find('.nav-tabs li').removeClass('active');
-                self.linkBrowser.find('.modal-panel-linkbrowser-item').removeClass('active');
-                $(tab).addClass('active');
-                self.linkBrowser.find('.modal-panel-linkbrowser-item[data-browser-key="' + browserKey + '"]').addClass('active');
-            });
-            // hide page children
-            var rootPid = this.linkBrowser.find('tr.db_list_normal[data-pid="0"]').attr('data-uid');
-            this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
-            // page tree open children
-            this.linkBrowser.find('tr .pagetree-opener').on('click', function (e) {
-                $(this).parent().toggleClass('active');
-                var uid = $(this).parent().attr('data-uid');
-                self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
-            });
-            // page tree link click
-            this.linkBrowser.find('tr .pagetree-title').on('click', function (e) {
-                e.preventDefault();
-                var uid = $(e.currentTarget).parent().attr('data-uid');
-                var table = 'pages';
-                var key = 'page';
-                var label = $(e.currentTarget).text();
-                self.linkBrowserClick(uid, table, key, label);
-            });
-            // record list click
-            this.linkBrowser.find('.recordlist tr').on('click', function (e) {
-                e.preventDefault();
-                var row = $(e.currentTarget);
-                var uid = row.attr('data-uid');
-                var table = row.closest('.table').attr('data-table');
-                var key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
-                var label = row.find('td:nth-child(2)').text();
-                self.linkBrowserClick(uid, table, key, label);
-            });
-            // close button link
-            this.linkBrowser.find('#closelinkbrowser').on('click', function (e) {
-                e.preventDefault();
-                self.linkBrowser.trigger('close');
-            });
-            // reset function
-            this.linkBrowser.bind('close', function () {
-                self.linkBrowser.removeClass('open');
-                self.linkBrowser.find('.nav-tabs li:first-child a').trigger('click');
-                self.linkBrowser.attr('data-current-focuspointPanelId', '');
-                self.linkBrowser.attr('data-current-fieldname', '');
-            });
         };
         FocuspointWizard.prototype.onWindowResize = function () {
             var self = this;

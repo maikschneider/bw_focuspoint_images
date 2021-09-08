@@ -51,7 +51,6 @@ class FocuspointWizard {
 	private focusBoxes: Array<JQuery> = [];
 	private inputPanels: Array<JQuery> = [];
 	private data: Array<Focuspoint>;
-	private linkBrowser: JQuery;
 	private is7up: boolean;
 
 	private calculateRelativeX(width: number): number {
@@ -436,7 +435,6 @@ class FocuspointWizard {
 	 * @private
 	 */
 	private init(): void {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
 		const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
 		let data = hiddenField.val();
 
@@ -464,95 +462,8 @@ class FocuspointWizard {
 			this.activateFocuspoint(newFocuspointId);
 		});
 
-		// bind link browser events
-		this.initLinkBrowser();
-
 		// Bind resize event
 		$(window).resize(this.onWindowResize.bind(this));
-	}
-
-	private linkBrowserClick(uid: number, table: string, key: string, label: string) {
-
-		// build data to save
-		const focuspointPanelId: number = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
-		const target = this.inputPanels[focuspointPanelId].find('.linkbrowser-target').val();
-		const browserlinkvalue = {
-			label: label,
-			uid: uid,
-			table: table,
-			key: key,
-			target: target
-		};
-
-		// save selected value to data
-		const fieldname = this.linkBrowser.attr('data-current-fieldname');
-		this.data[focuspointPanelId][fieldname] = browserlinkvalue;
-
-		// insert label into input and close
-		this.inputPanels[focuspointPanelId].find('.linkbrowser-input').val(label);
-		this.linkBrowser.trigger('close');
-	}
-
-	private initLinkBrowser(): void {
-		const self = this;
-		this.linkBrowser = this.currentModal.find('.modal-panel-linkbrowser');
-
-		// click on tab item
-		this.linkBrowser.find('.nav-tabs a').on('click', function (e) {
-			e.preventDefault();
-			const tab = $(e.currentTarget).parent();
-			const browserKey = $(tab).attr('data-browser-key');
-			self.linkBrowser.find('.nav-tabs li').removeClass('active');
-			self.linkBrowser.find('.modal-panel-linkbrowser-item').removeClass('active');
-			$(tab).addClass('active');
-			self.linkBrowser.find('.modal-panel-linkbrowser-item[data-browser-key="' + browserKey + '"]').addClass('active');
-		});
-
-		// hide page children
-		const rootPid = this.linkBrowser.find('tr.db_list_normal[data-pid="0"]').attr('data-uid');
-		this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
-
-		// page tree open children
-		this.linkBrowser.find('tr .pagetree-opener').on('click', function (e) {
-			$(this).parent().toggleClass('active');
-			const uid = $(this).parent().attr('data-uid');
-			self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
-		});
-
-		// page tree link click
-		this.linkBrowser.find('tr .pagetree-title').on('click', function (e) {
-			e.preventDefault();
-			const uid = $(e.currentTarget).parent().attr('data-uid');
-			const table = 'pages';
-			const key = 'page';
-			const label = $(e.currentTarget).text();
-			self.linkBrowserClick(uid, table, key, label);
-		});
-
-		// record list click
-		this.linkBrowser.find('.recordlist tr').on('click', function (e) {
-			e.preventDefault();
-			const row = $(e.currentTarget);
-			const uid = row.attr('data-uid');
-			const table = row.closest('.table').attr('data-table');
-			const key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
-			const label = row.find('td:nth-child(2)').text();
-			self.linkBrowserClick(uid, table, key, label);
-		});
-
-		// close button link
-		this.linkBrowser.find('#closelinkbrowser').on('click', function (e) {
-			e.preventDefault();
-			self.linkBrowser.trigger('close');
-		});
-
-		// reset function
-		this.linkBrowser.bind('close', () => {
-			self.linkBrowser.removeClass('open');
-			self.linkBrowser.find('.nav-tabs li:first-child a').trigger('click');
-			self.linkBrowser.attr('data-current-focuspointPanelId', '');
-			self.linkBrowser.attr('data-current-fieldname', '');
-		});
 	}
 
 	private onWindowResize(): void {
@@ -657,7 +568,6 @@ class FocuspointWizard {
 			this.data = null;
 		}
 	}
-
 
 	public initializeTrigger(is7up: boolean): void {
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
