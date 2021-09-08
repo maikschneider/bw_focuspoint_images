@@ -232,6 +232,11 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var hiddenField = $("#" + this.trigger.attr('data-field'));
             hiddenField.val(focusPoints);
         };
+        FocuspointWizard.prototype.onHiddenLinkInputChange = function (input) {
+            var focuspointPanelId = parseInt($(input).attr('data-focuspointPanelId'));
+            var fieldname = $(input).attr('data-fieldname');
+            this.data[focuspointPanelId][fieldname] = $(input).val();
+        };
         FocuspointWizard.prototype.initInputPanel = function (panel) {
             var _this = this;
             var self = this;
@@ -240,7 +245,8 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
             var focuspoint = this.data[focuspointPanelId] ? this.data[focuspointPanelId] : {};
             // for all inputs: set data and eventListener
             panelInputs.each(function (i, input) {
-                var inputValue = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+                var fieldName = $(input).attr('name') ? $(input).attr('name') : $(input).attr('data-fieldname');
+                var inputValue = focuspoint[fieldName] ? focuspoint[fieldName] : '';
                 // set value
                 switch ($(input).prop('tagName')) {
                     case 'INPUT':
@@ -254,9 +260,16 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                     case 'A':
                         //const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
                         //$(input).prev().prev().val(label);
-                        var fieldName = $(input).attr('data-fieldname');
-                        var inputName = 'linkfield-' + $(input).attr('data-fieldname') + '-' + i;
-                        var $hiddenElement = $('<input>').attr({ 'type': 'text', 'data-formengine-input-name': inputName });
+                        var inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+                        var $hiddenElement = $('<input>')
+                            .attr({
+                            'type': 'text',
+                            'value': inputValue,
+                            'data-fieldname': fieldName,
+                            'data-formengine-input-name': inputName,
+                            'data-focuspointPanelId': focuspointPanelId
+                        });
+                        $hiddenElement.on('change', _this.onHiddenLinkInputChange.bind(_this, $hiddenElement));
                         if (!$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').length) {
                             $(document).find('form[name="editform"]').append($hiddenElement);
                         }

@@ -257,6 +257,12 @@ class FocuspointWizard {
 		hiddenField.val(focusPoints);
 	}
 
+	private onHiddenLinkInputChange(input) {
+		const focuspointPanelId: number = parseInt($(input).attr('data-focuspointPanelId'));
+		const fieldname = $(input).attr('data-fieldname');
+		this.data[focuspointPanelId][fieldname] = $(input).val();
+	}
+
 	private initInputPanel(panel: JQuery): void {
 
 		const self = this;
@@ -267,7 +273,8 @@ class FocuspointWizard {
 		// for all inputs: set data and eventListener
 		panelInputs.each((i, input) => {
 
-			const inputValue: string = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+			const fieldName = $(input).attr('name') ? $(input).attr('name') : $(input).attr('data-fieldname')
+			const inputValue: string = focuspoint[fieldName] ? focuspoint[fieldName] : '';
 
 			// set value
 			switch ($(input).prop('tagName')) {
@@ -282,9 +289,16 @@ class FocuspointWizard {
 				case 'A':
 					//const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
 					//$(input).prev().prev().val(label);
-					const fieldName = $(input).attr('data-fieldname');
-					const inputName = 'linkfield-' + $(input).attr('data-fieldname') + '-' + i;
-					const $hiddenElement = $('<input>').attr({'type': 'text', 'data-formengine-input-name': inputName});
+					const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+					const $hiddenElement = $('<input>')
+						.attr({
+							'type': 'text',
+							'value': inputValue,
+							'data-fieldname': fieldName,
+							'data-formengine-input-name': inputName,
+							'data-focuspointPanelId': focuspointPanelId
+						});
+					$hiddenElement.on('change', this.onHiddenLinkInputChange.bind(this, $hiddenElement));
 					if (!$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').length) {
 						$(document).find('form[name="editform"]').append($hiddenElement);
 					}
