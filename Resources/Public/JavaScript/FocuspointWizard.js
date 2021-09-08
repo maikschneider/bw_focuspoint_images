@@ -264,6 +264,15 @@ define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "T
                         case 1:
                             data = _a.sent();
                             $(linkButton).attr('href', data.url);
+                            if (data.preview.text) {
+                                $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(data.preview.text).attr('title', data.preview.text);
+                            }
+                            if (data.preview.icon) {
+                                $(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(data.preview.icon);
+                            }
+                            if (data.preview.additionalAttributes) {
+                                $(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(data.preview.additionalAttributes);
+                            }
                             return [2 /*return*/];
                     }
                 });

@@ -286,6 +286,15 @@ class FocuspointWizard {
 			.get().then(async (response: AjaxResponse): Promise<any> => {
 			const data = await response.resolve();
 			$(linkButton).attr('href', data.url);
+			if (data.preview.text) {
+				$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(data.preview.text).attr('title', data.preview.text);
+			}
+			if (data.preview.icon) {
+				$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(data.preview.icon);
+			}
+			if (data.preview.additionalAttributes) {
+				$(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(data.preview.additionalAttributes);
+			}
 		});
 
 		// bind button event
