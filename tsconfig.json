@@ -1,14 +1,28 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "module": "amd",
     "sourceMap": false,
     "removeComments": false,
     "pretty": true,
+    "baseUrl": ".",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
     "paths": {
       "TYPO3/CMS/BwFocuspointImagaes/*": [
-        "Resources/Public/JavaScript/"
+        "Resources/Public/TypeScript/"
+      ],
+      "TYPO3/CMS/Core/*": [
+        ".Build/Sources/TypeScript/core/Resources/Public/TypeScript/*"
+      ],
+      "TYPO3/CMS/Backend/*": [
+        ".Build/Sources/TypeScript/backend/Resources/Public/TypeScript/*"
       ]
-    }
-  }
+    },
+  },
+  "typeRoots": [
+    "node_modules/@types",
+    ".Build/types"
+  ]
 }

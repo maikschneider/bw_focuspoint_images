@@ -1,18 +1,31 @@
 module.exports = function (grunt) {
     grunt.initConfig({
         ts: {
-            options: {
-                rootDir: "Resources/Public/JavaScript",
-                module: "amd"
-            },
             default: {
-                watch: "Resources/Private/Typescript",
-                src: ["**/*.ts", "!node_modules/**", "!vendor/**", "!public/**"],
-                outDir: "Resources/Public/JavaScript",
-                tsconfig: true
+                tsconfig: {
+                    tsconfig: './tsconfig.json',
+                    passThrough: true
+                },
+            },
+        },
+        move: {
+            test: {
+                src: './Resources/Private/TypeScript/*.js',
+                dest: './Resources/Public/JavaScript/'
             }
-        }
+        },
+        watch: {
+            scripts: {
+                files: './Resources/Private/TypeScript/*.ts',
+                tasks: ['ts', 'move'],
+                options: {
+                    interrupt: true,
+                },
+            },
+        },
     });
     grunt.loadNpmTasks("grunt-ts");
-    grunt.registerTask("default", ["ts"]);
+    grunt.loadNpmTasks('grunt-move');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.registerTask("default", ["ts", "move"]);
 };
