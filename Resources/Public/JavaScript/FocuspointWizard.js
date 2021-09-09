@@ -204,6 +204,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
             this.refreshLinkButtonUrlAndPreview(linkButton);
         }
         refreshLinkButtonUrlAndPreview(linkButton) {
+            const self = this;
             const pid = this.trigger.data('pid');
             const fieldName = $(linkButton).attr('data-fieldname');
             const focuspointPanelId = parseInt($(linkButton).attr('data-focuspointPanelId'));
@@ -227,10 +228,15 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
             });
             // get link browser url + link info
             request.done(function (response) {
-                console.log(response);
                 const data = response;
-                // update url
-                $(linkButton).attr('href', data.url);
+                // update link browser url
+                if (self.typo3Version >= 10) {
+                    $(linkButton).attr('href', data.url);
+                }
+                else {
+                    const onClickEvent = 'this.blur(); vHWin = window.document.list_frame.open(\'' + data.url + '\', \'\', \'height = 800, width = 1000, status = 0, menubar = 0, scrollbars = 1\'); vHWin.focus(); vHWin.onbeforeunload = function(){ window.document.list_frame.document.querySelector(\'input#' + inputName + '\').dispatchEvent(new Event(\'change\', {bubbles: true, cancelable: true})); }; return false;';
+                    $(linkButton).attr('onclick', onClickEvent);
+                }
                 // update link info
                 const text = data.preview.text ? data.preview.text : '';
                 const icon = data.preview.icon ? data.preview.icon : '';
@@ -240,17 +246,19 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
                 $(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(additionalAttributes);
             });
             // bind link button event
-            $(linkButton).off('click').on('click', function (e) {
-                e.preventDefault();
-                const url = $(linkButton).attr('href')
-                    + '&P[currentValue]=' + encodeURIComponent(inputValue)
-                    + '&P[currentSelectedValues]=' + encodeURIComponent('');
-                Modal.advanced({
-                    type: Modal.types.iframe,
-                    content: url,
-                    size: Modal.sizes.large,
+            if (self.typo3Version >= 10) {
+                $(linkButton).off('click').on('click', function (e) {
+                    e.preventDefault();
+                    const url = $(linkButton).attr('href')
+                        + '&P[currentValue]=' + encodeURIComponent(inputValue)
+                        + '&P[currentSelectedValues]=' + encodeURIComponent('');
+                    Modal.advanced({
+                        type: Modal.types.iframe,
+                        content: url,
+                        size: Modal.sizes.large,
+                    });
                 });
-            });
+            }
         }
         initInputPanel(panel) {
             const self = this;
@@ -278,6 +286,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
                             .attr({
                             'type': 'text',
                             'value': inputValue,
+                            'id': inputName,
                             'data-fieldname': fieldName,
                             'data-formengine-input-name': inputName,
                             'data-focuspointPanelId': focuspointPanelId
@@ -426,7 +435,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
                     trigger: this.onSaveButtonClick.bind(this)
                 },
             ];
-            if (this.is7up) {
+            if (this.typo3Version > 7) {
                 this.currentModal = Modal.advanced({
                     type: 'ajax',
                     content: imageUri,
@@ -464,11 +473,11 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
                 this.data = null;
             }
         }
-        initializeTrigger(is7up) {
+        initializeTrigger(typo3Version) {
             const triggerHandler = (e) => {
                 e.preventDefault();
                 this.trigger = $(e.currentTarget);
-                this.is7up = is7up;
+                this.typo3Version = typo3Version;
                 this.show();
             };
             $('.t3js-focuspoint-trigger').off('click').on('click', triggerHandler.bind(this));

@@ -12,10 +12,10 @@
  */
 
 import $ = require('jquery');
-import 'jquery-ui/draggable';
-import 'jquery-ui/resizable';
 import Modal = require('TYPO3/CMS/Backend/Modal');
 import ImagesLoaded = require('imagesloaded');
+import 'jquery-ui/draggable';
+import 'jquery-ui/resizable';
 
 interface Focuspoint {
 	width: number
@@ -39,7 +39,7 @@ class FocuspointWizard {
 	private focusBoxes: Array<JQuery> = [];
 	private inputPanels: Array<JQuery> = [];
 	private data: Array<Focuspoint>;
-	private is7up: boolean;
+	private typo3Version: number;
 
 	private calculateRelativeX(width: number): number {
 		const image: JQuery = this.currentModal.find(this.cropImageSelector);
@@ -256,6 +256,7 @@ class FocuspointWizard {
 	}
 
 	private refreshLinkButtonUrlAndPreview(linkButton) {
+		const self = this;
 		const pid = this.trigger.data('pid');
 		const fieldName = $(linkButton).attr('data-fieldname');
 		const focuspointPanelId: number = parseInt($(linkButton).attr('data-focuspointPanelId'));
@@ -269,7 +270,6 @@ class FocuspointWizard {
 		if (inputValue) {
 			$(linkButton).closest('.form-wizards-wrap').find('.form-control-clearable button').css('visibility', 'visible');
 		}
-
 
 		let url = TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl;
 		url += "&fieldName=" + encodeURIComponent(fieldName);
@@ -285,10 +285,15 @@ class FocuspointWizard {
 
 		// get link browser url + link info
 		request.done(function (response) {
-			console.log(response)
 			const data = response;
-			// update url
-			$(linkButton).attr('href', data.url);
+
+			// update link browser url
+			if (self.typo3Version >= 10) {
+				$(linkButton).attr('href', data.url);
+			} else {
+				const onClickEvent = 'this.blur(); vHWin = window.document.list_frame.open(\'' + data.url + '\', \'\', \'height = 800, width = 1000, status = 0, menubar = 0, scrollbars = 1\'); vHWin.focus(); vHWin.onbeforeunload = function(){ window.document.list_frame.document.querySelector(\'input#' + inputName + '\').dispatchEvent(new Event(\'change\', {bubbles: true, cancelable: true})); }; return false;';
+				$(linkButton).attr('onclick', onClickEvent);
+			}
 
 			// update link info
 			const text = data.preview.text ? data.preview.text : '';
@@ -300,19 +305,21 @@ class FocuspointWizard {
 		});
 
 		// bind link button event
-		$(linkButton).off('click').on('click', function (e) {
-			e.preventDefault();
+		if (self.typo3Version >= 10) {
+			$(linkButton).off('click').on('click', function (e) {
+				e.preventDefault();
 
-			const url = $(linkButton).attr('href')
-				+ '&P[currentValue]=' + encodeURIComponent(inputValue)
-				+ '&P[currentSelectedValues]=' + encodeURIComponent('');
+				const url = $(linkButton).attr('href')
+					+ '&P[currentValue]=' + encodeURIComponent(inputValue)
+					+ '&P[currentSelectedValues]=' + encodeURIComponent('');
 
-			Modal.advanced({
-				type: Modal.types.iframe,
-				content: url,
-				size: Modal.sizes.large,
+				Modal.advanced({
+					type: Modal.types.iframe,
+					content: url,
+					size: Modal.sizes.large,
+				});
 			});
-		})
+		}
 	}
 
 	private initInputPanel(panel: JQuery): void {
@@ -345,6 +352,7 @@ class FocuspointWizard {
 						.attr({
 							'type': 'text',
 							'value': inputValue,
+							'id': inputName,
 							'data-fieldname': fieldName,
 							'data-formengine-input-name': inputName,
 							'data-focuspointPanelId': focuspointPanelId
@@ -516,7 +524,7 @@ class FocuspointWizard {
 			},
 		];
 
-		if (this.is7up) {
+		if (this.typo3Version > 7) {
 			this.currentModal = Modal.advanced({
 				type: 'ajax',
 				content: imageUri,
@@ -565,11 +573,11 @@ class FocuspointWizard {
 		}
 	}
 
-	public initializeTrigger(is7up: boolean): void {
+	public initializeTrigger(typo3Version: number): void {
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
 			e.preventDefault();
 			this.trigger = $(e.currentTarget);
-			this.is7up = is7up
+			this.typo3Version = typo3Version;
 			this.show();
 		};
 		$('.t3js-focuspoint-trigger').off('click').on('click', triggerHandler.bind(this));
