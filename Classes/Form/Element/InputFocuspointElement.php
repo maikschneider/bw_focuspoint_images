@@ -92,7 +92,6 @@ class InputFocuspointElement extends AbstractFormElement
 
         $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
         $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
-        $is7up = $version['version_main'] > 7 ? 'true' : 'false';
 
         if ($version['version_main'] > 7) {
             $fieldInformationResult = $this->renderFieldInformation();
@@ -130,6 +129,7 @@ class InputFocuspointElement extends AbstractFormElement
             'config' => $config,
             'pid' => $this->data['databaseRow']['pid'],
             'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
+            'typo3Version' => $version['version_main']
         ];
 
         if ($arguments['isAllowedFileExtension']) {

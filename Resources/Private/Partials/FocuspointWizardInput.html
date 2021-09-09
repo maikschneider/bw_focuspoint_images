@@ -45,7 +45,7 @@
                             <button class="btn btn-default t3js-form-field-inputlink-explanation-toggle"
                                     type="button"
                                     title="Linkerläuterung umschalten">
-                                <core:icon identifier="actions-eye-link" size="small"/>
+                                <core:icon identifier="{f:if(condition:'{typo3Version}>9', then:'actions-eye-link', else:'actions-version-workspaces-preview-link'" size="small"/>
                             </button>
                         </span>
                         <input type="hidden"
