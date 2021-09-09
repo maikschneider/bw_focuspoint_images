@@ -129,7 +129,6 @@ class InputFocuspointElement extends AbstractFormElement
             'config' => $config,
             'pid' => $this->data['databaseRow']['pid'],
             'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
-            'typo3Version' => $version['version_main']
         ];
 
         if ($arguments['isAllowedFileExtension']) {

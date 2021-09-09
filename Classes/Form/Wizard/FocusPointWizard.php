@@ -12,6 +12,7 @@ use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class FocusPointWizard
@@ -93,6 +94,9 @@ class FocusPointWizard
         $templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
         $templateView->setTemplate('FocuspointWizard');
 
+        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
+        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
+
         $queryParams = json_decode($request->getQueryParams()['arguments'], true);
         $fileUid = $queryParams['image'];
         $image = null;
@@ -108,7 +112,8 @@ class FocusPointWizard
 
         $viewData = [
             'image' => $image,
-            'focusPoints' => $queryParams['focusPoints']
+            'focusPoints' => $queryParams['focusPoints'],
+            'typo3Version' => $version['version_main']
         ];
         $templateView->assignMultiple($viewData);
         $content = $templateView->render();
