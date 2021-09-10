@@ -66,6 +66,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
             // remove html elements
             $(this.focusBoxes[focuspointId]).trigger('remove');
             $(this.inputPanels[focuspointId]).trigger('remove');
+            $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId="' + focuspointId + '"]').remove();
             // remove from class members
             this.focusBoxes.splice(focuspointId, 1);
             this.inputPanels.splice(focuspointId, 1);
@@ -78,6 +79,21 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
             $(this.inputPanels).each(function (i, e) {
                 $(e).find('span[data-nr]').attr('data-nr', i + 1);
                 $(e).find('*[data-focuspointpanelid]').attr('data-focuspointpanelid', i);
+            });
+            // rename hidden link fields
+            const linkFields = $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]');
+            const linksFieldsPerPoint = this.data.length / linkFields.length;
+            this.data.forEach((p, i) => {
+                for (let j = 0; j < linksFieldsPerPoint; j++) {
+                    const index = i + j;
+                    const field = linkFields.get(index);
+                    const newFieldName = 'linkfield-' + $(field).attr('data-fieldname') + '-' + i;
+                    $(field).attr({
+                        'data-focuspointpanelid': i,
+                        'id': newFieldName,
+                        'data-formengine-input-name': newFieldName
+                    });
+                }
             });
         }
         initFocusBox(box) {
@@ -294,9 +310,8 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
                         });
                         const changeEventName = this.typo3Version > 9 ? 'change' : 'v9change';
                         $hiddenElement.on(changeEventName, this.onHiddenLinkInputChange.bind(this, $hiddenElement));
-                        if (!$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').length) {
-                            $(document).find('form[name="editform"]').append($hiddenElement);
-                        }
+                        $(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').remove();
+                        $(document).find('form[name="editform"]').append($hiddenElement);
                         // add button link and preview
                         this.refreshLinkButtonUrlAndPreview(input);
                         // event for toggling link display
@@ -459,6 +474,8 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
             this.currentModal.on('hide.bs.modal', (e) => {
                 this.destroy();
             });
+            // delete / reset all hidden inputs
+            $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
             // Do not dismiss the modal when clicking beside it to avoid data loss
             //this.currentModal.data('bs.modal').options.backdrop = 'static';
         }
