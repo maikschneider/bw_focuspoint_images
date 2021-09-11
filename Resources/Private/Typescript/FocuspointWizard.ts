@@ -86,7 +86,7 @@ class FocuspointWizard {
 	}
 
 	private deleteFocuspoint(focuspointId: number): void {
-
+		const self = this;
 		// remove html elements
 		$(this.focusBoxes[focuspointId]).trigger('remove');
 		$(this.inputPanels[focuspointId]).trigger('remove');
@@ -105,6 +105,7 @@ class FocuspointWizard {
 		$(this.inputPanels).each(function (i, e) {
 			$(e).find('span[data-nr]').attr('data-nr', i + 1);
 			$(e).find('*[data-focuspointpanelid]').attr('data-focuspointpanelid', i);
+			self.refreshLinkButtonUrlAndPreview($(e).find('.linkbrowser').get(0));
 		});
 		// rename hidden link fields
 		const linkFields = $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]');
@@ -323,8 +324,7 @@ class FocuspointWizard {
 		if (self.typo3Version >= 10) {
 			$(linkButton).off('click').on('click', function (e) {
 				e.preventDefault();
-
-				const url = $(linkButton).attr('href')
+				const url = $(e.currentTarget).attr('href')
 					+ '&P[currentValue]=' + encodeURIComponent(inputValue)
 					+ '&P[currentSelectedValues]=' + encodeURIComponent('');
 
