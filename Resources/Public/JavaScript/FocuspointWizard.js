@@ -302,7 +302,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "imagesloaded
                         const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
                         const $hiddenElement = $('<input>')
                             .attr({
-                            'type': 'text',
+                            'type': 'hidden',
                             'value': inputValue,
                             'id': inputName,
                             'data-fieldname': fieldName,
