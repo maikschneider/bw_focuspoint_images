@@ -378,7 +378,6 @@ class FocuspointWizard {
 					$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').remove();
 					$(document).find('form[name="editform"]').append($hiddenElement);
 
-
 					// add button link and preview
 					this.refreshLinkButtonUrlAndPreview(input);
 
@@ -392,10 +391,13 @@ class FocuspointWizard {
 					$(input).closest('.form-wizards-wrap').find('.form-control-clearable button').on('click', function (e) {
 						e.preventDefault();
 						$(e.currentTarget).css('visibility', 'hidden');
-						const focuspointPanelId = parseInt($(input).attr('data-focuspointpanelid'));
-						const fieldName = $(input).attr('data-fieldname');
-						const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
-						$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').val('').trigger('change');
+						$hiddenElement.val('').trigger(changeEventName);
+					});
+
+					// event for manually changing text
+					$(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-input').on('blur', function (e) {
+						e.preventDefault();
+						$hiddenElement.val($(e.currentTarget).val()).trigger(changeEventName);
 					});
 
 					break;
