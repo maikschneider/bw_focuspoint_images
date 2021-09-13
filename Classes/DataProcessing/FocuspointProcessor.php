@@ -43,32 +43,6 @@ class FocuspointProcessor extends FilesProcessor
                 // calculate center of each point for text positioning
                 $point->textX = $point->x + ($point->width / 2);
                 $point->textY = $point->y + ($point->height / 2);
-
-                // replace link field with typolink value
-                foreach ($point as $fieldname => &$fieldvalue) {
-                    if (!is_object($fieldvalue) || !property_exists($fieldvalue, 'table')) {
-                        continue;
-                    }
-
-                    // add additional field for target (e.g. use in svg)
-                    $linkTarget = $fieldname . 'Target';
-                    $point->$linkTarget = $fieldvalue->target;
-
-                    // use uid for page links
-                    if ($fieldvalue->table === 'pages') {
-                        $link = 't3://page?uid=' . $fieldvalue->uid;
-                        if ($fieldvalue->target) {
-                            $link .= ' ' . $fieldvalue->target;
-                        }
-                        $fieldvalue = $link;
-                        continue;
-                    }
-
-                    // generic record link
-                    // @TODO: check for TYPO3 version and installed linkhandler ext (e.g. t3?id=xx)
-                    $fieldvalue = 'record:' . $fieldvalue->key . ':' . $fieldvalue->table . ':' . $fieldvalue->uid;
-                }
-                unset($fieldvalue);
             }
 
             $processedData['image'] = $file;

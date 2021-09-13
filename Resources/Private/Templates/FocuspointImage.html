@@ -6,8 +6,13 @@
 
     <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
         <f:for each="{points}" as="point" iteration="i">
+            <f:variable name="linkTarget"></f:variable>
+            <f:link.typolink parameter="{point.link}" parts-as="parts">
+                <f:variable name="linkTarget">{parts.target}</f:variable>
+            </f:link.typolink>
+
             <f:if condition="{point.link}">
-                <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
+                <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{linkTarget}">
             </f:if>
             <rect x="{point.x}%"
                   y="{point.y}%"
