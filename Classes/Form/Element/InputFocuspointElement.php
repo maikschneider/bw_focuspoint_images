@@ -4,7 +4,6 @@ namespace Blueways\BwFocuspointImages\Form\Element;
 
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
-use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -19,57 +18,81 @@ class InputFocuspointElement extends AbstractFormElement
 {
 
     /**
-     * Default element configuration
+     * This will render an imageManipulation field
      *
-     * @var array
+     * @return array As defined in initializeResultArray() of AbstractNode
+     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
      */
-    protected static $defaultConfig = [
-        'file_field' => 'uid_local',
-        'focusPoints' => [
-            'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
-            'singlePoint' => [
-                'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
-                'resizable' => '1',
-                'defaultWidth' => '0.2',
-                'defaultHeight' => '0.2',
-                'fields' => []
-            ]
-        ]
-    ];
-
-    /**
-     * @var array
-     */
-    protected $typoScript;
-
-    /**
-     * @var StandaloneView
-     */
-    protected $templateView;
-
-    /**
-     * @var UriBuilder
-     */
-    protected $uriBuilder;
-
-    /**
-     * @param NodeFactory $nodeFactory
-     * @param array $data
-     */
-    public function __construct(NodeFactory $nodeFactory, array $data)
+    public function render()
     {
-        parent::__construct($nodeFactory, $data);
+        $resultArray = $this->initializeResultArray();
+        $parameterArray = $this->data['parameterArray'];
+        $config = HelperUtility::getConfigForFormElement($this->data['databaseRow']['pid'],
+            $parameterArray['fieldConf']['config']);
 
-        // @TODO: do not read TypoScript, use PageTS
-        $this->typoScript = HelperUtility::getTypoScript();
+        // migrate saved focuspoints (old link fields to new syntax)
+        $this->migrateOldTypolinkSyntax($parameterArray, $config);
 
-        $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->templateView->setLayoutRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Layouts']);
-        $this->templateView->setPartialRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Partials']);
-        $this->templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
-        $this->templateView->setTemplate('FocuspointElement');
+        // get image
+        $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
+        if (!$file) {
+            return $resultArray;
+        }
 
-        $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
+        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
+
+        $fieldInformationResult = $this->renderFieldInformation();
+        $fieldInformationHtml = $fieldInformationResult['html'];
+        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
+
+        $fieldControlResult = $this->renderFieldControl();
+        $fieldControlHtml = $fieldControlResult['html'];
+        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldControlResult, false);
+
+        $fieldWizardResult = $this->renderFieldWizard();
+        $fieldWizardHtml = $fieldWizardResult['html'];
+        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
+
+        $resultArray['requireJsModules'][] = [
+            'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointWizard.initializeTrigger(' . $version['version_main'] . '); }); }',
+        ];
+
+        $arguments = [
+            'fieldInformation' => $fieldInformationHtml,
+            'fieldControl' => $fieldControlHtml,
+            'fieldWizard' => $fieldWizardHtml,
+            'isAllowedFileExtension' => in_array(strtolower($file->getExtension()),
+                GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])), true),
+            'image' => $file,
+            'formEngine' => [
+                'field' => [
+                    'id' => 'bwfocuspointwizard' . random_int(1, 9999),
+                    'value' => $parameterArray['itemFormElValue'],
+                    'name' => $parameterArray['itemFormElName']
+                ],
+                'validation' => '[]'
+            ],
+            'config' => $config,
+            'pid' => $this->data['databaseRow']['pid'],
+            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
+        ];
+
+        if ($arguments['isAllowedFileExtension']) {
+            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
+            if (GeneralUtility::inList($config['eval'], 'required')) {
+                $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
+            }
+        }
+
+        // Build html
+        $templateView = GeneralUtility::makeInstance(StandaloneView::class);
+        $templateView->setTemplatePathAndFilename('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html');
+        $templateView->assignMultiple($arguments);
+
+        $resultArray['html'] = $templateView->render();
+
+        return $resultArray;
     }
 
     /**
@@ -115,98 +138,6 @@ class InputFocuspointElement extends AbstractFormElement
     }
 
     /**
-     * This will render an imageManipulation field
-     *
-     * @return array As defined in initializeResultArray() of AbstractNode
-     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
-     */
-    public function render()
-    {
-        $resultArray = $this->initializeResultArray();
-        $parameterArray = $this->data['parameterArray'];
-        $config = $this->populateConfiguration($parameterArray['fieldConf']['config']);
-
-        // migrate saved focuspoints (old link fields to new syntax)
-        $this->migrateOldTypolinkSyntax($parameterArray, $config);
-
-        $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
-        if (!$file) {
-            // Early return in case we do not find a file
-            return $resultArray;
-        }
-
-        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
-        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
-
-        if ($version['version_main'] > 7) {
-            $fieldInformationResult = $this->renderFieldInformation();
-            $fieldInformationHtml = $fieldInformationResult['html'];
-            $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
-
-            $fieldControlResult = $this->renderFieldControl();
-            $fieldControlHtml = $fieldControlResult['html'];
-            $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldControlResult, false);
-
-            $fieldWizardResult = $this->renderFieldWizard();
-            $fieldWizardHtml = $fieldWizardResult['html'];
-            $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
-        }
-
-        $resultArray['requireJsModules'][] = [
-            'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointWizard.initializeTrigger(' . $version['version_main'] . '); }); }',
-        ];
-
-        $arguments = [
-            'fieldInformation' => $fieldInformationHtml,
-            'fieldControl' => $fieldControlHtml,
-            'fieldWizard' => $fieldWizardHtml,
-            'isAllowedFileExtension' => in_array(strtolower($file->getExtension()),
-                GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])), true),
-            'image' => $file,
-            'formEngine' => [
-                'field' => [
-                    'id' => 'bwfocuspointwizard' . random_int(1, 9999),
-                    'value' => $parameterArray['itemFormElValue'],
-                    'name' => $parameterArray['itemFormElName']
-                ],
-                'validation' => '[]'
-            ],
-            'config' => $config,
-            'pid' => $this->data['databaseRow']['pid'],
-            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
-        ];
-
-        if ($arguments['isAllowedFileExtension']) {
-            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
-            if (GeneralUtility::inList($config['eval'], 'required')) {
-                $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
-            }
-        }
-        $this->templateView->assignMultiple($arguments);
-        $resultArray['html'] = $this->templateView->render();
-
-        return $resultArray;
-    }
-
-    /**
-     * @param array $baseConfiguration
-     * @return array
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
-     */
-    protected function populateConfiguration(array $baseConfiguration)
-    {
-        // override default config from TCA config
-        $defaultConfig = self::$defaultConfig;
-        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
-
-        // override single point settings from typoScript
-        $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'],
-            $this->typoScript['settings']);
-
-        return $config;
-    }
-
-    /**
      * Get file object
      *
      * @param array $row
@@ -217,15 +148,11 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $file = null;
         $fileUid = !empty($row[$fieldName]) ? $row[$fieldName] : null;
-        // v7: get file uid via explode of crazy uid string (e.g. "sys_file_7|myimagename.jpg")
-        if ($fileUid && !is_array($fileUid)) {
-            $fileUidParts = explode('|', $fileUid);
-            $fileUid = strpos($fileUidParts[0], 'sys_file_') === 0 ? str_replace('sys_file_', '',
-                $fileUidParts[0]) : $fileUid;
-        }
+
         if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
             $fileUid = $fileUid[0]['uid'];
         }
+
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
                 /** @var ResourceFactory $resourceFactory */
@@ -255,6 +182,8 @@ class InputFocuspointElement extends AbstractFormElement
         ];
         $uriArguments['arguments'] = json_encode($arguments);
         $uriArguments['signature'] = GeneralUtility::hmac($uriArguments['arguments'], $routeName);
-        return (string)$this->uriBuilder->buildUriFromRoute($routeName, $uriArguments);
+
+        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        return (string)$uriBuilder->buildUriFromRoute($routeName, $uriArguments);
     }
 }

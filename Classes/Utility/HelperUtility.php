@@ -13,6 +13,7 @@ use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
+use TYPO3\CMS\Core\TypoScript\TypoScriptService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
@@ -24,7 +25,6 @@ class HelperUtility
 
     /**
      * @return array
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      */
     public static function getTypoScript(): array
     {
@@ -39,31 +39,55 @@ class HelperUtility
 
     /**
      * @return array
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      */
     public static function getFullTypoScript(): array
     {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $configurationManager = $objectManager->get(ConfigurationManager::class);
+        $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
         $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        if (class_exists('TYPO3\CMS\Extbase\Service\TypoScriptService')) {
-            $typoScriptService = $objectManager->get(\TYPO3\CMS\Extbase\Service\TypoScriptService::class);
-        } else {
-            $typoScriptService = $objectManager->get(\TYPO3\CMS\Core\TypoScript\TypoScriptService::class);
-        }
+        $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
         return $typoScriptService->convertTypoScriptArrayToPlainArray($typoScript);
     }
 
     public static function getPagesTSconfig(int $pid): array
     {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $pageTS = BackendUtility::getPagesTSconfig($pid);
-        if (class_exists('TYPO3\CMS\Extbase\Service\TypoScriptService')) {
-            $typoScriptService = $objectManager->get(\TYPO3\CMS\Extbase\Service\TypoScriptService::class);
-        } else {
-            $typoScriptService = $objectManager->get(\TYPO3\CMS\Core\TypoScript\TypoScriptService::class);
-        }
+        $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
         return $typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
+    }
+
+    public static function getConfigForFormElement(int $pid, array $formElementConfig): array
+    {
+        $defaultConfig = [
+            'file_field' => 'uid_local',
+            'focusPoints' => [
+                'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
+                'singlePoint' => [
+                    'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
+                ]
+            ],
+            'missingPageTSWarning' => false
+        ];
+
+        // override default config from TCA config
+        $config = array_replace_recursive($defaultConfig, $formElementConfig);
+
+        // read pageTS
+        $pageTs = static::getPagesTSconfig($pid);
+        $tsSettings = $pageTs['mod']['tx_bwfocuspointimages']['settings'];
+
+        // fallback for old configuration: read TypoScript
+        if (!count($tsSettings['fields'])) {
+            $typoScript = static::getTypoScript();
+            if (count($typoScript['settings'])) {
+                $tsSettings = $typoScript['settings'];
+                $config['missingPageTSWarning'] = true;
+            }
+        }
+
+        // override single point settings from pageTS / TypoScript
+        $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'], $tsSettings);
+
+        return $config;
     }
 
     public function getLinkExplanation(string $itemValue): array
