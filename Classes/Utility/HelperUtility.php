@@ -55,6 +55,21 @@ class HelperUtility
         return $typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
     }
 
+    public static function getConfigForWizardAction(int $pid): array
+    {
+        $pageTs = static::getPagesTSconfig($pid);
+        $tsSettings = $pageTs['mod']['tx_bwfocuspointimages']['settings'];
+
+        if (!count($tsSettings['fields'])) {
+            $typoScript = static::getTypoScript();
+            if (count($typoScript['settings'])) {
+                $tsSettings = $typoScript['settings'];
+            }
+        }
+
+        return $tsSettings;
+    }
+
     public static function getConfigForFormElement(int $pid, array $formElementConfig): array
     {
         $defaultConfig = [
@@ -90,7 +105,7 @@ class HelperUtility
         return $config;
     }
 
-    public function getLinkExplanation(string $itemValue): array
+    public static function getLinkExplanation(string $itemValue): array
     {
         if (empty($itemValue)) {
             return [];
@@ -101,6 +116,7 @@ class HelperUtility
         $linkService = GeneralUtility::makeInstance(LinkService::class);
         /** @var IconFactory $iconFactory */
         $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+        $languageService = $GLOBALS['LANG'];
 
         try {
             $linkData = $linkService->resolve($linkParts['url']);
@@ -117,13 +133,13 @@ class HelperUtility
             if ($value) {
                 switch ($key) {
                     case 'class':
-                        $label = $this->getLanguageService()->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class');
+                        $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class');
                         break;
                     case 'title':
-                        $label = $this->getLanguageService()->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:title');
+                        $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:title');
                         break;
                     case 'additionalParams':
-                        $label = $this->getLanguageService()->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params');
+                        $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params');
                         break;
                     default:
                         $label = (string)$key;
@@ -194,11 +210,12 @@ class HelperUtility
                 }
                 break;
             case LinkService::TYPE_RECORD:
-                $table = $this->data['pageTsConfig']['TCEMAIN.']['linkHandler.'][$linkData['identifier'] . '.']['configuration.']['table'];
+                $pageTS = static::getPagesTSconfig(0);
+                $table = $pageTS['TCEMAIN.']['linkHandler.'][$linkData['identifier'] . '.']['configuration.']['table'];
                 $record = BackendUtility::getRecord($table, $linkData['uid']);
                 if ($record) {
                     $recordTitle = BackendUtility::getRecordTitle($table, $record);
-                    $tableTitle = $this->getLanguageService()->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
+                    $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
                     $data = [
                         'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
                         'icon' => $iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
@@ -221,11 +238,12 @@ class HelperUtility
                 }
                 break;
             default:
+                // @TODO: Needs implementation!
                 // Please note that this hook is preliminary and might change, as this element could become its own
                 // TCA type in the future
                 if (isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['linkHandler'][$linkData['type']])) {
-                    $linkBuilder = GeneralUtility::makeInstance($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['linkHandler'][$linkData['type']]);
-                    $data = $linkBuilder->getFormData($linkData, $linkParts, $this->data, $this);
+//                    $linkBuilder = GeneralUtility::makeInstance($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['linkHandler'][$linkData['type']]);
+//                    $data = $linkBuilder->getFormData($linkData, $linkParts, $this->data, $this);
                 } elseif ($linkData['type'] === LinkService::TYPE_UNKNOWN) {
                     $data = [
                         'text' => $linkData['file'],
@@ -241,13 +259,5 @@ class HelperUtility
 
         $data['additionalAttributes'] = '<div class="help-block">' . implode(' - ', $additionalAttributes) . '</div>';
         return $data;
-    }
-
-    /**
-     * @return LanguageService
-     */
-    protected function getLanguageService()
-    {
-        return $GLOBALS['LANG'];
     }
 }

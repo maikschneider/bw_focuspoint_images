@@ -31,19 +31,17 @@ class FocusPointWizard
         $inputName = $queryParams['inputName'];
         $inputValue = $queryParams['inputValue'];
         $pid = MathUtility::canBeInterpretedAsInteger($queryParams['pid']) ? (int)$queryParams['pid'] : 0;
-
-        // @TODO: do not read TypoScript, use PageTS
-        $typoScript = HelperUtility::getTypoScript();
+        $config = HelperUtility::getConfigForWizardAction($pid);
 
         $linkBrowserArguments = [];
-        if (isset($typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkOptions'])) {
-            $linkBrowserArguments['blindLinkOptions'] = $typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkOptions'];
+        if (isset($config['fields'][$fieldName]['linkPopup']['blindLinkOptions'])) {
+            $linkBrowserArguments['blindLinkOptions'] = $config['fields'][$fieldName]['linkPopup']['blindLinkOptions'];
         }
-        if (isset($typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkFields'])) {
-            $linkBrowserArguments['blindLinkFields'] = $typoScript['settings']['fields'][$fieldName]['linkPopup']['blindLinkFields'];
+        if (isset($config['fields'][$fieldName]['linkPopup']['blindLinkFields'])) {
+            $linkBrowserArguments['blindLinkFields'] = $config['fields'][$fieldName]['linkPopup']['blindLinkFields'];
         }
-        if (isset($typoScript['settings']['fields'][$fieldName]['linkPopup']['allowedExtensions'])) {
-            $linkBrowserArguments['allowedExtensions'] = $typoScript['settings']['fields'][$fieldName]['linkPopup']['allowedExtensions'];
+        if (isset($config['fields'][$fieldName]['linkPopup']['allowedExtensions'])) {
+            $linkBrowserArguments['allowedExtensions'] = $config['fields'][$fieldName]['linkPopup']['allowedExtensions'];
         }
 
         $urlParameters = [
@@ -65,9 +63,7 @@ class FocusPointWizard
 
         $preview = [];
         if ($inputValue) {
-            /** @var HelperUtility $helperUtility */
-            $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
-            $preview = $helperUtility->getLinkExplanation($queryParams['inputValue']);
+            $preview = HelperUtility::getLinkExplanation($queryParams['inputValue']);
         }
 
         return new JsonResponse([
