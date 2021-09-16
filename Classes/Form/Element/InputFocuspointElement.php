@@ -73,6 +73,48 @@ class InputFocuspointElement extends AbstractFormElement
     }
 
     /**
+     * Migrate old typolink markup (v2.3.3) to the t3:// syntax
+     *
+     * @param array $parameterArray
+     * @param array $config
+     */
+    protected function migrateOldTypolinkSyntax(array &$parameterArray, array $config): void
+    {
+        if (!$parameterArray['itemFormElValue'] || !is_array(json_decode($parameterArray['itemFormElValue'], true))) {
+            return;
+        }
+
+        $itemFormElValue = json_decode($parameterArray['itemFormElValue'], true);
+
+        if (!count($itemFormElValue)) {
+            return;
+        }
+
+        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'], function ($point) {
+            return $point['type'] === 'link';
+        });
+
+        foreach ($itemFormElValue as $key => $item) {
+            foreach ($linkFields as $fieldName => $field) {
+                if (!isset($item[$fieldName]) || !is_array($item[$fieldName])) {
+                    continue;
+                }
+
+                // construct new link
+                $link = $item[$fieldName];
+                $target = $link['target'] ?: '-';
+                $newSyntax = 't3://' . $link['key'] . '?uid=' . $link['uid'] . ' ' . $target;
+
+                // replace link
+                $itemFormElValue[$key][$fieldName] = $newSyntax;
+            }
+        }
+
+        // save new item value back tp parameterArray
+        $parameterArray['itemFormElValue'] = json_encode($itemFormElValue);
+    }
+
+    /**
      * This will render an imageManipulation field
      *
      * @return array As defined in initializeResultArray() of AbstractNode
@@ -83,6 +125,9 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
         $config = $this->populateConfiguration($parameterArray['fieldConf']['config']);
+
+        // migrate saved focuspoints (old link fields to new syntax)
+        $this->migrateOldTypolinkSyntax($parameterArray, $config);
 
         $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
         if (!$file) {
