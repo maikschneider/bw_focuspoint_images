@@ -371,9 +371,9 @@ class FocuspointWizard {
 							'data-fieldname': fieldName,
 							'data-formengine-input-name': inputName,
 							'data-focuspointPanelId': focuspointPanelId,
-							'onchange': 'this.dispatchEvent(new Event(\'v9change\', {bubbles: true, cancelable: true}));'
+							'onchange': 'this.dispatchEvent(new Event(\'v9-v10-change\', {bubbles: true, cancelable: true}));'
 						});
-					const changeEventName = this.typo3Version > 9 ? 'change' : 'v9change';
+					const changeEventName = this.typo3Version > 10 ? 'change' : 'v9-v10-change';
 					$hiddenElement.on(changeEventName, this.onHiddenLinkInputChange.bind(this, $hiddenElement));
 					$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').remove();
 					$(document).find('form[name="editform"]').append($hiddenElement);
