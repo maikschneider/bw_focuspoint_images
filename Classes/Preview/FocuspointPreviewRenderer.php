@@ -24,7 +24,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         }
 
         $content .= BackendUtility::thumbCode($row, 'tt_content', 'assets', '', '', null, 0,
-            '', '200x200', false);
+            '', '200px', false);
 
         $fileReferences = BackendUtility::resolveFileReferences('tt_content', 'assets', $row);
 
@@ -39,7 +39,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
             return $this->linkEditContent($content, $row);
         }
 
-        $svg = '<svg style="height:100%; width:100%; top:0; left:0; position:absolute;" width="200" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
+        $svg = '<svg viewBox="0 0 200 200" preserveAspectRatio="none" style="height:100%; width:100%; top:0; left:0; position:absolute;" width="200" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask'. array_key_first($fileReferences).'"><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />';
         $points = json_decode($focuspoints, false);
 
