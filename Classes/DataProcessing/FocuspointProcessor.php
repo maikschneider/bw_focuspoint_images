@@ -2,8 +2,10 @@
 
 namespace Blueways\BwFocuspointImages\DataProcessing;
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\DataProcessing\FilesProcessor;
+use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 
 class FocuspointProcessor extends FilesProcessor
 {
@@ -29,6 +31,9 @@ class FocuspointProcessor extends FilesProcessor
             return $processedData;
         }
 
+        /** @var TypoLinkCodecService $typoLinkCodecService */
+        $typoLinkCodecService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
+
         // the TCA is configured to use max. 1 image, however the file collector returns an array
         foreach ($processedData['image'] as $key => $file) {
 
@@ -44,17 +49,25 @@ class FocuspointProcessor extends FilesProcessor
                 $point->textX = $point->x + ($point->width / 2);
                 $point->textY = $point->y + ($point->height / 2);
 
-                // in case of old typolink syntax (v2.3.3): replace link field with typolink value
-                foreach ($point as &$fieldValue) {
-                    if (!is_object($fieldValue) || !property_exists($fieldValue, 'key')) {
-                        continue;
+                foreach ($point as $fieldName => &$fieldValue) {
+
+                    // in case of old typolink syntax (v2.3.3): replace link field with typolink value
+                    if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
+                        $newLink = 't3://' . $fieldValue->key . '?uid=' . $fieldValue->uid;
+                        if ($fieldValue->target) {
+                            $newLink .= ' ' . $fieldValue->target;
+                        }
+                        $fieldValue = $newLink;
                     }
 
-                    $link = 't3://' . $fieldValue->key . '?uid=' . $fieldValue->uid;
-                    if ($fieldValue->target) {
-                        $link .= ' ' . $fieldValue->target;
+                    // in case of typolinks with target, add a new field {$fieldName}Target='_blank'
+                    if (is_string($fieldValue) && strpos($fieldValue, 't3://') === 0) {
+                        $linkValues = $typoLinkCodecService->decode($fieldValue);
+                        if ($linkValues['target']) {
+                            $attributeName = $fieldName . 'Target';
+                            $point->$attributeName = $linkValues['target'];
+                        }
                     }
-                    $fieldValue = $link;
                 }
                 unset($fieldValue);
             }
