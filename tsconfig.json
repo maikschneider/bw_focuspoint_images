@@ -9,6 +9,7 @@
     "rootDir": ".",
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "experimentalDecorators": true,
     "paths": {
       "TYPO3/CMS/BwFocuspointImagaes/*": [
         "Resources/Public/TypeScript/"
@@ -19,7 +20,7 @@
       "TYPO3/CMS/Backend/*": [
         ".Build/Sources/TypeScript/backend/Resources/Public/TypeScript/*"
       ]
-    },
+    }
   },
   "typeRoots": [
     "node_modules/@types",

@@ -26,9 +26,6 @@
                             <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button"/>
                         </button>
                     </div>
-                    <div class="row media-gallery__list">
-                        <f:comment></f:comment>
-                    </div>
                 </f:then>
                 <f:else>
                     <div class="media-body">
@@ -36,16 +33,16 @@
                             <f:then>
                                 <p>
                                     <em>
-                                        <f:translate id="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.supported-types-message"/>
+                                        <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.supported-types-message"/>
                                         <br/> {config.allowedExtensions -> f:format.case(mode: 'upper')} </em>
                                 </p>
                             </f:then>
                             <f:else>
                                 <h4 class="alert-title">
-                                    <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions"/>
+                                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.no-image-dimensions"/>
                                 </h4>
                                 <p class="alert-message">
-                                    <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions-message"/>
+                                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.no-image-dimensions-message"/>
                                 </p>
                             </f:else>
                         </f:if>
