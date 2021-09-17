@@ -14,6 +14,7 @@
 import $ = require('jquery');
 import Modal = require('TYPO3/CMS/Backend/Modal');
 import Notification = require('TYPO3/CMS/Backend/Notification');
+import ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
 import ImagesLoaded = require('imagesloaded');
 import 'jquery-ui/draggable';
 import 'jquery-ui/resizable';
@@ -596,14 +597,35 @@ class FocuspointWizard {
 		this.trigger = $('.t3js-focuspoint-trigger');
 		this.trigger.off('click').on('click', triggerHandler.bind(this));
 
+
 		if (this.trigger.attr('data-missing-pagets-warning') === '1') {
-			Notification.warning(
-				'Configuration needs update',
-				'The Focus point configuration has been moved to PageTS. Please read the manual and update your configuration',
-				0
-			);
+			this.displayMissingPageTsWarning();
 		}
 
+	}
+
+	protected displayMissingPageTsWarning()
+	{
+		// Open Notification with Action button for for v10+
+		if (this.typo3Version >= 10) {
+			const notificationCallback = new ImmediateAction(() => {
+				window.open('https://docs.typo3.org/p/blueways/bw-focuspoint-images/master/en-us/#upgrade', '_blank').focus();
+			});
+			Notification.warning(
+				'Configuration needs update',
+				'The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.',
+				0,
+				[{label: 'Open manual', action: notificationCallback}]
+			);
+			return;
+		}
+
+		// Default warning
+		Notification.warning(
+			'Configuration needs update',
+			'The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.',
+			0
+		);
 	}
 
 }

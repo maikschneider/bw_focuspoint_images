@@ -43,6 +43,10 @@ class HelperUtility
     public static function getFullTypoScript(): array
     {
         $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
+        if ($configurationManager === null) {
+            $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+            $configurationManager = $objectManager->get(ConfigurationManager::class);
+        }
         $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
         $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
         return $typoScriptService->convertTypoScriptArrayToPlainArray($typoScript);
