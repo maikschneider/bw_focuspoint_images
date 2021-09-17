@@ -509,11 +509,11 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Ba
                 const notificationCallback = new ImmediateAction(() => {
                     window.open('https://docs.typo3.org/p/blueways/bw-focuspoint-images/master/en-us/#upgrade', '_blank').focus();
                 });
-                Notification.warning('Configuration needs update', 'The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.', 0, [{ label: 'Open manual', action: notificationCallback }]);
+                Notification.warning(TYPO3.lang.wizard_missingPageTs_title, TYPO3.lang.wizard_missingPageTs_message, 0, [{ label: TYPO3.lang.wizard_missingPageTs_button, action: notificationCallback }]);
                 return;
             }
             // Default warning
-            Notification.warning('Configuration needs update', 'The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.', 0);
+            Notification.warning(TYPO3.lang.wizard_missingPageTs_title, TYPO3.lang.wizard_missingPageTs_message, 0);
         }
     }
     return new FocuspointWizard();

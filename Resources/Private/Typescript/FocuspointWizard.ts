@@ -597,7 +597,6 @@ class FocuspointWizard {
 		this.trigger = $('.t3js-focuspoint-trigger');
 		this.trigger.off('click').on('click', triggerHandler.bind(this));
 
-
 		if (this.trigger.attr('data-missing-pagets-warning') === '1') {
 			this.displayMissingPageTsWarning();
 		}
@@ -612,18 +611,18 @@ class FocuspointWizard {
 				window.open('https://docs.typo3.org/p/blueways/bw-focuspoint-images/master/en-us/#upgrade', '_blank').focus();
 			});
 			Notification.warning(
-				'Configuration needs update',
-				'The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.',
+				TYPO3.lang.wizard_missingPageTs_title,
+				TYPO3.lang.wizard_missingPageTs_message,
 				0,
-				[{label: 'Open manual', action: notificationCallback}]
+				[{label: TYPO3.lang.wizard_missingPageTs_button, action: notificationCallback}]
 			);
 			return;
 		}
 
 		// Default warning
 		Notification.warning(
-			'Configuration needs update',
-			'The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.',
+			TYPO3.lang.wizard_missingPageTs_title,
+			TYPO3.lang.wizard_missingPageTs_message,
 			0
 		);
 	}
