@@ -13,6 +13,7 @@
 
 import $ = require('jquery');
 import Modal = require('TYPO3/CMS/Backend/Modal');
+import Notification = require('TYPO3/CMS/Backend/Notification');
 import ImagesLoaded = require('imagesloaded');
 import 'jquery-ui/draggable';
 import 'jquery-ui/resizable';
@@ -543,25 +544,15 @@ class FocuspointWizard {
 			},
 		];
 
-		if (this.typo3Version > 7) {
-			this.currentModal = Modal.advanced({
-				type: 'ajax',
-				content: imageUri,
-				size: Modal.sizes.full,
-				style: Modal.styles.dark,
-				title: modalTitle,
-				ajaxCallback: this.initializeFocuspointModal.bind(this),
-				buttons: buttons,
-			});
-		} else {
-			this.currentModal = Modal.loadUrl(
-				modalTitle,
-				-2,
-				buttons,
-				imageUri,
-				this.initializeFocuspointModal.bind(this)
-			);
-		}
+		this.currentModal = Modal.advanced({
+			type: 'ajax',
+			content: imageUri,
+			size: Modal.sizes.full,
+			style: Modal.styles.dark,
+			title: modalTitle,
+			ajaxCallback: this.initializeFocuspointModal.bind(this),
+			buttons: buttons,
+		});
 
 		this.currentModal.addClass('modal-dark');
 		this.currentModal.addClass('modal-focuspoints');
@@ -598,11 +589,21 @@ class FocuspointWizard {
 	public initializeTrigger(typo3Version: number): void {
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
 			e.preventDefault();
-			this.trigger = $(e.currentTarget);
-			this.typo3Version = typo3Version;
 			this.show();
 		};
-		$('.t3js-focuspoint-trigger').off('click').on('click', triggerHandler.bind(this));
+
+		this.typo3Version = typo3Version;
+		this.trigger = $('.t3js-focuspoint-trigger');
+		this.trigger.off('click').on('click', triggerHandler.bind(this));
+
+		if (this.trigger.attr('data-missing-pagets-warning') === '1') {
+			Notification.warning(
+				'Configuration needs update',
+				'The Focus point configuration has been moved to PageTS. Please read the manual and update your configuration',
+				0
+			);
+		}
+
 	}
 
 }

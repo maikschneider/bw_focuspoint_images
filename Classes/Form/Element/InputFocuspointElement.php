@@ -21,9 +21,9 @@ class InputFocuspointElement extends AbstractFormElement
      * This will render an imageManipulation field
      *
      * @return array As defined in initializeResultArray() of AbstractNode
-     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
+     * @throws \Exception
      */
-    public function render()
+    public function render(): array
     {
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
@@ -144,7 +144,7 @@ class InputFocuspointElement extends AbstractFormElement
      * @param string $fieldName
      * @return File|null
      */
-    protected function getFile(array $row, $fieldName)
+    protected function getFile(array $row, $fieldName): ?File
     {
         $file = null;
         $fileUid = !empty($row[$fieldName]) ? $row[$fieldName] : null;
@@ -158,8 +158,7 @@ class InputFocuspointElement extends AbstractFormElement
                 /** @var ResourceFactory $resourceFactory */
                 $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
                 $file = $resourceFactory->getFileObject($fileUid);
-            } catch (FileDoesNotExistException $e) {
-            } catch (\InvalidArgumentException $e) {
+            } catch (FileDoesNotExistException | \InvalidArgumentException $e) {
             }
         }
         return $file;
@@ -170,7 +169,6 @@ class InputFocuspointElement extends AbstractFormElement
      * @param \TYPO3\CMS\Core\Resource\File $image
      * @param int $pid
      * @return string
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     protected function getWizardUri(array $focusPoints, File $image, int $pid): string
     {
