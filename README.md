@@ -15,7 +15,7 @@ Example 1: Default output
 
 Frontend output with included example TypoScript setup
 
-![Example 1](./Documentation/Images/example_frontend.jpg)
+![Example 1](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_frontend.jpg)
 
 Example 2: SVG Animation
 ------------------------
@@ -23,7 +23,7 @@ Example 2: SVG Animation
 In this example the focus areas are animated via SVG. The additional
 information are displayed next to the image with some delay.
 
-![Example 2](./Documentation/Images/example_animation.gif)
+![Example 2](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_animation.gif)
 
 For administrators
 ==================
@@ -52,7 +52,7 @@ For administrators
 Add the new content element "SVG Focuspoints" to any page, link a new
 image and start adding your focus areas.
 
-![Backend view](./Documentation/Images/backend-collage.jpg)
+![Backend view](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/backend-collage.jpg)
 
 ### Configuration
 
@@ -157,7 +157,7 @@ Upgrade
 To version 3.x
 ---------------
 
-In version 3.0.0 the configuration of focuspoint fields has been moved to ```PageTS``` in order to make different settings possible in the page tree.
+In version ```3.0.0``` the configuration of focuspoint fields has been moved to **PageTS** in order to make different settings possible in the page tree.
 
 Old TypoScript: ```plugin.tx_bwfocuspointimages.settings.fields..```
 
