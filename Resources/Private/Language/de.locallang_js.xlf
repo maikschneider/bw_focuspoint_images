@@ -9,11 +9,8 @@
 				<target>Konfiguration benötigt Update</target>
 			</trans-unit>
 			<trans-unit id="wizard_missingPageTs_message">
-				<source>The Focus point configuration has been moved from TypoScript to PageTS. The support will be
-					dropped in the next release. Please read the manual and update your configuration.
-				</source>
-				<target>Die Fokuspoint-Konfiguration wird nun über PageTS vorgenommen. Die Unterstützung von TypoScript wird in der nächsten Version entfernt. Bitte lesen Sie die Dokumentation und passen Sie die Konfiguration an.
-				</target>
+				<source>The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.</source>
+				<target>Die Fokuspoint-Konfiguration wird nun über PageTS vorgenommen. Die Unterstützung von TypoScript wird in der nächsten Version entfernt. Bitte lesen Sie die Dokumentation und passen Sie die Konfiguration an.</target>
 			</trans-unit>
 			<trans-unit id="wizard_missingPageTs_button">
 				<source>Open manual</source>

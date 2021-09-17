@@ -8,9 +8,7 @@
 				<source>Configuration needs update</source>
 			</trans-unit>
 			<trans-unit id="wizard_missingPageTs_message">
-				<source>The Focus point configuration has been moved from TypoScript to PageTS. The support will be
-					dropped in the next release. Please read the manual and update your configuration.
-				</source>
+				<source>The Focus point configuration has been moved from TypoScript to PageTS. The support will be dropped in the next release. Please read the manual and update your configuration.</source>
 			</trans-unit>
 			<trans-unit id="wizard_missingPageTs_button">
 				<source>Open manual</source>
