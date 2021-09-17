@@ -45,25 +45,26 @@ For administrators
 3.  Define your own wizard fields
 
     There are **no default fields** defined! An example with working
-    frontend output can be found in the setup section.
+    frontend output can be found in the PageTS section.
 
 ### Usage
 
 Add the new content element "SVG Focuspoints" to any page, link a new
 image and start adding your focus areas.
 
+![Backend view](./Documentation/Images/backend-collage.jpg)
+
 ### Configuration
 
-#### Setup
+#### PageTS
 
 To configure the fields in the focus point wizard, use the following
-TypoScript settings. You can choose between **text**, **textarea** and
-**select** inputs in the wizard.
+**PageTS** settings. You can choose between **text**, **textarea**, **select** and **link** inputs in the wizard.
 
 This example setup is used to generate the output shown in Example 1
 
 ``` {.typoscript}
-plugin.tx_bwfocuspointimages.settings.fields {
+mod.tx_bwfocuspointimages.settings.fields {
 
     name {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
@@ -150,16 +151,20 @@ tt_content.your_element {
 }
 ```
 
-Todos
-=====
+Upgrade
+=======
 
-Possible improvements:
+To version 3.x
+---------------
 
--   More frontend examples (e.g. svg animation, use of canvas
-    element,..)
--   Better configuration of the custom tt\_content element (e.g.
-    template selection, further display configuration)
--   \...
+In version 3.0.0 the configuration of focuspoint fields has been moved to ```PageTS``` in order to make different settings possible in the page tree.
+
+Old TypoScript: ```plugin.tx_bwfocuspointimages.settings.fields..```
+
+New PageTS: ```mod.tx_bwfocuspointimages.settings.fields..```
+
+Just move your existing configuration to PageTS and adjust the prefix from ```plugin``` to ```mod```.
+
 
 Contribute
 ==========
