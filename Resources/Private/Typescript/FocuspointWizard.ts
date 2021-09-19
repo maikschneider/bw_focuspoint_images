@@ -11,22 +11,13 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-/// <amd-dependency path='TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min' name='ImagesLoaded'>
-/// <amd-dependency path='TYPO3/CMS/Backend/Modal' name='Modal'>
-/// <amd-dependency path='TYPO3/CMS/Recordlist/LinkBrowser' name='LinkBrowser'>
-
 import $ = require('jquery');
+import Modal = require('TYPO3/CMS/Backend/Modal');
+import Notification = require('TYPO3/CMS/Backend/Notification');
+import ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
+import ImagesLoaded = require('imagesloaded');
 import 'jquery-ui/draggable';
 import 'jquery-ui/resizable';
-
-declare const Modal: any;
-declare const ImagesLoaded: any;
-
-declare global {
-	interface Window {
-		TYPO3: any;
-	}
-}
 
 interface Focuspoint {
 	width: number
@@ -46,12 +37,11 @@ class FocuspointWizard {
 	private cropImageSelector: string = '#t3js-crop-image';
 	private focusPointContainerSelector: string = '#focuspoint-container';
 	private trigger: JQuery;
-	private currentModal: JQuery;
+	private currentModal: any;
 	private focusBoxes: Array<JQuery> = [];
 	private inputPanels: Array<JQuery> = [];
 	private data: Array<Focuspoint>;
-	private linkBrowser: JQuery;
-	private is7up: boolean;
+	private typo3Version: number;
 
 	private calculateRelativeX(width: number): number {
 		const image: JQuery = this.currentModal.find(this.cropImageSelector);
@@ -98,10 +88,11 @@ class FocuspointWizard {
 	}
 
 	private deleteFocuspoint(focuspointId: number): void {
-
+		const self = this;
 		// remove html elements
 		$(this.focusBoxes[focuspointId]).trigger('remove');
 		$(this.inputPanels[focuspointId]).trigger('remove');
+		$(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId="' + focuspointId + '"]').remove();
 
 		// remove from class members
 		this.focusBoxes.splice(focuspointId, 1);
@@ -116,8 +107,23 @@ class FocuspointWizard {
 		$(this.inputPanels).each(function (i, e) {
 			$(e).find('span[data-nr]').attr('data-nr', i + 1);
 			$(e).find('*[data-focuspointpanelid]').attr('data-focuspointpanelid', i);
+			self.refreshLinkButtonUrlAndPreview($(e).find('.linkbrowser').get(0));
 		});
-
+		// rename hidden link fields
+		const linkFields = $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]');
+		const linksFieldsPerPoint = this.data.length / linkFields.length;
+		this.data.forEach((p, i) => {
+			for (let j = 0; j < linksFieldsPerPoint; j++) {
+				const index = i + j;
+				const field = linkFields.get(index);
+				const newFieldName = 'linkfield-' + $(field).attr('data-fieldname') + '-' + i;
+				$(field).attr({
+					'data-focuspointpanelid': i,
+					'id': newFieldName,
+					'data-formengine-input-name': newFieldName
+				});
+			}
+		});
 	}
 
 	private initFocusBox(box: JQuery): void {
@@ -173,19 +179,19 @@ class FocuspointWizard {
 	 */
 	private activateFocuspoint(id: number): void {
 
-		const wasOpen = this.inputPanels[id].find('a').attr('aria-expanded') === 'true';
+		const wasOpen = this.inputPanels[id].find('a.panel-link').attr('aria-expanded') === 'true';
 
 		// remove all active states
 		for (let i = 0; i < this.data.length; i++) {
-				this.focusBoxes[i].removeClass('active');
-				this.inputPanels[i].find('a').attr('aria-expanded', 'false');
-				this.inputPanels[i].find('.panel-collapse').removeClass('show');
+			this.focusBoxes[i].removeClass('active');
+			this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
+			this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
 
 		// add new active state (if it was closed)
 		if (!wasOpen) {
 			this.focusBoxes[id].addClass('active');
-			this.inputPanels[id].find('a').attr('aria-expanded', 'true');
+			this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
 			this.inputPanels[id].find('.panel-collapse').addClass('show');
 		}
 	}
@@ -256,6 +262,83 @@ class FocuspointWizard {
 		hiddenField.val(focusPoints);
 	}
 
+	private onHiddenLinkInputChange(input) {
+		// save data
+		const focuspointPanelId: number = parseInt($(input).attr('data-focuspointPanelId'));
+		const fieldname = $(input).attr('data-fieldname');
+		this.data[focuspointPanelId][fieldname] = $(input).val();
+
+		// update link and preview
+		const linkButton = this.inputPanels[focuspointPanelId].find('a[data-fieldname="' + fieldname + '"]').first();
+		this.refreshLinkButtonUrlAndPreview(linkButton);
+	}
+
+	private refreshLinkButtonUrlAndPreview(linkButton) {
+		const self = this;
+		const pid = this.trigger.data('pid');
+		const fieldName = $(linkButton).attr('data-fieldname');
+		const focuspointPanelId: number = parseInt($(linkButton).attr('data-focuspointPanelId'));
+		const inputValue: string = this.data[focuspointPanelId][fieldName];
+		const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+
+		// set value in panel input
+		$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-input').val(inputValue);
+
+		// show remove button
+		if (inputValue) {
+			$(linkButton).closest('.form-wizards-wrap').find('.form-control-clearable button').css('visibility', 'visible');
+		}
+
+		let url = TYPO3.settings.ajaxUrls.wizard_focuspoint_linkbrowserurl;
+		url += "&fieldName=" + encodeURIComponent(fieldName);
+		url += "&inputValue=" + encodeURIComponent(inputValue);
+		url += "&inputName=" + encodeURIComponent(inputName);
+		url += "&pid=" + encodeURIComponent(pid);
+
+		const request = $.ajax({
+			type: 'GET',
+			url: url,
+			contentType: 'json'
+		});
+
+		// get link browser url + link info
+		request.done(function (response) {
+			const data = response;
+
+			// update link browser url
+			if (self.typo3Version >= 10) {
+				$(linkButton).attr('href', data.url);
+			} else {
+				const onClickEvent = 'this.blur(); vHWin = window.document.list_frame.open(\'' + data.url + '&P[currentValue]=' + encodeURIComponent(inputValue) + '\', \'\', \'height = 800, width = 1000, status = 0, menubar = 0, scrollbars = 1\'); vHWin.focus(); return false;';
+				$(linkButton).attr('onclick', onClickEvent);
+			}
+
+			// update link info
+			const text = data.preview.text ? data.preview.text : '';
+			const icon = data.preview.icon ? data.preview.icon : '';
+			const additionalAttributes = data.preview.additionalAttributes ? data.preview.additionalAttributes : '';
+			$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation').val(text).attr('title', text);
+			$(linkButton).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-icon').html(icon);
+			$(linkButton).closest('.form-wizards-wrap').find('.form-wizards-items-bottom').html(additionalAttributes);
+		});
+
+		// bind link button event
+		if (self.typo3Version >= 10) {
+			$(linkButton).off('click').on('click', function (e) {
+				e.preventDefault();
+				const url = $(e.currentTarget).attr('href')
+					+ '&P[currentValue]=' + encodeURIComponent(inputValue)
+					+ '&P[currentSelectedValues]=' + encodeURIComponent('');
+
+				Modal.advanced({
+					type: Modal.types.iframe,
+					content: url,
+					size: Modal.sizes.large,
+				});
+			});
+		}
+	}
+
 	private initInputPanel(panel: JQuery): void {
 
 		const self = this;
@@ -266,7 +349,8 @@ class FocuspointWizard {
 		// for all inputs: set data and eventListener
 		panelInputs.each((i, input) => {
 
-			const inputValue: string = focuspoint[$(input).attr('name')] ? focuspoint[$(input).attr('name')] : '';
+			const fieldName = $(input).attr('name') ? $(input).attr('name') : $(input).attr('data-fieldname')
+			const inputValue: string = focuspoint[fieldName] ? focuspoint[fieldName] : '';
 
 			// set value
 			switch ($(input).prop('tagName')) {
@@ -279,8 +363,45 @@ class FocuspointWizard {
 					$('option[value="' + inputValue + '"]', input).prop('selected', true);
 					break;
 				case 'A':
-					const label = focuspoint[$(input).attr('data-fieldname')] ? focuspoint[$(input).attr('data-fieldname')].label : '';
-					$(input).prev().prev().val(label);
+					// create hidden element
+					const inputName = 'linkfield-' + fieldName + '-' + focuspointPanelId;
+					const $hiddenElement = $('<input>')
+						.attr({
+							'type': 'hidden',
+							'value': inputValue,
+							'id': inputName,
+							'data-fieldname': fieldName,
+							'data-formengine-input-name': inputName,
+							'data-focuspointPanelId': focuspointPanelId,
+							'onchange': 'this.dispatchEvent(new Event(\'v9-v10-change\', {bubbles: true, cancelable: true}));'
+						});
+					const changeEventName = this.typo3Version > 10 ? 'change' : 'v9-v10-change';
+					$hiddenElement.on(changeEventName, this.onHiddenLinkInputChange.bind(this, $hiddenElement));
+					$(document).find('form[name="editform"] input[data-formengine-input-name="' + inputName + '"]').remove();
+					$(document).find('form[name="editform"]').append($hiddenElement);
+
+					// add button link and preview
+					this.refreshLinkButtonUrlAndPreview(input);
+
+					// event for toggling link display
+					$(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation-toggle').on('click', function (e) {
+						e.preventDefault();
+						$(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-explanation, .t3js-form-field-inputlink-input').toggleClass('hidden');
+					});
+
+					// event for deleting link
+					$(input).closest('.form-wizards-wrap').find('.form-control-clearable button').on('click', function (e) {
+						e.preventDefault();
+						$(e.currentTarget).css('visibility', 'hidden');
+						$hiddenElement.val('').trigger(changeEventName);
+					});
+
+					// event for manually changing text
+					$(input).closest('.form-wizards-wrap').find('.t3js-form-field-inputlink-input').on('blur', function (e) {
+						e.preventDefault();
+						$hiddenElement.val($(e.currentTarget).val()).trigger(changeEventName);
+					});
+
 					break;
 			}
 
@@ -288,32 +409,6 @@ class FocuspointWizard {
 			$(input).off('input').on('input', this.onInputChange.bind(this, input));
 
 		});
-
-		// bind linkbrowser
-		const linkelement = $(panel).find('.linkbrowser');
-
-		if (linkelement.length) {
-			const onButtonClick = function (e) {
-				e.preventDefault();
-				self.linkBrowser.attr('data-current-focuspointPanelId', focuspointPanelId);
-				self.linkBrowser.attr('data-current-fieldname', $(linkelement).attr('data-fieldname'));
-				self.linkBrowser.addClass('open');
-			};
-			const onLinkTargetChange = function (e) {
-				if (!self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')]) {
-					return;
-				}
-				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')].target = $(e.currentTarget).val();
-			};
-			$(linkelement).on('click', onButtonClick.bind(this));
-			$(panel).find('.linkbrowser-input').on('click', onButtonClick.bind(this));
-			$(panel).find('.linkbrowser-target').on('change', onLinkTargetChange.bind(this));
-			$(panel).find('.linkbrowser-remove').on('click', function (e) {
-				e.preventDefault();
-				$(panel).find('.linkbrowser-input').val('');
-				self.data[focuspointPanelId][$(linkelement).attr('data-fieldname')] = null;
-			});
-		}
 
 		// bind remove event
 		const removeEvent = function () {
@@ -323,7 +418,6 @@ class FocuspointWizard {
 		$(panel).bind('remove', removeEvent.bind(null, panel));
 
 		// bind open / close event
-		const self = this;
 		const clickEvent: Function = function () {
 			const id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
 			self.activateFocuspoint(id);
@@ -365,7 +459,6 @@ class FocuspointWizard {
 	 * @private
 	 */
 	private init(): void {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
 		const hiddenField: JQuery = $(`#${this.trigger.attr('data-field')}`);
 		let data = hiddenField.val();
 
@@ -374,6 +467,7 @@ class FocuspointWizard {
 		}
 
 		// If we have data already set we assume an internal reinit eg. after resizing
+		// @ts-ignore
 		this.data = $.isEmptyObject(this.data) ? JSON.parse(data) : this.data;
 
 		if (this.data.length) {
@@ -393,95 +487,8 @@ class FocuspointWizard {
 			this.activateFocuspoint(newFocuspointId);
 		});
 
-		// bind link browser events
-		this.initLinkBrowser();
-
 		// Bind resize event
 		$(window).resize(this.onWindowResize.bind(this));
-	}
-
-	private linkBrowserClick(uid: number, table: string, key: string, label: string) {
-
-		// build data to save
-		const focuspointPanelId: number = parseInt(this.linkBrowser.attr('data-current-focuspointPanelId'));
-		const target = this.inputPanels[focuspointPanelId].find('.linkbrowser-target').val();
-		const browserlinkvalue = {
-			label: label,
-			uid: uid,
-			table: table,
-			key: key,
-			target: target
-		};
-
-		// save selected value to data
-		const fieldname = this.linkBrowser.attr('data-current-fieldname');
-		this.data[focuspointPanelId][fieldname] = browserlinkvalue;
-
-		// insert label into input and close
-		this.inputPanels[focuspointPanelId].find('.linkbrowser-input').val(label);
-		this.linkBrowser.trigger('close');
-	}
-
-	private initLinkBrowser(): void {
-		const self = this;
-		this.linkBrowser = this.currentModal.find('.modal-panel-linkbrowser');
-
-		// click on tab item
-		this.linkBrowser.find('.nav-tabs a').on('click', function (e) {
-			e.preventDefault();
-			const tab = $(e.currentTarget).parent();
-			const browserKey = $(tab).attr('data-browser-key');
-			self.linkBrowser.find('.nav-tabs li').removeClass('active');
-			self.linkBrowser.find('.modal-panel-linkbrowser-item').removeClass('active');
-			$(tab).addClass('active');
-			self.linkBrowser.find('.modal-panel-linkbrowser-item[data-browser-key="' + browserKey + '"]').addClass('active');
-		});
-
-		// hide page children
-		const rootPid = this.linkBrowser.find('tr.db_list_normal[data-pid="0"]').attr('data-uid');
-		this.linkBrowser.find('tr.db_list_normal[data-pid!="0"][data-pid!="' + rootPid + '"]').addClass('is-child');
-
-		// page tree open children
-		this.linkBrowser.find('tr .pagetree-opener').on('click', function (e) {
-			$(this).parent().toggleClass('active');
-			const uid = $(this).parent().attr('data-uid');
-			self.linkBrowser.find('.is-child[data-pid="' + uid + '"]').toggleClass('open');
-		});
-
-		// page tree link click
-		this.linkBrowser.find('tr .pagetree-title').on('click', function (e) {
-			e.preventDefault();
-			const uid = $(e.currentTarget).parent().attr('data-uid');
-			const table = 'pages';
-			const key = 'page';
-			const label = $(e.currentTarget).text();
-			self.linkBrowserClick(uid, table, key, label);
-		});
-
-		// record list click
-		this.linkBrowser.find('.recordlist tr').on('click', function (e) {
-			e.preventDefault();
-			const row = $(e.currentTarget);
-			const uid = row.attr('data-uid');
-			const table = row.closest('.table').attr('data-table');
-			const key = row.closest('.modal-panel-linkbrowser-item').attr('data-browser-key');
-			const label = row.find('td:nth-child(2)').text();
-			self.linkBrowserClick(uid, table, key, label);
-		});
-
-		// close button link
-		this.linkBrowser.find('#closelinkbrowser').on('click', function (e) {
-			e.preventDefault();
-			self.linkBrowser.trigger('close');
-		});
-
-		// reset function
-		this.linkBrowser.bind('close', () => {
-			self.linkBrowser.removeClass('open');
-			self.linkBrowser.find('.nav-tabs li:first-child a').trigger('click');
-			self.linkBrowser.attr('data-current-focuspointPanelId', '');
-			self.linkBrowser.attr('data-current-fieldname', '');
-		});
 	}
 
 	private onWindowResize(): void {
@@ -517,7 +524,7 @@ class FocuspointWizard {
 		const buttonDismissText: string = this.trigger.data('buttonDismissText');
 		const buttonSaveText: string = this.trigger.data('buttonSaveText');
 		const imageUri: string = this.trigger.data('url');
-		const buttons: array = [
+		const buttons: Array<Object> = [
 			{
 				btnClass: 'btn-default',
 				dataAttributes: {
@@ -538,25 +545,15 @@ class FocuspointWizard {
 			},
 		];
 
-		if (this.is7up) {
-			this.currentModal = Modal.advanced({
-				type: 'ajax',
-				content: imageUri,
-				size: Modal.sizes.full,
-				style: Modal.styles.dark,
-				title: modalTitle,
-				ajaxCallback: this.initializeFocuspointModal.bind(this),
-				buttons: buttons,
-			});
-		} else {
-			this.currentModal = Modal.loadUrl(
-				modalTitle,
-				-2,
-				buttons,
-				imageUri,
-				this.initializeFocuspointModal.bind(this)
-			);
-		}
+		this.currentModal = Modal.advanced({
+			type: 'ajax',
+			content: imageUri,
+			size: Modal.sizes.full,
+			style: Modal.styles.dark,
+			title: modalTitle,
+			ajaxCallback: this.initializeFocuspointModal.bind(this),
+			buttons: buttons,
+		});
 
 		this.currentModal.addClass('modal-dark');
 		this.currentModal.addClass('modal-focuspoints');
@@ -567,6 +564,9 @@ class FocuspointWizard {
 		this.currentModal.on('hide.bs.modal', (e: JQueryEventObject): void => {
 			this.destroy();
 		});
+
+		// delete / reset all hidden inputs
+		$(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
 
 		// Do not dismiss the modal when clicking beside it to avoid data loss
 		//this.currentModal.data('bs.modal').options.backdrop = 'static';
@@ -587,15 +587,44 @@ class FocuspointWizard {
 		}
 	}
 
-
-	public initializeTrigger(is7up: boolean): void {
+	public initializeTrigger(typo3Version: number): void {
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
 			e.preventDefault();
-			this.trigger = $(e.currentTarget);
-			this.is7up = is7up
 			this.show();
 		};
-		$('.t3js-focuspoint-trigger').off('click').click(triggerHandler);
+
+		this.typo3Version = typo3Version;
+		this.trigger = $('.t3js-focuspoint-trigger');
+		this.trigger.off('click').on('click', triggerHandler.bind(this));
+
+		if (this.trigger.attr('data-missing-pagets-warning') === '1') {
+			this.displayMissingPageTsWarning();
+		}
+
+	}
+
+	protected displayMissingPageTsWarning()
+	{
+		// Open Notification with Action button for for v10+
+		if (this.typo3Version >= 10) {
+			const notificationCallback = new ImmediateAction(() => {
+				window.open('https://docs.typo3.org/p/blueways/bw-focuspoint-images/master/en-us/#upgrade', '_blank').focus();
+			});
+			Notification.warning(
+				TYPO3.lang.wizard_missingPageTs_title,
+				TYPO3.lang.wizard_missingPageTs_message,
+				0,
+				[{label: TYPO3.lang.wizard_missingPageTs_button, action: notificationCallback}]
+			);
+			return;
+		}
+
+		// Default warning
+		Notification.warning(
+			TYPO3.lang.wizard_missingPageTs_title,
+			TYPO3.lang.wizard_missingPageTs_message,
+			0
+		);
 	}
 
 }

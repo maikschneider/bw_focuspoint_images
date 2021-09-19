@@ -1,61 +1,3 @@
-<div class="modal-panel-linkbrowser" data-current-focuspointPanelId="" data-current-fieldname="">
-
-    <ul class="nav nav-tabs">
-        <li role="presentation" class="active" data-browser-key="page">
-            <a href="#">
-                <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkbrowser.page"/>
-            </a>
-        </li>
-        <f:for each="{linkBrowsers}" as="linkbrowser" key="key" iteration="i">
-            <li role="presentation" data-browser-key="{key}">
-                <a href="#">
-                    <f:translate key="{linkbrowser.label}"/>
-                </a>
-            </li>
-        </f:for>
-        <a href="#" id="closelinkbrowser"><i class="fa fa-times"></i></a>
-    </ul>
-
-    <div class="modal-panel-linkbrowser-content">
-
-        <div class="modal-panel-linkbrowser-item active" data-browser-key="page">
-            <table>
-                <f:for each="{tree}" as="page" iteration="i">
-                    <tr class="db_list_normal {f:if(condition: page.hasSub, then: 'has-sub')}"
-                        data-uid="{page.row.uid}"
-                        data-pid="{page.row.pid}">
-                        <td>
-                            <a class="pagetree-link {f:if(condition: page.hasSub, then: 'has-sub')}"
-                               href="#"
-                               data-uid="{page.row.uid}"
-                               data-pid="{page.row.pid}">
-                                <f:if condition="{page.hasSub}">
-                                    <span class="pagetree-opener"></span>
-                                </f:if>
-                                {page.depthData -> f:format.raw()}
-                                <f:format.raw>{page.HTML}</f:format.raw>
-                                <span class="pagetree-title">{page.row.title}</span>
-                            </a>
-                        </td>
-                    </tr>
-                </f:for>
-            </table>
-        </div>
-
-
-        <f:for each="{linkBrowsers}" as="linkbrowser" key="key" iteration="i">
-            <div class="modal-panel-linkbrowser-item" data-browser-key="{key}">
-                <f:be.tableList tableName="{linkbrowser.configuration.table}"
-                                clickTitleMode="show"
-                                recordsPerPage="9999"
-                                storagePid="{linkbrowser.configuration.storagePid}"
-                                levels="{linkbrowser.configuration.levels}"/>
-            </div>
-        </f:for>
-    </div>
-
-</div>
-
 <div class="modal-panel-main">
     <div id="t3js-crop-image-container" class="cropper-image-container">
         <div id="focuspoint-container">
@@ -114,7 +56,7 @@
                                                                    data-focuspointPanelId="x"/>
                         <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="j">
                             <f:render partial="FocuspointWizardInput"
-                                      arguments="{field: field, fieldname: fieldname, j: j}"/>
+                                      arguments="{field: field, fieldname: fieldname, j: j, typo3Version: typo3Version}"/>
                         </f:for>
                         <div class="input-group">
                             <button data-delete class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i>
@@ -307,6 +249,7 @@
         overflow: scroll;
         -ms-overflow-style: none;
         scrollbar-width: none;
+        min-width: 344px;
     }
 
     .modal-body-focuspoints .modal-panel-sidebar::-webkit-scrollbar {
@@ -316,6 +259,14 @@
     .modal-body-focuspoints .modal-panel-sidebar .panel-group {
         margin: 0;
         min-width: 332px;
+    }
+
+    .modal-body-focuspoints .help-block {
+        color: #eeeeee;
+    }
+
+    .modal-body-focuspoints .help-block:empty {
+        display: none;
     }
 
     .modal-body-focuspoints .modal-panel-sidebar .panel-hidden,
@@ -339,7 +290,7 @@
         height: 30px;
     }
 
-    .modal-body-focuspoints .modal-panel-sidebar .input-group {
+    .modal-body-focuspoints .modal-panel-sidebar .focus-input-group:not(.focus-input-group--link) {
         display: grid;
         grid-template-columns: auto min-content;
     }
@@ -358,6 +309,18 @@
 
     .modal-body-focuspoints .linkbrowser__target label {
         margin-top: 10px;
+    }
+
+    .modal-body-focuspoints .t3js-form-field-inputlink-input {
+        border-radius: 0;
+    }
+
+    .modal-body-focuspoints .form-control-clearable button {
+        color: #000;
+    }
+
+    .modal-body-focuspoints .form-control.hidden + .close {
+        display: none;
     }
 
     /*!

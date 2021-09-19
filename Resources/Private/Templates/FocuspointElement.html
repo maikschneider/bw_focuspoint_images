@@ -13,7 +13,9 @@
                                data-formengine-validation-rules="{formEngine.validation}"/>
                         <button class="btn btn-default t3js-focuspoint-trigger"
                                 data-url="{wizardUri}"
+                                data-pid="{pid}"
                                 data-severity="notice"
+                                data-missing-pagets-warning="{config.missingPageTSWarning}"
                                 data-modal-title="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.focus_points')}"
                                 data-image-uid="{image.uid}"
                                 data-focus-points-value="{formEngine.field.value}"
@@ -21,12 +23,9 @@
                                 data-button-save-text="{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button.save')}"
                                 data-file-field="{config.file_field}"
                                 data-field="{formEngine.field.id}">
-                            <span class="t3-icon fa fa-bullseye"></span>
+                            <core:icon identifier="content-target" size="small"/>
                             <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.button"/>
                         </button>
-                    </div>
-                    <div class="row media-gallery__list">
-                        <f:comment></f:comment>
                     </div>
                 </f:then>
                 <f:else>
@@ -35,16 +34,16 @@
                             <f:then>
                                 <p>
                                     <em>
-                                        <f:translate id="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.supported-types-message"/>
+                                        <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.supported-types-message"/>
                                         <br/> {config.allowedExtensions -> f:format.case(mode: 'upper')} </em>
                                 </p>
                             </f:then>
                             <f:else>
                                 <h4 class="alert-title">
-                                    <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions"/>
+                                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.no-image-dimensions"/>
                                 </h4>
                                 <p class="alert-message">
-                                    <f:translate key="LLL:EXT:lang/Resources/Private/Language/locallang_wizards.xlf:imwizard.no-image-dimensions-message"/>
+                                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.no-image-dimensions-message"/>
                                 </p>
                             </f:else>
                         </f:if>

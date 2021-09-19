@@ -77,6 +77,15 @@
             <trans-unit id="tca.wizard.svg.description">
                 <source>Displays an image with highlighted areas and additional information</source>
             </trans-unit>
+            <trans-unit id="tca.supported-types-message">
+                <source>Focuspoint Editor is only available for supported types</source>
+            </trans-unit>
+            <trans-unit id="tca.no-image-dimensions">
+                <source>No image dimensions could be determined.</source>
+            </trans-unit>
+            <trans-unit id="tca.no-image-dimensions-message">
+                <source>Unable to provide image manipulation, because original dimensions of the image are unknown.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

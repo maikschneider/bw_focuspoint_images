@@ -43,33 +43,67 @@ class BwFocuspointSvgPreviewRenderer implements PageLayoutViewDrawItemHookInterf
         array &$row
     ) {
         if ($row['CType'] === 'bw_focuspoint_images_svg') {
-            if ($row['bodytext']) {
-                $itemContent .= $parentObject->linkEditContent($parentObject->renderText($row['bodytext']),
-                        $row) . '<br />';
-            }
 
             if ($row['assets']) {
-                $itemContent .= $parentObject->linkEditContent($parentObject->getThumbCodeUnlinked($row, 'tt_content',
-                        'assets'), $row) . '<br />';
+
+                $itemContent .= BackendUtility::thumbCode($row, 'tt_content', 'assets', '', '', null, 0,
+                    '', '200px', false);
 
                 $fileReferences = BackendUtility::resolveFileReferences('tt_content', 'assets', $row);
 
-                if (!empty($fileReferences)) {
-                    $linkedContent = '';
-
-                    foreach ($fileReferences as $fileReference) {
-                        $points = $fileReference->getProperty('focus_points');
-                        $points = $points ?: '[]';
-                        $points = json_decode($points);
-                        $text = count($points) . ' Focus point';
-                        $text .= count($points) > 1 ? 's' : '';
-                        $linkedContent .= htmlspecialchars($text) . '<br />';
-                    }
-
-                    $itemContent .= $parentObject->linkEditContent($linkedContent, $row);
-
-                    unset($linkedContent);
+                if (empty($fileReferences)) {
+                    $itemContent = $parentObject->linkEditContent($itemContent, $row);
+                    return;
                 }
+
+                $fileReference = $fileReferences[array_key_first($fileReferences)];
+
+                $focuspoints = $fileReference->getReferenceProperty('focus_points');
+                if ($focuspoints === null || $focuspoints === '') {
+                    $itemContent = $parentObject->linkEditContent($itemContent, $row);
+                    return;
+                }
+
+                $svg = '<svg viewBox="0 0 200 200" preserveAspectRatio="none" style="height:100%; width:100%; top:0; left:0; position:absolute;" width="200" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
+            <mask id="mask' . array_key_first($fileReferences) . '"><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />';
+                $points = json_decode($focuspoints, false);
+
+                foreach ($points as $point) {
+                    $x = $point->x * 100;
+                    $y = $point->y * 100;
+                    $height = $point->height * 100;
+                    $width = $point->width * 100;
+
+                    $svg .= '<rect x="' . $x . '%"
+                  y="' . $y . '%"
+                  width="' . $width . '%"
+                  height="' . $height . '%"
+                  fill="#000"/>';
+                }
+
+                $svg .= '</mask>';
+                $svg .= '<rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask' . array_key_first($fileReferences) . ')" />';
+
+                foreach ($points as $point) {
+                    $x = $point->x * 100;
+                    $y = $point->y * 100;
+                    $height = $point->height * 100;
+                    $width = $point->width * 100;
+
+                    $svg .= '<rect x="' . $x . '%"
+                  y="' . $y . '%"
+                  stroke="#ff8700"
+                  stroke-width="1.5px"
+                  width="' . $width . '%"
+                  height="' . $height . '%"
+                  fill="none"/>';
+                }
+
+                $svg .= '</svg>';
+                $itemContent .= $svg;
+                $itemContent = '<div class="focuspoint" style="display:inline-block; position:relative;">' . $itemContent . '</div>';
+
+                $itemContent = $parentObject->linkEditContent($itemContent, $row);
             }
 
             $drawItem = false;

@@ -1,11 +1,13 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
+{namespace bw=Blueways\BwFocuspointImages\ViewHelpers}
+
 <f:if condition="{field.title}">
     <label class="element{j.cycle}">
         <f:translate key="{field.title}">{field.title}</f:translate>
     </label>
 </f:if>
-<div class="input-group">
+<div class="focus-input-group focus-input-group--{field.type}">
     <f:switch expression="{field.type}">
         <f:case value="text">
             <input type="text" name="{fieldname}" data-focuspointPanelId="x"/>
@@ -21,21 +23,49 @@
             </select>
         </f:case>
         <f:case value="link">
-            <input type="text" class="linkbrowser-input" readonly/>
-            <a href="#" class="linkbrowser-remove"><i class="fa fa-times"></i></a>
-            <a href="#" class="linkbrowser btn btn-default" data-fieldname="{fieldname}" data-focuspointPanelId="x"><i
-                class="fa fa-link"></i></a>
-            <div class="linkbrowser__target">
-                <label>
-                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target"/>:</label>
-                <select class="linkbrowser-target" data-fieldname="{fieldname}" data-focuspointPanelId="x">
-                    <option value="">
-                        {f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target.default')}</option>
-                    <option value="_top">
-                        {f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target.top')}</option>
-                    <option value="_blank">{f:translate(key:'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.target.newWindow')}</option>
-                </select>
+
+            <div class="form-wizards-wrap">
+                <div class="form-wizards-element">
+                    <div class="input-group t3js-form-field-inputlink">
+                        <span class="t3js-form-field-inputlink-icon input-group-addon"></span>
+                        <input class="form-control t3js-form-field-inputlink-explanation"
+                               data-bs-toggle="tooltip"
+                               title=""
+                               value=""
+                               readonly>
+                        <div class="form-control-clearable"><input type="text"
+                                                                   id="formengine-input-6138b15cb744c617898547"
+                                                                   class="form-control t3js-clearable t3js-form-field-inputlink-input hidden hasDefaultValue t3js-charcounter-initialized"
+                                                                   maxlength="1024">
+                            <button type="button" tabindex="-1" class="close" style="visibility: hidden;">
+                                <core:icon identifier="actions-close" size="small"/>
+                            </button>
+                        </div>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default t3js-form-field-inputlink-explanation-toggle"
+                                    type="button"
+                                    title="Linkerläuterung umschalten">
+                                <core:icon identifier="{f:if(condition:'{typo3Version}>9', then:'actions-eye-link', else:'actions-version-workspaces-preview-link')}" size="small"/>
+                            </button>
+                        </span>
+                        <input type="hidden"
+                               name="data[tt_content][4267][header_link]"
+                               value="t3://page?uid=117 _blank css titel">
+                    </div>
+                </div>
+                <div class="form-wizards-items-aside">
+                    <div class="btn-group">
+                        <a href="#"
+                           class="linkbrowser btn btn-default"
+                           data-focuspointPanelId="x"
+                           data-fieldname="{fieldname}">
+                            <core:icon identifier="actions-link" size="small"/>
+                        </a>
+                    </div>
+                </div>
+                <div class="form-wizards-items-bottom"></div>
             </div>
+
         </f:case>
     </f:switch>
 </div>
