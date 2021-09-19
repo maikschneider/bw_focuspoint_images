@@ -13,7 +13,7 @@ Examples
 Example 1: Default output
 -------------------------
 
-Frontend output with included example TypoScript setup
+Frontend output with configuration of example PageTS
 
 ![Example 1](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_frontend.jpg)
 
@@ -61,7 +61,7 @@ image and start adding your focus areas.
 To configure the fields in the focus point wizard, use the following
 **PageTS** settings. You can choose between **text**, **textarea**, **select** and **link** inputs in the wizard.
 
-This example setup is used to generate the output shown in Example 1
+This example configuration is used to generate the output shown in Example 1
 
 ``` {.typoscript}
 mod.tx_bwfocuspointimages.settings.fields {

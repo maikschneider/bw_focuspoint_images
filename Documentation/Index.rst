@@ -16,7 +16,7 @@ Examples
 Example 1: Default output
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Frontend output with included :ref:`example TypoScript setup <typoscript_fields>`
+Frontend output with configuration of :ref:`example PageTS <pagets_fields>`
 
 .. figure:: ./Images/example_frontend.jpg
    :alt: Frontend output example 1
@@ -52,7 +52,7 @@ Installation
 
 3. Define your own wizard fields
 
-   There are **no default fields** defined! An example with working frontend output can be found here: :ref:`typoscript_fields`
+   There are **no default fields** defined! An example with working frontend output can be found here: :ref:`pagets_fields`
 
 Usage
 -----
@@ -60,24 +60,25 @@ Usage
 Add the new content element “SVG Focuspoints” to any page, link a new
 image and start adding your focus areas.
 
+.. figure:: ./Images/backend-collage.jpg
+   :alt: Backend view
+   :class: with-shadow
 
 Configuration
 -------------
 
-.. _typoscript_fields:
+.. _pagets_fields:
 
-Setup
-~~~~~
+PageTS
+~~~~~~
 
-To configure the fields in the focus point wizard, use the following
-TypoScript settings. You can choose between **text**, **textarea** and
-**select** inputs in the wizard.
+To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select** and **link** inputs in the wizard.
 
-This example setup is used to generate the output shown in :ref:`Example 1 <example1>`.
+This example configuration is used to generate the output shown in :ref:`Example 1 <example1>`.
 
 .. code:: typoscript
 
-   plugin.tx_bwfocuspointimages.settings.fields {
+   mod.tx_bwfocuspointimages.settings.fields {
 
        name {
            title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
@@ -105,9 +106,6 @@ This example setup is used to generate the output shown in :ref:`Example 1 <exam
        }
 
    }
-
-.. attention::
-   You need to add the TypoScript configuration to your main template at root page. In an upcoming version the configuration will be moved to PageTS.
 
 Constants
 ~~~~~~~~~
@@ -167,14 +165,20 @@ To decode the json format and use relative points in your fluid template, use th
 .. note::
    These snippets assume that references are done via :file:`assets` column. Change this to your needs.
 
-Todos
-=====
 
-Possible improvements:
+Upgrade
+=======
 
-* More frontend examples (e.g. svg animation, use of canvas element,..)
-* Better configuration of the custom tt_content element (e.g. template selection, further display configuration)
-* Configuration for link browser
+To version 3.x
+---------------
+
+In version ``3.0.0`` the configuration of focuspoint fields has been moved to **PageTS** in order to make different settings possible in the page tree.
+
+Old TypoScript: ``plugin.tx_bwfocuspointimages.settings.fields..``
+
+New PageTS: ``mod.tx_bwfocuspointimages.settings.fields..``
+
+Just move your existing configuration to PageTS and adjust the prefix from ``plugin`` to ``mod``.
 
 
 Contribute
@@ -193,3 +197,5 @@ Feel free to contribute!
 .. versionadded:: 2.3.1
    Bugfix for missing TypoScript include at root page
 
+.. versionadded:: 3.0.0
+   Native link browser: Supports all configured LinkBrowsers (e.g. Files), drop support of TYPO3 v7 & v8
