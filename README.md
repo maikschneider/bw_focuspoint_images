@@ -94,6 +94,32 @@ mod.tx_bwfocuspointimages.settings.fields {
 }
 ```
 
+##### Adjusting the link wizard
+
+You can customize the display of the link wizard. Use the additional ```linkPopup``` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for [link inputs](https://docs.typo3.org/m/typo3/reference-tca/master/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html).
+
+``` {.typoscript}
+mod.tx_bwfocuspointimages.settings.fields {
+
+    email {
+        title = Hide all wizard tabs but email
+        linkPopup {
+            blindLinkOptions = file, folder, page, spec, telephone, url
+        }
+    }
+
+    pdf {
+        title = Only files of .pdf or .docx extension
+        linkPopup {
+            blindLinkFields = pdf, docx
+            blindLinkOptions = email, folder, page, spec, telephone, url
+            blindLinkFields = class, params, target, title
+        }
+    }
+
+}
+```
+
 #### Constants
 
 To override templates set your own paths via constants:
