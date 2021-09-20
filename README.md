@@ -103,6 +103,7 @@ mod.tx_bwfocuspointimages.settings.fields {
 
     email {
         title = Hide all wizard tabs but email
+        type = link
         linkPopup {
             blindLinkOptions = file, folder, page, spec, telephone, url
         }
@@ -110,6 +111,7 @@ mod.tx_bwfocuspointimages.settings.fields {
 
     pdf {
         title = Only files of .pdf or .docx extension
+        type = link
         linkPopup {
             blindLinkFields = pdf, docx
             blindLinkOptions = email, folder, page, spec, telephone, url

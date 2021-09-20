@@ -107,6 +107,36 @@ This example configuration is used to generate the output shown in :ref:`Example
 
    }
 
+Adjusting the link wizard
++++++++++++++++++++++++++
+
+You can customize the display of the link wizard. Use the additional ``linkPopup`` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for `link inputs <https://docs.typo3.org/m/typo3/reference-tca/master/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html>`__.
+
+.. code:: typoscript
+
+   mod.tx_bwfocuspointimages.settings.fields {
+
+       email {
+           title = Hide all wizard tabs but email
+           type = link
+           linkPopup {
+               blindLinkOptions = file, folder, page, spec, telephone, url
+           }
+       }
+
+       pdf {
+           title = Only files of .pdf or .docx extension
+           type = link
+           linkPopup {
+               blindLinkFields = pdf, docx
+               blindLinkOptions = email, folder, page, spec, telephone, url
+               blindLinkFields = class, params, target, title
+           }
+       }
+
+   }
+
+
 Constants
 ~~~~~~~~~
 
@@ -198,4 +228,4 @@ Feel free to contribute!
    Bugfix for missing TypoScript include at root page
 
 .. versionadded:: 3.0.0
-   Native link browser: Supports all configured LinkBrowsers (e.g. Files), drop support of TYPO3 v7 & v8
+   Native link browser: Supports all configured LinkBrowsers (e.g. Files), drop support of TYPO3 v7 & v8, new backend preview
