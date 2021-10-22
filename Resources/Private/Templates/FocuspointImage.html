@@ -1,6 +1,6 @@
 <h1>{data.header}</h1>
 
-<div class="focuspoint">
+<div class="focuspoint" style="width:{image.properties.width}px">
 
     <f:image image="{image}"/>
 
@@ -54,6 +54,7 @@
         display: grid;
         grid-template-columns: 100%;
         grid-template-rows: auto min-content;
+        max-width: 100%;
     }
 
     .focuspoint img {
