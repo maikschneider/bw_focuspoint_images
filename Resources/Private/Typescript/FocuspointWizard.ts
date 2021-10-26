@@ -309,7 +309,7 @@ class FocuspointWizard {
 			if (self.typo3Version >= 10) {
 				$(linkButton).attr('href', data.url);
 			} else {
-				const onClickEvent = 'this.blur(); vHWin = window.document.list_frame.open(\'' + data.url + '&P[currentValue]=' + encodeURIComponent(inputValue) + '\', \'\', \'height = 800, width = 1000, status = 0, menubar = 0, scrollbars = 1\'); vHWin.focus(); return false;';
+				const onClickEvent = 'this.blur(); vHWin = list_frame.open(\'' + data.url + '&P[currentValue]=' + encodeURIComponent(inputValue) + '\', \'\', \'height = 800, width = 1000, status = 0, menubar = 0, scrollbars = 1\'); vHWin.focus(); return false;';
 				$(linkButton).attr('onclick', onClickEvent);
 			}
 
