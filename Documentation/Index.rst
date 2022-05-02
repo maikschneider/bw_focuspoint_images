@@ -167,25 +167,36 @@ To use the editor in other content elements with FAL images, use the following T
 .. code-block:: php
 
    $GLOBALS['TCA']['tt_content']['types']['your_list_type']['columnsOverrides'] = [
-      'assets' => [
-        'config' => [
-            'foreign_types' => [
-                \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                    'showitem' => 'focus_points'
-                ]
-            ]
-         ]
-      ]
+       'assets' => [
+           'config' => [
+               'overrideChildTca' => [
+                   'types' => [
+                       \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                           'showitem' => 'focus_points,--palette--;;filePalette'
+                       ],
+                   ],
+                   'columns' => [
+                       'uid_local' => [
+                           'config' => [
+                               'appearance' => [
+                                   'elementBrowserAllowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+                               ],
+                           ],
+                       ],
+                   ],
+               ]
+           ]
+       ]
    ];
 
 To decode the json format and use relative points in your fluid template, use the :file:`FocuspointProcessor`:
 
 .. code-block:: typoscript
 
-   tt_content.your_custom_element {
+   tt_content.your_list_type {
       dataProcessing {
-         10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
-         10 {
+         15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+         15 {
             references.fieldName = assets
             as = image
          }
