@@ -151,15 +151,26 @@ following TCA to activate the palette:
 
 ``` {.php}
 $GLOBALS['TCA']['tt_content']['types']['your_list_type']['columnsOverrides'] = [
-   'assets' => [
-     'config' => [
-         'foreign_types' => [
-             \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                 'showitem' => 'focus_points'
-             ]
-         ]
-      ]
-   ]
+    'assets' => [
+        'config' => [
+            'overrideChildTca' => [
+                'types' => [
+                    \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                        'showitem' => 'focus_points,--palette--;;filePalette'
+                    ],
+                ],
+                'columns' => [
+                    'uid_local' => [
+                        'config' => [
+                            'appearance' => [
+                                'elementBrowserAllowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+                            ],
+                        ],
+                    ],
+                ],
+            ]
+        ]
+    ]
 ];
 ```
 
@@ -168,10 +179,10 @@ This snippet assumes that references are done via `assets` column. Change this t
 To decode the JSON data and use the information in your template, use the `FocuspointProcessor`:
 
 ```typo3_typoscript
-tt_content.your_element {
+tt_content.your_list_type {
 	dataProcessing {
-		10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
-		10 {
+		15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+		15 {
 			references.fieldName = assets
 			as = image
 		}
