@@ -25,5 +25,5 @@ $EM_CONF[$_EXTKEY] = [
     'author' => 'Maik Schneider',
     'author_email' => 'm.schneider@blueways.de',
     'author_company' => 'blueways',
-    'version' => '3.0.1',
+    'version' => '3.0.2',
 ];
