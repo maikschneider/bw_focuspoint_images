@@ -81,7 +81,7 @@ class InputFocuspointElement extends AbstractFormElement
 
         if ($arguments['isAllowedFileExtension']) {
             $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
-            if (GeneralUtility::inList($config['eval'], 'required')) {
+            if (isset($config['eval']) && GeneralUtility::inList($config['eval'], 'required')) {
                 $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
             }
         }
