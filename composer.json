@@ -13,7 +13,7 @@
     "roave/security-advisories": "dev-master",
     "typo3/cms-base-distribution": "^11.0",
     "bk2k/bootstrap-package": "dev-master",
-    "helhum/typo3-console": "dev-latest"
+    "helhum/typo3-console": "^7.1"
   },
   "autoload": {
     "psr-4": {
@@ -22,16 +22,8 @@
   },
   "extra": {
     "typo3/cms": {
-      "cms-package-dir": "{$vendor-dir}/typo3/cms",
       "web-dir": "public",
       "extension-key": "bw_focuspoint_images"
-    }
-  },
-  "config": {
-    "bin-dir": "bin",
-    "vendor-dir": "vendor",
-    "platform": {
-      "php": "7.4"
     }
   },
   "authors": [
@@ -45,5 +37,11 @@
   "require": {
     "ext-json": "*",
     "typo3/cms-core": "^9.0 || ^10.0 || ^11.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "typo3/cms-composer-installers": true,
+      "typo3/class-alias-loader": true
+    }
   }
 }
