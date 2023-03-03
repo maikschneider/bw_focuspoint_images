@@ -54,7 +54,7 @@ class FocuspointProcessor extends FilesProcessor
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
                     if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
                         $newLink = 't3://' . $fieldValue->key . '?uid=' . $fieldValue->uid;
-                        if ($fieldValue->target) {
+                        if (property_exists($fieldValue, 'target') && $fieldValue->target) {
                             $newLink .= ' ' . $fieldValue->target;
                         }
                         $fieldValue = $newLink;
