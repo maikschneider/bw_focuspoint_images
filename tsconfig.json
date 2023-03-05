@@ -13,12 +13,6 @@
     "paths": {
       "TYPO3/CMS/BwFocuspointImagaes/*": [
         "Resources/Public/TypeScript/"
-      ],
-      "TYPO3/CMS/Core/*": [
-        ".Build/Sources/TypeScript/core/Resources/Public/TypeScript/*"
-      ],
-      "TYPO3/CMS/Backend/*": [
-        ".Build/Sources/TypeScript/backend/Resources/Public/TypeScript/*"
       ]
     }
   },

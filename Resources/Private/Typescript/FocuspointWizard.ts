@@ -12,8 +12,11 @@
  */
 
 import $ = require('jquery');
+// @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
+// @ts-ignore
 import Notification = require('TYPO3/CMS/Backend/Notification');
+// @ts-ignore
 import ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
 import ImagesLoaded = require('imagesloaded');
 import 'jquery-ui/draggable';
