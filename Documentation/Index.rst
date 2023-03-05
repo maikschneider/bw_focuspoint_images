@@ -227,7 +227,7 @@ Contribute
 
 Feel free to contribute!
 
-* `Bitbucket-Repository <https://bitbucket.org/blueways/bw_focuspoint_images/>`__
+* `Bitbucket-Repository <https://github.com/maikschneider/bw_focuspoint_images/>`__
 
 .. versionadded:: 2.2.0
    New link browser for the Focuspoint Wizard
