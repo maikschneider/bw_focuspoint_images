@@ -23,7 +23,7 @@ $EM_CONF[$_EXTKEY] = [
     'uploadfolder' => 0,
     'clearCacheOnLoad' => 1,
     'author' => 'Maik Schneider',
-    'author_email' => 'm.schneider@blueways.de',
-    'author_company' => 'blueways',
+    'author_email' => 'maik.schneider@xima.de',
+    'author_company' => 'XIMA Media GmbH',
     'version' => '3.0.3',
 ];

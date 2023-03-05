@@ -208,6 +208,8 @@ Just move your existing configuration to PageTS and adjust the prefix from ```pl
 Contribute
 ==========
 
-This extension was made by Maik Schneider from [blueways](https://www.blueways.de/). Feel free to contribute!
+This extension was made by Maik Schneider: Feel free to contribute!
 
--   [Bitbucket-Repository](https://bitbucket.org/blueways/bw_focuspoint_images/)
+* [Github-Repository](https://github.com/maikschneider/bw_focuspoint_images)
+
+Thanks to [blueways](https://www.blueways.de/) and [XIMA](https://www.xima.de/)!
