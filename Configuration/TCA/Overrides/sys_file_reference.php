@@ -1,8 +1,6 @@
 <?php
 defined('TYPO3_MODE') || die('Access denied');
 
-$_EXTKEY = 'bw_focuspoint_images';
-
 $additionalColumns = [
     'focus_points' => [
         'exclude' => 0,

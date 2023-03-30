@@ -4,8 +4,6 @@ use Blueways\BwFocuspointImages\Hooks\BwFocuspointSvgPreviewRenderer;
 
 defined('TYPO3_MODE') || die('Access denied');
 
-$_EXTKEY = 'bw_focuspoint_images';
-
 /**
  * Register new form type
  */
