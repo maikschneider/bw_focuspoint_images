@@ -16,6 +16,12 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
 {
+    protected HelperUtility $helperUtility;
+
+    public function injectHelperUtility(HelperUtility $helperUtility)
+    {
+        $this->helperUtility = $helperUtility;
+    }
 
     /**
      * This will render an imageManipulation field
@@ -27,7 +33,7 @@ class InputFocuspointElement extends AbstractFormElement
     {
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
-        $config = HelperUtility::getConfigForFormElement($this->data['databaseRow']['pid'],
+        $config = $this->helperUtility->getConfigForFormElement($this->data['databaseRow']['pid'],
             $parameterArray['fieldConf']['config']);
 
         // migrate saved focuspoints (old link fields to new syntax)

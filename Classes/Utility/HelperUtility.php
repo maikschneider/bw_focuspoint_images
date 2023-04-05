@@ -7,36 +7,47 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
-use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\TypoScript\TypoScriptService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 
 class HelperUtility
 {
+    protected TypoScriptService $typoScriptService;
+    protected TypoLinkCodecService $typoLinkCodecService;
+    protected LinkService $linkService;
+    protected IconFactory $iconFactory;
 
-    public static function getPagesTSconfig(int $pid): array
-    {
-        $pageTS = BackendUtility::getPagesTSconfig($pid);
-        $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
-        return $typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
+    public function __construct(
+        TypoScriptService $typoScriptService,
+        TypoLinkCodecService $typoLinkCodecService,
+        LinkService $linkService,
+        IconFactory $iconFactory
+    ) {
+        $this->typoScriptService = $typoScriptService;
+        $this->typoLinkCodecService = $typoLinkCodecService;
+        $this->linkService = $linkService;
+        $this->iconFactory = $iconFactory;
     }
 
-    public static function getConfigForWizardAction(int $pid): array
+    public function getPagesTSconfig(int $pid): array
     {
-        $pageTs = static::getPagesTSconfig($pid);
+        $pageTS = BackendUtility::getPagesTSconfig($pid);
+        return $this->typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
+    }
+
+    public function getConfigForWizardAction(int $pid): array
+    {
+        $pageTs = $this->getPagesTSconfig($pid);
         return $pageTs['mod']['tx_bwfocuspointimages']['settings'];
     }
 
-    public static function getConfigForFormElement(int $pid, array $formElementConfig): array
+    public function getConfigForFormElement(int $pid, array $formElementConfig): array
     {
         $defaultConfig = [
             'file_field' => 'uid_local',
@@ -53,7 +64,7 @@ class HelperUtility
         $config = array_replace_recursive($defaultConfig, $formElementConfig);
 
         // read pageTS
-        $tsSettings = static::getConfigForWizardAction($pid);
+        $tsSettings = $this->getConfigForWizardAction($pid);
 
         // override single point settings from pageTS
         $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'], $tsSettings);
@@ -61,21 +72,17 @@ class HelperUtility
         return $config;
     }
 
-    public static function getLinkExplanation(string $itemValue): array
+    public function getLinkExplanation(string $itemValue): array
     {
         if (empty($itemValue)) {
             return [];
         }
         $data = ['text' => '', 'icon' => ''];
-        $typolinkService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
-        $linkParts = $typolinkService->decode($itemValue);
-        $linkService = GeneralUtility::makeInstance(LinkService::class);
-        /** @var IconFactory $iconFactory */
-        $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+        $linkParts = $this->typoLinkCodecService->decode($itemValue);
         $languageService = $GLOBALS['LANG'];
 
         try {
-            $linkData = $linkService->resolve($linkParts['url']);
+            $linkData = $this->linkService->resolve($linkParts['url']);
         } catch (FileDoesNotExistException | FolderDoesNotExistException | UnknownLinkHandlerException | InvalidPathException $e) {
             return $data;
         }
@@ -125,20 +132,20 @@ class HelperUtility
                     }
                     $data = [
                         'text' => $pageRecord['_thePathFull'] . '[' . $pageRecord['uid'] . ']' . $fragmentTitle,
-                        'icon' => $iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL)->render()
                     ];
                 }
                 break;
             case LinkService::TYPE_EMAIL:
                 $data = [
                     'text' => $linkData['email'],
-                    'icon' => $iconFactory->getIcon('content-elements-mailform', Icon::SIZE_SMALL)->render()
+                    'icon' => $this->iconFactory->getIcon('content-elements-mailform', Icon::SIZE_SMALL)->render()
                 ];
                 break;
             case LinkService::TYPE_URL:
                 $data = [
                     'text' => $linkData['url'],
-                    'icon' => $iconFactory->getIcon('apps-pagetree-page-shortcut-external',
+                    'icon' => $this->iconFactory->getIcon('apps-pagetree-page-shortcut-external',
                         Icon::SIZE_SMALL)->render()
 
                 ];
@@ -149,7 +156,7 @@ class HelperUtility
                 if ($file) {
                     $data = [
                         'text' => $file->getPublicUrl(),
-                        'icon' => $iconFactory->getIconForFileExtension($file->getExtension(),
+                        'icon' => $this->iconFactory->getIconForFileExtension($file->getExtension(),
                             Icon::SIZE_SMALL)->render()
                     ];
                 }
@@ -160,7 +167,7 @@ class HelperUtility
                 if ($folder) {
                     $data = [
                         'text' => $folder->getPublicUrl(),
-                        'icon' => $iconFactory->getIcon('apps-filetree-folder-default',
+                        'icon' => $this->iconFactory->getIcon('apps-filetree-folder-default',
                             Icon::SIZE_SMALL)->render()
                     ];
                 }
@@ -174,12 +181,12 @@ class HelperUtility
                     $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
                     $data = [
                         'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
-                        'icon' => $iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
+                        'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
                     ];
                 } else {
                     $data = [
                         'text' => sprintf('%s', $linkData['uid']),
-                        'icon' => $iconFactory->getIcon('tcarecords-' . $table . '-default', Icon::SIZE_SMALL,
+                        'icon' => $this->iconFactory->getIcon('tcarecords-' . $table . '-default', Icon::SIZE_SMALL,
                             'overlay-missing')->render(),
                     ];
                 }
@@ -189,7 +196,7 @@ class HelperUtility
                 if ($telephone) {
                     $data = [
                         'text' => $telephone,
-                        'icon' => $iconFactory->getIcon('actions-device-mobile', Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIcon('actions-device-mobile', Icon::SIZE_SMALL)->render()
                     ];
                 }
                 break;
@@ -203,7 +210,7 @@ class HelperUtility
                 } elseif ($linkData['type'] === LinkService::TYPE_UNKNOWN) {
                     $data = [
                         'text' => $linkData['file'],
-                        'icon' => $iconFactory->getIcon('actions-link', Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIcon('actions-link', Icon::SIZE_SMALL)->render()
                     ];
                 } else {
                     $data = [
