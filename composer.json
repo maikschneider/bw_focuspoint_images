@@ -2,7 +2,6 @@
   "name": "blueways/bw-focuspoint-images",
   "type": "typo3-cms-extension",
   "description": "Image Editor for adding focus points to images",
-  "homepage": "https://blueways.de",
   "license": [
     "GPL-2.0-or-later"
   ],
@@ -11,9 +10,9 @@
   ],
   "require-dev": {
     "roave/security-advisories": "dev-master",
-    "typo3/cms-base-distribution": "^11.0",
+    "typo3/cms-base-distribution": "^12.0",
     "bk2k/bootstrap-package": "dev-master",
-    "helhum/typo3-console": "^7.1"
+    "helhum/typo3-console": "^8.0"
   },
   "autoload": {
     "psr-4": {
@@ -28,15 +27,14 @@
   },
   "authors": [
     {
-      "homepage": "https://blueways.de",
       "name": "Maik Schneider",
       "role": "Developer",
-      "email": "m.schneider@blueways.de"
+      "email": "schneider.maik@me.com"
     }
   ],
   "require": {
     "ext-json": "*",
-    "typo3/cms-core": "^9.0 || ^10.0 || ^11.0"
+    "typo3/cms-core": "^10.0 || ^11.0 || ^12.0"
   },
   "config": {
     "allow-plugins": {

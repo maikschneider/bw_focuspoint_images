@@ -197,7 +197,7 @@ tt_content.your_list_type {
 Upgrade
 =======
 
-To version 3.x
+To version 4.x
 ---------------
 
 * TypoScript paths changed:
