@@ -1,14 +1,7 @@
 <?php
 
-defined('TYPO3_MODE') or die();
+defined('TYPO3') or die();
 
-/*
-
-    Custom CE
-    =========
-    bw_focuspoint_images_svg
-
- */
 // register CType in TCA
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
     'tt_content',

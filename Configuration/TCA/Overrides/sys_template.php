@@ -1,18 +1,11 @@
 <?php
-defined('TYPO3_MODE') || die();
+defined('TYPO3') || die();
 
 call_user_func(function()
 {
-    /**
-     * Temporary variables
-     */
-    $extensionKey = 'bw_focuspoint_images';
-
-    /**
-     * Default TypoScript for BwFocuspointImages
-     */
+    // Register static TypoScript template
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile(
-        $extensionKey,
+        'bw_focuspoint_images',
         'Configuration/TypoScript',
         'Bw Focuspoint Images'
     );
