@@ -42,7 +42,11 @@ For administrators
     **static TypoScript template** or manually include setup and
     constants.
 
-3.  Define your own wizard fields
+3.  Include PageTS
+
+    To add the Focuspoint element to the common tab of the new content element wizard, include the **static PageTS** in the page properties of your root page or manually include `EXT:bw_focuspoint_images/Configuration/PageTS/mod.typoscript`
+
+4.  Define your own wizard fields
 
     There are **no default fields** defined! An example with working
     frontend output can be found in the PageTS section.

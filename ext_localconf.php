@@ -28,5 +28,5 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['cms/layout/class.tx_cms_layout.php'][
 
 // Register PageTS
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig('
-    <INCLUDE_TYPOSCRIPT: source="FILE:EXT:bw_focuspoint_images/Configuration/PageTS/mod.typoscript">
+    <INCLUDE_TYPOSCRIPT: source="FILE:EXT:bw_focuspoint_images/Configuration/page.tsconfig">
 ');
