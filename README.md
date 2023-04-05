@@ -44,7 +44,7 @@ For administrators
 
 3.  Include PageTS
 
-    To add the Focuspoint element to the common tab of the new content element wizard, include the **static PageTS** in the page properties of your root page or manually include `EXT:bw_focuspoint_images/Configuration/PageTS/mod.typoscript`
+    To add the Focuspoint element to the common tab of the new content element wizard, include the **static PageTS** in the page properties or manually include `EXT:bw_focuspoint_images/Configuration/PageTS/wizard.tsconfig`
 
 4.  Define your own wizard fields
 
@@ -196,6 +196,17 @@ tt_content.your_list_type {
 
 Upgrade
 =======
+
+To version 3.x
+---------------
+
+* TypoScript paths changed:
+  * Old: `EXT:bw_focuspoint_images/Configuration/setup.txt`
+  * New: `EXT:bw_focuspoint_images/Configuration/setup.typoscript`
+* PageTS changed:
+  * Content Element Wizard not included automatically anymore
+  * Include via static PageTS or: `EXT:bw_focuspoint_images/Configuration/PageTS.tsconfig`
+
 
 To version 3.x
 ---------------
