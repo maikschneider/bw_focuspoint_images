@@ -23,35 +23,6 @@ use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 class HelperUtility
 {
 
-    /**
-     * @return array
-     */
-    public static function getTypoScript(): array
-    {
-        $emptyTypoScript = [
-            'settings' => [
-                'fields' => []
-            ]
-        ];
-        $typoScript = self::getFullTypoScript();
-        return $typoScript['plugin']['tx_bwfocuspointimages'] ?? $emptyTypoScript;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getFullTypoScript(): array
-    {
-        $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
-        if ($configurationManager === null) {
-            $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-            $configurationManager = $objectManager->get(ConfigurationManager::class);
-        }
-        $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
-        return $typoScriptService->convertTypoScriptArrayToPlainArray($typoScript);
-    }
-
     public static function getPagesTSconfig(int $pid): array
     {
         $pageTS = BackendUtility::getPagesTSconfig($pid);
@@ -62,16 +33,7 @@ class HelperUtility
     public static function getConfigForWizardAction(int $pid): array
     {
         $pageTs = static::getPagesTSconfig($pid);
-        $tsSettings = $pageTs['mod']['tx_bwfocuspointimages']['settings'];
-
-        if (!count($tsSettings['fields'])) {
-            $typoScript = static::getTypoScript();
-            if (count($typoScript['settings'])) {
-                $tsSettings = $typoScript['settings'];
-            }
-        }
-
-        return $tsSettings;
+        return $pageTs['mod']['tx_bwfocuspointimages']['settings'];
     }
 
     public static function getConfigForFormElement(int $pid, array $formElementConfig): array
@@ -91,19 +53,9 @@ class HelperUtility
         $config = array_replace_recursive($defaultConfig, $formElementConfig);
 
         // read pageTS
-        $pageTs = static::getPagesTSconfig($pid);
-        $tsSettings = $pageTs['mod']['tx_bwfocuspointimages']['settings'];
+        $tsSettings = static::getConfigForWizardAction($pid);
 
-        // fallback for old configuration: read TypoScript
-        if (!count($tsSettings['fields'])) {
-            $typoScript = static::getTypoScript();
-            if (count($typoScript['settings'])) {
-                $tsSettings = $typoScript['settings'];
-                $config['missingPageTSWarning'] = true;
-            }
-        }
-
-        // override single point settings from pageTS / TypoScript
+        // override single point settings from pageTS
         $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'], $tsSettings);
 
         return $config;
