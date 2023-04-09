@@ -6,3 +6,6 @@ services:
 
   Blueways\BwFocuspointImages\:
     resource: '../Classes/*'
+
+  Blueways\BwFocuspointImages\Utility\HelperUtility:
+    public: true

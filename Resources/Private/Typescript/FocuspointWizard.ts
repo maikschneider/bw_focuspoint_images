@@ -1,26 +1,9 @@
-/*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
- */
-
-import $ = require('jquery');
-// @ts-ignore
-import Modal = require('TYPO3/CMS/Backend/Modal');
-// @ts-ignore
-import Notification = require('TYPO3/CMS/Backend/Notification');
-// @ts-ignore
-import ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
-import ImagesLoaded = require('imagesloaded');
-import 'jquery-ui/draggable';
-import 'jquery-ui/resizable';
+import $ from 'jquery'
+import Modal from '@typo3/backend/modal.js'
+import Notification from '@typo3/backend/notification.js'
+import ImmediateAction from '@typo3/backend/action-button/immediate-action.js'
+import "jquery-ui/draggable.js";
+import "jquery-ui/resizable.js";
 
 interface Focuspoint {
 	width: number
@@ -29,11 +12,6 @@ interface Focuspoint {
 	y: number
 }
 
-/**
- * Module: TYPO3/CMS/BwFocuspointImages/FocuspointWizard
- * Contains all logic for the image crop GUI including setting focusAreas
- * @exports TYPO3/CMS/BwFocuspointImages/FocuspointWizard
- */
 class FocuspointWizard {
 
 	private panelGroupSelector: string = '#accordion-cropper-variants';
@@ -47,25 +25,25 @@ class FocuspointWizard {
 	private typo3Version: number;
 
 	private calculateRelativeX(width: number): number {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
+		const image: JQuery = $(this.currentModal).find(this.cropImageSelector);
 		const imageWidth: number = $(image).width();
 		return Math.round((width / imageWidth) * 1e3) / 1e3
 	}
 
 	private calculateAbsoluteX(width: number = 0.33): number {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
+		const image: JQuery = $(this.currentModal).find(this.cropImageSelector);
 		const imageWidth: number = $(image).width();
 		return Math.round((width * imageWidth) * 1e3) / 1e3
 	}
 
 	private calculateRelativeY(height: number): number {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
+		const image: JQuery = $(this.currentModal).find(this.cropImageSelector);
 		const imageHeight: number = $(image).height();
 		return Math.round((height / imageHeight) * 1e3) / 1e3
 	}
 
 	private calculateAbsoluteY(height: number = 0.33): number {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
+		const image: JQuery = $(this.currentModal).find(this.cropImageSelector);
 		const imageHeight: number = $(image).height();
 		return Math.round((height * imageHeight) * 1e3) / 1e3
 	}
@@ -211,7 +189,7 @@ class FocuspointWizard {
 
 		// copy dummys
 		// 1. box dummy
-		const newBox: JQuery = this.currentModal.find('.focuspoint-item.focuspoint-item-dummy').first()
+		const newBox: JQuery = $(this.currentModal).find('.focuspoint-item.focuspoint-item-dummy').first()
 			.clone()
 			.appendTo(this.focusPointContainerSelector)
 			.attr('data-focuspointBoxId', focuspointBoxId)
@@ -222,7 +200,7 @@ class FocuspointWizard {
 			.parent();
 
 		// 2. panel dummy
-		const newPanel: JQuery = this.currentModal.find('.panel.panel-dummy').first()
+		const newPanel: JQuery = $(this.currentModal).find('.panel.panel-dummy').first()
 			.clone()
 			.appendTo(this.panelGroupSelector)
 			.addClass('panel-hidden')
@@ -512,12 +490,21 @@ class FocuspointWizard {
 	 * @private
 	 */
 	private initializeFocuspointModal(): void {
-		const image: JQuery = this.currentModal.find(this.cropImageSelector);
-		ImagesLoaded(image, (): void => {
-			setTimeout((): void => {
-				this.init();
-			}, 100);
-		});
+		const image: JQuery = $(this.currentModal).find(this.cropImageSelector);
+		setTimeout((): void => {
+
+			$(this.currentModal).addClass('modal-dark');
+			$(this.currentModal).addClass('modal-focuspoints');
+			$(this.currentModal).find('.modal-body')
+				.addClass('cropper')
+				.addClass('modal-body-focuspoints');
+
+			$(this.currentModal).on('hide.bs.modal', (e: JQueryEventObject): void => {
+				this.destroy();
+			});
+
+			this.init();
+		}, 100);
 	};
 
 
@@ -558,16 +545,6 @@ class FocuspointWizard {
 			buttons: buttons,
 		});
 
-		this.currentModal.addClass('modal-dark');
-		this.currentModal.addClass('modal-focuspoints');
-		this.currentModal.find('.modal-body')
-			.addClass('cropper')
-			.addClass('modal-body-focuspoints');
-
-		this.currentModal.on('hide.bs.modal', (e: JQueryEventObject): void => {
-			this.destroy();
-		});
-
 		// delete / reset all hidden inputs
 		$(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
 
@@ -590,7 +567,9 @@ class FocuspointWizard {
 		}
 	}
 
-	public initializeTrigger(typo3Version: number): void {
+	public constructor(typo3Version: number) {
+
+		console.log(typo3Version)
 		const triggerHandler: Function = (e: JQueryEventObject): void => {
 			e.preventDefault();
 			this.show();
@@ -606,8 +585,7 @@ class FocuspointWizard {
 
 	}
 
-	protected displayMissingPageTsWarning()
-	{
+	protected displayMissingPageTsWarning() {
 		// Open Notification with Action button for for v10+
 		if (this.typo3Version >= 10) {
 			const notificationCallback = new ImmediateAction(() => {
@@ -632,4 +610,4 @@ class FocuspointWizard {
 
 }
 
-export = new FocuspointWizard();
+export default FocuspointWizard

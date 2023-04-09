@@ -16,12 +16,6 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
 {
-    protected HelperUtility $helperUtility;
-
-    public function injectHelperUtility(HelperUtility $helperUtility)
-    {
-        $this->helperUtility = $helperUtility;
-    }
 
     /**
      * This will render an imageManipulation field
@@ -31,9 +25,10 @@ class InputFocuspointElement extends AbstractFormElement
      */
     public function render(): array
     {
+        $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
-        $config = $this->helperUtility->getConfigForFormElement($this->data['databaseRow']['pid'],
+        $config = $helperUtility->getConfigForFormElement($this->data['databaseRow']['pid'],
             $parameterArray['fieldConf']['config']);
 
         // migrate saved focuspoints (old link fields to new syntax)
@@ -61,9 +56,14 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_js.xlf';
-        $resultArray['requireJsModules'][] = [
-            'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { FocuspointWizard.initializeTrigger(' . $version['version_main'] . '); }); }',
-        ];
+        if ($version < 12) {
+            $resultArray['requireJsModules'][] = [
+                'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { new FocuspointWizard(' . $version['version_main'] . '); }); }',
+            ];
+        } else {
+            $resultArray['javaScriptModules'][] = \TYPO3\CMS\Core\Page\JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointWizard.js')
+                ->instance($version['version_main']);
+        }
 
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,

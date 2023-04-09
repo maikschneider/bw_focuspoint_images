@@ -14,23 +14,19 @@ use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\TypoScript\TypoScriptService;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 
 class HelperUtility
 {
     protected TypoScriptService $typoScriptService;
-    protected TypoLinkCodecService $typoLinkCodecService;
     protected LinkService $linkService;
     protected IconFactory $iconFactory;
 
     public function __construct(
         TypoScriptService $typoScriptService,
-        TypoLinkCodecService $typoLinkCodecService,
         LinkService $linkService,
         IconFactory $iconFactory
     ) {
         $this->typoScriptService = $typoScriptService;
-        $this->typoLinkCodecService = $typoLinkCodecService;
         $this->linkService = $linkService;
         $this->iconFactory = $iconFactory;
     }
@@ -78,7 +74,9 @@ class HelperUtility
             return [];
         }
         $data = ['text' => '', 'icon' => ''];
-        $linkParts = $this->typoLinkCodecService->decode($itemValue);
+        // @todo: replace
+        // $linkParts = $this->typoLinkCodecService->decode($itemValue);
+        $linkParts = [];
         $languageService = $GLOBALS['LANG'];
 
         try {
