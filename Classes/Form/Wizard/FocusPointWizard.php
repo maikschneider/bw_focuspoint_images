@@ -5,6 +5,7 @@ namespace Blueways\BwFocuspointImages\Form\Wizard;
 
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
@@ -19,10 +20,9 @@ class FocusPointWizard
 {
 
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return \TYPO3\CMS\Core\Http\JsonResponse
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
+     * @param ServerRequestInterface $request
+     * @return JsonResponse
+     * @throws RouteNotFoundException
      */
     public function getLinkWizardUrlAction(ServerRequestInterface $request): JsonResponse
     {
@@ -31,7 +31,8 @@ class FocusPointWizard
         $inputName = $queryParams['inputName'];
         $inputValue = $queryParams['inputValue'];
         $pid = MathUtility::canBeInterpretedAsInteger($queryParams['pid']) ? (int)$queryParams['pid'] : 0;
-        $config = HelperUtility::getConfigForWizardAction($pid);
+        $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
+        $config = $helperUtility->getConfigForWizardAction($pid);
 
         $linkBrowserArguments = [];
         if (isset($config['fields'][$fieldName]['linkPopup']['blindLinkOptions'])) {
@@ -57,13 +58,12 @@ class FocusPointWizard
             ],
         ];
 
-        /** @var \TYPO3\CMS\Backend\Routing\UriBuilder $uriBuilder */
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $url = (string)$uriBuilder->buildUriFromRoute('wizard_link', $urlParameters);
 
         $preview = [];
         if ($inputValue) {
-            $preview = HelperUtility::getLinkExplanation($queryParams['inputValue']);
+            $preview = $helperUtility->getLinkExplanation($queryParams['inputValue']);
         }
 
         return new JsonResponse([
@@ -73,8 +73,8 @@ class FocusPointWizard
     }
 
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return \TYPO3\CMS\Core\Http\Response
+     * @param ServerRequestInterface $request
+     * @return Response
      */
     public function getWizardAction(ServerRequestInterface $request): Response
     {

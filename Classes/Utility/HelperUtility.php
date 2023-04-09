@@ -7,6 +7,7 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
+use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
@@ -20,15 +21,18 @@ class HelperUtility
     protected TypoScriptService $typoScriptService;
     protected LinkService $linkService;
     protected IconFactory $iconFactory;
+    protected TypoLinkCodecService $typoLinkCodecService;
 
     public function __construct(
         TypoScriptService $typoScriptService,
         LinkService $linkService,
-        IconFactory $iconFactory
+        IconFactory $iconFactory,
+        TypoLinkCodecService $typoLinkCodecService
     ) {
         $this->typoScriptService = $typoScriptService;
         $this->linkService = $linkService;
         $this->iconFactory = $iconFactory;
+        $this->typoLinkCodecService = $typoLinkCodecService;
     }
 
     public function getPagesTSconfig(int $pid): array
@@ -74,9 +78,7 @@ class HelperUtility
             return [];
         }
         $data = ['text' => '', 'icon' => ''];
-        // @todo: replace
-        // $linkParts = $this->typoLinkCodecService->decode($itemValue);
-        $linkParts = [];
+        $linkParts = $this->typoLinkCodecService->decode($itemValue);
         $languageService = $GLOBALS['LANG'];
 
         try {

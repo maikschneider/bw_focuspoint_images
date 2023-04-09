@@ -149,9 +149,9 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	        const focuspointBoxIdReadableString = (focuspointBoxId + 1).toString();
 	        // copy dummys
 	        // 1. box dummy
-	        const newBox = $__default["default"](this.currentModal).find('.focuspoint-item.focuspoint-item-dummy').first()
+	        const newBox = $__default["default"](this.currentModal).find('.focuspoint-item-dummy')
 	            .clone()
-	            .appendTo(this.focusPointContainerSelector)
+	            .appendTo($__default["default"](this.currentModal).find(this.focusPointContainerSelector))
 	            .attr('data-focuspointBoxId', focuspointBoxId)
 	            .addClass('focuspoint-item-hidden')
 	            .removeClass('focuspoint-item-dummy')
@@ -159,9 +159,9 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            .html(focuspointBoxIdReadableString)
 	            .parent();
 	        // 2. panel dummy
-	        const newPanel = $__default["default"](this.currentModal).find('.panel.panel-dummy').first()
+	        const newPanel = $__default["default"](this.currentModal).find('.panel.panel-dummy')
 	            .clone()
-	            .appendTo(this.panelGroupSelector)
+	            .appendTo($__default["default"](this.currentModal).find(this.panelGroupSelector))
 	            .addClass('panel-hidden')
 	            .removeClass('panel-dummy');
 	        // update all input inside panel: set new id (= offset in this.data)
@@ -182,13 +182,25 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	    }
 	    onCancelButtonClick(e) {
 	        e.preventDefault();
-	        this.currentModal.modal('hide');
+	        // hide modal in v12+
+	        if (typeof this.currentModal.hideModal === 'function') {
+	            this.currentModal.hideModal();
+	        }
+	        else {
+	            this.currentModal.trigger('modal-dismiss');
+	        }
 	        this.destroy();
 	    }
 	    onSaveButtonClick(e) {
 	        e.preventDefault();
 	        this.save(this.data);
-	        this.currentModal.modal('hide');
+	        // hide modal in v12+
+	        if (typeof this.currentModal.hideModal === 'function') {
+	            this.currentModal.hideModal();
+	        }
+	        else {
+	            this.currentModal.trigger('modal-dismiss');
+	        }
 	    }
 	    save(data) {
 	        const focusPoints = JSON.stringify(data);
@@ -347,10 +359,12 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            width: 0.3,
 	            height: 0.3
 	        };
-	        var defaultWidth = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="width"]').val();
-	        var defaultHeight = this.currentModal.find('.panel.panel-dummy [data-focuspointPanelId][name="height"]').val();
-	        var defaultSize = defaultWidth > defaultHeight ? defaultWidth : defaultHeight;
+	        const defaultWidth = $__default["default"](this.currentModal).find('.panel.panel-dummy [data-focuspointPanelId][name="width"]').val();
+	        const defaultHeight = $__default["default"](this.currentModal).find('.panel.panel-dummy [data-focuspointPanelId][name="height"]').val();
+	        const defaultSize = defaultWidth > defaultHeight ? defaultWidth : defaultHeight;
+	        // @ts-ignore
 	        o.width = defaultSize;
+	        // @ts-ignore
 	        o.height = defaultSize;
 	        if (defaultSize != 0.3) {
 	            o.x = (1 - o.width) / 2;
@@ -381,7 +395,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            this.activateFocuspoint(0);
 	        }
 	        // Bind New button
-	        this.currentModal.find('[data-method=new]').off('click').on('click', (e) => {
+	        $__default["default"](this.currentModal).find('[data-method=new]').off('click').on('click', (e) => {
 	            e.preventDefault();
 	            const newFocuspointId = this.addNewFocuspoint(-1);
 	            this.activateFocuspoint(newFocuspointId);
