@@ -1,4 +1,4 @@
-define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', 'TYPO3/CMS/Backend/ActionButton/ImmediateAction', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js'], (function ($, Modal, Notification, ImmediateAction, draggable_js, resizable_js) { 'use strict';
+define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', 'TYPO3/CMS/Backend/ActionButton/ImmediateAction', 'TYPO3/CMS/Core/Ajax/AjaxRequest', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js', 'lit', 'lit/directives/unsafe-html.js'], (function ($, Modal, Notification, ImmediateAction, AjaxRequest, draggable_js, resizable_js, lit, unsafeHtml_js) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -6,6 +6,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	var Modal__default = /*#__PURE__*/_interopDefaultLegacy(Modal);
 	var Notification__default = /*#__PURE__*/_interopDefaultLegacy(Notification);
 	var ImmediateAction__default = /*#__PURE__*/_interopDefaultLegacy(ImmediateAction);
+	var AjaxRequest__default = /*#__PURE__*/_interopDefaultLegacy(AjaxRequest);
 
 	class FocuspointWizard {
 	    calculateRelativeX(width) {
@@ -15,7 +16,9 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	    }
 	    calculateAbsoluteX(width = 0.33) {
 	        const image = $__default["default"](this.currentModal).find(this.cropImageSelector);
+	        console.log(image);
 	        const imageWidth = $__default["default"](image).width();
+	        console.log(imageWidth);
 	        return Math.round((width * imageWidth) * 1e3) / 1e3;
 	    }
 	    calculateRelativeY(height) {
@@ -414,26 +417,22 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            $__default["default"](box).css('left', self.calculateAbsoluteX(focuspoint.x) + 'px');
 	        });
 	    }
-	    /**
-	     * @method initializeFocuspointModal
-	     * @desc Initialize the focuspoint modal and dispatch the focuspoint init
-	     * @private
-	     */
-	    initializeFocuspointModal() {
-	        $__default["default"](this.currentModal).find(this.cropImageSelector);
-	        setTimeout(() => {
-	            $__default["default"](this.currentModal).addClass('modal-dark');
-	            $__default["default"](this.currentModal).addClass('modal-focuspoints');
-	            $__default["default"](this.currentModal).find('.modal-body')
-	                .addClass('cropper')
-	                .addClass('modal-body-focuspoints');
-	            $__default["default"](this.currentModal).on('hide.bs.modal', (e) => {
-	                this.destroy();
-	            });
-	            this.init();
-	        }, 100);
+	    async onModalLoaded() {
+	        const image = this.currentModal.querySelector(this.cropImageSelector);
+	        image.addEventListener('load', this.initializeFocuspointModal.bind(this));
+	        image.src = image.getAttribute('data-src');
 	    }
-	    ;
+	    initializeFocuspointModal() {
+	        $__default["default"](this.currentModal).addClass('modal-dark');
+	        $__default["default"](this.currentModal).addClass('modal-focuspoints');
+	        $__default["default"](this.currentModal).find('.modal-body')
+	            .addClass('cropper')
+	            .addClass('modal-body-focuspoints');
+	        $__default["default"](this.currentModal).on('hide.bs.modal', (e) => {
+	            this.destroy();
+	        });
+	        this.init();
+	    }
 	    show() {
 	        const modalTitle = this.trigger.data('modalTitle');
 	        const buttonDismissText = this.trigger.data('buttonDismissText');
@@ -460,13 +459,18 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            },
 	        ];
 	        this.currentModal = Modal__default["default"].advanced({
-	            type: 'ajax',
-	            content: imageUri,
+	            content: lit.html `<div class="modal-loading"><typo3-backend-spinner size="default"></typo3-backend-spinner></div>`,
 	            size: Modal__default["default"].sizes.full,
 	            style: Modal__default["default"].styles.dark,
 	            title: modalTitle,
-	            ajaxCallback: this.initializeFocuspointModal.bind(this),
 	            buttons: buttons,
+	        });
+	        this.currentModal.addEventListener('typo3-modal-shown', () => {
+	            new AjaxRequest__default["default"](imageUri).get().then(async (response) => {
+	                const htmlResponse = await response.resolve();
+	                this.currentModal.templateResultContent = lit.html `${unsafeHtml_js.unsafeHTML(htmlResponse)}`;
+	                this.currentModal.updateComplete.then(() => this.onModalLoaded());
+	            });
 	        });
 	        // delete / reset all hidden inputs
 	        $__default["default"](document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
@@ -492,7 +496,6 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	        this.focusPointContainerSelector = '#focuspoint-container';
 	        this.focusBoxes = [];
 	        this.inputPanels = [];
-	        console.log(typo3Version);
 	        const triggerHandler = (e) => {
 	            e.preventDefault();
 	            this.show();

@@ -90,6 +90,7 @@ export default {
             plugins: []
         },
     ],
+    external: ['jquery-ui/draggable.js', 'jquery-ui/resizable.js'],
     plugins: [
         typescript(),
         typo3Resolve(),

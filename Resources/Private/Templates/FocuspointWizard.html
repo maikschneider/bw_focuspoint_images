@@ -1,12 +1,13 @@
 <div class="modal-panel-main">
     <div id="t3js-crop-image-container" class="cropper-image-container">
         <div id="focuspoint-container">
-            <f:image image="{image}"
-                     maxWidth="1280"
-                     maxHeight="980"
-                     id="t3js-crop-image"
-                     class="cropper-image-container-image"
-                     additionalAttributes="{data-original-width: image.properties.width, data-original-height: image.properties.height}"/>
+            <img src="" data-src="{f:uri.image(image:image, maxWidth:1280, maxHeight:980)}"
+                 class="cropper-image-container-image"
+                 alt="{image.properties.alternative}"
+                 id="t3js-crop-image"
+                 data-original-width="{image.properties.width}"
+                 data-original-height="{image.properties.height}"
+            />
 
             <div data-focuspointBoxId="x"
                  class="focuspoint-item focuspoint-item-hidden ui-draggable {f:if(condition:'{focusPoints.singlePoint.resizable}==1', then:'ui-resizable')} focuspoint-item-dummy">

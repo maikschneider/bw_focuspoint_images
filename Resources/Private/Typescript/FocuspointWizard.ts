@@ -2,8 +2,12 @@ import $ from 'jquery'
 import Modal from '@typo3/backend/modal.js'
 import Notification from '@typo3/backend/notification.js'
 import ImmediateAction from '@typo3/backend/action-button/immediate-action.js'
+import AjaxRequest from '@typo3/core/ajax/ajax-request.js'
+import AjaxResponse from '@typo3/core/ajax/ajax-response.js'
 import "jquery-ui/draggable.js";
 import "jquery-ui/resizable.js";
+import {html} from 'lit';
+import {unsafeHTML} from 'lit/directives/unsafe-html';
 
 interface Focuspoint {
 	width: number
@@ -496,36 +500,33 @@ class FocuspointWizard {
 		});
 	}
 
-	/**
-	 * @method initializeFocuspointModal
-	 * @desc Initialize the focuspoint modal and dispatch the focuspoint init
-	 * @private
-	 */
+	private async onModalLoaded(): Promise<void> {
+		const image: HTMLImageElement = this.currentModal.querySelector(this.cropImageSelector);
+		image.addEventListener('load', this.initializeFocuspointModal.bind(this));
+		image.src = image.getAttribute('data-src')
+	}
+
 	private initializeFocuspointModal(): void {
-		const image: JQuery = $(this.currentModal).find(this.cropImageSelector);
-		setTimeout((): void => {
+		$(this.currentModal).addClass('modal-dark');
+		$(this.currentModal).addClass('modal-focuspoints');
+		$(this.currentModal).find('.modal-body')
+			.addClass('cropper')
+			.addClass('modal-body-focuspoints');
 
-			$(this.currentModal).addClass('modal-dark');
-			$(this.currentModal).addClass('modal-focuspoints');
-			$(this.currentModal).find('.modal-body')
-				.addClass('cropper')
-				.addClass('modal-body-focuspoints');
+		$(this.currentModal).on('hide.bs.modal', (e: JQueryEventObject): void => {
+			this.destroy();
+		});
 
-			$(this.currentModal).on('hide.bs.modal', (e: JQueryEventObject): void => {
-				this.destroy();
-			});
-
-			this.init();
-		}, 100);
-	};
+		this.init();
+	}
 
 
 	public show(): void {
-
 		const modalTitle: string = this.trigger.data('modalTitle');
 		const buttonDismissText: string = this.trigger.data('buttonDismissText');
 		const buttonSaveText: string = this.trigger.data('buttonSaveText');
 		const imageUri: string = this.trigger.data('url');
+
 		const buttons: Array<Object> = [
 			{
 				btnClass: 'btn-default',
@@ -548,13 +549,19 @@ class FocuspointWizard {
 		];
 
 		this.currentModal = Modal.advanced({
-			type: 'ajax',
-			content: imageUri,
+			content: html`<div class="modal-loading"><typo3-backend-spinner size="default"></typo3-backend-spinner></div>`,
 			size: Modal.sizes.full,
 			style: Modal.styles.dark,
 			title: modalTitle,
-			ajaxCallback: this.initializeFocuspointModal.bind(this),
 			buttons: buttons,
+		});
+
+		this.currentModal.addEventListener('typo3-modal-shown', (): void => {
+			new AjaxRequest(imageUri).get().then(async (response: AjaxResponse): Promise<void> => {
+				const htmlResponse = await response.resolve();
+				this.currentModal.templateResultContent = html`${unsafeHTML(htmlResponse)}`;
+				this.currentModal.updateComplete.then(() => this.onModalLoaded());
+			});
 		});
 
 		// delete / reset all hidden inputs

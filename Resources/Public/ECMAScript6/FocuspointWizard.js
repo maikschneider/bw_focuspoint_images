@@ -2,8 +2,11 @@ import $ from 'jquery';
 import Modal from '@typo3/backend/modal.js';
 import Notification from '@typo3/backend/notification.js';
 import ImmediateAction from '@typo3/backend/action-button/immediate-action.js';
+import AjaxRequest from '@typo3/core/ajax/ajax-request.js';
 import 'jquery-ui/draggable.js';
 import 'jquery-ui/resizable.js';
+import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 class FocuspointWizard {
     calculateRelativeX(width) {
@@ -13,7 +16,9 @@ class FocuspointWizard {
     }
     calculateAbsoluteX(width = 0.33) {
         const image = $(this.currentModal).find(this.cropImageSelector);
+        console.log(image);
         const imageWidth = $(image).width();
+        console.log(imageWidth);
         return Math.round((width * imageWidth) * 1e3) / 1e3;
     }
     calculateRelativeY(height) {
@@ -412,26 +417,22 @@ class FocuspointWizard {
             $(box).css('left', self.calculateAbsoluteX(focuspoint.x) + 'px');
         });
     }
-    /**
-     * @method initializeFocuspointModal
-     * @desc Initialize the focuspoint modal and dispatch the focuspoint init
-     * @private
-     */
-    initializeFocuspointModal() {
-        $(this.currentModal).find(this.cropImageSelector);
-        setTimeout(() => {
-            $(this.currentModal).addClass('modal-dark');
-            $(this.currentModal).addClass('modal-focuspoints');
-            $(this.currentModal).find('.modal-body')
-                .addClass('cropper')
-                .addClass('modal-body-focuspoints');
-            $(this.currentModal).on('hide.bs.modal', (e) => {
-                this.destroy();
-            });
-            this.init();
-        }, 100);
+    async onModalLoaded() {
+        const image = this.currentModal.querySelector(this.cropImageSelector);
+        image.addEventListener('load', this.initializeFocuspointModal.bind(this));
+        image.src = image.getAttribute('data-src');
     }
-    ;
+    initializeFocuspointModal() {
+        $(this.currentModal).addClass('modal-dark');
+        $(this.currentModal).addClass('modal-focuspoints');
+        $(this.currentModal).find('.modal-body')
+            .addClass('cropper')
+            .addClass('modal-body-focuspoints');
+        $(this.currentModal).on('hide.bs.modal', (e) => {
+            this.destroy();
+        });
+        this.init();
+    }
     show() {
         const modalTitle = this.trigger.data('modalTitle');
         const buttonDismissText = this.trigger.data('buttonDismissText');
@@ -458,13 +459,18 @@ class FocuspointWizard {
             },
         ];
         this.currentModal = Modal.advanced({
-            type: 'ajax',
-            content: imageUri,
+            content: html `<div class="modal-loading"><typo3-backend-spinner size="default"></typo3-backend-spinner></div>`,
             size: Modal.sizes.full,
             style: Modal.styles.dark,
             title: modalTitle,
-            ajaxCallback: this.initializeFocuspointModal.bind(this),
             buttons: buttons,
+        });
+        this.currentModal.addEventListener('typo3-modal-shown', () => {
+            new AjaxRequest(imageUri).get().then(async (response) => {
+                const htmlResponse = await response.resolve();
+                this.currentModal.templateResultContent = html `${unsafeHTML(htmlResponse)}`;
+                this.currentModal.updateComplete.then(() => this.onModalLoaded());
+            });
         });
         // delete / reset all hidden inputs
         $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
@@ -490,7 +496,6 @@ class FocuspointWizard {
         this.focusPointContainerSelector = '#focuspoint-container';
         this.focusBoxes = [];
         this.inputPanels = [];
-        console.log(typo3Version);
         const triggerHandler = (e) => {
             e.preventDefault();
             this.show();
