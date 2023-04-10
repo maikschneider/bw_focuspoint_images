@@ -24,7 +24,7 @@
             <div class="panel-heading" role="tab" data-append-id="id" id="cropper-accordion-heading-">
                 <h4 class="panel-title">
                     <a role="button"
-                       data-toggle="collapse"
+                       data-bs-toggle="collapse"
                        data-parent="#accordion-cropper-variants"
                        href="#cropper-collapse-"
                        aria-expanded="false"
@@ -32,7 +32,7 @@
                        class="t3js-crop-variant-trigger collapsed panel-link"
                        data-append-id="href,aria-controls"
                        data-crop-variant>
-                        <span data-nr="" data-append-id="data-nr"><i class="fa fa-chevron-down" aria-hidden="true"></i>
+                        <span data-nr="" data-append-id="data-nr"><core:icon identifier="actions-chevron-down" size="small"/>
                             {f:translate(id:'{focusPoints.singlePoint.title}')}
                         </span>
                     </a>
@@ -60,7 +60,7 @@
                                       arguments="{field: field, fieldname: fieldname, j: j, typo3Version: typo3Version}"/>
                         </f:for>
                         <div class="input-group">
-                            <button data-delete class="btn btn-danger singlepoint-delete"><i class="fa fa-trash"></i>
+                            <button data-delete class="btn btn-danger singlepoint-delete"><core:icon identifier="actions-delete" size="small"/>
                                 <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.delete"/>
                             </button>
                         </div>
@@ -71,7 +71,7 @@
 
     </div>
     <div class="panel-body">
-        <button data-method="new" class="btn btn-success btn-block"><i class="fa fa-plus"></i>
+        <button data-method="new" class="btn btn-success btn-block"><core:icon identifier="actions-plus" size="small"/>
             <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.button.addnew"/>
         </button>
     </div>
@@ -114,16 +114,21 @@
         margin: 5px;
     }
 
-    .modal-body-focuspoints .panel {
-        margin-bottom: 0;
-    }
-
     .modal-body-focuspoints .btn.btn-danger {
         gap: 8px;
     }
 
     .modal-body-focuspoints .form-wizards-wrap {
         display: flex;
+    }
+
+    .modal-body-focuspoints .form-wizards-wrap .form-wizards-element {
+        flex-grow: 1;
+    }
+
+    .modal-body-focuspoints .form-wizards-wrap .form-wizards-items-aside {
+        display: grid;
+        align-self: stretch;
     }
 
     .modal-body-focuspoints .modal-panel-linkbrowser.open {
@@ -291,8 +296,8 @@
         content: attr(data-nr);
     }
 
-    .modal-body-focuspoints .modal-panel-sidebar a[aria-expanded="true"] .fa-chevron-down {
-        transform: rotate(180deg);
+    .modal-body-focuspoints .modal-panel-sidebar a[aria-expanded="true"] .icon-actions-chevron-down {
+        transform: rotate(-180deg);
     }
 
     .modal-body-focuspoints .modal-panel-sidebar input, .modal-body-focuspoints .modal-panel-sidebar textarea, .modal-body-focuspoints .modal-panel-sidebar select {

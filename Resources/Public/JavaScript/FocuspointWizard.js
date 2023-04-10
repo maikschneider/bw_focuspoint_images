@@ -1,4 +1,4 @@
-define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', 'TYPO3/CMS/Backend/ActionButton/ImmediateAction', 'TYPO3/CMS/Core/Ajax/AjaxRequest', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js', 'lit', 'lit/directives/unsafe-html.js'], (function ($, Modal, Notification, ImmediateAction, AjaxRequest, draggable_js, resizable_js, lit, unsafeHtml_js) { 'use strict';
+define(['jquery', 'bootstrap', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', 'TYPO3/CMS/Backend/ActionButton/ImmediateAction', 'TYPO3/CMS/Core/Ajax/AjaxRequest', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js', 'lit', 'lit/directives/unsafe-html.js'], (function ($, bootstrap, Modal, Notification, ImmediateAction, AjaxRequest, draggable_js, resizable_js, lit, unsafeHtml_js) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -16,9 +16,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	    }
 	    calculateAbsoluteX(width = 0.33) {
 	        const image = $__default["default"](this.currentModal).find(this.cropImageSelector);
-	        console.log(image);
 	        const imageWidth = $__default["default"](image).width();
-	        console.log(imageWidth);
 	        return Math.round((width * imageWidth) * 1e3) / 1e3;
 	    }
 	    calculateRelativeY(height) {
@@ -129,18 +127,12 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	     * @private
 	     */
 	    activateFocuspoint(id) {
-	        const wasOpen = this.inputPanels[id].find('a.panel-link').attr('aria-expanded') === 'true';
-	        // remove all active states
+	        const alreadyOpen = this.focusBoxes[id].hasClass('active');
 	        for (let i = 0; i < this.data.length; i++) {
 	            this.focusBoxes[i].removeClass('active');
-	            this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
-	            this.inputPanels[i].find('.panel-collapse').removeClass('show');
 	        }
-	        // add new active state (if it was closed)
-	        if (!wasOpen) {
+	        if (!alreadyOpen) {
 	            this.focusBoxes[id].addClass('active');
-	            this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
-	            this.inputPanels[id].find('.panel-collapse').addClass('show');
 	        }
 	    }
 	    addNewFocuspoint(focuspointBoxId = -1) {
@@ -346,7 +338,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            const id = parseInt($__default["default"]('input:first', panel).attr('data-focuspointpanelid'));
 	            self.activateFocuspoint(id);
 	        };
-	        $__default["default"](panel).find('a.panel-link').bind('click', clickEvent.bind(null, panel));
+	        $__default["default"](panel).find('a.panel-link').bind('click', clickEvent.bind(this, panel));
 	        // bind delete button event
 	        $__default["default"](panel).find('[data-delete]').off('click').on('click', (e, button) => {
 	            e.preventDefault();
@@ -459,7 +451,10 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	            },
 	        ];
 	        this.currentModal = Modal__default["default"].advanced({
-	            content: lit.html `<div class="modal-loading"><typo3-backend-spinner size="default"></typo3-backend-spinner></div>`,
+	            content: lit.html `
+				<div class="modal-loading">
+					<typo3-backend-spinner size="default"></typo3-backend-spinner>
+				</div>`,
 	            size: Modal__default["default"].sizes.full,
 	            style: Modal__default["default"].styles.dark,
 	            title: modalTitle,

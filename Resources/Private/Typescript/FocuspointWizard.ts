@@ -156,28 +156,14 @@ class FocuspointWizard {
 		$(box).bind('click', clickEvent.bind(null, box));
 	}
 
-	/**
-	 * Toggle panel open close states + active effect for focus box
-	 * @TODO: add animation with css class "collapsing" and timeout of .35s
-	 * @param id
-	 * @private
-	 */
 	private activateFocuspoint(id: number): void {
-
-		const wasOpen = this.inputPanels[id].find('a.panel-link').attr('aria-expanded') === 'true';
-
-		// remove all active states
+		// @TODO: handle sidebar panel active state
+		const alreadyOpen = this.focusBoxes[id].hasClass('active')
 		for (let i = 0; i < this.data.length; i++) {
 			this.focusBoxes[i].removeClass('active');
-			this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
-			this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
-
-		// add new active state (if it was closed)
-		if (!wasOpen) {
+		if (!alreadyOpen) {
 			this.focusBoxes[id].addClass('active');
-			this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
-			this.inputPanels[id].find('.panel-collapse').addClass('show');
 		}
 	}
 
@@ -417,7 +403,7 @@ class FocuspointWizard {
 			const id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
 			self.activateFocuspoint(id);
 		};
-		$(panel).find('a.panel-link').bind('click', clickEvent.bind(null, panel));
+		$(panel).find('a.panel-link').bind('click', clickEvent.bind(this, panel));
 
 		// bind delete button event
 		$(panel).find('[data-delete]').off('click').on('click', (e, button) => {
@@ -549,7 +535,10 @@ class FocuspointWizard {
 		];
 
 		this.currentModal = Modal.advanced({
-			content: html`<div class="modal-loading"><typo3-backend-spinner size="default"></typo3-backend-spinner></div>`,
+			content: html`
+				<div class="modal-loading">
+					<typo3-backend-spinner size="default"></typo3-backend-spinner>
+				</div>`,
 			size: Modal.sizes.full,
 			style: Modal.styles.dark,
 			title: modalTitle,

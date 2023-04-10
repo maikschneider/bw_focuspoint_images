@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import 'bootstrap';
 import Modal from '@typo3/backend/modal.js';
 import Notification from '@typo3/backend/notification.js';
 import ImmediateAction from '@typo3/backend/action-button/immediate-action.js';
@@ -16,9 +17,7 @@ class FocuspointWizard {
     }
     calculateAbsoluteX(width = 0.33) {
         const image = $(this.currentModal).find(this.cropImageSelector);
-        console.log(image);
         const imageWidth = $(image).width();
-        console.log(imageWidth);
         return Math.round((width * imageWidth) * 1e3) / 1e3;
     }
     calculateRelativeY(height) {
@@ -129,18 +128,12 @@ class FocuspointWizard {
      * @private
      */
     activateFocuspoint(id) {
-        const wasOpen = this.inputPanels[id].find('a.panel-link').attr('aria-expanded') === 'true';
-        // remove all active states
+        const alreadyOpen = this.focusBoxes[id].hasClass('active');
         for (let i = 0; i < this.data.length; i++) {
             this.focusBoxes[i].removeClass('active');
-            this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
-            this.inputPanels[i].find('.panel-collapse').removeClass('show');
         }
-        // add new active state (if it was closed)
-        if (!wasOpen) {
+        if (!alreadyOpen) {
             this.focusBoxes[id].addClass('active');
-            this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
-            this.inputPanels[id].find('.panel-collapse').addClass('show');
         }
     }
     addNewFocuspoint(focuspointBoxId = -1) {
@@ -346,7 +339,7 @@ class FocuspointWizard {
             const id = parseInt($('input:first', panel).attr('data-focuspointpanelid'));
             self.activateFocuspoint(id);
         };
-        $(panel).find('a.panel-link').bind('click', clickEvent.bind(null, panel));
+        $(panel).find('a.panel-link').bind('click', clickEvent.bind(this, panel));
         // bind delete button event
         $(panel).find('[data-delete]').off('click').on('click', (e, button) => {
             e.preventDefault();
@@ -459,7 +452,10 @@ class FocuspointWizard {
             },
         ];
         this.currentModal = Modal.advanced({
-            content: html `<div class="modal-loading"><typo3-backend-spinner size="default"></typo3-backend-spinner></div>`,
+            content: html `
+				<div class="modal-loading">
+					<typo3-backend-spinner size="default"></typo3-backend-spinner>
+				</div>`,
             size: Modal.sizes.full,
             style: Modal.styles.dark,
             title: modalTitle,

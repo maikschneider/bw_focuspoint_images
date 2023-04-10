@@ -7,7 +7,6 @@
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@types/jquery": "3.5.16",
     "@types/jqueryui": "^1.12.16",
-    "imagesloaded": "^4.1.4",
     "jquery": "^3.6.4",
     "jquery-ui": "^1.13.2",
     "rollup": "^2.79.1",
