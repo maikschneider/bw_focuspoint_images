@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', 'TYPO3/CMS/Backend/ActionButton/ImmediateAction', 'TYPO3/CMS/Core/Ajax/AjaxRequest', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js', 'lit', 'lit/directives/unsafe-html.js'], (function ($, bootstrap, Modal, Notification, ImmediateAction, AjaxRequest, draggable_js, resizable_js, lit, unsafeHtml_js) { 'use strict';
+define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', 'TYPO3/CMS/Backend/ActionButton/ImmediateAction', 'TYPO3/CMS/Core/Ajax/AjaxRequest', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js', 'lit', 'lit/directives/unsafe-html.js'], (function ($, Modal, Notification, ImmediateAction, AjaxRequest, draggable_js, resizable_js, lit, unsafeHtml_js) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -120,13 +120,8 @@ define(['jquery', 'bootstrap', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Not
 	        };
 	        $__default["default"](box).bind('click', clickEvent.bind(null, box));
 	    }
-	    /**
-	     * Toggle panel open close states + active effect for focus box
-	     * @TODO: add animation with css class "collapsing" and timeout of .35s
-	     * @param id
-	     * @private
-	     */
 	    activateFocuspoint(id) {
+	        // @TODO: handle sidebar panel active state
 	        const alreadyOpen = this.focusBoxes[id].hasClass('active');
 	        for (let i = 0; i < this.data.length; i++) {
 	            this.focusBoxes[i].removeClass('active');

@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import 'bootstrap';
 import Modal from '@typo3/backend/modal.js';
 import Notification from '@typo3/backend/notification.js';
 import ImmediateAction from '@typo3/backend/action-button/immediate-action.js';
@@ -121,13 +120,8 @@ class FocuspointWizard {
         };
         $(box).bind('click', clickEvent.bind(null, box));
     }
-    /**
-     * Toggle panel open close states + active effect for focus box
-     * @TODO: add animation with css class "collapsing" and timeout of .35s
-     * @param id
-     * @private
-     */
     activateFocuspoint(id) {
+        // @TODO: handle sidebar panel active state
         const alreadyOpen = this.focusBoxes[id].hasClass('active');
         for (let i = 0; i < this.data.length; i++) {
             this.focusBoxes[i].removeClass('active');
