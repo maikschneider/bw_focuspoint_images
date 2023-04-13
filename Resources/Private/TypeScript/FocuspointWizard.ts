@@ -157,13 +157,16 @@ class FocuspointWizard {
 	}
 
 	private activateFocuspoint(id: number): void {
-		// @TODO: handle sidebar panel active state
 		const alreadyOpen = this.focusBoxes[id].hasClass('active')
 		for (let i = 0; i < this.data.length; i++) {
 			this.focusBoxes[i].removeClass('active');
+			this.inputPanels[i].find('a.panel-link').attr('aria-expanded', 'false');
+			this.inputPanels[i].find('.panel-collapse').removeClass('show');
 		}
 		if (!alreadyOpen) {
 			this.focusBoxes[id].addClass('active');
+			this.inputPanels[id].find('a.panel-link').attr('aria-expanded', 'true');
+			this.inputPanels[id].find('.panel-collapse').addClass('show');
 		}
 	}
 
