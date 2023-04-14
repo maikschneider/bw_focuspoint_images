@@ -56,7 +56,7 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_js.xlf';
-        if ($version < 12) {
+        if ($version['version_main'] < 12) {
             $resultArray['requireJsModules'][] = [
                 'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { new FocuspointWizard(' . $version['version_main'] . '); }); }',
             ];
