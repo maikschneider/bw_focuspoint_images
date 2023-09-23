@@ -33,6 +33,7 @@ const typo3Prefixes = [
     'lit-element/',
     'lit-html/',
     'flatpickr/',
+    'jquery-ui/'
 ];
 
 const lowerDashedToUpperCamelCase = (str) => str.replace(/([-\/])([a-z])/g, (_str, sep, letter) => (sep === '/' ? '/' : '') + letter.toUpperCase());
