@@ -226,7 +226,6 @@ class FocuspointWizard {
 		} else {
 			this.currentModal.trigger('modal-dismiss');
 		}
-		this.destroy();
 	}
 
 	private onSaveButtonClick(e): void {
@@ -238,7 +237,6 @@ class FocuspointWizard {
 		} else {
 			this.currentModal.trigger('modal-dismiss');
 		}
-		this.destroy();
 	}
 
 	private save(data: Object): void {
@@ -557,11 +555,12 @@ class FocuspointWizard {
 			});
 		});
 
+		this.currentModal.addEventListener('typo3-modal-hide', (): void => {
+			this.destroy();
+		});
+
 		// delete / reset all hidden inputs
 		$(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
-
-		// Do not dismiss the modal when clicking beside it to avoid data loss
-		//this.currentModal.data('bs.modal').options.backdrop = 'static';
 
 	}
 

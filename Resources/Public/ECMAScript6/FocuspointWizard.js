@@ -182,7 +182,6 @@ class FocuspointWizard {
         else {
             this.currentModal.trigger('modal-dismiss');
         }
-        this.destroy();
     }
     onSaveButtonClick(e) {
         e.preventDefault();
@@ -194,7 +193,6 @@ class FocuspointWizard {
         else {
             this.currentModal.trigger('modal-dismiss');
         }
-        this.destroy();
     }
     save(data) {
         const focusPoints = JSON.stringify(data);
@@ -466,10 +464,11 @@ class FocuspointWizard {
                 this.currentModal.updateComplete.then(() => this.onModalLoaded());
             });
         });
+        this.currentModal.addEventListener('typo3-modal-hide', () => {
+            this.destroy();
+        });
         // delete / reset all hidden inputs
         $(document).find('form[name="editform"] input[data-formengine-input-name][data-focuspointPanelId]').remove();
-        // Do not dismiss the modal when clicking beside it to avoid data loss
-        //this.currentModal.data('bs.modal').options.backdrop = 'static';
     }
     /**
      * @method destroy
