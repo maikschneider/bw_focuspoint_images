@@ -16,7 +16,7 @@
             <textarea class="form-control" name="{fieldname}" data-focuspointPanelId="x"></textarea>
         </f:case>
         <f:case value="select">
-            <select class="form-control" name="{fieldname}" data-focuspointPanelId="x">
+            <select class="form-control form-select" name="{fieldname}" data-focuspointPanelId="x">
                 <f:for each="{field.options}" as="option" key="optionname" iteration="k">
                     <option value="{optionname}">{f:translate(id:'{option}')}</option>
                 </f:for>
@@ -33,7 +33,7 @@
                                title=""
                                value=""
                                readonly>
-                        <div class="form-control-clearable"><input type="text"
+                        <div class="form-control-clearable form-control-clearable-wrapper"><input type="text"
                                                                    id="formengine-input-6138b15cb744c617898547"
                                                                    class="form-control t3js-clearable t3js-form-field-inputlink-input hidden hasDefaultValue t3js-charcounter-initialized"
                                                                    maxlength="1024">
