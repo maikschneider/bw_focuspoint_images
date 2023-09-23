@@ -194,6 +194,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/Notification', '
 	        else {
 	            this.currentModal.trigger('modal-dismiss');
 	        }
+	        this.destroy();
 	    }
 	    save(data) {
 	        const focusPoints = JSON.stringify(data);

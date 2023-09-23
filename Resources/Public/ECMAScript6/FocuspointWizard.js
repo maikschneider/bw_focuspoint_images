@@ -194,6 +194,7 @@ class FocuspointWizard {
         else {
             this.currentModal.trigger('modal-dismiss');
         }
+        this.destroy();
     }
     save(data) {
         const focusPoints = JSON.stringify(data);

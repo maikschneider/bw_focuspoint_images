@@ -238,6 +238,7 @@ class FocuspointWizard {
 		} else {
 			this.currentModal.trigger('modal-dismiss');
 		}
+		this.destroy();
 	}
 
 	private save(data: Object): void {
