@@ -26,6 +26,8 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $content .= BackendUtility::thumbCode($row, 'tt_content', 'assets', '', '', null, 0,
             '', '200px', false);
 
+        $content .= '<style>.focuspoint .preview-thumbnails-element-image {height:auto;}</style>';
+
         $fileReferences = BackendUtility::resolveFileReferences('tt_content', 'assets', $row);
 
         if (empty($fileReferences)) {
