@@ -112,7 +112,7 @@ class InputFocuspointElement extends AbstractFormElement
             return;
         }
 
-        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'], function ($point) {
+        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'] ?? [], function ($point) {
             return $point['type'] === 'link';
         });
 

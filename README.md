@@ -42,18 +42,14 @@ For administrators
     **static TypoScript template** or manually include setup and
     constants.
 
-3.  Include PageTS
-
-    To add the Focuspoint element to the common tab of the new content element wizard, include the **static PageTS** in the page properties or manually include `EXT:bw_focuspoint_images/Configuration/PageTS/wizard.tsconfig`
-
-4.  Define your own wizard fields
+3.  Define your own wizard fields
 
     There are **no default fields** defined! An example with working
     frontend output can be found in the PageTS section.
 
 ### Usage
 
-Add the new content element "SVG Focuspoints" to any page, link a new
+Add the new content element "Image with Focuspoints" to any page, link a new
 image and start adding your focus areas.
 
 ![Backend view](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/backend-collage.jpg)
@@ -100,7 +96,7 @@ mod.tx_bwfocuspointimages.settings.fields {
 
 ##### Adjusting the link wizard
 
-You can customize the display of the link wizard. Use the additional ```linkPopup``` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for [link inputs](https://docs.typo3.org/m/typo3/reference-tca/master/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html).
+You can customize the display of the link wizard. Use the additional ```linkPopup``` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for [link inputs](https://docs.typo3.org/m/typo3/reference-tca/11.5/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html#linkpopup).
 
 ``` {.typoscript}
 mod.tx_bwfocuspointimages.settings.fields {
@@ -141,7 +137,7 @@ plugin.tx_bwfocuspointimages {
 ```
 
 To use the default rendering of **fluid\_styled\_content**, set Layout
-and Partial path to your styles.content setting and use the **Default**
+and Partial path to your `styles.content` setting and use the **Default**
 layout in your **FocuspointImage** template file.
 
 For developers
