@@ -203,10 +203,6 @@ To version 4.x
 * TypoScript paths changed:
   * Old: `EXT:bw_focuspoint_images/Configuration/setup.txt`
   * New: `EXT:bw_focuspoint_images/Configuration/setup.typoscript`
-* PageTS changed:
-  * Content Element Wizard not included automatically anymore
-  * Include via static PageTS or: `EXT:bw_focuspoint_images/Configuration/PageTS.tsconfig`
-
 
 To version 3.x
 ---------------
