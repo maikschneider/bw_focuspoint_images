@@ -3,8 +3,10 @@
 namespace Blueways\BwFocuspointImages\Form\Element;
 
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
+use Exception;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
@@ -21,7 +23,7 @@ class InputFocuspointElement extends AbstractFormElement
      * This will render an imageManipulation field
      *
      * @return array As defined in initializeResultArray() of AbstractNode
-     * @throws \Exception
+     * @throws Exception
      */
     public function render(): array
     {
@@ -40,9 +42,6 @@ class InputFocuspointElement extends AbstractFormElement
             return $resultArray;
         }
 
-        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
-        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
-
         $fieldInformationResult = $this->renderFieldInformation();
         $fieldInformationHtml = $fieldInformationResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
@@ -56,14 +55,7 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_js.xlf';
-        if ($version['version_main'] < 12) {
-            $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/BwFocuspointImages/FocuspointWizard' => 'function(FocuspointWizard){top.require(["jquery-ui/draggable", "jquery-ui/resizable"], function() { new FocuspointWizard(' . $version['version_main'] . '); }); }',
-            ];
-        } else {
-            $resultArray['javaScriptModules'][] = \TYPO3\CMS\Core\Page\JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointWizardEs6.js')
-                ->instance($version['version_main']);
-        }
+        $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointWizard.js')->instance();
 
         $arguments = [
             'fieldInformation' => $fieldInformationHtml,
@@ -76,9 +68,9 @@ class InputFocuspointElement extends AbstractFormElement
                 'field' => [
                     'id' => 'bwfocuspointwizard' . random_int(1, 9999),
                     'value' => $parameterArray['itemFormElValue'],
-                    'name' => $parameterArray['itemFormElName']
+                    'name' => $parameterArray['itemFormElName'],
                 ],
-                'validation' => '[]'
+                'validation' => '[]',
             ],
             'config' => $config,
             'pid' => $this->data['databaseRow']['pid'],
@@ -165,7 +157,7 @@ class InputFocuspointElement extends AbstractFormElement
                 /** @var ResourceFactory $resourceFactory */
                 $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
                 $file = $resourceFactory->getFileObject($fileUid);
-            } catch (FileDoesNotExistException | \InvalidArgumentException $e) {
+            } catch (FileDoesNotExistException|\InvalidArgumentException $e) {
             }
         }
         return $file;

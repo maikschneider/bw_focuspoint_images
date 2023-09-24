@@ -54,7 +54,7 @@ class FocusPointWizard
                 'field' => $inputName,
                 'formName' => 'editform',
                 'itemName' => $inputName,
-                'hmac' => GeneralUtility::hmac('focusPointForm' . $inputName, 'wizard_js')
+                'hmac' => GeneralUtility::hmac('focusPointForm' . $inputName, 'wizard_js'),
             ],
         ];
 
@@ -68,7 +68,7 @@ class FocusPointWizard
 
         return new JsonResponse([
             'url' => $url,
-            'preview' => $preview
+            'preview' => $preview,
         ]);
     }
 
@@ -90,9 +90,6 @@ class FocusPointWizard
         $templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
         $templateView->setTemplate('FocuspointWizard');
 
-        $verionNumberUtility = GeneralUtility::makeInstance(VersionNumberUtility::class);
-        $version = $verionNumberUtility->convertVersionStringToArray($verionNumberUtility->getNumericTypo3Version());
-
         $queryParams = json_decode($request->getQueryParams()['arguments'], true);
         $fileUid = $queryParams['image'];
         $image = null;
@@ -109,7 +106,6 @@ class FocusPointWizard
         $viewData = [
             'image' => $image,
             'focusPoints' => $queryParams['focusPoints'],
-            'typo3Version' => $version['version_main']
         ];
         $templateView->assignMultiple($viewData);
         $content = $templateView->render();

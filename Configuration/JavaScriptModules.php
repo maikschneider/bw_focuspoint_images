@@ -1,8 +1,13 @@
 <?php
 
 return [
-    'dependencies' => ['backend'],
+    'dependencies' => [
+        'backend',
+    ],
+    'tags' => [
+        'backend.form',
+    ],
     'imports' => [
-        '@blueways/bw-focuspoint-images/' =>  'EXT:bw_focuspoint_images/Resources/Public/ECMAScript6/',
+        '@blueways/bw-focuspoint-images/' => 'EXT:bw_focuspoint_images/Resources/Public/JavaScript/',
     ],
 ];

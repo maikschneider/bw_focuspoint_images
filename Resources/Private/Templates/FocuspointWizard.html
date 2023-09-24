@@ -57,7 +57,7 @@
                                                                    data-focuspointPanelId="x"/>
                         <f:for each="{focusPoints.singlePoint.fields}" as="field" key="fieldname" iteration="j">
                             <f:render partial="FocuspointWizardInput"
-                                      arguments="{field: field, fieldname: fieldname, j: j, typo3Version: typo3Version}"/>
+                                      arguments="{field: field, fieldname: fieldname, j: j}"/>
                         </f:for>
                         <div class="input-group">
                             <button data-delete class="btn btn-danger singlepoint-delete"><core:icon identifier="actions-delete" size="small"/>

@@ -20,7 +20,7 @@
     "experimentalDecorators": true,
     "paths": {
       "@blueways/bw-focuspoint-images/*": [
-        "Resources/Public/ECMAScript6/*"
+        "Resources/Public/JavaScript/*"
       ],
       "@typo3/backend/*": [
         "vendor/typo3/cms-backend/Resources/Public/JavaScript/*"
