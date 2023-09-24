@@ -1,29 +1,24 @@
 <?php
 
-/**
- * Extension Manager/Repository config file for ext "bw_focuspoint_images".
- */
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Bw Focuspoint Images',
     'description' => 'Image Editor for adding focus points to images',
     'category' => 'plugin',
     'constraints' => [
         'depends' => [
-            'typo3' => '9.0.0-11.9.99',
+            'typo3' => '12.0.0-12.9.99',
         ],
         'conflicts' => [
         ],
     ],
     'autoload' => [
         'psr-4' => [
-            'Blueways\\BwFocuspointImages\\' => 'Classes'
+            'Blueways\\BwFocuspointImages\\' => 'Classes',
         ],
     ],
     'state' => 'stable',
-    'uploadfolder' => 0,
-    'clearCacheOnLoad' => 1,
     'author' => 'Maik Schneider',
     'author_email' => 'maik.schneider@xima.de',
     'author_company' => 'XIMA Media GmbH',
-    'version' => '3.0.4',
+    'version' => '4.0.0',
 ];

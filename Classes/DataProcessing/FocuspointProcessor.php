@@ -5,18 +5,12 @@ namespace Blueways\BwFocuspointImages\DataProcessing;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\DataProcessing\FilesProcessor;
-use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 
 class FocuspointProcessor extends FilesProcessor
 {
-
     /**
      * Inject image and decoded focus points into the template
      *
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj
-     * @param array $contentObjectConfiguration
-     * @param array $processorConfiguration
-     * @param array $processedData
      * @return array
      */
     public function process(
@@ -31,14 +25,13 @@ class FocuspointProcessor extends FilesProcessor
             return $processedData;
         }
 
-        /** @var TypoLinkCodecService $typoLinkCodecService */
-        $typoLinkCodecService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
+        /** @var \TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService $typoLinkCodecService */
+        $typoLinkCodecService = GeneralUtility::makeInstance(\TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService::class);
 
         // the TCA is configured to use max. 1 image, however the file collector returns an array
-        foreach ($processedData['image'] as $key => $file) {
-
+        foreach ($processedData['image'] as $file) {
             $points = $file->getProperty('focus_points') ?: '[]';
-            $points = json_decode($points, false);
+            $points = json_decode((string)$points, false);
 
             foreach ($points as $point) {
                 $point->x *= 100;
@@ -50,13 +43,13 @@ class FocuspointProcessor extends FilesProcessor
                 $point->textY = $point->y + ($point->height / 2);
 
                 foreach ($point as $fieldName => &$fieldValue) {
-
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
                     if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
                         $newLink = 't3://' . $fieldValue->key . '?uid=' . $fieldValue->uid;
                         if (property_exists($fieldValue, 'target') && $fieldValue->target) {
                             $newLink .= ' ' . $fieldValue->target;
                         }
+
                         $fieldValue = $newLink;
                     }
 
@@ -69,6 +62,7 @@ class FocuspointProcessor extends FilesProcessor
                         }
                     }
                 }
+
                 unset($fieldValue);
             }
 
@@ -78,5 +72,4 @@ class FocuspointProcessor extends FilesProcessor
 
         return $processedData;
     }
-
 }

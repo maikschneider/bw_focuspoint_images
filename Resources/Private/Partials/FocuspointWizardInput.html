@@ -10,13 +10,13 @@
 <div class="focus-input-group focus-input-group--{field.type}">
     <f:switch expression="{field.type}">
         <f:case value="text">
-            <input type="text" name="{fieldname}" data-focuspointPanelId="x"/>
+            <input class="form-control" type="text" name="{fieldname}" data-focuspointPanelId="x"/>
         </f:case>
         <f:case value="textarea">
-            <textarea name="{fieldname}" data-focuspointPanelId="x"></textarea>
+            <textarea class="form-control" name="{fieldname}" data-focuspointPanelId="x"></textarea>
         </f:case>
         <f:case value="select">
-            <select name="{fieldname}" data-focuspointPanelId="x">
+            <select class="form-control form-select" name="{fieldname}" data-focuspointPanelId="x">
                 <f:for each="{field.options}" as="option" key="optionname" iteration="k">
                     <option value="{optionname}">{f:translate(id:'{option}')}</option>
                 </f:for>
@@ -33,7 +33,7 @@
                                title=""
                                value=""
                                readonly>
-                        <div class="form-control-clearable"><input type="text"
+                        <div class="form-control-clearable form-control-clearable-wrapper"><input type="text"
                                                                    id="formengine-input-6138b15cb744c617898547"
                                                                    class="form-control t3js-clearable t3js-form-field-inputlink-input hidden hasDefaultValue t3js-charcounter-initialized"
                                                                    maxlength="1024">
@@ -41,29 +41,24 @@
                                 <core:icon identifier="actions-close" size="small"/>
                             </button>
                         </div>
-                        <span class="input-group-btn">
-                            <button class="btn btn-default t3js-form-field-inputlink-explanation-toggle"
-                                    type="button"
-                                    title="Linkerläuterung umschalten">
-                                <core:icon identifier="{f:if(condition:'{typo3Version}>9', then:'actions-eye-link', else:'actions-version-workspaces-preview-link')}" size="small"/>
-                            </button>
-                        </span>
+                        <button class="btn btn-default t3js-form-field-inputlink-explanation-toggle"
+                                type="button"
+                                title="Linkerläuterung umschalten">
+                            <core:icon identifier="actions-eye-link" size="small"/>
+                        </button>
                         <input type="hidden"
                                name="data[tt_content][4267][header_link]"
                                value="t3://page?uid=117 _blank css titel">
                     </div>
                 </div>
                 <div class="form-wizards-items-aside">
-                    <div class="btn-group">
-                        <a href="#"
-                           class="linkbrowser btn btn-default"
-                           data-focuspointPanelId="x"
-                           data-fieldname="{fieldname}">
-                            <core:icon identifier="actions-link" size="small"/>
-                        </a>
-                    </div>
+                    <a href="#"
+                       class="linkbrowser btn btn-default"
+                       data-focuspointPanelId="x"
+                       data-fieldname="{fieldname}">
+                        <core:icon identifier="actions-link" size="small"/>
+                    </a>
                 </div>
-                <div class="form-wizards-items-bottom"></div>
             </div>
 
         </f:case>
