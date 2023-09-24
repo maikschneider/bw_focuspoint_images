@@ -14,10 +14,19 @@ use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class FocusPointWizard
 {
+    protected ConfigurationManager $configurationManager;
+
+    public function __construct(ConfigurationManager $configurationManager)
+    {
+        $this->configurationManager = $configurationManager;
+    }
+
     /**
      * @throws RouteNotFoundException
      */
@@ -79,10 +88,11 @@ class FocusPointWizard
             return $response->withStatus(403);
         }
 
+        $typoScript = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
         $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $templateView->setLayoutRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Layouts']);
-        $templateView->setPartialRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Partials']);
-        $templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
+        $templateView->setLayoutRootPaths($typoScript['plugin.']['tx_bwfocuspointimages.']['view.']['layoutRootPaths.']);
+        $templateView->setPartialRootPaths($typoScript['plugin.']['tx_bwfocuspointimages.']['view.']['partialRootPaths.']);
+        $templateView->setTemplateRootPaths($typoScript['plugin.']['tx_bwfocuspointimages.']['view.']['templateRootPaths.']);
         $templateView->setTemplate('FocuspointWizard');
 
         $queryParams = json_decode((string)$request->getQueryParams()['arguments'], true);

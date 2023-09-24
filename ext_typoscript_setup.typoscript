@@ -1,0 +1,8 @@
+plugin.tx_bwfocuspointimages.view {
+	templateRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Templates/
+	templateRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.templateRootPath}
+	partialRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Partials/
+	partialRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.partialRootPath}
+	layoutRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Layouts/
+	layoutRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.layoutRootPath}
+}
