@@ -618,4 +618,4 @@ class FocuspointWizard {
 
 }
 
-new FocuspointWizard();
+export default new FocuspointWizard();
