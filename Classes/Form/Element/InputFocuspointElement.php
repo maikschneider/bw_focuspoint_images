@@ -38,7 +38,7 @@ class InputFocuspointElement extends AbstractFormElement
 
         // get image
         $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
-        if (!$file) {
+        if (!$file instanceof File) {
             return $resultArray;
         }
 
@@ -62,7 +62,7 @@ class InputFocuspointElement extends AbstractFormElement
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
             'isAllowedFileExtension' => in_array(strtolower($file->getExtension()),
-                GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])), true),
+                GeneralUtility::trimExplode(',', strtolower((string) $config['allowedExtensions'])), true),
             'image' => $file,
             'formEngine' => [
                 'field' => [
@@ -96,32 +96,31 @@ class InputFocuspointElement extends AbstractFormElement
 
     /**
      * Migrate old typolink markup (v2.3.3) to the t3:// syntax
-     *
-     * @param array $parameterArray
-     * @param array $config
      */
     protected function migrateOldTypolinkSyntax(array &$parameterArray, array $config): void
     {
-        if (!$parameterArray['itemFormElValue'] || !is_array(json_decode($parameterArray['itemFormElValue'], true))) {
+        if (!$parameterArray['itemFormElValue'] || !is_array(json_decode((string) $parameterArray['itemFormElValue'], true))) {
             return;
         }
 
-        $itemFormElValue = json_decode($parameterArray['itemFormElValue'], true);
+        $itemFormElValue = json_decode((string) $parameterArray['itemFormElValue'], true);
 
-        if (!count($itemFormElValue)) {
+        if ($itemFormElValue === []) {
             return;
         }
 
-        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'] ?? [], function ($point) {
+        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'] ?? [], static function ($point) : bool {
             return $point['type'] === 'link';
         });
 
         foreach ($itemFormElValue as $key => $item) {
             foreach ($linkFields as $fieldName => $field) {
-                if (!isset($item[$fieldName]) || !is_array($item[$fieldName])) {
+                if (!isset($item[$fieldName])) {
                     continue;
                 }
-
+                if (!is_array($item[$fieldName])) {
+                    continue;
+                }
                 // construct new link
                 $link = $item[$fieldName];
                 $target = $link['target'] ?: '-';
@@ -139,14 +138,12 @@ class InputFocuspointElement extends AbstractFormElement
     /**
      * Get file object
      *
-     * @param array $row
      * @param string $fieldName
-     * @return File|null
      */
     protected function getFile(array $row, $fieldName): ?File
     {
         $file = null;
-        $fileUid = !empty($row[$fieldName]) ? $row[$fieldName] : null;
+        $fileUid = empty($row[$fieldName]) ? null : $row[$fieldName];
 
         if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
             $fileUid = $fileUid[0]['uid'];
@@ -160,15 +157,10 @@ class InputFocuspointElement extends AbstractFormElement
             } catch (FileDoesNotExistException|\InvalidArgumentException $e) {
             }
         }
+
         return $file;
     }
 
-    /**
-     * @param array $focusPoints
-     * @param \TYPO3\CMS\Core\Resource\File $image
-     * @param int $pid
-     * @return string
-     */
     protected function getWizardUri(array $focusPoints, File $image, int $pid): string
     {
         $routeName = 'ajax_wizard_focuspoint';

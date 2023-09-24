@@ -20,8 +20,6 @@ class FocusPointWizard
 {
 
     /**
-     * @param ServerRequestInterface $request
-     * @return JsonResponse
      * @throws RouteNotFoundException
      */
     public function getLinkWizardUrlAction(ServerRequestInterface $request): JsonResponse
@@ -38,9 +36,11 @@ class FocusPointWizard
         if (isset($config['fields'][$fieldName]['linkPopup']['blindLinkOptions'])) {
             $linkBrowserArguments['blindLinkOptions'] = $config['fields'][$fieldName]['linkPopup']['blindLinkOptions'];
         }
+
         if (isset($config['fields'][$fieldName]['linkPopup']['blindLinkFields'])) {
             $linkBrowserArguments['blindLinkFields'] = $config['fields'][$fieldName]['linkPopup']['blindLinkFields'];
         }
+
         if (isset($config['fields'][$fieldName]['linkPopup']['allowedExtensions'])) {
             $linkBrowserArguments['allowedExtensions'] = $config['fields'][$fieldName]['linkPopup']['allowedExtensions'];
         }
@@ -72,10 +72,6 @@ class FocusPointWizard
         ]);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return Response
-     */
     public function getWizardAction(ServerRequestInterface $request): Response
     {
         $response = new Response();
@@ -90,7 +86,7 @@ class FocusPointWizard
         $templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
         $templateView->setTemplate('FocuspointWizard');
 
-        $queryParams = json_decode($request->getQueryParams()['arguments'], true);
+        $queryParams = json_decode((string) $request->getQueryParams()['arguments'], true);
         $fileUid = $queryParams['image'];
         $image = null;
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
@@ -118,7 +114,6 @@ class FocusPointWizard
      * Check if hmac signature is correct
      *
      * @param ServerRequestInterface $request the request with the GET parameters
-     * @return bool
      */
     protected function isSignatureValid(ServerRequestInterface $request): bool
     {

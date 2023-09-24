@@ -1,9 +1,12 @@
 <?php
 
-defined('TYPO3') or die();
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer;
+use TYPO3\CMS\Core\Resource\File;
+defined('TYPO3') || die();
 
 // register CType in TCA
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
+ExtensionManagementUtility::addTcaSelectItem(
     'tt_content',
     'CType',
     [
@@ -28,7 +31,7 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
          --palette--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:palette.access;access,
       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xml:tabs.extended
     ',
-    'previewRenderer' => Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer::class,
+    'previewRenderer' => FocuspointPreviewRenderer::class,
 ];
 
 // set icon for page module
@@ -49,7 +52,7 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverr
             ],
             'overrideChildTca' => [
                 'types' => [
-                    \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                    File::FILETYPE_IMAGE => [
                         'showitem' => 'focus_points,--palette--;;filePalette',
                     ],
                 ],

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Blueways\BwFocuspointImages\Utility\HelperUtility;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -16,5 +17,5 @@ return static function (
 
     $services->load('Blueways\\BwFocuspointImages\\', '../Classes/');
 
-    $services->set(\Blueways\BwFocuspointImages\Utility\HelperUtility::class)->public();
+    $services->set(HelperUtility::class)->public();
 };

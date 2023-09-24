@@ -19,8 +19,11 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 class HelperUtility
 {
     protected TypoScriptService $typoScriptService;
+
     protected LinkService $linkService;
+
     protected IconFactory $iconFactory;
+
     protected TypoLinkCodecService $typoLinkCodecService;
 
     public function __construct(
@@ -74,9 +77,10 @@ class HelperUtility
 
     public function getLinkExplanation(string $itemValue): array
     {
-        if (empty($itemValue)) {
+        if ($itemValue === '') {
             return [];
         }
+
         $data = ['text' => '', 'icon' => ''];
         $linkParts = $this->typoLinkCodecService->decode($itemValue);
         $languageService = $GLOBALS['LANG'];
@@ -93,7 +97,8 @@ class HelperUtility
             if ($key === 'url') {
                 continue;
             }
-            if ($value) {
+
+            if ($value !== '' && $value !== '0') {
                 switch ($key) {
                     case 'class':
                         $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class');
@@ -105,10 +110,10 @@ class HelperUtility
                         $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params');
                         break;
                     default:
-                        $label = (string)$key;
+                        $label = $key;
                 }
 
-                $additionalAttributes[] = '<span><strong>' . htmlspecialchars($label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
+                $additionalAttributes[] = '<span><strong>' . htmlspecialchars((string) $label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
             }
         }
 
@@ -128,13 +133,16 @@ class HelperUtility
                                     false);
                             }
                         }
+
                         $fragmentTitle = ' #' . ($fragmentTitle ?: $linkData['fragment']);
                     }
+
                     $data = [
                         'text' => $pageRecord['_thePathFull'] . '[' . $pageRecord['uid'] . ']' . $fragmentTitle,
                         'icon' => $this->iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL)->render()
                     ];
                 }
+
                 break;
             case LinkService::TYPE_EMAIL:
                 $data = [
@@ -160,6 +168,7 @@ class HelperUtility
                             Icon::SIZE_SMALL)->render()
                     ];
                 }
+
                 break;
             case LinkService::TYPE_FOLDER:
                 /** @var Folder $folder */
@@ -171,6 +180,7 @@ class HelperUtility
                             Icon::SIZE_SMALL)->render()
                     ];
                 }
+
                 break;
             case LinkService::TYPE_RECORD:
                 $pageTS = static::getPagesTSconfig(0);
@@ -190,6 +200,7 @@ class HelperUtility
                             'overlay-missing')->render(),
                     ];
                 }
+
                 break;
             case LinkService::TYPE_TELEPHONE:
                 $telephone = $linkData['telephone'];
@@ -199,6 +210,7 @@ class HelperUtility
                         'icon' => $this->iconFactory->getIcon('actions-device-mobile', Icon::SIZE_SMALL)->render()
                     ];
                 }
+
                 break;
             default:
                 // @TODO: Needs implementation!
