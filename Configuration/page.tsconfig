@@ -1,3 +1,12 @@
+mod.tx_bwfocuspointimages.settings {
+	resizable = 1
+	defaultWidth = 0.2
+	defaultHeight = 0.2
+	fields {
+
+	}
+}
+
 mod.wizards.newContentElement.wizardItems.common {
 	elements {
 		bw_focuspoint_images_svg {
@@ -11,13 +20,4 @@ mod.wizards.newContentElement.wizardItems.common {
 	}
 
 	show := addToList(bw_focuspoint_images_svg)
-}
-
-mod.tx_bwfocuspointimages.settings {
-	resizable = 1
-	defaultWidth = 0.2
-	defaultHeight = 0.2
-	fields {
-
-	}
 }

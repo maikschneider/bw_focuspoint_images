@@ -1,5 +1,8 @@
 <?php
-defined('TYPO3_MODE') || die('Access denied');
+
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
+defined('TYPO3') || die();
 
 $additionalColumns = [
     'focus_points' => [
@@ -9,11 +12,11 @@ $additionalColumns = [
         'config' => [
             'type' => 'input',
             'renderType' => 'focuspoint_wizard',
-            'allowedExtensions' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+            'allowedExtensions' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'],
         ],
     ],
 ];
 
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('sys_file_reference', $additionalColumns);
+ExtensionManagementUtility::addTCAcolumns('sys_file_reference', $additionalColumns);
 
 //$GLOBALS['TCA']['sys_file_reference']['palettes']['imageoverlayPalette']['showitem'] = 'focus_points';

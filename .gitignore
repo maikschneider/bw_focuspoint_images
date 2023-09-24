@@ -9,3 +9,5 @@ Documentation-GENERATED-temp
 composer.lock
 tscommand-*.tmp.txt
 .Build
+config/
+.tscache

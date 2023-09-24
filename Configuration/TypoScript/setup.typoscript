@@ -1,0 +1,20 @@
+tt_content.bw_focuspoint_images_svg = FLUIDTEMPLATE
+tt_content.bw_focuspoint_images_svg {
+
+	templateRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Templates/
+	templateRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.templateRootPath}
+	partialRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Partials/
+	partialRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.partialRootPath}
+	layoutRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Layouts/
+	layoutRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.layoutRootPath}
+
+	templateName = FocuspointImage
+	dataProcessing {
+		10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+		10 {
+			references.fieldName = assets
+			as = image
+		}
+	}
+}
+

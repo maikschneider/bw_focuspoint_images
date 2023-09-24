@@ -1,23 +1,44 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "module": "amd",
+    "lib": [
+      "dom",
+      "scripthost",
+      "es2017",
+      "es2018",
+      "es2019"
+    ],
+    "module": "ES2015",
     "sourceMap": false,
     "removeComments": false,
     "pretty": true,
     "baseUrl": ".",
-    "rootDir": ".",
-    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
+    "alwaysStrict": true,
+    "downlevelIteration": true,
     "experimentalDecorators": true,
     "paths": {
-      "TYPO3/CMS/BwFocuspointImagaes/*": [
-        "Resources/Public/TypeScript/"
+      "@blueways/bw-focuspoint-images/*": [
+        "Resources/Public/JavaScript/*"
+      ],
+      "@typo3/backend/*": [
+        "vendor/typo3/cms-backend/Resources/Public/JavaScript/*"
+      ],
+      "@typo3/core/*": [
+        "vendor/typo3/cms-core/Resources/Public/JavaScript/*"
       ]
-    }
+    },
+    "typeRoots": [
+      "node_modules/@types",
+      "types"
+    ],
   },
-  "typeRoots": [
-    "node_modules/@types",
-    ".Build/types"
+  "include": [
+    "./Resources/Private/TypeScript"
+  ],
+  "exclude": [
+    "Configuration",
+    "node_modules"
   ]
 }

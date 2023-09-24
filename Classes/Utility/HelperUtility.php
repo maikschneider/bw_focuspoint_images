@@ -7,74 +7,50 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
-use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\TypoScript\TypoScriptService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 
 class HelperUtility
 {
+    protected TypoScriptService $typoScriptService;
 
-    /**
-     * @return array
-     */
-    public static function getTypoScript(): array
-    {
-        $emptyTypoScript = [
-            'settings' => [
-                'fields' => []
-            ]
-        ];
-        $typoScript = self::getFullTypoScript();
-        return $typoScript['plugin']['tx_bwfocuspointimages'] ?? $emptyTypoScript;
+    protected LinkService $linkService;
+
+    protected IconFactory $iconFactory;
+
+    protected TypoLinkCodecService $typoLinkCodecService;
+
+    public function __construct(
+        TypoScriptService $typoScriptService,
+        LinkService $linkService,
+        IconFactory $iconFactory,
+        TypoLinkCodecService $typoLinkCodecService
+    ) {
+        $this->typoScriptService = $typoScriptService;
+        $this->linkService = $linkService;
+        $this->iconFactory = $iconFactory;
+        $this->typoLinkCodecService = $typoLinkCodecService;
     }
 
-    /**
-     * @return array
-     */
-    public static function getFullTypoScript(): array
-    {
-        $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
-        if ($configurationManager === null) {
-            $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-            $configurationManager = $objectManager->get(ConfigurationManager::class);
-        }
-        $typoScript = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
-        return $typoScriptService->convertTypoScriptArrayToPlainArray($typoScript);
-    }
-
-    public static function getPagesTSconfig(int $pid): array
+    public function getPagesTSconfig(int $pid): array
     {
         $pageTS = BackendUtility::getPagesTSconfig($pid);
-        $typoScriptService = GeneralUtility::makeInstance(TypoScriptService::class);
-        return $typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
+        return $this->typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
     }
 
-    public static function getConfigForWizardAction(int $pid): array
+    public function getConfigForWizardAction(int $pid): array
     {
-        $pageTs = static::getPagesTSconfig($pid);
-        $tsSettings = $pageTs['mod']['tx_bwfocuspointimages']['settings'];
-
-        if (!count($tsSettings['fields'])) {
-            $typoScript = static::getTypoScript();
-            if (count($typoScript['settings'])) {
-                $tsSettings = $typoScript['settings'];
-            }
-        }
-
-        return $tsSettings;
+        $pageTs = $this->getPagesTSconfig($pid);
+        return $pageTs['mod']['tx_bwfocuspointimages']['settings'];
     }
 
-    public static function getConfigForFormElement(int $pid, array $formElementConfig): array
+    public function getConfigForFormElement(int $pid, array $formElementConfig): array
     {
         $defaultConfig = [
             'file_field' => 'uid_local',
@@ -82,48 +58,35 @@ class HelperUtility
                 'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
                 'singlePoint' => [
                     'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
-                ]
+                ],
             ],
-            'missingPageTSWarning' => false
+            'missingPageTSWarning' => false,
         ];
 
         // override default config from TCA config
         $config = array_replace_recursive($defaultConfig, $formElementConfig);
 
         // read pageTS
-        $pageTs = static::getPagesTSconfig($pid);
-        $tsSettings = $pageTs['mod']['tx_bwfocuspointimages']['settings'];
+        $tsSettings = $this->getConfigForWizardAction($pid);
 
-        // fallback for old configuration: read TypoScript
-        if (!count($tsSettings['fields'])) {
-            $typoScript = static::getTypoScript();
-            if (count($typoScript['settings'])) {
-                $tsSettings = $typoScript['settings'];
-                $config['missingPageTSWarning'] = true;
-            }
-        }
-
-        // override single point settings from pageTS / TypoScript
+        // override single point settings from pageTS
         $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'], $tsSettings);
 
         return $config;
     }
 
-    public static function getLinkExplanation(string $itemValue): array
+    public function getLinkExplanation(string $itemValue): array
     {
-        if (empty($itemValue)) {
+        if ($itemValue === '') {
             return [];
         }
+
         $data = ['text' => '', 'icon' => ''];
-        $typolinkService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
-        $linkParts = $typolinkService->decode($itemValue);
-        $linkService = GeneralUtility::makeInstance(LinkService::class);
-        /** @var IconFactory $iconFactory */
-        $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+        $linkParts = $this->typoLinkCodecService->decode($itemValue);
         $languageService = $GLOBALS['LANG'];
 
         try {
-            $linkData = $linkService->resolve($linkParts['url']);
+            $linkData = $this->linkService->resolve($linkParts['url']);
         } catch (FileDoesNotExistException | FolderDoesNotExistException | UnknownLinkHandlerException | InvalidPathException $e) {
             return $data;
         }
@@ -134,7 +97,8 @@ class HelperUtility
             if ($key === 'url') {
                 continue;
             }
-            if ($value) {
+
+            if ($value !== '' && $value !== '0') {
                 switch ($key) {
                     case 'class':
                         $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class');
@@ -146,10 +110,10 @@ class HelperUtility
                         $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params');
                         break;
                     default:
-                        $label = (string)$key;
+                        $label = $key;
                 }
 
-                $additionalAttributes[] = '<span><strong>' . htmlspecialchars($label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
+                $additionalAttributes[] = '<span><strong>' . htmlspecialchars((string)$label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
             }
         }
 
@@ -162,32 +126,45 @@ class HelperUtility
                     $fragmentTitle = '';
                     if (isset($linkData['fragment'])) {
                         if (MathUtility::canBeInterpretedAsInteger($linkData['fragment'])) {
-                            $contentElement = BackendUtility::getRecord('tt_content', (int)$linkData['fragment'], '*',
-                                'pid=' . $pageRecord['uid']);
+                            $contentElement = BackendUtility::getRecord(
+                                'tt_content',
+                                (int)$linkData['fragment'],
+                                '*',
+                                'pid=' . $pageRecord['uid']
+                            );
                             if ($contentElement) {
-                                $fragmentTitle = BackendUtility::getRecordTitle('tt_content', $contentElement, false,
-                                    false);
+                                $fragmentTitle = BackendUtility::getRecordTitle(
+                                    'tt_content',
+                                    $contentElement,
+                                    false,
+                                    false
+                                );
                             }
                         }
+
                         $fragmentTitle = ' #' . ($fragmentTitle ?: $linkData['fragment']);
                     }
+
                     $data = [
                         'text' => $pageRecord['_thePathFull'] . '[' . $pageRecord['uid'] . ']' . $fragmentTitle,
-                        'icon' => $iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL)->render(),
                     ];
                 }
+
                 break;
             case LinkService::TYPE_EMAIL:
                 $data = [
                     'text' => $linkData['email'],
-                    'icon' => $iconFactory->getIcon('content-elements-mailform', Icon::SIZE_SMALL)->render()
+                    'icon' => $this->iconFactory->getIcon('content-elements-mailform', Icon::SIZE_SMALL)->render(),
                 ];
                 break;
             case LinkService::TYPE_URL:
                 $data = [
                     'text' => $linkData['url'],
-                    'icon' => $iconFactory->getIcon('apps-pagetree-page-shortcut-external',
-                        Icon::SIZE_SMALL)->render()
+                    'icon' => $this->iconFactory->getIcon(
+                        'apps-pagetree-page-shortcut-external',
+                        Icon::SIZE_SMALL
+                    )->render(),
 
                 ];
                 break;
@@ -197,10 +174,13 @@ class HelperUtility
                 if ($file) {
                     $data = [
                         'text' => $file->getPublicUrl(),
-                        'icon' => $iconFactory->getIconForFileExtension($file->getExtension(),
-                            Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIconForFileExtension(
+                            $file->getExtension(),
+                            Icon::SIZE_SMALL
+                        )->render(),
                     ];
                 }
+
                 break;
             case LinkService::TYPE_FOLDER:
                 /** @var Folder $folder */
@@ -208,10 +188,13 @@ class HelperUtility
                 if ($folder) {
                     $data = [
                         'text' => $folder->getPublicUrl(),
-                        'icon' => $iconFactory->getIcon('apps-filetree-folder-default',
-                            Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIcon(
+                            'apps-filetree-folder-default',
+                            Icon::SIZE_SMALL
+                        )->render(),
                     ];
                 }
+
                 break;
             case LinkService::TYPE_RECORD:
                 $pageTS = static::getPagesTSconfig(0);
@@ -222,41 +205,46 @@ class HelperUtility
                     $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
                     $data = [
                         'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
-                        'icon' => $iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
+                        'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
                     ];
                 } else {
                     $data = [
                         'text' => sprintf('%s', $linkData['uid']),
-                        'icon' => $iconFactory->getIcon('tcarecords-' . $table . '-default', Icon::SIZE_SMALL,
-                            'overlay-missing')->render(),
+                        'icon' => $this->iconFactory->getIcon(
+                            'tcarecords-' . $table . '-default',
+                            Icon::SIZE_SMALL,
+                            'overlay-missing'
+                        )->render(),
                     ];
                 }
+
                 break;
             case LinkService::TYPE_TELEPHONE:
                 $telephone = $linkData['telephone'];
                 if ($telephone) {
                     $data = [
                         'text' => $telephone,
-                        'icon' => $iconFactory->getIcon('actions-device-mobile', Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIcon('actions-device-mobile', Icon::SIZE_SMALL)->render(),
                     ];
                 }
+
                 break;
             default:
                 // @TODO: Needs implementation!
                 // Please note that this hook is preliminary and might change, as this element could become its own
                 // TCA type in the future
                 if (isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['linkHandler'][$linkData['type']])) {
-//                    $linkBuilder = GeneralUtility::makeInstance($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['linkHandler'][$linkData['type']]);
-//                    $data = $linkBuilder->getFormData($linkData, $linkParts, $this->data, $this);
+                    //                    $linkBuilder = GeneralUtility::makeInstance($GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['linkHandler'][$linkData['type']]);
+                    //                    $data = $linkBuilder->getFormData($linkData, $linkParts, $this->data, $this);
                 } elseif ($linkData['type'] === LinkService::TYPE_UNKNOWN) {
                     $data = [
                         'text' => $linkData['file'],
-                        'icon' => $iconFactory->getIcon('actions-link', Icon::SIZE_SMALL)->render()
+                        'icon' => $this->iconFactory->getIcon('actions-link', Icon::SIZE_SMALL)->render(),
                     ];
                 } else {
                     $data = [
                         'text' => 'not implemented type ' . $linkData['type'],
-                        'icon' => ''
+                        'icon' => '',
                     ];
                 }
         }

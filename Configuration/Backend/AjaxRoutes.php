@@ -1,19 +1,14 @@
 <?php
 
- /**
-  * Definitions for routes provided by EXT:bw_focuspoint_images
-  * Contains all AJAX-based routes for entry points
-  *
-  * Currently the "access" property is only used so no token creation + validation is made
-  * but will be extended further.
-  */
- return [
+use Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard;
+
+return [
     'wizard_focuspoint' => [
-         'path' => '/tx_bwfocuspointimages/focuspoint_ajax',
-         'target' => \Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard::class .'::getWizardAction'
-     ],
-     'wizard_focuspoint_linkbrowserurl' => [
-         'path' => '/tx_bwfocuspointimages/focuspoint_linkbrowserurl',
-         'target' => \Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard::class . '::getLinkWizardUrlAction'
-     ]
- ];
+        'path' => '/tx_bwfocuspointimages/focuspoint_ajax',
+        'target' => FocusPointWizard::class . '::getWizardAction',
+    ],
+    'wizard_focuspoint_linkbrowserurl' => [
+        'path' => '/tx_bwfocuspointimages/focuspoint_linkbrowserurl',
+        'target' => FocusPointWizard::class . '::getLinkWizardUrlAction',
+    ],
+];
