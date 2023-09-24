@@ -57,7 +57,7 @@ Installation
 Usage
 -----
 
-Add the new content element “SVG Focuspoints” to any page, link a new
+Add the new content element “Image with Focuspoints” to any page, link a new
 image and start adding your focus areas.
 
 .. figure:: ./Images/backend-collage.jpg
@@ -210,6 +210,14 @@ To decode the json format and use relative points in your fluid template, use th
 Upgrade
 =======
 
+To version 4.x
+---------------
+
+TypoScript paths changed:
+
+Old: ``EXT:bw_focuspoint_images/Configuration/setup.txt``
+New: ``EXT:bw_focuspoint_images/Configuration/setup.typoscript``
+
 To version 3.x
 ---------------
 
@@ -240,3 +248,6 @@ Feel free to contribute!
 
 .. versionadded:: 3.0.0
    Native link browser: Supports all configured LinkBrowsers (e.g. Files), drop support of TYPO3 v7 & v8, new backend preview
+
+.. versionadded:: 4.0.0
+	TYPO3 v12 support

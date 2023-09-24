@@ -31,6 +31,9 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
     'previewRenderer' => Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer::class,
 ];
 
+// set icon for page module
+$GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['bw_focuspoint_images_svg'] = 'bw_focuspoint_images_svg';
+
 // override the imageoverlayPalette to show only the focus_points widget
 $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverrides'] = [
     'assets' => [
