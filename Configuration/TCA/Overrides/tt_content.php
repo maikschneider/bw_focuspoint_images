@@ -1,8 +1,9 @@
 <?php
 
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer;
 use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 defined('TYPO3') || die();
 
 // register CType in TCA

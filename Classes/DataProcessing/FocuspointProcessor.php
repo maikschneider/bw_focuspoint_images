@@ -8,7 +8,6 @@ use TYPO3\CMS\Frontend\DataProcessing\FilesProcessor;
 
 class FocuspointProcessor extends FilesProcessor
 {
-
     /**
      * Inject image and decoded focus points into the template
      *
@@ -31,9 +30,8 @@ class FocuspointProcessor extends FilesProcessor
 
         // the TCA is configured to use max. 1 image, however the file collector returns an array
         foreach ($processedData['image'] as $file) {
-
             $points = $file->getProperty('focus_points') ?: '[]';
-            $points = json_decode((string) $points, false);
+            $points = json_decode((string)$points, false);
 
             foreach ($points as $point) {
                 $point->x *= 100;
@@ -45,7 +43,6 @@ class FocuspointProcessor extends FilesProcessor
                 $point->textY = $point->y + ($point->height / 2);
 
                 foreach ($point as $fieldName => &$fieldValue) {
-
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
                     if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
                         $newLink = 't3://' . $fieldValue->key . '?uid=' . $fieldValue->uid;
@@ -75,5 +72,4 @@ class FocuspointProcessor extends FilesProcessor
 
         return $processedData;
     }
-
 }

@@ -13,7 +13,6 @@ use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
  */
 class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
-
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
         $content = '';
@@ -23,8 +22,18 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
             return $content;
         }
 
-        $content .= BackendUtility::thumbCode($row, 'tt_content', 'assets', '', '', null, 0,
-            '', '200px', false);
+        $content .= BackendUtility::thumbCode(
+            $row,
+            'tt_content',
+            'assets',
+            '',
+            '',
+            null,
+            0,
+            '',
+            '200px',
+            false
+        );
 
         $content .= '<style>.focuspoint .preview-thumbnails-element-image {height:auto;}</style>';
 
@@ -42,8 +51,8 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         }
 
         $svg = '<svg viewBox="0 0 200 200" preserveAspectRatio="none" style="height:100%; width:100%; top:0; left:0; position:absolute;" width="200" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-            <mask id="mask'. array_key_first($fileReferences).'"><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />';
-        $points = json_decode((string) $focuspoints, false);
+            <mask id="mask' . array_key_first($fileReferences) . '"><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />';
+        $points = json_decode((string)$focuspoints, false);
 
         foreach ($points as $point) {
             $x = $point->x * 100;
@@ -59,7 +68,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         }
 
         $svg .= '</mask>';
-        $svg .= '<rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask'. array_key_first($fileReferences) .')" />';
+        $svg .= '<rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask' . array_key_first($fileReferences) . ')" />';
 
         foreach ($points as $point) {
             $x = $point->x * 100;

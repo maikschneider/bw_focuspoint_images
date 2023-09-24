@@ -13,7 +13,7 @@ $EM_CONF[$_EXTKEY] = [
     ],
     'autoload' => [
         'psr-4' => [
-            'Blueways\\BwFocuspointImages\\' => 'Classes'
+            'Blueways\\BwFocuspointImages\\' => 'Classes',
         ],
     ],
     'state' => 'stable',

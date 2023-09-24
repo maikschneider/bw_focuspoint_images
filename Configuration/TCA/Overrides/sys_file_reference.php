@@ -1,5 +1,7 @@
 <?php
+
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 defined('TYPO3') || die();
 
 $additionalColumns = [
@@ -10,7 +12,7 @@ $additionalColumns = [
         'config' => [
             'type' => 'input',
             'renderType' => 'focuspoint_wizard',
-            'allowedExtensions' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+            'allowedExtensions' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'],
         ],
     ],
 ];

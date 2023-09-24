@@ -13,7 +13,8 @@
     "typo3/cms-base-distribution": "^12.0",
     "bk2k/bootstrap-package": "dev-master",
     "helhum/typo3-console": "^8.0",
-    "ssch/typo3-rector": "^1.2"
+    "ssch/typo3-rector": "^1.2",
+    "friendsofphp/php-cs-fixer": "^3.6.0"
   },
   "autoload": {
     "psr-4": {
@@ -42,5 +43,8 @@
       "typo3/cms-composer-installers": true,
       "typo3/class-alias-loader": true
     }
+  },
+  "scripts": {
+    "php:fixer": "php vendor/bin/php-cs-fixer --config=php-cs-fixer.php fix"
   }
 }

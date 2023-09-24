@@ -1,6 +1,7 @@
 <?php
 
 use Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard;
+
 return [
     'wizard_focuspoint' => [
         'path' => '/tx_bwfocuspointimages/focuspoint_ajax',

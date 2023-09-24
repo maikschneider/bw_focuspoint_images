@@ -1,6 +1,7 @@
 <?php
 
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
+
 return [
     'bw_focuspoint_images_svg' => [
         'provider' => SvgIconProvider::class,

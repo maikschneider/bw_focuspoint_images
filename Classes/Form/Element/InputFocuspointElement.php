@@ -13,12 +13,10 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
 {
-
     /**
      * This will render an imageManipulation field
      *
@@ -30,8 +28,10 @@ class InputFocuspointElement extends AbstractFormElement
         $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
-        $config = $helperUtility->getConfigForFormElement($this->data['databaseRow']['pid'],
-            $parameterArray['fieldConf']['config']);
+        $config = $helperUtility->getConfigForFormElement(
+            $this->data['databaseRow']['pid'],
+            $parameterArray['fieldConf']['config']
+        );
 
         // migrate saved focuspoints (old link fields to new syntax)
         $this->migrateOldTypolinkSyntax($parameterArray, $config);
@@ -61,8 +61,11 @@ class InputFocuspointElement extends AbstractFormElement
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
-            'isAllowedFileExtension' => in_array(strtolower($file->getExtension()),
-                GeneralUtility::trimExplode(',', strtolower((string) $config['allowedExtensions'])), true),
+            'isAllowedFileExtension' => in_array(
+                strtolower($file->getExtension()),
+                GeneralUtility::trimExplode(',', strtolower((string)$config['allowedExtensions'])),
+                true
+            ),
             'image' => $file,
             'formEngine' => [
                 'field' => [
@@ -99,17 +102,17 @@ class InputFocuspointElement extends AbstractFormElement
      */
     protected function migrateOldTypolinkSyntax(array &$parameterArray, array $config): void
     {
-        if (!$parameterArray['itemFormElValue'] || !is_array(json_decode((string) $parameterArray['itemFormElValue'], true))) {
+        if (!$parameterArray['itemFormElValue'] || !is_array(json_decode((string)$parameterArray['itemFormElValue'], true))) {
             return;
         }
 
-        $itemFormElValue = json_decode((string) $parameterArray['itemFormElValue'], true);
+        $itemFormElValue = json_decode((string)$parameterArray['itemFormElValue'], true);
 
         if ($itemFormElValue === []) {
             return;
         }
 
-        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'] ?? [], static function ($point) : bool {
+        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'] ?? [], static function ($point): bool {
             return $point['type'] === 'link';
         });
 

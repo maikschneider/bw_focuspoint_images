@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Blueways\BwFocuspointImages\Form\Wizard;
@@ -13,12 +14,10 @@ use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class FocusPointWizard
 {
-
     /**
      * @throws RouteNotFoundException
      */
@@ -86,7 +85,7 @@ class FocusPointWizard
         $templateView->setTemplateRootPaths(['EXT:bw_focuspoint_images/Resources/Private/Templates']);
         $templateView->setTemplate('FocuspointWizard');
 
-        $queryParams = json_decode((string) $request->getQueryParams()['arguments'], true);
+        $queryParams = json_decode((string)$request->getQueryParams()['arguments'], true);
         $fileUid = $queryParams['image'];
         $image = null;
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
