@@ -8,7 +8,7 @@ import 'jquery-ui/resizable.js';
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
-class FocuspointWizard {
+class FocuspointWizardEs6 {
     calculateRelativeX(width) {
         const image = $(this.currentModal).find(this.cropImageSelector);
         const imageWidth = $(image).width();
@@ -514,4 +514,4 @@ class FocuspointWizard {
     }
 }
 
-export { FocuspointWizard as default };
+export { FocuspointWizardEs6 as default };
