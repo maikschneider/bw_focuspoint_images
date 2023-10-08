@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>eliashaeussler/renovate-config",
-    "github>eliashaeussler/renovate-config:typo3-extension"
+    "local>maikschneider/renovate-config",
+    "local>maikschneider/renovate-config:typo3-extension"
   ]
 }
