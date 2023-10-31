@@ -2,8 +2,6 @@
 
 defined('TYPO3_MODE') or die();
 
-$_EXTKEY = $GLOBALS['_EXTKEY'] = 'bw_focuspoint_images';
-
 /*
 
     Custom CE
