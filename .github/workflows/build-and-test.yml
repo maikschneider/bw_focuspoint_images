@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - v3.x-dev
 
 jobs:
   release:
