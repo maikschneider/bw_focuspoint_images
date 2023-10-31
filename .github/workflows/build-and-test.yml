@@ -12,3 +12,11 @@ jobs:
       teams-webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
     with:
       base-branch: master
+
+  release-v3:
+      if: github.ref == 'refs/heads/v3.x-dev'
+      uses: maikschneider/reusable-workflows/.github/workflows/release-typo3-extension.yml@main
+      secrets:
+          teams-webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      with:
+          base-branch: v3.x
