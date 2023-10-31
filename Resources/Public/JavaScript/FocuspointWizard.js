@@ -10,7 +10,7 @@
  *
  * The TYPO3 project - inspiring people to share!
  */
-define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/Notification", "TYPO3/CMS/Backend/ActionButton/ImmediateAction", "imagesloaded", "jquery-ui/draggable", "jquery-ui/resizable"], function (require, exports, $, Modal, Notification, ImmediateAction, ImagesLoaded) {
+define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/Notification", "imagesloaded", "jquery-ui/draggable", "jquery-ui/resizable"], function (require, exports, $, Modal, Notification, ImagesLoaded) {
     "use strict";
     /**
      * Module: TYPO3/CMS/BwFocuspointImages/FocuspointWizard
@@ -504,8 +504,10 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Ba
             }
         }
         displayMissingPageTsWarning() {
-            // Open Notification with Action button for for v10+
+            // Open Notification with Action button for v10+
             if (this.typo3Version >= 10) {
+                // @ts-ignore
+                const ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
                 const notificationCallback = new ImmediateAction(() => {
                     window.open('https://docs.typo3.org/p/blueways/bw-focuspoint-images/master/en-us/#upgrade', '_blank').focus();
                 });

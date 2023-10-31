@@ -16,8 +16,6 @@ import $ = require('jquery');
 import Modal = require('TYPO3/CMS/Backend/Modal');
 // @ts-ignore
 import Notification = require('TYPO3/CMS/Backend/Notification');
-// @ts-ignore
-import ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
 import ImagesLoaded = require('imagesloaded');
 import 'jquery-ui/draggable';
 import 'jquery-ui/resizable';
@@ -608,8 +606,10 @@ class FocuspointWizard {
 
 	protected displayMissingPageTsWarning()
 	{
-		// Open Notification with Action button for for v10+
+		// Open Notification with Action button for v10+
 		if (this.typo3Version >= 10) {
+			// @ts-ignore
+			const ImmediateAction = require('TYPO3/CMS/Backend/ActionButton/ImmediateAction');
 			const notificationCallback = new ImmediateAction(() => {
 				window.open('https://docs.typo3.org/p/blueways/bw-focuspoint-images/master/en-us/#upgrade', '_blank').focus();
 			});
