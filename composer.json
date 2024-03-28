@@ -10,7 +10,7 @@
   ],
   "require-dev": {
     "roave/security-advisories": "dev-master",
-    "typo3/cms-base-distribution": "^12.0",
+    "typo3/cms-base-distribution": "^12.0 || ^13.0",
     "bk2k/bootstrap-package": "dev-master",
     "helhum/typo3-console": "^8.0",
     "ssch/typo3-rector": "^1.2 || ^2.0",
@@ -36,7 +36,7 @@
   ],
   "require": {
     "ext-json": "*",
-    "typo3/cms-core": "^12.0"
+    "typo3/cms-core": "^12.0 || ^13.0"
   },
   "config": {
     "allow-plugins": {
