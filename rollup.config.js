@@ -14,12 +14,11 @@ export default [
 				plugins: []
 			}
 		],
-		external: ['lit', 'lit/directives/unsafe-html.js', 'jquery-ui/draggable.js', 'jquery-ui/resizable.js'],
+		external: ['lit', 'lit/directives/unsafe-html.js', 'interactjs'],
 		plugins: [
 			typescript(),
 			resolve({
-				mainFields: ['module', 'main'],
-				modulesOnly: true
+				mainFields: ['module', 'main']
 			}),
 		],
 	}

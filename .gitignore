@@ -11,3 +11,4 @@ tscommand-*.tmp.txt
 .Build
 config/
 .tscache
+package-lock.json
