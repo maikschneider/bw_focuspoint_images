@@ -124,16 +124,36 @@ class FocuspointWizard {
   }
 
   private initFocusBox(box: HTMLElement): void {
+    console.log(box)
     // Using interact.js for draggable and resizable functionality
     interact(box)
+
       .draggable({
-        autoScroll: true,
-        onmove: this.onBoxChange.bind(this, box)
+        onmove: (event) => {
+            console.log(event)
+        },
+        modifiers: [
+          interact.modifiers.restrict({ restriction: 'parent' })
+        ],
+        listeners: {
+          end: (event) => {
+            this.onBoxChange(box);
+          }
+        }
       })
       .resizable({
-        edges: {left: true, right: true, bottom: true, top: true},
-        onend: this.onBoxChange.bind(this, box)
+        origin: 'self',
+        edges: { left: true, right: true, bottom: true, top: true },
+        listeners: {
+          end: (event) => {
+            this.onBoxChange(box);
+          }
+        }
       });
+
+    interact('.focuspoint-item').draggable(true);
+
+    console.log(box)
 
     // set onload position and size
     const boxId = box.getAttribute('data-focuspointBoxId');
@@ -162,7 +182,7 @@ class FocuspointWizard {
         this.activateFocuspoint(parseInt(focuspointBoxId));
       }
     };
-    box.addEventListener('click', clickEvent);
+    //box.addEventListener('click', clickEvent);
   }
 
   private activateFocuspoint(id: number): void {
@@ -551,6 +571,7 @@ class FocuspointWizard {
     this.currentModal = Modal.advanced({
       content: html`
           <div class="modal-loading">
+              <focuspoint-wizard></focuspoint-wizard>
               <typo3-backend-spinner size="default"></typo3-backend-spinner>
           </div>`,
       size: Modal.sizes.full,

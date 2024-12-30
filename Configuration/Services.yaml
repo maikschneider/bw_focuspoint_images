@@ -1,0 +1,16 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Blueways\BwFocuspointImages\:
+    resource: '../Classes/*'
+
+  Blueways\BwFocuspointImages\Utility\HelperUtility:
+    public: true
+
+  Blueways\BwFocuspointImages\EventListener\BeforeJavaScriptsRenderingEventListener:
+    tags:
+      - name: 'event.listener'
+        identifier: 'blueways/focuspoint-images-before-javascripts-rendering'

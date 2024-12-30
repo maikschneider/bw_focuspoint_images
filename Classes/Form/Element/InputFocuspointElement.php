@@ -6,6 +6,7 @@ use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Exception;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -54,10 +55,17 @@ class InputFocuspointElement extends AbstractFormElement
         $fieldWizardHtml = $fieldWizardResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
+        $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid']);
+
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_js.xlf';
-        $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointWizard.js')->instance();
+        $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
+        $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointElement.js');
 
         $arguments = [
+            'itemFormElName' => $parameterArray['itemFormElName'],
+            'itemFormElValue' => $parameterArray['itemFormElValue'],
+            'wizardConfig' => $wizardConfig,
+
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
@@ -99,6 +107,8 @@ class InputFocuspointElement extends AbstractFormElement
 
     /**
      * Migrate old typolink markup (v2.3.3) to the t3:// syntax
+     *
+     * @deprecated
      */
     protected function migrateOldTypolinkSyntax(array &$parameterArray, array $config): void
     {
