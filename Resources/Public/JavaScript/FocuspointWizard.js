@@ -3373,6 +3373,16 @@ function remove_input_defaults(input) {
   queue_idle_task(remove_defaults);
   add_form_reset_listener();
 }
+function set_value(element2, value) {
+  var attributes = element2.__attributes ??= {};
+  if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
+  value ?? void 0) || // @ts-expect-error
+  // `progress` elements always need their value set when its `0`
+  element2.value === value && (value !== 0 || element2.nodeName !== "PROGRESS")) {
+    return;
+  }
+  element2.value = value;
+}
 function set_attribute(element2, attribute, value, skip_warning) {
   var attributes = element2.__attributes ??= {};
   if (hydrating) {
@@ -3446,6 +3456,17 @@ function srcset_url_equal(element2, srcset) {
     // contain relative or absolute URLs.
     (src_url_equal(element_urls[i][0], url) || src_url_equal(url, element_urls[i][0]))
   );
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/class.js
+function toggle_class(dom, class_name, value) {
+  if (value) {
+    if (dom.classList.contains(class_name)) return;
+    dom.classList.add(class_name);
+  } else {
+    if (!dom.classList.contains(class_name)) return;
+    dom.classList.remove(class_name);
+  }
 }
 
 // node_modules/svelte/src/internal/client/dom/elements/bindings/input.js
@@ -4282,6 +4303,7 @@ function get2(store) {
 }
 
 // Resources/Private/JavaScript/store.svelte.js
+import Icons from "@typo3/backend/icons.js";
 var wizardConfigStore = writable(null);
 var focuspoints = writable([]);
 var initStores = (itemFormElValue, wizardConfig) => {
@@ -4297,6 +4319,19 @@ var createNewFocuspoint = () => {
     height: parseFloat(config.defaultHeight)
   };
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
+};
+var iconStore = writable({});
+var getIcon = async (iconName) => {
+  const store = get2(iconStore);
+  if (store[iconName]) {
+    return;
+  }
+  Icons.getIcon(iconName, Icons.sizes.small).then((html2) => {
+    iconStore.update((store2) => {
+      store2[iconName] = html2;
+      return store2;
+    });
+  });
 };
 
 // Resources/Private/JavaScript/components/Image.svelte
@@ -4370,15 +4405,13 @@ mark_module_end(Image);
 create_custom_element(Image, { image: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Sidebar.svelte
-import Icons from "@typo3/backend/icons.js";
+import Icons2 from "@typo3/backend/icons.js";
 
 // Resources/Private/JavaScript/components/Fields/Select.svelte
 mark_module_start();
 Select[FILENAME] = "Resources/Private/JavaScript/components/Fields/Select.svelte";
-var root_12 = add_locations(template(`<option> </option>`), Select[FILENAME], [[15, 12]]);
-var root2 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <select class="form-select"></select></div>`), Select[FILENAME], [
-  [9, 0, [[10, 4], [13, 4]]]
-]);
+var root_12 = add_locations(template(`<option> </option>`), Select[FILENAME], [[14, 12]]);
+var root2 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <select class="form-select"></select></div>`), Select[FILENAME], [[8, 0, [[9, 4], [12, 4]]]]);
 function Select($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Select);
@@ -4557,18 +4590,41 @@ import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
 import Modal from "@typo3/backend/modal.js";
 mark_module_start();
 Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
-var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div><form><input type="text" class="form-control"></form> <button class="btn btn-default">\xD6ffnen</button></div></div>`), Link[FILENAME], [
+var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div class="form-wizards-wrap"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="input-group-addon"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" class="form-control form-control-clearable" readonly=""> <input type="text" class="form-control form-control-clearable"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input" class="close text-black"><!></button></div> <button class="btn btn-default"><!></button></div></div> <div class="form-wizards-items-aside form-wizards-items-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default"><!></button></div></div></div></div>`), Link[FILENAME], [
   [
-    46,
+    62,
     0,
     [
-      [47, 4],
+      [63, 4],
       [
-        50,
+        66,
         4,
         [
-          [51, 8, [[52, 12]]],
-          [54, 8]
+          [
+            67,
+            8,
+            [
+              [
+                68,
+                12,
+                [
+                  [69, 16],
+                  [70, 16],
+                  [
+                    71,
+                    16,
+                    [[72, 20], [79, 20], [85, 20]]
+                  ],
+                  [96, 16]
+                ]
+              ]
+            ]
+          ],
+          [
+            101,
+            8,
+            [[102, 12, [[103, 16]]]]
+          ]
         ]
       ]
     ]
@@ -4580,12 +4636,24 @@ function Link($$anchor, $$props) {
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
+  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   validate_prop_bindings($$props, [], [], Link);
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
+  let linkBrowserData = state(null);
+  let readOnly = state(true);
+  let previewText = derived(() => get(linkBrowserData)?.preview?.text ?? "");
+  let previewIcon = derived(() => get(linkBrowserData)?.preview?.icon ?? "");
+  onMount(() => {
+    updateLinkBrowserInfo();
+    getIcon("actions-close");
+    getIcon("actions-wizard-link");
+    getIcon("actions-version-workspaces-preview-link");
+  });
   const handleLinkSelection = (event2) => {
     store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = event2.detail.link, untrack($focuspoints));
+    updateLinkBrowserInfo();
   };
-  async function getLinkBrowserInfo() {
+  async function updateLinkBrowserInfo() {
     let url = TYPO3.settings.ajaxUrls["wizard_focuspoint_linkbrowserurl"];
     url += "&pid=" + $wizardConfigStore().pid;
     url += "&fieldName=" + name();
@@ -4594,43 +4662,75 @@ function Link($$anchor, $$props) {
       url += "&inputValue=" + $focuspoints()[index2()][name()];
     }
     return new AjaxRequest(url).get().then(async (response) => {
-      return await response.resolve();
+      set(linkBrowserData, proxy(await response.resolve(), null, linkBrowserData));
     });
   }
-  async function openModal() {
-    await getLinkBrowserInfo().then((data) => {
-      const modal = Modal.advanced({
-        type: Modal.types.iframe,
-        content: data.url,
-        size: Modal.sizes.large
-      });
-      window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore().itemFormElName}-link-selected`, handleLinkSelection);
-      modal.addEventListener("typo3-modal-hidden", function() {
-        window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore().itemFormElName}-link-selected`, handleLinkSelection);
-      });
+  function openModal() {
+    const modal = Modal.advanced({
+      type: Modal.types.iframe,
+      content: get(linkBrowserData).url,
+      size: Modal.sizes.large
     });
+    window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore().itemFormElName}-link-selected`, handleLinkSelection);
+    modal.addEventListener("typo3-modal-hidden", function() {
+      window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore().itemFormElName}-link-selected`, handleLinkSelection);
+    });
+  }
+  function onInputClear() {
+    store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = "", untrack($focuspoints));
+    get(linkBrowserData).preview = null;
   }
   var div = root5();
   var label = child(div);
   var text2 = child(label, true);
   reset(label);
   var div_1 = sibling(label, 2);
-  var form = child(div_1);
-  var input = child(form);
+  var div_2 = child(div_1);
+  var div_3 = child(div_2);
+  var span = child(div_3);
+  var node = child(span);
+  html(node, () => get(previewIcon), false, false);
+  reset(span);
+  var div_4 = sibling(span, 4);
+  var input = child(div_4);
   remove_input_defaults(input);
-  reset(form);
-  var button = sibling(form, 2);
+  var input_1 = sibling(input, 2);
+  remove_input_defaults(input_1);
+  var button = sibling(input_1, 2);
+  var node_1 = child(button);
+  html(node_1, () => $iconStore()["actions-close"], false, false);
+  reset(button);
+  reset(div_4);
+  var button_1 = sibling(div_4, 2);
+  var node_2 = child(button_1);
+  html(node_2, () => $iconStore()["actions-version-workspaces-preview-link"], false, false);
+  reset(button_1);
+  reset(div_3);
+  reset(div_2);
+  var div_5 = sibling(div_2, 2);
+  var div_6 = child(div_5);
+  var button_2 = child(div_6);
+  var node_3 = child(button_2);
+  html(node_3, () => $iconStore()["actions-wizard-link"], false, false);
+  reset(button_2);
+  reset(div_6);
+  reset(div_5);
   reset(div_1);
   reset(div);
   template_effect(() => {
     set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
     set_text(text2, config().title);
-    set_attribute(form, "name", `form-${index2() ?? ""}-${name() ?? ""}`);
-    set_attribute(input, "data-formengine-input-name", `input-${index2() ?? ""}-${name() ?? ""}`);
     set_attribute(input, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+    set_value(input, get(previewText));
+    toggle_class(input, "hidden", !get(readOnly));
+    set_attribute(input_1, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+    toggle_class(input_1, "hidden", get(readOnly));
+    toggle_class(button, "hidden", strict_equals($focuspoints()[index2()][name()], ""));
   });
-  bind_value(input, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
-  event("click", button, openModal);
+  bind_value(input_1, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
+  event("click", button, preventDefault(onInputClear));
+  event("click", button_1, preventDefault(() => set(readOnly, !get(readOnly))));
+  event("click", button_2, preventDefault(openModal));
   append($$anchor, div);
   return pop({
     get config() {
@@ -4716,13 +4816,13 @@ function Sidebar($$anchor, $$props) {
   let deleteIcon = state("");
   let addIcon = state("");
   onMount(() => {
-    Icons.getIcon("actions-chevron-up", Icons.sizes.small).then((html2) => {
+    Icons2.getIcon("actions-chevron-up", Icons2.sizes.small).then((html2) => {
       set(chevronIcon, proxy(html2, null, chevronIcon));
     });
-    Icons.getIcon("actions-delete", Icons.sizes.small).then((html2) => {
+    Icons2.getIcon("actions-delete", Icons2.sizes.small).then((html2) => {
       set(deleteIcon, proxy(html2, null, deleteIcon));
     });
-    Icons.getIcon("actions-add", Icons.sizes.small).then((html2) => {
+    Icons2.getIcon("actions-add", Icons2.sizes.small).then((html2) => {
       set(addIcon, proxy(html2, null, addIcon));
     });
   });

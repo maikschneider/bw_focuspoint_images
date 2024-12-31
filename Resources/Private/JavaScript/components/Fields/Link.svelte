@@ -1,15 +1,28 @@
 <script>
-    import {focuspoints, wizardConfigStore} from '../../store.svelte.js'
+    import {focuspoints, getIcon, wizardConfigStore, iconStore} from '../../store.svelte.js'
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
+    import {onMount} from "svelte";
 
     let {config, index, name} = $props()
+    let linkBrowserData = $state(null)
+    let readOnly = $state(true)
+    let previewText = $derived(linkBrowserData?.preview?.text ?? '')
+    let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
+
+    onMount(() => {
+        updateLinkBrowserInfo()
+        getIcon('actions-close')
+        getIcon('actions-wizard-link')
+        getIcon('actions-version-workspaces-preview-link')
+    })
 
     const handleLinkSelection = (event) => {
         $focuspoints[index][name] = event.detail.link
+        updateLinkBrowserInfo()
     }
 
-    async function getLinkBrowserInfo() {
+    async function updateLinkBrowserInfo() {
         let url = TYPO3.settings.ajaxUrls['wizard_focuspoint_linkbrowserurl'];
         url += '&pid=' + $wizardConfigStore.pid;
         url += '&fieldName=' + name;
@@ -19,27 +32,30 @@
         }
 
         return (new AjaxRequest(url)).get().then(async (response) => {
-            return await response.resolve();
+            linkBrowserData = await response.resolve();
         })
     }
 
-    async function openModal() {
+    function openModal() {
 
-        (await getLinkBrowserInfo().then(data => {
-            const modal = Modal.advanced({
-                type: Modal.types.iframe,
-                content: data.url,
-                size: Modal.sizes.large,
-            })
+        const modal = Modal.advanced({
+            type: Modal.types.iframe,
+            content: linkBrowserData.url,
+            size: Modal.sizes.large,
+        })
 
-            // listen for the link selection event (from FocuspointElement.svelte)
-            window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
+        // listen for the link selection event (from FocuspointElement.svelte)
+        window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
 
-            // remove the event listener when the modal is closed
-            modal.addEventListener('typo3-modal-hidden', function () {
-                window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
-            });
-        }))
+        // remove the event listener when the modal is closed
+        modal.addEventListener('typo3-modal-hidden', function () {
+            window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
+        });
+    }
+
+    function onInputClear() {
+        $focuspoints[index][name] = ''
+        linkBrowserData.preview = null
     }
 </script>
 
@@ -47,12 +63,48 @@
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>
-    <div>
-        <form name="form-{index}-{name}">
-            <input bind:value={$focuspoints[index][name]} type="text" class="form-control" data-formengine-input-name="input-{index}-{name}" id="input-{index}-{name}" />
-        </form>
-        <button class="btn btn-default" on:click={openModal}>
-            Öffnen
-        </button>
+    <div class="form-wizards-wrap">
+        <div class="form-wizards-element">
+            <div class="input-group t3js-form-field-link">
+                <span class="input-group-addon">{@html previewIcon}</span>
+                <input class="form-control" title="" value="" readonly="" hidden="">
+                <div class="form-control-clearable-wrapper">
+                    <input
+                            type="text"
+                            id="input-{index}-{name}"
+                            class="form-control form-control-clearable"
+                            readonly
+                            value={previewText}
+                            class:hidden={!readOnly} />
+                    <input
+                            bind:value={$focuspoints[index][name]}
+                            class:hidden={readOnly}
+                            type="text"
+                            class="form-control form-control-clearable"
+                            id="input-{index}-{name}" />
+                    <button
+                            on:click|preventDefault={onInputClear}
+                            class:hidden={$focuspoints[index][name] === ''}
+                            type="button"
+                            tabindex="-1"
+                            title="Clear input"
+                            aria-label="Clear input"
+                            class="close text-black">
+                        {@html $iconStore['actions-close']}
+                    </button>
+                </div>
+                <button class="btn btn-default" on:click|preventDefault={() => readOnly = !readOnly}>
+                    {@html $iconStore['actions-version-workspaces-preview-link']}
+                </button>
+            </div>
+        </div>
+        <div class="form-wizards-items-aside form-wizards-items-aside--field-control">
+            <div class="btn-group">
+                <button
+                        on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">
+                    {@html $iconStore['actions-wizard-link']}
+                </button>
+            </div>
+        </div>
     </div>
 </div>

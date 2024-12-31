@@ -1,4 +1,5 @@
 import {writable, get} from 'svelte/store';
+import Icons from '@typo3/backend/icons.js'
 
 export const wizardConfigStore = writable(null);
 
@@ -18,4 +19,20 @@ export const createNewFocuspoint = () => {
         height: parseFloat(config.defaultHeight),
     };
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
+}
+
+export const iconStore = writable({});
+
+export const getIcon = async (iconName) => {
+    const store = get(iconStore);
+    if (store[iconName]) {
+        return;
+    }
+
+    Icons.getIcon(iconName, Icons.sizes.small).then((html) => {
+        iconStore.update((store) => {
+            store[iconName] = html;
+            return store
+        });
+    })
 }

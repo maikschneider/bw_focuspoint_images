@@ -1,6 +1,5 @@
 <script>
     import {focuspoints} from '../../store.svelte.js'
-    import {onMount} from "svelte";
 
     let {config, index, name} = $props()
     let options = Object.entries(config.options).map(([value, label]) => ({value, label}))
