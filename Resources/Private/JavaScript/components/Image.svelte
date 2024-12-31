@@ -1,5 +1,6 @@
 <script>
     import interact from 'interactjs';
+    import {focuspoints} from "../store.svelte";
 
     let {image} = $props()
 
@@ -33,10 +34,10 @@
             })
 
     function dragMoveListener(event) {
-        var target = event.target
+        const target = event.target;
         // keep the dragged position in the data-x/data-y attributes
-        var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-        var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
         // translate the element
         target.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
@@ -51,15 +52,6 @@
 </script>
 
 <style>
-    .canvas {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
     .draggable {
         position: absolute;
     }
@@ -70,16 +62,22 @@
         -webkit-user-select: none;
         user-select: none;
         max-width: 100%;
+        max-height: 100%;
+    }
+
+    .cropper-bg {
+        padding: 20px;
     }
 </style>
 
-<div class="canvas">
+<div class="cropper-bg" touch-action="none">
+
+    {#each $focuspoints as focuspoint}
+        <div class="draggable" data-x="{focuspoint.x}" data-y="{focuspoint.y}">
+            <span>Focuspoint</span>
+        </div>
+    {/each}
+
     <img src={image} alt="Image" unselectable="on" />
 
-    <div id="drag-1" class="draggable" style="display: inline-block">
-        <span> You can drag one element</span>
-    </div>
-    <div id="drag-2" class="draggable" style="display: inline-block">
-        <span> with each spanointer</span>
-    </div>
 </div>

@@ -46,8 +46,9 @@ class HelperUtility
 
     public function getConfigForWizardAction(int $pid): array
     {
-        $pageTs = $this->getPagesTSconfig($pid);
-        return $pageTs['mod']['tx_bwfocuspointimages']['settings'];
+        $pageTs = $this->getPagesTSconfig($pid)['mod']['tx_bwfocuspointimages']['settings'] ?? [];
+        $pageTs['pid'] = $pid;
+        return $pageTs;
     }
 
     public function getConfigForFormElement(int $pid, array $formElementConfig): array

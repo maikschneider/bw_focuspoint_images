@@ -3845,8 +3845,16 @@ i4?.({ LitElement: r4 });
 // Resources/Private/JavaScript/FocuspointElement.svelte
 mark_module_start();
 FocuspointElement[FILENAME] = "Resources/Private/JavaScript/FocuspointElement.svelte";
-var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button></div>`), FocuspointElement[FILENAME], [
-  [57, 0, [[58, 4], [59, 4]]]
+var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden" data-formengine-input-name="focuspoint-hidden-link-field"></form></div>`), FocuspointElement[FILENAME], [
+  [
+    62,
+    0,
+    [
+      [63, 4],
+      [64, 4],
+      [69, 4, [[70, 8]]]
+    ]
+  ]
 ]);
 function FocuspointElement($$anchor, $$props) {
   check_target(new.target);
@@ -3883,18 +3891,20 @@ function FocuspointElement($$anchor, $$props) {
         }
       ],
       content: x`
-                <div>
-                    <focuspoint-wizard
-                            image="${image()}"
-                            itemFormElName="${itemFormElName()}"
-                            itemFormElValue="${itemFormElValue()}"
-                            wizardConfig="${wizardConfig()}"></focuspoint-wizard>
-                </div>`,
+                <focuspoint-wizard
+                        style="height: 100%; width: 100%;"
+                        image="${image()}"
+                        itemFormElName="${itemFormElName()}"
+                        itemFormElValue="${itemFormElValue()}"
+                        wizardConfig="${wizardConfig()}"></focuspoint-wizard>    `,
       size: Modal.sizes.full,
       style: Modal.styles.dark,
       title: "modalTitle",
       staticBackdrop: true
     });
+  }
+  function onLinkSelection(e4) {
+    window.document.dispatchEvent(new CustomEvent(`${JSON.parse(itemFormElName())}-link-selected`, { detail: { link: e4.currentTarget.value } }));
   }
   var div = root();
   var input = child(div);
@@ -3904,9 +3914,13 @@ function FocuspointElement($$anchor, $$props) {
   var text2 = sibling(node);
   text2.nodeValue = ` ${TYPO3.lang["wizard.button"] ?? ""}`;
   reset(button);
+  var form = sibling(button, 2);
+  var input_1 = child(form);
+  reset(form);
   reset(div);
   template_effect(() => set_attribute(input, "name", itemFormElName()));
   event("click", button, preventDefault(() => openModal()));
+  event("change", input_1, onLinkSelection);
   append($$anchor, div);
   return pop({
     get itemFormElName() {

@@ -39,18 +39,23 @@
                 },
             ],
             content: html`
-                <div>
-                    <focuspoint-wizard
-                            image="${image}"
-                            itemFormElName="${itemFormElName}"
-                            itemFormElValue="${itemFormElValue}"
-                            wizardConfig="${wizardConfig}"></focuspoint-wizard>
-                </div>`,
+                <focuspoint-wizard
+                        style="height: 100%; width: 100%;"
+                        image="${image}"
+                        itemFormElName="${itemFormElName}"
+                        itemFormElValue="${itemFormElValue}"
+                        wizardConfig="${wizardConfig}"></focuspoint-wizard>    `,
             size: Modal.sizes.full,
             style: Modal.styles.dark,
             title: 'modalTitle',
             staticBackdrop: true
         })
+    }
+
+    function onLinkSelection(e) {
+        window.document.dispatchEvent(new CustomEvent(`${JSON.parse(itemFormElName)}-link-selected`, {
+            detail: {link: e.currentTarget.value}
+        }))
     }
 </script>
 
@@ -60,4 +65,9 @@
         {@html icon}
         {TYPO3.lang['wizard.button']}
     </button>
+
+    <form name="editform">
+        <input
+                type="hidden" on:change={onLinkSelection} data-formengine-input-name="focuspoint-hidden-link-field" />
+    </form>
 </div>

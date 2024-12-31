@@ -10,6 +10,9 @@ services:
   Blueways\BwFocuspointImages\Utility\HelperUtility:
     public: true
 
+  Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard:
+    public: true
+
   Blueways\BwFocuspointImages\EventListener\BeforeJavaScriptsRenderingEventListener:
     tags:
       - name: 'event.listener'

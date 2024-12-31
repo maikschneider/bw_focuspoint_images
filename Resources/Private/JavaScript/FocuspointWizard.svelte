@@ -10,21 +10,20 @@
 <script>
     import {onMount} from "svelte";
     import Image from './components/Image.svelte';
+    import Sidebar from "./components/Sidebar.svelte";
+    import {initStores} from './store.svelte';
 
     let {itemFormElName, itemFormElValue, wizardConfig, image} = $props()
 
-    let config = JSON.parse(wizardConfig)
-    let focuspoint = JSON.parse(itemFormElValue)
-
     onMount(() => {
-        console.log('FocuspointWizard mounted', config, focuspoint);
+        initStores(itemFormElValue, wizardConfig)
     });
 
 
 </script>
 
 <div class="wizard">
-        <Image image={image} />
-    <div>
-    </div>
+    <Image image={image} />
+    <Sidebar />
 </div>
+

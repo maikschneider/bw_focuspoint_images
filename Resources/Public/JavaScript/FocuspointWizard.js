@@ -6,6 +6,7 @@ if (typeof window !== "undefined")
   (window.__svelte ||= { v: /* @__PURE__ */ new Set() }).v.add(PUBLIC_VERSION);
 
 // node_modules/svelte/src/constants.js
+var EACH_ITEM_REACTIVE = 1;
 var EACH_INDEX_REACTIVE = 1 << 1;
 var EACH_IS_CONTROLLED = 1 << 2;
 var EACH_IS_ANIMATED = 1 << 3;
@@ -29,6 +30,14 @@ var FILENAME = Symbol("filename");
 var HMR = Symbol("hmr");
 
 // node_modules/svelte/src/utils.js
+var regex_return_characters = /\r/g;
+function hash(str) {
+  str = str.replace(regex_return_characters, "");
+  let hash2 = 5381;
+  let i = str.length;
+  while (i--) hash2 = (hash2 << 5) - hash2 ^ str.charCodeAt(i);
+  return (hash2 >>> 0).toString(36);
+}
 var DOM_BOOLEAN_ATTRIBUTES = [
   "allowfullscreen",
   "async",
@@ -95,6 +104,8 @@ var get_descriptors = Object.getOwnPropertyDescriptors;
 var object_prototype = Object.prototype;
 var array_prototype = Array.prototype;
 var get_prototype_of = Object.getPrototypeOf;
+var noop = () => {
+};
 function run_all(arr) {
   for (var i = 0; i < arr.length; i++) {
     arr[i]();
@@ -139,6 +150,17 @@ function safe_equals(value) {
 }
 
 // node_modules/svelte/src/internal/client/errors.js
+function bind_invalid_checkbox_value() {
+  if (dev_fallback_default) {
+    const error = new Error(`bind_invalid_checkbox_value
+Using \`bind:value\` together with a checkbox input is not allowed. Use \`bind:checked\` instead
+https://svelte.dev/e/bind_invalid_checkbox_value`);
+    error.name = "Svelte error";
+    throw error;
+  } else {
+    throw new Error(`https://svelte.dev/e/bind_invalid_checkbox_value`);
+  }
+}
 function bind_invalid_export(component2, key, name) {
   if (dev_fallback_default) {
     const error = new Error(`bind_invalid_export
@@ -320,122 +342,6 @@ https://svelte.dev/e/state_unsafe_mutation`);
 var legacy_mode_flag = false;
 var tracing_mode_flag = false;
 
-// node_modules/svelte/src/internal/shared/warnings.js
-var bold = "font-weight: bold";
-var normal = "font-weight: normal";
-function state_snapshot_uncloneable(properties) {
-  if (dev_fallback_default) {
-    console.warn(`%c[svelte] state_snapshot_uncloneable
-%c${properties ? `The following properties cannot be cloned with \`$state.snapshot\` \u2014 the return value contains the originals:
-
-${properties}` : "Value cannot be cloned with `$state.snapshot` \u2014 the original value was returned"}
-https://svelte.dev/e/state_snapshot_uncloneable`, bold, normal);
-  } else {
-    console.warn(`https://svelte.dev/e/state_snapshot_uncloneable`);
-  }
-}
-
-// node_modules/svelte/src/internal/shared/clone.js
-var empty = [];
-function snapshot(value, skip_warning = false) {
-  if (dev_fallback_default && !skip_warning) {
-    const paths = [];
-    const copy = clone(value, /* @__PURE__ */ new Map(), "", paths);
-    if (paths.length === 1 && paths[0] === "") {
-      state_snapshot_uncloneable();
-    } else if (paths.length > 0) {
-      const slice = paths.length > 10 ? paths.slice(0, 7) : paths.slice(0, 10);
-      const excess = paths.length - slice.length;
-      let uncloned = slice.map((path) => `- <value>${path}`).join("\n");
-      if (excess > 0) uncloned += `
-- ...and ${excess} more`;
-      state_snapshot_uncloneable(uncloned);
-    }
-    return copy;
-  }
-  return clone(value, /* @__PURE__ */ new Map(), "", empty);
-}
-function clone(value, cloned, path, paths, original = null) {
-  if (typeof value === "object" && value !== null) {
-    var unwrapped = cloned.get(value);
-    if (unwrapped !== void 0) return unwrapped;
-    if (value instanceof Map) return (
-      /** @type {Snapshot<T>} */
-      new Map(value)
-    );
-    if (value instanceof Set) return (
-      /** @type {Snapshot<T>} */
-      new Set(value)
-    );
-    if (is_array(value)) {
-      var copy = (
-        /** @type {Snapshot<any>} */
-        Array(value.length)
-      );
-      cloned.set(value, copy);
-      if (original !== null) {
-        cloned.set(original, copy);
-      }
-      for (var i = 0; i < value.length; i += 1) {
-        var element2 = value[i];
-        if (i in value) {
-          copy[i] = clone(element2, cloned, dev_fallback_default ? `${path}[${i}]` : path, paths);
-        }
-      }
-      return copy;
-    }
-    if (get_prototype_of(value) === object_prototype) {
-      copy = {};
-      cloned.set(value, copy);
-      if (original !== null) {
-        cloned.set(original, copy);
-      }
-      for (var key in value) {
-        copy[key] = clone(value[key], cloned, dev_fallback_default ? `${path}.${key}` : path, paths);
-      }
-      return copy;
-    }
-    if (value instanceof Date) {
-      return (
-        /** @type {Snapshot<T>} */
-        structuredClone(value)
-      );
-    }
-    if (typeof /** @type {T & { toJSON?: any } } */
-    value.toJSON === "function") {
-      return clone(
-        /** @type {T & { toJSON(): any } } */
-        value.toJSON(),
-        cloned,
-        dev_fallback_default ? `${path}.toJSON()` : path,
-        paths,
-        // Associate the instance with the toJSON clone
-        value
-      );
-    }
-  }
-  if (value instanceof EventTarget) {
-    return (
-      /** @type {Snapshot<T>} */
-      value
-    );
-  }
-  try {
-    return (
-      /** @type {Snapshot<T>} */
-      structuredClone(value)
-    );
-  } catch (e) {
-    if (dev_fallback_default) {
-      paths.push(path);
-    }
-    return (
-      /** @type {Snapshot<T>} */
-      value
-    );
-  }
-}
-
 // node_modules/svelte/src/internal/client/dev/tracing.js
 var tracing_expressions = null;
 function get_stack(label) {
@@ -491,6 +397,9 @@ function source(v, stack2) {
   }
   return signal;
 }
+function state(v) {
+  return /* @__PURE__ */ push_derived_source(source(v));
+}
 // @__NO_SIDE_EFFECTS__
 function mutable_source(initial_value, immutable = false) {
   const s = source(initial_value);
@@ -501,6 +410,17 @@ function mutable_source(initial_value, immutable = false) {
     (component_context.l.s ??= []).push(s);
   }
   return s;
+}
+// @__NO_SIDE_EFFECTS__
+function push_derived_source(source2) {
+  if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0) {
+    if (derived_sources === null) {
+      set_derived_sources([source2]);
+    } else {
+      derived_sources.push(source2);
+    }
+  }
+  return source2;
 }
 function set(source2, value) {
   if (active_reaction !== null && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT)) !== 0 && // If the source was created locally within the current derived, then
@@ -584,40 +504,49 @@ function mark_reactions(signal, status) {
 }
 
 // node_modules/svelte/src/internal/client/warnings.js
-var bold2 = "font-weight: bold";
-var normal2 = "font-weight: normal";
+var bold = "font-weight: bold";
+var normal = "font-weight: normal";
 function assignment_value_stale(property, location) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] assignment_value_stale
 %cAssignment to \`${property}\` property (${location}) will evaluate to the right-hand side, not the value of \`${property}\` following the assignment. This may result in unexpected behaviour.
-https://svelte.dev/e/assignment_value_stale`, bold2, normal2);
+https://svelte.dev/e/assignment_value_stale`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/assignment_value_stale`);
   }
 }
-function console_log_state(method) {
+function event_handler_invalid(handler, suggestion) {
   if (dev_fallback_default) {
-    console.warn(`%c[svelte] console_log_state
-%cYour \`console.${method}\` contained \`$state\` proxies. Consider using \`$inspect(...)\` or \`$state.snapshot(...)\` instead
-https://svelte.dev/e/console_log_state`, bold2, normal2);
+    console.warn(`%c[svelte] event_handler_invalid
+%c${handler} should be a function. Did you mean to ${suggestion}?
+https://svelte.dev/e/event_handler_invalid`, bold, normal);
   } else {
-    console.warn(`https://svelte.dev/e/console_log_state`);
+    console.warn(`https://svelte.dev/e/event_handler_invalid`);
   }
 }
 function hydration_attribute_changed(attribute, html2, value) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_attribute_changed
 %cThe \`${attribute}\` attribute on \`${html2}\` changed its value between server and client renders. The client value, \`${value}\`, will be ignored in favour of the server value
-https://svelte.dev/e/hydration_attribute_changed`, bold2, normal2);
+https://svelte.dev/e/hydration_attribute_changed`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/hydration_attribute_changed`);
+  }
+}
+function hydration_html_changed(location) {
+  if (dev_fallback_default) {
+    console.warn(`%c[svelte] hydration_html_changed
+%c${location ? `The value of an \`{@html ...}\` block ${location} changed between server and client renders. The client value will be ignored in favour of the server value` : "The value of an `{@html ...}` block changed between server and client renders. The client value will be ignored in favour of the server value"}
+https://svelte.dev/e/hydration_html_changed`, bold, normal);
+  } else {
+    console.warn(`https://svelte.dev/e/hydration_html_changed`);
   }
 }
 function hydration_mismatch(location) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_mismatch
 %c${location ? `Hydration failed because the initial UI does not match what was rendered on the server. The error occurred near ${location}` : "Hydration failed because the initial UI does not match what was rendered on the server"}
-https://svelte.dev/e/hydration_mismatch`, bold2, normal2);
+https://svelte.dev/e/hydration_mismatch`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/hydration_mismatch`);
   }
@@ -626,7 +555,7 @@ function lifecycle_double_unmount() {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] lifecycle_double_unmount
 %cTried to unmount a component that was not mounted
-https://svelte.dev/e/lifecycle_double_unmount`, bold2, normal2);
+https://svelte.dev/e/lifecycle_double_unmount`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/lifecycle_double_unmount`);
   }
@@ -635,7 +564,7 @@ function ownership_invalid_mutation(component2, owner) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] ownership_invalid_mutation
 %c${component2 ? `${component2} mutated a value owned by ${owner}. This is strongly discouraged. Consider passing values to child components with \`bind:\`, or use a callback instead` : "Mutating a value outside the component that created it is strongly discouraged. Consider passing values to child components with `bind:`, or use a callback instead"}
-https://svelte.dev/e/ownership_invalid_mutation`, bold2, normal2);
+https://svelte.dev/e/ownership_invalid_mutation`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/ownership_invalid_mutation`);
   }
@@ -644,7 +573,7 @@ function state_proxy_equality_mismatch(operator) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] state_proxy_equality_mismatch
 %cReactive \`$state(...)\` proxies and the values they proxy have different identities. Because of this, comparisons with \`${operator}\` will produce unexpected results
-https://svelte.dev/e/state_proxy_equality_mismatch`, bold2, normal2);
+https://svelte.dev/e/state_proxy_equality_mismatch`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/state_proxy_equality_mismatch`);
   }
@@ -686,6 +615,30 @@ function next(count = 1) {
       get_next_sibling(node);
     }
     hydrate_node = node;
+  }
+}
+function remove_nodes() {
+  var depth = 0;
+  var node = hydrate_node;
+  while (true) {
+    if (node.nodeType === 8) {
+      var data = (
+        /** @type {Comment} */
+        node.data
+      );
+      if (data === HYDRATION_END) {
+        if (depth === 0) return node;
+        depth -= 1;
+      } else if (data === HYDRATION_START || data === HYDRATION_START_ELSE) {
+        depth += 1;
+      }
+    }
+    var next2 = (
+      /** @type {TemplateNode} */
+      get_next_sibling(node)
+    );
+    node.remove();
+    node = next2;
   }
 }
 
@@ -1012,6 +965,9 @@ function get_proxied_value(value) {
   }
   return value;
 }
+function is(a, b) {
+  return Object.is(get_proxied_value(a), get_proxied_value(b));
+}
 
 // node_modules/svelte/src/internal/client/dev/equality.js
 function init_array_prototype_warnings() {
@@ -1062,6 +1018,15 @@ function init_array_prototype_warnings() {
     array_prototype2.lastIndexOf = lastIndexOf;
     array_prototype2.includes = includes;
   };
+}
+function strict_equals(a, b, equal = true) {
+  try {
+    if (a === b !== (get_proxied_value(a) === get_proxied_value(b))) {
+      state_proxy_equality_mismatch(equal ? "===" : "!==");
+    }
+  } catch {
+  }
+  return a === b === equal;
 }
 
 // node_modules/svelte/src/internal/client/dom/operations.js
@@ -1120,6 +1085,54 @@ function child(node, is_text) {
   set_hydrate_node(child2);
   return child2;
 }
+function first_child(fragment, is_text) {
+  if (!hydrating) {
+    var first = (
+      /** @type {DocumentFragment} */
+      /* @__PURE__ */ get_first_child(
+        /** @type {Node} */
+        fragment
+      )
+    );
+    if (first instanceof Comment && first.data === "") return /* @__PURE__ */ get_next_sibling(first);
+    return first;
+  }
+  if (is_text && hydrate_node?.nodeType !== 3) {
+    var text2 = create_text();
+    hydrate_node?.before(text2);
+    set_hydrate_node(text2);
+    return text2;
+  }
+  return hydrate_node;
+}
+function sibling(node, count = 1, is_text = false) {
+  let next_sibling = hydrating ? hydrate_node : node;
+  var last_sibling;
+  while (count--) {
+    last_sibling = next_sibling;
+    next_sibling = /** @type {TemplateNode} */
+    /* @__PURE__ */ get_next_sibling(next_sibling);
+  }
+  if (!hydrating) {
+    return next_sibling;
+  }
+  var type = next_sibling?.nodeType;
+  if (is_text && type !== 3) {
+    var text2 = create_text();
+    if (next_sibling === null) {
+      last_sibling?.after(text2);
+    } else {
+      next_sibling.before(text2);
+    }
+    set_hydrate_node(text2);
+    return text2;
+  }
+  set_hydrate_node(next_sibling);
+  return (
+    /** @type {TemplateNode} */
+    next_sibling
+  );
+}
 function clear_text_content(node) {
   node.textContent = "";
 }
@@ -1166,10 +1179,10 @@ function derived_safe_equal(fn) {
   signal.equals = safe_equals;
   return signal;
 }
-function destroy_derived_children(derived2) {
-  var children = derived2.children;
+function destroy_derived_children(derived3) {
+  var children = derived3.children;
   if (children !== null) {
-    derived2.children = null;
+    derived3.children = null;
     for (var i = 0; i < children.length; i += 1) {
       var child2 = children[i];
       if ((child2.f & DERIVED) !== 0) {
@@ -1187,8 +1200,8 @@ function destroy_derived_children(derived2) {
   }
 }
 var stack = [];
-function get_derived_parent_effect(derived2) {
-  var parent = derived2.parent;
+function get_derived_parent_effect(derived3) {
+  var parent = derived3.parent;
   while (parent !== null) {
     if ((parent.f & DERIVED) === 0) {
       return (
@@ -1200,20 +1213,20 @@ function get_derived_parent_effect(derived2) {
   }
   return null;
 }
-function execute_derived(derived2) {
+function execute_derived(derived3) {
   var value;
   var prev_active_effect = active_effect;
-  set_active_effect(get_derived_parent_effect(derived2));
+  set_active_effect(get_derived_parent_effect(derived3));
   if (dev_fallback_default) {
     let prev_inspect_effects = inspect_effects;
     set_inspect_effects(/* @__PURE__ */ new Set());
     try {
-      if (stack.includes(derived2)) {
+      if (stack.includes(derived3)) {
         derived_references_self();
       }
-      stack.push(derived2);
-      destroy_derived_children(derived2);
-      value = update_reaction(derived2);
+      stack.push(derived3);
+      destroy_derived_children(derived3);
+      value = update_reaction(derived3);
     } finally {
       set_active_effect(prev_active_effect);
       set_inspect_effects(prev_inspect_effects);
@@ -1221,28 +1234,28 @@ function execute_derived(derived2) {
     }
   } else {
     try {
-      destroy_derived_children(derived2);
-      value = update_reaction(derived2);
+      destroy_derived_children(derived3);
+      value = update_reaction(derived3);
     } finally {
       set_active_effect(prev_active_effect);
     }
   }
   return value;
 }
-function update_derived(derived2) {
-  var value = execute_derived(derived2);
-  var status = (skip_reaction || (derived2.f & UNOWNED) !== 0) && derived2.deps !== null ? MAYBE_DIRTY : CLEAN;
-  set_signal_status(derived2, status);
-  if (!derived2.equals(value)) {
-    derived2.v = value;
-    derived2.version = increment_version();
+function update_derived(derived3) {
+  var value = execute_derived(derived3);
+  var status = (skip_reaction || (derived3.f & UNOWNED) !== 0) && derived3.deps !== null ? MAYBE_DIRTY : CLEAN;
+  set_signal_status(derived3, status);
+  if (!derived3.equals(value)) {
+    derived3.v = value;
+    derived3.version = increment_version();
   }
 }
-function destroy_derived(derived2) {
-  destroy_derived_children(derived2);
-  remove_reactions(derived2, 0);
-  set_signal_status(derived2, DESTROYED);
-  derived2.v = derived2.children = derived2.deps = derived2.ctx = derived2.reactions = null;
+function destroy_derived(derived3) {
+  destroy_derived_children(derived3);
+  remove_reactions(derived3, 0);
+  set_signal_status(derived3, DESTROYED);
+  derived3.v = derived3.children = derived3.deps = derived3.ctx = derived3.reactions = null;
 }
 
 // node_modules/svelte/src/internal/client/reactivity/effects.js
@@ -1316,13 +1329,19 @@ function create_effect(type, fn, sync, push2 = true) {
       push_effect(effect2, parent_effect);
     }
     if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0) {
-      var derived2 = (
+      var derived3 = (
         /** @type {Derived} */
         active_reaction
       );
-      (derived2.children ??= []).push(effect2);
+      (derived3.children ??= []).push(effect2);
     }
   }
+  return effect2;
+}
+function teardown(fn) {
+  const effect2 = create_effect(RENDER_EFFECT, null, false);
+  set_signal_status(effect2, CLEAN);
+  effect2.teardown = fn;
   return effect2;
 }
 function user_effect(fn) {
@@ -1516,8 +1535,33 @@ function pause_children(effect2, transitions, local) {
     child2 = sibling2;
   }
 }
+function resume_effect(effect2) {
+  resume_children(effect2, true);
+}
+function resume_children(effect2, local) {
+  if ((effect2.f & INERT) === 0) return;
+  if (check_dirtiness(effect2)) {
+    update_effect(effect2);
+  }
+  effect2.f ^= INERT;
+  var child2 = effect2.first;
+  while (child2 !== null) {
+    var sibling2 = child2.next;
+    var transparent = (child2.f & EFFECT_TRANSPARENT) !== 0 || (child2.f & BRANCH_EFFECT) !== 0;
+    resume_children(child2, transparent ? local : false);
+    child2 = sibling2;
+  }
+  if (effect2.transitions !== null) {
+    for (const transition2 of effect2.transitions) {
+      if (transition2.is_global || local) {
+        transition2.in();
+      }
+    }
+  }
+}
 
 // node_modules/svelte/src/internal/client/dom/task.js
+var request_idle_callback = typeof requestIdleCallback === "undefined" ? (cb) => setTimeout(cb, 1) : requestIdleCallback;
 var is_micro_task_queued = false;
 var is_idle_task_queued = false;
 var current_queued_micro_tasks = [];
@@ -1541,6 +1585,13 @@ function queue_micro_task(fn) {
   }
   current_queued_micro_tasks.push(fn);
 }
+function queue_idle_task(fn) {
+  if (!is_idle_task_queued) {
+    is_idle_task_queued = true;
+    request_idle_callback(process_idle_tasks);
+  }
+  current_queued_idle_tasks.push(fn);
+}
 function flush_tasks() {
   if (is_micro_task_queued) {
     process_micro_tasks();
@@ -1560,6 +1611,17 @@ https://svelte.dev/e/lifecycle_outside_component`);
     throw error;
   } else {
     throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
+  }
+}
+function store_invalid_shape(name) {
+  if (dev_fallback_default) {
+    const error = new Error(`store_invalid_shape
+\`${name}\` is not a store with a \`subscribe\` method
+https://svelte.dev/e/store_invalid_shape`);
+    error.name = "Svelte error";
+    throw error;
+  } else {
+    throw new Error(`https://svelte.dev/e/store_invalid_shape`);
   }
 }
 
@@ -1591,6 +1653,9 @@ function set_active_effect(effect2) {
   active_effect = effect2;
 }
 var derived_sources = null;
+function set_derived_sources(sources) {
+  derived_sources = sources;
+}
 var new_deps = null;
 var skipped_deps = 0;
 var untracked_writes = null;
@@ -2090,12 +2155,12 @@ function get(signal) {
     }
   } else if (is_derived && /** @type {Derived} */
   signal.deps === null) {
-    var derived2 = (
+    var derived3 = (
       /** @type {Derived} */
       signal
     );
-    var parent = derived2.parent;
-    var target = derived2;
+    var parent = derived3.parent;
+    var target = derived3;
     while (parent !== null) {
       if ((parent.f & DERIVED) !== 0) {
         var parent_derived = (
@@ -2117,10 +2182,10 @@ function get(signal) {
     }
   }
   if (is_derived) {
-    derived2 = /** @type {Derived} */
+    derived3 = /** @type {Derived} */
     signal;
-    if (check_dirtiness(derived2)) {
-      update_derived(derived2);
+    if (check_dirtiness(derived3)) {
+      update_derived(derived3);
     }
   }
   if (dev_fallback_default && tracing_mode_flag && tracing_expressions !== null && active_reaction !== null && tracing_expressions.reaction === active_reaction) {
@@ -2304,9 +2369,96 @@ function assign_locations(node, filename, locations) {
   }
 }
 
+// node_modules/svelte/src/internal/client/dom/elements/misc.js
+function remove_textarea_child(dom) {
+  if (hydrating && get_first_child(dom) !== null) {
+    clear_text_content(dom);
+  }
+}
+var listening_to_form_reset = false;
+function add_form_reset_listener() {
+  if (!listening_to_form_reset) {
+    listening_to_form_reset = true;
+    document.addEventListener(
+      "reset",
+      (evt) => {
+        Promise.resolve().then(() => {
+          if (!evt.defaultPrevented) {
+            for (
+              const e of
+              /**@type {HTMLFormElement} */
+              evt.target.elements
+            ) {
+              e.__on_r?.();
+            }
+          }
+        });
+      },
+      // In the capture phase to guarantee we get noticed of it (no possiblity of stopPropagation)
+      { capture: true }
+    );
+  }
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/bindings/shared.js
+function without_reactive_context(fn) {
+  var previous_reaction = active_reaction;
+  var previous_effect = active_effect;
+  set_active_reaction(null);
+  set_active_effect(null);
+  try {
+    return fn();
+  } finally {
+    set_active_reaction(previous_reaction);
+    set_active_effect(previous_effect);
+  }
+}
+function listen_to_event_and_reset_event(element2, event2, handler, on_reset = handler) {
+  element2.addEventListener(event2, () => without_reactive_context(handler));
+  const prev = element2.__on_r;
+  if (prev) {
+    element2.__on_r = () => {
+      prev();
+      on_reset(true);
+    };
+  } else {
+    element2.__on_r = () => on_reset(true);
+  }
+  add_form_reset_listener();
+}
+
 // node_modules/svelte/src/internal/client/dom/elements/events.js
 var all_registered_events = /* @__PURE__ */ new Set();
 var root_event_handles = /* @__PURE__ */ new Set();
+function create_event(event_name, dom, handler, options) {
+  function target_handler(event2) {
+    if (!options.capture) {
+      handle_event_propagation.call(dom, event2);
+    }
+    if (!event2.cancelBubble) {
+      return without_reactive_context(() => {
+        return handler.call(this, event2);
+      });
+    }
+  }
+  if (event_name.startsWith("pointer") || event_name.startsWith("touch") || event_name === "wheel") {
+    queue_micro_task(() => {
+      dom.addEventListener(event_name, target_handler, options);
+    });
+  } else {
+    dom.addEventListener(event_name, target_handler, options);
+  }
+  return target_handler;
+}
+function event(event_name, dom, handler, capture, passive2) {
+  var options = { capture, passive: passive2 };
+  var target_handler = create_event(event_name, dom, handler, options);
+  if (dom === document.body || dom === window || dom === document) {
+    teardown(() => {
+      dom.removeEventListener(event_name, target_handler, options);
+    });
+  }
+}
 function handle_event_propagation(event2) {
   var handler_element = this;
   var owner_document = (
@@ -2393,6 +2545,28 @@ function handle_event_propagation(event2) {
     set_active_effect(previous_effect);
   }
 }
+function apply(thunk, element2, args, component2, loc, has_side_effects = false, remove_parens = false) {
+  let handler;
+  let error;
+  try {
+    handler = thunk();
+  } catch (e) {
+    error = e;
+  }
+  if (typeof handler === "function") {
+    handler.apply(element2, args);
+  } else if (has_side_effects || handler != null || error) {
+    const filename = component2?.[FILENAME];
+    const location = loc ? ` at ${filename}:${loc[0]}:${loc[1]}` : ` in ${filename}`;
+    const event_name = args[0].type;
+    const description = `\`${event_name}\` handler${location}`;
+    const suggestion = remove_parens ? "remove the trailing `()`" : "add a leading `() =>`";
+    event_handler_invalid(description, suggestion);
+    if (error) {
+      throw error;
+    }
+  }
+}
 
 // node_modules/svelte/src/internal/client/dom/blocks/svelte-head.js
 var head_anchor;
@@ -2434,25 +2608,37 @@ function template(content, flags) {
       if (!is_fragment) node = /** @type {Node} */
       get_first_child(node);
     }
-    var clone2 = (
+    var clone = (
       /** @type {TemplateNode} */
       use_import_node ? document.importNode(node, true) : node.cloneNode(true)
     );
     if (is_fragment) {
       var start = (
         /** @type {TemplateNode} */
-        get_first_child(clone2)
+        get_first_child(clone)
       );
       var end = (
         /** @type {TemplateNode} */
-        clone2.lastChild
+        clone.lastChild
       );
       assign_nodes(start, end);
     } else {
-      assign_nodes(clone2, clone2);
+      assign_nodes(clone, clone);
     }
-    return clone2;
+    return clone;
   };
+}
+function comment() {
+  if (hydrating) {
+    assign_nodes(hydrate_node, null);
+    return hydrate_node;
+  }
+  var frag = document.createDocumentFragment();
+  var start = document.createComment("");
+  var anchor = create_text();
+  frag.append(start, anchor);
+  assign_nodes(start, anchor);
+  return frag;
 }
 function append(anchor, dom) {
   if (hydrating) {
@@ -2471,6 +2657,13 @@ function append(anchor, dom) {
 
 // node_modules/svelte/src/internal/client/render.js
 var should_intro = true;
+function set_text(text2, value) {
+  var str = value == null ? "" : typeof value === "object" ? value + "" : value;
+  if (str !== (text2.__t ??= text2.nodeValue)) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
+  }
+}
 function mount(component2, options) {
   return _mount(component2, options);
 }
@@ -2636,19 +2829,514 @@ function legacy_api() {
   };
 }
 
+// node_modules/svelte/src/internal/client/dom/blocks/each.js
+var current_each_item = null;
+function index(_, i) {
+  return i;
+}
+function pause_effects(state2, items, controlled_anchor, items_map) {
+  var transitions = [];
+  var length = items.length;
+  for (var i = 0; i < length; i++) {
+    pause_children(items[i].e, transitions, true);
+  }
+  var is_controlled = length > 0 && transitions.length === 0 && controlled_anchor !== null;
+  if (is_controlled) {
+    var parent_node = (
+      /** @type {Element} */
+      /** @type {Element} */
+      controlled_anchor.parentNode
+    );
+    clear_text_content(parent_node);
+    parent_node.append(
+      /** @type {Element} */
+      controlled_anchor
+    );
+    items_map.clear();
+    link(state2, items[0].prev, items[length - 1].next);
+  }
+  run_out_transitions(transitions, () => {
+    for (var i2 = 0; i2 < length; i2++) {
+      var item = items[i2];
+      if (!is_controlled) {
+        items_map.delete(item.k);
+        link(state2, item.prev, item.next);
+      }
+      destroy_effect(item.e, !is_controlled);
+    }
+  });
+}
+function each(node, flags, get_collection, get_key, render_fn, fallback_fn = null) {
+  var anchor = node;
+  var state2 = { flags, items: /* @__PURE__ */ new Map(), first: null };
+  var is_controlled = (flags & EACH_IS_CONTROLLED) !== 0;
+  if (is_controlled) {
+    var parent_node = (
+      /** @type {Element} */
+      node
+    );
+    anchor = hydrating ? set_hydrate_node(
+      /** @type {Comment | Text} */
+      get_first_child(parent_node)
+    ) : parent_node.appendChild(create_text());
+  }
+  if (hydrating) {
+    hydrate_next();
+  }
+  var fallback2 = null;
+  var was_empty = false;
+  block(() => {
+    var collection = get_collection();
+    var array = is_array(collection) ? collection : collection == null ? [] : array_from(collection);
+    var length = array.length;
+    if (was_empty && length === 0) {
+      return;
+    }
+    was_empty = length === 0;
+    let mismatch = false;
+    if (hydrating) {
+      var is_else = (
+        /** @type {Comment} */
+        anchor.data === HYDRATION_START_ELSE
+      );
+      if (is_else !== (length === 0)) {
+        anchor = remove_nodes();
+        set_hydrate_node(anchor);
+        set_hydrating(false);
+        mismatch = true;
+      }
+    }
+    if (hydrating) {
+      var prev = null;
+      var item;
+      for (var i = 0; i < length; i++) {
+        if (hydrate_node.nodeType === 8 && /** @type {Comment} */
+        hydrate_node.data === HYDRATION_END) {
+          anchor = /** @type {Comment} */
+          hydrate_node;
+          mismatch = true;
+          set_hydrating(false);
+          break;
+        }
+        var value = array[i];
+        var key = get_key(value, i);
+        item = create_item(
+          hydrate_node,
+          state2,
+          prev,
+          null,
+          value,
+          key,
+          i,
+          render_fn,
+          flags,
+          get_collection
+        );
+        state2.items.set(key, item);
+        prev = item;
+      }
+      if (length > 0) {
+        set_hydrate_node(remove_nodes());
+      }
+    }
+    if (!hydrating) {
+      var effect2 = (
+        /** @type {Effect} */
+        active_reaction
+      );
+      reconcile(
+        array,
+        state2,
+        anchor,
+        render_fn,
+        flags,
+        (effect2.f & INERT) !== 0,
+        get_key,
+        get_collection
+      );
+    }
+    if (fallback_fn !== null) {
+      if (length === 0) {
+        if (fallback2) {
+          resume_effect(fallback2);
+        } else {
+          fallback2 = branch(() => fallback_fn(anchor));
+        }
+      } else if (fallback2 !== null) {
+        pause_effect(fallback2, () => {
+          fallback2 = null;
+        });
+      }
+    }
+    if (mismatch) {
+      set_hydrating(true);
+    }
+    get_collection();
+  });
+  if (hydrating) {
+    anchor = hydrate_node;
+  }
+}
+function reconcile(array, state2, anchor, render_fn, flags, is_inert, get_key, get_collection) {
+  var is_animated = (flags & EACH_IS_ANIMATED) !== 0;
+  var should_update = (flags & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
+  var length = array.length;
+  var items = state2.items;
+  var first = state2.first;
+  var current = first;
+  var seen;
+  var prev = null;
+  var to_animate;
+  var matched = [];
+  var stashed = [];
+  var value;
+  var key;
+  var item;
+  var i;
+  if (is_animated) {
+    for (i = 0; i < length; i += 1) {
+      value = array[i];
+      key = get_key(value, i);
+      item = items.get(key);
+      if (item !== void 0) {
+        item.a?.measure();
+        (to_animate ??= /* @__PURE__ */ new Set()).add(item);
+      }
+    }
+  }
+  for (i = 0; i < length; i += 1) {
+    value = array[i];
+    key = get_key(value, i);
+    item = items.get(key);
+    if (item === void 0) {
+      var child_anchor = current ? (
+        /** @type {TemplateNode} */
+        current.e.nodes_start
+      ) : anchor;
+      prev = create_item(
+        child_anchor,
+        state2,
+        prev,
+        prev === null ? state2.first : prev.next,
+        value,
+        key,
+        i,
+        render_fn,
+        flags,
+        get_collection
+      );
+      items.set(key, prev);
+      matched = [];
+      stashed = [];
+      current = prev.next;
+      continue;
+    }
+    if (should_update) {
+      update_item(item, value, i, flags);
+    }
+    if ((item.e.f & INERT) !== 0) {
+      resume_effect(item.e);
+      if (is_animated) {
+        item.a?.unfix();
+        (to_animate ??= /* @__PURE__ */ new Set()).delete(item);
+      }
+    }
+    if (item !== current) {
+      if (seen !== void 0 && seen.has(item)) {
+        if (matched.length < stashed.length) {
+          var start = stashed[0];
+          var j;
+          prev = start.prev;
+          var a = matched[0];
+          var b = matched[matched.length - 1];
+          for (j = 0; j < matched.length; j += 1) {
+            move(matched[j], start, anchor);
+          }
+          for (j = 0; j < stashed.length; j += 1) {
+            seen.delete(stashed[j]);
+          }
+          link(state2, a.prev, b.next);
+          link(state2, prev, a);
+          link(state2, b, start);
+          current = start;
+          prev = b;
+          i -= 1;
+          matched = [];
+          stashed = [];
+        } else {
+          seen.delete(item);
+          move(item, current, anchor);
+          link(state2, item.prev, item.next);
+          link(state2, item, prev === null ? state2.first : prev.next);
+          link(state2, prev, item);
+          prev = item;
+        }
+        continue;
+      }
+      matched = [];
+      stashed = [];
+      while (current !== null && current.k !== key) {
+        if (is_inert || (current.e.f & INERT) === 0) {
+          (seen ??= /* @__PURE__ */ new Set()).add(current);
+        }
+        stashed.push(current);
+        current = current.next;
+      }
+      if (current === null) {
+        continue;
+      }
+      item = current;
+    }
+    matched.push(item);
+    prev = item;
+    current = item.next;
+  }
+  if (current !== null || seen !== void 0) {
+    var to_destroy = seen === void 0 ? [] : array_from(seen);
+    while (current !== null) {
+      if (is_inert || (current.e.f & INERT) === 0) {
+        to_destroy.push(current);
+      }
+      current = current.next;
+    }
+    var destroy_length = to_destroy.length;
+    if (destroy_length > 0) {
+      var controlled_anchor = (flags & EACH_IS_CONTROLLED) !== 0 && length === 0 ? anchor : null;
+      if (is_animated) {
+        for (i = 0; i < destroy_length; i += 1) {
+          to_destroy[i].a?.measure();
+        }
+        for (i = 0; i < destroy_length; i += 1) {
+          to_destroy[i].a?.fix();
+        }
+      }
+      pause_effects(state2, to_destroy, controlled_anchor, items);
+    }
+  }
+  if (is_animated) {
+    queue_micro_task(() => {
+      if (to_animate === void 0) return;
+      for (item of to_animate) {
+        item.a?.apply();
+      }
+    });
+  }
+  active_effect.first = state2.first && state2.first.e;
+  active_effect.last = prev && prev.e;
+}
+function update_item(item, value, index2, type) {
+  if ((type & EACH_ITEM_REACTIVE) !== 0) {
+    internal_set(item.v, value);
+  }
+  if ((type & EACH_INDEX_REACTIVE) !== 0) {
+    internal_set(
+      /** @type {Value<number>} */
+      item.i,
+      index2
+    );
+  } else {
+    item.i = index2;
+  }
+}
+function create_item(anchor, state2, prev, next2, value, key, index2, render_fn, flags, get_collection) {
+  var previous_each_item = current_each_item;
+  var reactive = (flags & EACH_ITEM_REACTIVE) !== 0;
+  var mutable = (flags & EACH_ITEM_IMMUTABLE) === 0;
+  var v = reactive ? mutable ? mutable_source(value) : source(value) : value;
+  var i = (flags & EACH_INDEX_REACTIVE) === 0 ? index2 : source(index2);
+  if (dev_fallback_default && reactive) {
+    v.debug = () => {
+      var collection_index = typeof i === "number" ? index2 : i.v;
+      get_collection()[collection_index];
+    };
+  }
+  var item = {
+    i,
+    v,
+    k: key,
+    a: null,
+    // @ts-expect-error
+    e: null,
+    prev,
+    next: next2
+  };
+  current_each_item = item;
+  try {
+    item.e = branch(() => render_fn(anchor, v, i), hydrating);
+    item.e.prev = prev && prev.e;
+    item.e.next = next2 && next2.e;
+    if (prev === null) {
+      state2.first = item;
+    } else {
+      prev.next = item;
+      prev.e.next = item.e;
+    }
+    if (next2 !== null) {
+      next2.prev = item;
+      next2.e.prev = item.e;
+    }
+    return item;
+  } finally {
+    current_each_item = previous_each_item;
+  }
+}
+function move(item, next2, anchor) {
+  var end = item.next ? (
+    /** @type {TemplateNode} */
+    item.next.e.nodes_start
+  ) : anchor;
+  var dest = next2 ? (
+    /** @type {TemplateNode} */
+    next2.e.nodes_start
+  ) : anchor;
+  var node = (
+    /** @type {TemplateNode} */
+    item.e.nodes_start
+  );
+  while (node !== end) {
+    var next_node = (
+      /** @type {TemplateNode} */
+      get_next_sibling(node)
+    );
+    dest.before(node);
+    node = next_node;
+  }
+}
+function link(state2, prev, next2) {
+  if (prev === null) {
+    state2.first = next2;
+  } else {
+    prev.next = next2;
+    prev.e.next = next2 && next2.e;
+  }
+  if (next2 !== null) {
+    next2.prev = prev;
+    next2.e.prev = prev && prev.e;
+  }
+}
+
+// node_modules/svelte/src/internal/client/dom/blocks/html.js
+function check_hash(element2, server_hash, value) {
+  if (!server_hash || server_hash === hash(String(value ?? ""))) return;
+  let location;
+  const loc = element2.__svelte_meta?.loc;
+  if (loc) {
+    location = `near ${loc.file}:${loc.line}:${loc.column}`;
+  } else if (dev_current_component_function?.[FILENAME]) {
+    location = `in ${dev_current_component_function[FILENAME]}`;
+  }
+  hydration_html_changed(sanitize_location(location));
+}
+function html(node, get_value, svg, mathml, skip_warning) {
+  var anchor = node;
+  var value = "";
+  var effect2;
+  block(() => {
+    if (value === (value = get_value() ?? "")) {
+      if (hydrating) {
+        hydrate_next();
+      }
+      return;
+    }
+    if (effect2 !== void 0) {
+      destroy_effect(effect2);
+      effect2 = void 0;
+    }
+    if (value === "") return;
+    effect2 = branch(() => {
+      if (hydrating) {
+        var hash2 = (
+          /** @type {Comment} */
+          hydrate_node.data
+        );
+        var next2 = hydrate_next();
+        var last = next2;
+        while (next2 !== null && (next2.nodeType !== 8 || /** @type {Comment} */
+        next2.data !== "")) {
+          last = next2;
+          next2 = /** @type {TemplateNode} */
+          get_next_sibling(next2);
+        }
+        if (next2 === null) {
+          hydration_mismatch();
+          throw HYDRATION_ERROR;
+        }
+        if (dev_fallback_default && !skip_warning) {
+          check_hash(
+            /** @type {Element} */
+            next2.parentNode,
+            hash2,
+            value
+          );
+        }
+        assign_nodes(hydrate_node, last);
+        anchor = set_hydrate_node(next2);
+        return;
+      }
+      var html2 = value + "";
+      if (svg) html2 = `<svg>${html2}</svg>`;
+      else if (mathml) html2 = `<math>${html2}</math>`;
+      var node2 = create_fragment_from_html(html2);
+      if (svg || mathml) {
+        node2 = /** @type {Element} */
+        get_first_child(node2);
+      }
+      assign_nodes(
+        /** @type {TemplateNode} */
+        get_first_child(node2),
+        /** @type {TemplateNode} */
+        node2.lastChild
+      );
+      if (svg || mathml) {
+        while (get_first_child(node2)) {
+          anchor.before(
+            /** @type {Node} */
+            get_first_child(node2)
+          );
+        }
+      } else {
+        anchor.before(node2);
+      }
+    });
+  });
+}
+
+// node_modules/svelte/src/internal/client/dom/blocks/svelte-component.js
+function component(node, get_component2, render_fn) {
+  if (hydrating) {
+    hydrate_next();
+  }
+  var anchor = node;
+  var component2;
+  var effect2;
+  block(() => {
+    if (component2 === (component2 = get_component2())) return;
+    if (effect2) {
+      pause_effect(effect2);
+      effect2 = null;
+    }
+    if (component2) {
+      effect2 = branch(() => render_fn(anchor, component2));
+    }
+  }, EFFECT_TRANSPARENT);
+  if (hydrating) {
+    anchor = hydrate_node;
+  }
+}
+
 // node_modules/svelte/src/internal/client/dom/css.js
 function append_styles(anchor, css) {
   queue_micro_task(() => {
-    var root3 = anchor.getRootNode();
+    var root8 = anchor.getRootNode();
     var target = (
       /** @type {ShadowRoot} */
-      root3.host ? (
+      root8.host ? (
         /** @type {ShadowRoot} */
-        root3
+        root8
       ) : (
         /** @type {Document} */
-        root3.head ?? /** @type {Document} */
-        root3.ownerDocument.head
+        root8.head ?? /** @type {Document} */
+        root8.ownerDocument.head
       )
     );
     if (!target.querySelector("#" + css.hash)) {
@@ -2664,6 +3352,27 @@ function append_styles(anchor, css) {
 }
 
 // node_modules/svelte/src/internal/client/dom/elements/attributes.js
+function remove_input_defaults(input) {
+  if (!hydrating) return;
+  var already_removed = false;
+  var remove_defaults = () => {
+    if (already_removed) return;
+    already_removed = true;
+    if (input.hasAttribute("value")) {
+      var value = input.value;
+      set_attribute(input, "value", null);
+      input.value = value;
+    }
+    if (input.hasAttribute("checked")) {
+      var checked = input.checked;
+      set_attribute(input, "checked", null);
+      input.checked = checked;
+    }
+  };
+  input.__on_r = remove_defaults;
+  queue_idle_task(remove_defaults);
+  add_form_reset_listener();
+}
 function set_attribute(element2, attribute, value, skip_warning) {
   var attributes = element2.__attributes ??= {};
   if (hydrating) {
@@ -2739,6 +3448,156 @@ function srcset_url_equal(element2, srcset) {
   );
 }
 
+// node_modules/svelte/src/internal/client/dom/elements/bindings/input.js
+function bind_value(input, get3, set2 = get3) {
+  var runes = is_runes();
+  listen_to_event_and_reset_event(input, "input", (is_reset) => {
+    if (dev_fallback_default && input.type === "checkbox") {
+      bind_invalid_checkbox_value();
+    }
+    var value = is_reset ? input.defaultValue : input.value;
+    value = is_numberlike_input(input) ? to_number(value) : value;
+    set2(value);
+    if (runes && value !== (value = get3())) {
+      var start = input.selectionStart;
+      var end = input.selectionEnd;
+      input.value = value ?? "";
+      if (end !== null) {
+        input.selectionStart = start;
+        input.selectionEnd = Math.min(end, input.value.length);
+      }
+    }
+  });
+  if (
+    // If we are hydrating and the value has since changed,
+    // then use the updated value from the input instead.
+    hydrating && input.defaultValue !== input.value || // If defaultValue is set, then value == defaultValue
+    // TODO Svelte 6: remove input.value check and set to empty string?
+    untrack(get3) == null && input.value
+  ) {
+    set2(is_numberlike_input(input) ? to_number(input.value) : input.value);
+  }
+  render_effect(() => {
+    if (dev_fallback_default && input.type === "checkbox") {
+      bind_invalid_checkbox_value();
+    }
+    var value = get3();
+    if (is_numberlike_input(input) && value === to_number(input.value)) {
+      return;
+    }
+    if (input.type === "date" && !value && !input.value) {
+      return;
+    }
+    if (value !== input.value) {
+      input.value = value ?? "";
+    }
+  });
+}
+function is_numberlike_input(input) {
+  var type = input.type;
+  return type === "number" || type === "range";
+}
+function to_number(value) {
+  return value === "" ? null : +value;
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/bindings/select.js
+function select_option(select, value, mounting) {
+  if (select.multiple) {
+    return select_options(select, value);
+  }
+  for (var option of select.options) {
+    var option_value = get_option_value(option);
+    if (is(option_value, value)) {
+      option.selected = true;
+      return;
+    }
+  }
+  if (!mounting || value !== void 0) {
+    select.selectedIndex = -1;
+  }
+}
+function init_select(select, get_value) {
+  let mounting = true;
+  effect(() => {
+    if (get_value) {
+      select_option(select, untrack(get_value), mounting);
+    }
+    mounting = false;
+    var observer = new MutationObserver(() => {
+      var value = select.__value;
+      select_option(select, value);
+    });
+    observer.observe(select, {
+      // Listen to option element changes
+      childList: true,
+      subtree: true,
+      // because of <optgroup>
+      // Listen to option element value attribute changes
+      // (doesn't get notified of select value changes,
+      // because that property is not reflected as an attribute)
+      attributes: true,
+      attributeFilter: ["value"]
+    });
+    return () => {
+      observer.disconnect();
+    };
+  });
+}
+function bind_select_value(select, get3, set2 = get3) {
+  var mounting = true;
+  listen_to_event_and_reset_event(select, "change", (is_reset) => {
+    var query = is_reset ? "[selected]" : ":checked";
+    var value;
+    if (select.multiple) {
+      value = [].map.call(select.querySelectorAll(query), get_option_value);
+    } else {
+      var selected_option = select.querySelector(query) ?? // will fall back to first non-disabled option if no option is selected
+      select.querySelector("option:not([disabled])");
+      value = selected_option && get_option_value(selected_option);
+    }
+    set2(value);
+  });
+  effect(() => {
+    var value = get3();
+    select_option(select, value, mounting);
+    if (mounting && value === void 0) {
+      var selected_option = select.querySelector(":checked");
+      if (selected_option !== null) {
+        value = get_option_value(selected_option);
+        set2(value);
+      }
+    }
+    select.__value = value;
+    mounting = false;
+  });
+  init_select(select);
+}
+function select_options(select, value) {
+  for (var option of select.options) {
+    option.selected = ~value.indexOf(get_option_value(option));
+  }
+}
+function get_option_value(option) {
+  if ("__value" in option) {
+    return option.__value;
+  } else {
+    return option.value;
+  }
+}
+
+// node_modules/svelte/src/internal/client/dom/legacy/event-modifiers.js
+function preventDefault(fn) {
+  return function(...args) {
+    var event2 = (
+      /** @type {Event} */
+      args[0]
+    );
+    event2.preventDefault();
+    return fn?.apply(this, args);
+  };
+}
+
 // node_modules/svelte/src/index-client.js
 function onMount(fn) {
   if (component_context === null) {
@@ -2764,8 +3623,69 @@ function init_update_callbacks(context) {
   return l.u ??= { a: [], b: [], m: [] };
 }
 
+// node_modules/svelte/src/store/utils.js
+function subscribe_to_store(store, run2, invalidate) {
+  if (store == null) {
+    run2(void 0);
+    if (invalidate) invalidate(void 0);
+    return noop;
+  }
+  const unsub = untrack(
+    () => store.subscribe(
+      run2,
+      // @ts-expect-error
+      invalidate
+    )
+  );
+  return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+}
+
 // node_modules/svelte/src/internal/client/reactivity/store.js
 var is_store_binding = false;
+function store_get(store, store_name, stores) {
+  const entry = stores[store_name] ??= {
+    store: null,
+    source: mutable_source(void 0),
+    unsubscribe: noop
+  };
+  if (entry.store !== store) {
+    entry.unsubscribe();
+    entry.store = store ?? null;
+    if (store == null) {
+      entry.source.v = void 0;
+      entry.unsubscribe = noop;
+    } else {
+      var is_synchronous_callback = true;
+      entry.unsubscribe = subscribe_to_store(store, (v) => {
+        if (is_synchronous_callback) {
+          entry.source.v = v;
+        } else {
+          set(entry.source, v);
+        }
+      });
+      is_synchronous_callback = false;
+    }
+  }
+  return get(entry.source);
+}
+function store_set(store, value) {
+  store.set(value);
+  return value;
+}
+function setup_stores() {
+  const stores = {};
+  teardown(() => {
+    for (var store_name in stores) {
+      const ref = stores[store_name];
+      ref.unsubscribe();
+    }
+  });
+  return stores;
+}
+function store_mutate(store, expression, new_value) {
+  store.set(new_value);
+  return expression;
+}
 function capture_store_binding(fn) {
   var previous_is_store_binding = is_store_binding;
   try {
@@ -3296,53 +4216,104 @@ function create_custom_element(Component, props_definition, slots, exports, use_
   return Class;
 }
 
-// node_modules/svelte/src/internal/client/dev/console-log.js
-function log_if_contains_state(method, ...objects) {
-  untrack(() => {
-    try {
-      let has_state = false;
-      const transformed = [];
-      for (const obj of objects) {
-        if (obj && typeof obj === "object" && STATE_SYMBOL in obj) {
-          transformed.push(snapshot(obj, true));
-          has_state = true;
-        } else {
-          transformed.push(obj);
-        }
-      }
-      if (has_state) {
-        console_log_state(method);
-        console.log("%c[snapshot]", "color: grey", ...transformed);
-      }
-    } catch {
-    }
-  });
-  return objects;
+// node_modules/svelte/src/internal/shared/validate.js
+function validate_store(store, name) {
+  if (store != null && typeof store.subscribe !== "function") {
+    store_invalid_shape(name);
+  }
 }
 
 // Resources/Private/JavaScript/components/Image.svelte
 import interact from "interactjs";
+
+// node_modules/svelte/src/store/shared/index.js
+var subscriber_queue = [];
+function writable(value, start = noop) {
+  let stop = null;
+  const subscribers = /* @__PURE__ */ new Set();
+  function set2(new_value) {
+    if (safe_not_equal(value, new_value)) {
+      value = new_value;
+      if (stop) {
+        const run_queue = !subscriber_queue.length;
+        for (const subscriber of subscribers) {
+          subscriber[1]();
+          subscriber_queue.push(subscriber, value);
+        }
+        if (run_queue) {
+          for (let i = 0; i < subscriber_queue.length; i += 2) {
+            subscriber_queue[i][0](subscriber_queue[i + 1]);
+          }
+          subscriber_queue.length = 0;
+        }
+      }
+    }
+  }
+  function update2(fn) {
+    set2(fn(
+      /** @type {T} */
+      value
+    ));
+  }
+  function subscribe(run2, invalidate = noop) {
+    const subscriber = [run2, invalidate];
+    subscribers.add(subscriber);
+    if (subscribers.size === 1) {
+      stop = start(set2, update2) || noop;
+    }
+    run2(
+      /** @type {T} */
+      value
+    );
+    return () => {
+      subscribers.delete(subscriber);
+      if (subscribers.size === 0 && stop) {
+        stop();
+        stop = null;
+      }
+    };
+  }
+  return { set: set2, update: update2, subscribe };
+}
+function get2(store) {
+  let value;
+  subscribe_to_store(store, (_) => value = _)();
+  return value;
+}
+
+// Resources/Private/JavaScript/store.svelte.js
+var wizardConfigStore = writable(null);
+var focuspoints = writable([]);
+var initStores = (itemFormElValue, wizardConfig) => {
+  wizardConfigStore.set(JSON.parse(wizardConfig));
+  focuspoints.set(JSON.parse(JSON.parse(itemFormElValue)));
+};
+var createNewFocuspoint = () => {
+  const config = get2(wizardConfigStore);
+  const newFocuspoint = {
+    x: 0.333,
+    y: 0.333,
+    width: parseFloat(config.defaultWidth),
+    height: parseFloat(config.defaultHeight)
+  };
+  focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
+};
+
+// Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root = add_locations(template(`<div class="canvas svelte-ixlu5c"><img alt="Image" unselectable="on" class="svelte-ixlu5c"> <div id="drag-1" class="draggable svelte-ixlu5c" style="display: inline-block"><span>You can drag one element</span></div> <div id="drag-2" class="draggable svelte-ixlu5c" style="display: inline-block"><span>with each spanointer</span></div></div>`), Image[FILENAME], [
-  [
-    76,
-    0,
-    [
-      [77, 4],
-      [79, 4, [[80, 8]]],
-      [82, 4, [[83, 8]]]
-    ]
-  ]
-]);
+var root_1 = add_locations(template(`<div class="draggable svelte-1r6hc0p"><span>Focuspoint</span></div>`), Image[FILENAME], [[76, 8, [[77, 12]]]]);
+var root = add_locations(template(`<div class="cropper-bg svelte-1r6hc0p" touch-action="none"><!> <img alt="Image" unselectable="on" class="svelte-1r6hc0p"></div>`), Image[FILENAME], [[73, 0, [[81, 4]]]]);
 var $$css = {
-  hash: "svelte-ixlu5c",
-  code: "\n    .canvas.svelte-ixlu5c {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .draggable.svelte-ixlu5c {\n        position: absolute;\n    }\n\n    img.svelte-ixlu5c {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n    }\n"
+  hash: "svelte-1r6hc0p",
+  code: "\n    .draggable.svelte-1r6hc0p {\n        position: absolute;\n    }\n\n    img.svelte-1r6hc0p {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-1r6hc0p {\n        padding: 20px;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Image);
   append_styles($$anchor, $$css);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   validate_prop_bindings($$props, [], [], Image);
   let image = prop($$props, "image", 7);
   interact(".draggable").draggable({
@@ -3357,22 +4328,30 @@ function Image($$anchor, $$props) {
       move: dragMoveListener,
       end(event2) {
         var textEl = event2.target.querySelector("p");
-        textEl && assign(textEl, "textContent", "moved a distance of " + Math.sqrt(Math.pow(event2.pageX - event2.x0, 2) + Math.pow(event2.pageY - event2.y0, 2) | 0).toFixed(2) + "px", "Resources/\u200BPrivate/\u200BJavaScript/\u200Bcomponents/\u200BImage.svelte:26:35");
+        textEl && assign(textEl, "textContent", "moved a distance of " + Math.sqrt(Math.pow(event2.pageX - event2.x0, 2) + Math.pow(event2.pageY - event2.y0, 2) | 0).toFixed(2) + "px", "Resources/\u200BPrivate/\u200BJavaScript/\u200Bcomponents/\u200BImage.svelte:27:35");
       }
     }
   });
   function dragMoveListener(event2) {
-    var target = event2.target;
-    var x = (parseFloat(target.getAttribute("data-x")) || 0) + event2.dx;
-    var y = (parseFloat(target.getAttribute("data-y")) || 0) + event2.dy;
+    const target = event2.target;
+    const x = (parseFloat(target.getAttribute("data-x")) || 0) + event2.dx;
+    const y = (parseFloat(target.getAttribute("data-y")) || 0) + event2.dy;
     target.style.transform = "translate(" + x + "px, " + y + "px)";
     target.setAttribute("data-x", x);
     target.setAttribute("data-y", y);
   }
   window.dragMoveListener = dragMoveListener;
   var div = root();
-  var img = child(div);
-  next(4);
+  var node = child(div);
+  each(node, 1, $focuspoints, index, ($$anchor2, focuspoint) => {
+    var div_1 = root_1();
+    template_effect(() => {
+      set_attribute(div_1, "data-x", get(focuspoint).x);
+      set_attribute(div_1, "data-y", get(focuspoint).y);
+    });
+    append($$anchor2, div_1);
+  });
+  var img = sibling(node, 2);
   reset(div);
   template_effect(() => set_attribute(img, "src", image()));
   append($$anchor, div);
@@ -3390,33 +4369,472 @@ function Image($$anchor, $$props) {
 mark_module_end(Image);
 create_custom_element(Image, { image: {} }, [], [], true);
 
+// Resources/Private/JavaScript/components/Sidebar.svelte
+import Icons from "@typo3/backend/icons.js";
+
+// Resources/Private/JavaScript/components/Fields/Select.svelte
+mark_module_start();
+Select[FILENAME] = "Resources/Private/JavaScript/components/Fields/Select.svelte";
+var root_12 = add_locations(template(`<option> </option>`), Select[FILENAME], [[15, 12]]);
+var root2 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <select class="form-select"></select></div>`), Select[FILENAME], [
+  [9, 0, [[10, 4], [13, 4]]]
+]);
+function Select($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Select);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  validate_prop_bindings($$props, [], [], Select);
+  let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
+  let options = Object.entries(config().options).map(([value, label]) => ({ value, label }));
+  var div = root2();
+  var label_1 = child(div);
+  var text2 = child(label_1, true);
+  reset(label_1);
+  var select = sibling(label_1, 2);
+  each(select, 21, () => options, index, ($$anchor2, $$item) => {
+    let value = () => get($$item).value;
+    value();
+    let label = () => get($$item).label;
+    label();
+    var option = root_12();
+    var option_value = {};
+    var text_1 = child(option, true);
+    reset(option);
+    template_effect(() => {
+      if (option_value !== (option_value = value())) {
+        option.value = null == (option.__value = value()) ? "" : value();
+      }
+      set_text(text_1, label());
+    });
+    append($$anchor2, option);
+  });
+  reset(select);
+  reset(div);
+  template_effect(() => {
+    set_attribute(label_1, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
+    set_text(text2, config().title);
+    set_attribute(select, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+  });
+  bind_select_value(select, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
+  append($$anchor, div);
+  return pop({
+    get config() {
+      return config();
+    },
+    set config($$value) {
+      config($$value);
+      flush_sync();
+    },
+    get index() {
+      return index2();
+    },
+    set index($$value) {
+      index2($$value);
+      flush_sync();
+    },
+    get name() {
+      return name();
+    },
+    set name($$value) {
+      name($$value);
+      flush_sync();
+    },
+    ...legacy_api()
+  });
+}
+mark_module_end(Select);
+create_custom_element(Select, { config: {}, index: {}, name: {} }, [], [], true);
+
+// Resources/Private/JavaScript/components/Fields/Text.svelte
+mark_module_start();
+Text2[FILENAME] = "Resources/Private/JavaScript/components/Fields/Text.svelte";
+var root3 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <input type="text" class="form-control"></div>`), Text2[FILENAME], [[7, 0, [[8, 4], [11, 4]]]]);
+function Text2($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Text2);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  validate_prop_bindings($$props, [], [], Text2);
+  let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
+  var div = root3();
+  var label = child(div);
+  var text2 = child(label, true);
+  reset(label);
+  var input = sibling(label, 2);
+  remove_input_defaults(input);
+  reset(div);
+  template_effect(() => {
+    set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
+    set_text(text2, config().title);
+    set_attribute(input, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+  });
+  bind_value(input, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
+  append($$anchor, div);
+  return pop({
+    get config() {
+      return config();
+    },
+    set config($$value) {
+      config($$value);
+      flush_sync();
+    },
+    get index() {
+      return index2();
+    },
+    set index($$value) {
+      index2($$value);
+      flush_sync();
+    },
+    get name() {
+      return name();
+    },
+    set name($$value) {
+      name($$value);
+      flush_sync();
+    },
+    ...legacy_api()
+  });
+}
+mark_module_end(Text2);
+create_custom_element(Text2, { config: {}, index: {}, name: {} }, [], [], true);
+
+// Resources/Private/JavaScript/components/Fields/Textarea.svelte
+mark_module_start();
+Textarea[FILENAME] = "Resources/Private/JavaScript/components/Fields/Textarea.svelte";
+var root4 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <textarea type="text" class="form-control"></textarea></div>`), Textarea[FILENAME], [[7, 0, [[8, 4], [11, 4]]]]);
+function Textarea($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Textarea);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  validate_prop_bindings($$props, [], [], Textarea);
+  let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
+  var div = root4();
+  var label = child(div);
+  var text2 = child(label, true);
+  reset(label);
+  var textarea = sibling(label, 2);
+  remove_textarea_child(textarea);
+  reset(div);
+  template_effect(() => {
+    set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
+    set_text(text2, config().title);
+    set_attribute(textarea, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+  });
+  bind_value(textarea, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
+  append($$anchor, div);
+  return pop({
+    get config() {
+      return config();
+    },
+    set config($$value) {
+      config($$value);
+      flush_sync();
+    },
+    get index() {
+      return index2();
+    },
+    set index($$value) {
+      index2($$value);
+      flush_sync();
+    },
+    get name() {
+      return name();
+    },
+    set name($$value) {
+      name($$value);
+      flush_sync();
+    },
+    ...legacy_api()
+  });
+}
+mark_module_end(Textarea);
+create_custom_element(Textarea, { config: {}, index: {}, name: {} }, [], [], true);
+
+// Resources/Private/JavaScript/components/Fields/Link.svelte
+import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
+import Modal from "@typo3/backend/modal.js";
+mark_module_start();
+Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
+var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div><form><input type="text" class="form-control"></form> <button class="btn btn-default">\xD6ffnen</button></div></div>`), Link[FILENAME], [
+  [
+    46,
+    0,
+    [
+      [47, 4],
+      [
+        50,
+        4,
+        [
+          [51, 8, [[52, 12]]],
+          [54, 8]
+        ]
+      ]
+    ]
+  ]
+]);
+function Link($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Link);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
+  validate_prop_bindings($$props, [], [], Link);
+  let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
+  const handleLinkSelection = (event2) => {
+    store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = event2.detail.link, untrack($focuspoints));
+  };
+  async function getLinkBrowserInfo() {
+    let url = TYPO3.settings.ajaxUrls["wizard_focuspoint_linkbrowserurl"];
+    url += "&pid=" + $wizardConfigStore().pid;
+    url += "&fieldName=" + name();
+    url += "&inputName=focuspoint-hidden-link-field";
+    if ($focuspoints()[index2()][name()]) {
+      url += "&inputValue=" + $focuspoints()[index2()][name()];
+    }
+    return new AjaxRequest(url).get().then(async (response) => {
+      return await response.resolve();
+    });
+  }
+  async function openModal() {
+    await getLinkBrowserInfo().then((data) => {
+      const modal = Modal.advanced({
+        type: Modal.types.iframe,
+        content: data.url,
+        size: Modal.sizes.large
+      });
+      window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore().itemFormElName}-link-selected`, handleLinkSelection);
+      modal.addEventListener("typo3-modal-hidden", function() {
+        window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore().itemFormElName}-link-selected`, handleLinkSelection);
+      });
+    });
+  }
+  var div = root5();
+  var label = child(div);
+  var text2 = child(label, true);
+  reset(label);
+  var div_1 = sibling(label, 2);
+  var form = child(div_1);
+  var input = child(form);
+  remove_input_defaults(input);
+  reset(form);
+  var button = sibling(form, 2);
+  reset(div_1);
+  reset(div);
+  template_effect(() => {
+    set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
+    set_text(text2, config().title);
+    set_attribute(form, "name", `form-${index2() ?? ""}-${name() ?? ""}`);
+    set_attribute(input, "data-formengine-input-name", `input-${index2() ?? ""}-${name() ?? ""}`);
+    set_attribute(input, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+  });
+  bind_value(input, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
+  event("click", button, openModal);
+  append($$anchor, div);
+  return pop({
+    get config() {
+      return config();
+    },
+    set config($$value) {
+      config($$value);
+      flush_sync();
+    },
+    get index() {
+      return index2();
+    },
+    set index($$value) {
+      index2($$value);
+      flush_sync();
+    },
+    get name() {
+      return name();
+    },
+    set name($$value) {
+      name($$value);
+      flush_sync();
+    },
+    ...legacy_api()
+  });
+}
+mark_module_end(Link);
+create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
+
+// Resources/Private/JavaScript/components/Sidebar.svelte
+mark_module_start();
+Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
+var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"><div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="cropper-collapse-1" class="t3js-crop-variant-trigger collapsed" data-crop-variant-id="default" data-crop-variant=""><span><!> </span></a></h4></div> <div class="panel-collapse collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div></div>`), Sidebar[FILENAME], [
+  [
+    54,
+    8,
+    [
+      [
+        56,
+        12,
+        [
+          [
+            57,
+            16,
+            [
+              [
+                58,
+                20,
+                [[59, 24, [[68, 28]]]]
+              ]
+            ]
+          ],
+          [
+            75,
+            16,
+            [[80, 20, [[85, 24]]]]
+          ]
+        ]
+      ]
+    ]
+  ]
+]);
+var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><!> <div class="pt-3"><button class="btn btn-success w-100 "><!> Add focuspoint</button></div></div>`), Sidebar[FILENAME], [
+  [
+    50,
+    0,
+    [[97, 4, [[98, 8]]]]
+  ]
+]);
+var $$css2 = {
+  hash: "svelte-1kzhkn4",
+  code: "\n    .modal-panel-sidebar.svelte-1kzhkn4 {\n        padding-top: 0;\n    }\n\n    .panel-group.svelte-1kzhkn4 {\n        margin-top: 0;\n        margin-bottom: 0;\n    }\n"
+};
+function Sidebar($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Sidebar);
+  append_styles($$anchor, $$css2);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
+  validate_prop_bindings($$props, [], [], Sidebar);
+  let chevronIcon = state("");
+  let deleteIcon = state("");
+  let addIcon = state("");
+  onMount(() => {
+    Icons.getIcon("actions-chevron-up", Icons.sizes.small).then((html2) => {
+      set(chevronIcon, proxy(html2, null, chevronIcon));
+    });
+    Icons.getIcon("actions-delete", Icons.sizes.small).then((html2) => {
+      set(deleteIcon, proxy(html2, null, deleteIcon));
+    });
+    Icons.getIcon("actions-add", Icons.sizes.small).then((html2) => {
+      set(addIcon, proxy(html2, null, addIcon));
+    });
+  });
+  function deleteFocuspoint(index2) {
+    store_set(focuspoints, proxy($focuspoints().filter((focuspoint, i) => strict_equals(i, index2, false)), null, $focuspoints));
+  }
+  const components = {
+    text: Text2,
+    textarea: Textarea,
+    select: Select,
+    link: Link
+  };
+  var div = root6();
+  var node = child(div);
+  each(node, 1, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
+    var div_1 = root_13();
+    var div_2 = child(div_1);
+    var div_3 = child(div_2);
+    var h4 = child(div_3);
+    set_attribute(h4, "id", `cropper-accordion-heading-${index2 ?? ""}`);
+    var a = child(h4);
+    set_attribute(a, "href", `#cropper-collapse-${index2 ?? ""}`);
+    var span = child(a);
+    var node_1 = child(span);
+    html(node_1, () => get(chevronIcon), false, false);
+    var text2 = sibling(node_1);
+    text2.nodeValue = ` Focuspoint ${index2 + 1}`;
+    reset(span);
+    reset(a);
+    reset(h4);
+    reset(div_3);
+    var div_4 = sibling(div_3, 2);
+    set_attribute(div_4, "id", `cropper-collapse-${index2 ?? ""}`);
+    set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2 ?? ""}`);
+    var div_5 = child(div_4);
+    var node_2 = child(div_5);
+    each(node_2, 1, () => Object.entries($wizardConfigStore().fields), index, ($$anchor3, $$item) => {
+      let key = () => get($$item)[0];
+      key();
+      let field = () => get($$item)[1];
+      field();
+      var fragment = comment();
+      var node_3 = first_child(fragment);
+      var config = derived(() => field() ?? {});
+      component(node_3, () => components[field().type], ($$anchor4, $$component) => {
+        $$component($$anchor4, {
+          index: index2,
+          get name() {
+            return key();
+          },
+          get config() {
+            return get(config);
+          }
+        });
+      });
+      append($$anchor3, fragment);
+    });
+    var button = sibling(node_2, 2);
+    var node_4 = child(button);
+    html(node_4, () => get(deleteIcon), false, false);
+    next();
+    reset(button);
+    reset(div_5);
+    reset(div_4);
+    reset(div_2);
+    reset(div_1);
+    event("click", button, preventDefault(() => deleteFocuspoint(index2)));
+    append($$anchor2, div_1);
+  });
+  var div_6 = sibling(node, 2);
+  var button_1 = child(div_6);
+  var node_5 = child(button_1);
+  html(node_5, () => get(addIcon), false, false);
+  next();
+  reset(button_1);
+  reset(div_6);
+  reset(div);
+  event("click", button_1, preventDefault(function(...$$args) {
+    apply(() => createNewFocuspoint, this, $$args, Sidebar, [98, 72]);
+  }));
+  append($$anchor, div);
+  return pop({ ...legacy_api() });
+}
+mark_module_end(Sidebar);
+create_custom_element(Sidebar, {}, [], [], true);
+
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 mark_module_start();
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root2 = add_locations(template(`<div class="wizard svelte-840dcp"><!> <div></div></div>`), FocuspointWizard[FILENAME], [[26, 0, [[28, 4]]]]);
-var $$css2 = {
+var root7 = add_locations(template(`<div class="wizard svelte-840dcp"><!> <!></div>`), FocuspointWizard[FILENAME], [[25, 0]]);
+var $$css3 = {
   hash: "svelte-840dcp",
   code: "\n    .wizard.svelte-840dcp {\n        display: grid;\n        grid-template-columns: auto 300px;\n    }\n"
 };
 function FocuspointWizard($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, FocuspointWizard);
-  append_styles($$anchor, $$css2);
+  append_styles($$anchor, $$css3);
   validate_prop_bindings($$props, [], [], FocuspointWizard);
   let itemFormElName = prop($$props, "itemFormElName", 7), itemFormElValue = prop($$props, "itemFormElValue", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
-  let config = JSON.parse(wizardConfig());
-  let focuspoint = JSON.parse(itemFormElValue());
   onMount(() => {
-    console.log(...log_if_contains_state("log", "FocuspointWizard mounted", config, focuspoint));
+    initStores(itemFormElValue(), wizardConfig());
   });
-  var div = root2();
+  var div = root7();
   var node = child(div);
   Image(node, {
     get image() {
       return image();
     }
   });
-  next(2);
+  var node_1 = sibling(node, 2);
+  Sidebar(node_1, {});
   reset(div);
   append($$anchor, div);
   return pop({

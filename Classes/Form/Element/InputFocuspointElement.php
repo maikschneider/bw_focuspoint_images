@@ -56,6 +56,15 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid']);
+        foreach($wizardConfig['fields'] ?? [] as $fieldName => $fieldConfig) {
+            $wizardConfig['fields'][$fieldName]['title'] = $this->getLanguageService()->sL($fieldConfig['title']);
+            if (isset($fieldConfig['options'])) {
+                foreach($fieldConfig['options'] as $optionKey => $option) {
+                    $wizardConfig['fields'][$fieldName]['options'][$optionKey] = $this->getLanguageService()->sL($option);
+                }
+            }
+        }
+        $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
 
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_js.xlf';
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
