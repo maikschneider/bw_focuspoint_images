@@ -1,26 +1,15 @@
 <script>
-    import {focuspoints, createNewFocuspoint, wizardConfigStore} from '../store.svelte'
+    import {focuspoints, createNewFocuspoint, wizardConfigStore, getIcon, iconStore} from '../store.svelte'
     import {onMount} from "svelte";
-    import Icons from '@typo3/backend/icons.js'
     import Select from "./Fields/Select.svelte";
     import Text from "./Fields/Text.svelte";
     import Textarea from "./Fields/Textarea.svelte";
     import Link from "./Fields/Link.svelte";
 
-    let chevronIcon = $state('')
-    let deleteIcon = $state('')
-    let addIcon = $state('')
-
     onMount(() => {
-        Icons.getIcon('actions-chevron-up', Icons.sizes.small).then((html) => {
-            chevronIcon = html
-        })
-        Icons.getIcon('actions-delete', Icons.sizes.small).then((html) => {
-            deleteIcon = html
-        })
-        Icons.getIcon('actions-add', Icons.sizes.small).then((html) => {
-            addIcon = html
-        })
+        getIcon('actions-chevron-up')
+        getIcon('actions-delete')
+        getIcon('actions-add')
     })
 
     function deleteFocuspoint(index) {
@@ -66,7 +55,7 @@
                                 data-crop-variant-id="default"
                                 data-crop-variant="">
                             <span>
-                                {@html chevronIcon}
+                                {@html $iconStore['actions-chevron-up']}
                                 Focuspoint {index + 1}
                             </span>
                         </a>
@@ -84,7 +73,7 @@
 
                         <button
                                 class="btn btn-danger" name="reset" title="Reset" on:click|preventDefault={() => deleteFocuspoint(index)}>
-                            {@html deleteIcon}
+                            {@html $iconStore['actions-delete']}
                             Delete
                         </button>
                     </div>
@@ -96,7 +85,7 @@
 
     <div class="pt-3">
         <button class="btn btn-success w-100 " on:click|preventDefault={createNewFocuspoint}>
-            {@html addIcon}
+            {@html $iconStore['actions-add']}
             Add focuspoint
         </button>
     </div>

@@ -1438,6 +1438,7 @@ function pause_children(effect2, transitions, local) {
 }
 
 // node_modules/svelte/src/internal/client/dom/task.js
+var request_idle_callback = typeof requestIdleCallback === "undefined" ? (cb) => setTimeout(cb, 1) : requestIdleCallback;
 var is_micro_task_queued = false;
 var is_idle_task_queued = false;
 var current_queued_micro_tasks = [];
@@ -1460,6 +1461,13 @@ function queue_micro_task(fn) {
     queueMicrotask(process_micro_tasks);
   }
   current_queued_micro_tasks.push(fn);
+}
+function queue_idle_task(fn) {
+  if (!is_idle_task_queued) {
+    is_idle_task_queued = true;
+    request_idle_callback(process_idle_tasks);
+  }
+  current_queued_idle_tasks.push(fn);
 }
 function flush_tasks() {
   if (is_micro_task_queued) {
@@ -2196,6 +2204,32 @@ function assign_locations(node, filename, locations) {
   }
 }
 
+// node_modules/svelte/src/internal/client/dom/elements/misc.js
+var listening_to_form_reset = false;
+function add_form_reset_listener() {
+  if (!listening_to_form_reset) {
+    listening_to_form_reset = true;
+    document.addEventListener(
+      "reset",
+      (evt) => {
+        Promise.resolve().then(() => {
+          if (!evt.defaultPrevented) {
+            for (
+              const e4 of
+              /**@type {HTMLFormElement} */
+              evt.target.elements
+            ) {
+              e4.__on_r?.();
+            }
+          }
+        });
+      },
+      // In the capture phase to guarantee we get noticed of it (no possiblity of stopPropagation)
+      { capture: true }
+    );
+  }
+}
+
 // node_modules/svelte/src/internal/client/dom/elements/bindings/shared.js
 function without_reactive_context(fn) {
   var previous_reaction = active_reaction;
@@ -2658,6 +2692,37 @@ function html(node, get_value, svg, mathml, skip_warning) {
 }
 
 // node_modules/svelte/src/internal/client/dom/elements/attributes.js
+function remove_input_defaults(input) {
+  if (!hydrating) return;
+  var already_removed = false;
+  var remove_defaults = () => {
+    if (already_removed) return;
+    already_removed = true;
+    if (input.hasAttribute("value")) {
+      var value = input.value;
+      set_attribute(input, "value", null);
+      input.value = value;
+    }
+    if (input.hasAttribute("checked")) {
+      var checked = input.checked;
+      set_attribute(input, "checked", null);
+      input.checked = checked;
+    }
+  };
+  input.__on_r = remove_defaults;
+  queue_idle_task(remove_defaults);
+  add_form_reset_listener();
+}
+function set_value(element2, value) {
+  var attributes = element2.__attributes ??= {};
+  if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
+  value ?? void 0) || // @ts-expect-error
+  // `progress` elements always need their value set when its `0`
+  element2.value === value && (value !== 0 || element2.nodeName !== "PROGRESS")) {
+    return;
+  }
+  element2.value = value;
+}
 function set_attribute(element2, attribute, value, skip_warning) {
   var attributes = element2.__attributes ??= {};
   if (hydrating) {
@@ -3872,12 +3937,6 @@ function FocuspointElement($$anchor, $$props) {
       additionalCssClasses: ["modal-image-manipulation", "cropper"],
       buttons: [
         {
-          btnClass: "btn-default float-start",
-          name: "preview",
-          icon: "actions-view",
-          text: "buttonPreviewText"
-        },
-        {
           btnClass: "btn-default",
           name: "dismiss",
           icon: "actions-close",
@@ -3887,7 +3946,8 @@ function FocuspointElement($$anchor, $$props) {
           btnClass: "btn-primary",
           name: "save",
           icon: "actions-document-save",
-          text: "buttonSaveText"
+          text: "buttonSaveText",
+          trigger: onModalSave
         }
       ],
       content: x`
@@ -3903,11 +3963,16 @@ function FocuspointElement($$anchor, $$props) {
       staticBackdrop: true
     });
   }
+  function onModalSave() {
+    window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-save`, {}));
+    window.parent.TYPO3.Modal.dismiss();
+  }
   function onLinkSelection(e4) {
-    window.document.dispatchEvent(new CustomEvent(`${JSON.parse(itemFormElName())}-link-selected`, { detail: { link: e4.currentTarget.value } }));
+    window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-link-selected`, { detail: { link: e4.currentTarget.value } }));
   }
   var div = root();
   var input = child(div);
+  remove_input_defaults(input);
   var button = sibling(input, 2);
   var node = child(button);
   html(node, () => get(icon), false, false);
@@ -3918,7 +3983,10 @@ function FocuspointElement($$anchor, $$props) {
   var input_1 = child(form);
   reset(form);
   reset(div);
-  template_effect(() => set_attribute(input, "name", itemFormElName()));
+  template_effect(() => {
+    set_attribute(input, "name", itemFormElName());
+    set_value(input, itemFormElValue());
+  });
   event("click", button, preventDefault(() => openModal()));
   event("change", input_1, onLinkSelection);
   append($$anchor, div);

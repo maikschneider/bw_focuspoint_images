@@ -106,6 +106,9 @@ var array_prototype = Array.prototype;
 var get_prototype_of = Object.getPrototypeOf;
 var noop = () => {
 };
+function run(fn) {
+  return fn();
+}
 function run_all(arr) {
   for (var i = 0; i < arr.length; i++) {
     arr[i]();
@@ -341,6 +344,9 @@ https://svelte.dev/e/state_unsafe_mutation`);
 // node_modules/svelte/src/internal/flags/index.js
 var legacy_mode_flag = false;
 var tracing_mode_flag = false;
+function enable_legacy_mode_flag() {
+  legacy_mode_flag = true;
+}
 
 // node_modules/svelte/src/internal/client/dev/tracing.js
 var tracing_expressions = null;
@@ -1367,6 +1373,15 @@ function user_effect(fn) {
     return signal;
   }
 }
+function user_pre_effect(fn) {
+  validate_effect("$effect.pre");
+  if (dev_fallback_default) {
+    define_property(fn, "name", {
+      value: "$effect.pre"
+    });
+  }
+  return render_effect(fn);
+}
 function effect_root(fn) {
   const effect2 = create_effect(ROOT_EFFECT, fn, true);
   return () => {
@@ -2269,6 +2284,49 @@ function pop(component2) {
   }
   return component2 || /** @type {T} */
   {};
+}
+function deep_read_state(value) {
+  if (typeof value !== "object" || !value || value instanceof EventTarget) {
+    return;
+  }
+  if (STATE_SYMBOL in value) {
+    deep_read(value);
+  } else if (!Array.isArray(value)) {
+    for (let key in value) {
+      const prop2 = value[key];
+      if (typeof prop2 === "object" && prop2 && STATE_SYMBOL in prop2) {
+        deep_read(prop2);
+      }
+    }
+  }
+}
+function deep_read(value, visited = /* @__PURE__ */ new Set()) {
+  if (typeof value === "object" && value !== null && // We don't want to traverse DOM elements
+  !(value instanceof EventTarget) && !visited.has(value)) {
+    visited.add(value);
+    if (value instanceof Date) {
+      value.getTime();
+    }
+    for (let key in value) {
+      try {
+        deep_read(value[key], visited);
+      } catch (e) {
+      }
+    }
+    const proto = get_prototype_of(value);
+    if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
+      const descriptors = get_descriptors(proto);
+      for (let key in descriptors) {
+        const get3 = descriptors[key].get;
+        if (get3) {
+          try {
+            get3.call(value);
+          } catch (e) {
+          }
+        }
+      }
+    }
+  }
 }
 if (dev_fallback_default) {
   let throw_rune_error = function(rune) {
@@ -3619,6 +3677,65 @@ function preventDefault(fn) {
   };
 }
 
+// node_modules/svelte/src/internal/client/dom/legacy/lifecycle.js
+function init(immutable = false) {
+  const context = (
+    /** @type {ComponentContextLegacy} */
+    component_context
+  );
+  const callbacks = context.l.u;
+  if (!callbacks) return;
+  let props = () => deep_read_state(context.s);
+  if (immutable) {
+    let version = 0;
+    let prev = (
+      /** @type {Record<string, any>} */
+      {}
+    );
+    const d = derived(() => {
+      let changed = false;
+      const props2 = context.s;
+      for (const key in props2) {
+        if (props2[key] !== prev[key]) {
+          prev[key] = props2[key];
+          changed = true;
+        }
+      }
+      if (changed) version++;
+      return version;
+    });
+    props = () => get(d);
+  }
+  if (callbacks.b.length) {
+    user_pre_effect(() => {
+      observe_all(context, props);
+      run_all(callbacks.b);
+    });
+  }
+  user_effect(() => {
+    const fns = untrack(() => callbacks.m.map(run));
+    return () => {
+      for (const fn of fns) {
+        if (typeof fn === "function") {
+          fn();
+        }
+      }
+    };
+  });
+  if (callbacks.a.length) {
+    user_effect(() => {
+      observe_all(context, props);
+      run_all(callbacks.a);
+    });
+  }
+}
+function observe_all(context, props) {
+  if (context.l.s) {
+    for (const signal of context.l.s) get(signal);
+  }
+  props();
+}
+
 // node_modules/svelte/src/index-client.js
 function onMount(fn) {
   if (component_context === null) {
@@ -3635,6 +3752,12 @@ function onMount(fn) {
       );
     });
   }
+}
+function onDestroy(fn) {
+  if (component_context === null) {
+    lifecycle_outside_component("onDestroy");
+  }
+  onMount(() => () => untrack(fn));
 }
 function init_update_callbacks(context) {
   var l = (
@@ -4404,8 +4527,8 @@ function Image($$anchor, $$props) {
 mark_module_end(Image);
 create_custom_element(Image, { image: {} }, [], [], true);
 
-// Resources/Private/JavaScript/components/Sidebar.svelte
-import Icons2 from "@typo3/backend/icons.js";
+// node_modules/svelte/src/internal/flags/legacy.js
+enable_legacy_mode_flag();
 
 // Resources/Private/JavaScript/components/Fields/Select.svelte
 mark_module_start();
@@ -4765,28 +4888,28 @@ mark_module_start();
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
 var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"><div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="cropper-collapse-1" class="t3js-crop-variant-trigger collapsed" data-crop-variant-id="default" data-crop-variant=""><span><!> </span></a></h4></div> <div class="panel-collapse collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div></div>`), Sidebar[FILENAME], [
   [
-    54,
+    43,
     8,
     [
       [
-        56,
+        45,
         12,
         [
           [
-            57,
+            46,
             16,
             [
               [
-                58,
+                47,
                 20,
-                [[59, 24, [[68, 28]]]]
+                [[48, 24, [[57, 28]]]]
               ]
             ]
           ],
           [
-            75,
+            64,
             16,
-            [[80, 20, [[85, 24]]]]
+            [[69, 20, [[74, 24]]]]
           ]
         ]
       ]
@@ -4795,9 +4918,9 @@ var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" ro
 ]);
 var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><!> <div class="pt-3"><button class="btn btn-success w-100 "><!> Add focuspoint</button></div></div>`), Sidebar[FILENAME], [
   [
-    50,
+    39,
     0,
-    [[97, 4, [[98, 8]]]]
+    [[86, 4, [[87, 8]]]]
   ]
 ]);
 var $$css2 = {
@@ -4806,28 +4929,19 @@ var $$css2 = {
 };
 function Sidebar($$anchor, $$props) {
   check_target(new.target);
-  push($$props, true, Sidebar);
+  push($$props, false, Sidebar);
   append_styles($$anchor, $$css2);
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
-  validate_prop_bindings($$props, [], [], Sidebar);
-  let chevronIcon = state("");
-  let deleteIcon = state("");
-  let addIcon = state("");
   onMount(() => {
-    Icons2.getIcon("actions-chevron-up", Icons2.sizes.small).then((html2) => {
-      set(chevronIcon, proxy(html2, null, chevronIcon));
-    });
-    Icons2.getIcon("actions-delete", Icons2.sizes.small).then((html2) => {
-      set(deleteIcon, proxy(html2, null, deleteIcon));
-    });
-    Icons2.getIcon("actions-add", Icons2.sizes.small).then((html2) => {
-      set(addIcon, proxy(html2, null, addIcon));
-    });
+    getIcon("actions-chevron-up");
+    getIcon("actions-delete");
+    getIcon("actions-add");
   });
   function deleteFocuspoint(index2) {
-    store_set(focuspoints, proxy($focuspoints().filter((focuspoint, i) => strict_equals(i, index2, false)), null, $focuspoints));
+    store_set(focuspoints, $focuspoints().filter((focuspoint, i) => strict_equals(i, index2, false)));
   }
   const components = {
     text: Text2,
@@ -4835,6 +4949,7 @@ function Sidebar($$anchor, $$props) {
     select: Select,
     link: Link
   };
+  init();
   var div = root6();
   var node = child(div);
   each(node, 1, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
@@ -4847,7 +4962,7 @@ function Sidebar($$anchor, $$props) {
     set_attribute(a, "href", `#cropper-collapse-${index2 ?? ""}`);
     var span = child(a);
     var node_1 = child(span);
-    html(node_1, () => get(chevronIcon), false, false);
+    html(node_1, () => $iconStore()["actions-chevron-up"], false, false);
     var text2 = sibling(node_1);
     text2.nodeValue = ` Focuspoint ${index2 + 1}`;
     reset(span);
@@ -4866,7 +4981,7 @@ function Sidebar($$anchor, $$props) {
       field();
       var fragment = comment();
       var node_3 = first_child(fragment);
-      var config = derived(() => field() ?? {});
+      var config = derived_safe_equal(() => field() ?? {});
       component(node_3, () => components[field().type], ($$anchor4, $$component) => {
         $$component($$anchor4, {
           index: index2,
@@ -4882,7 +4997,7 @@ function Sidebar($$anchor, $$props) {
     });
     var button = sibling(node_2, 2);
     var node_4 = child(button);
-    html(node_4, () => get(deleteIcon), false, false);
+    html(node_4, () => $iconStore()["actions-delete"], false, false);
     next();
     reset(button);
     reset(div_5);
@@ -4895,13 +5010,13 @@ function Sidebar($$anchor, $$props) {
   var div_6 = sibling(node, 2);
   var button_1 = child(div_6);
   var node_5 = child(button_1);
-  html(node_5, () => get(addIcon), false, false);
+  html(node_5, () => $iconStore()["actions-add"], false, false);
   next();
   reset(button_1);
   reset(div_6);
   reset(div);
   event("click", button_1, preventDefault(function(...$$args) {
-    apply(() => createNewFocuspoint, this, $$args, Sidebar, [98, 72]);
+    apply(() => createNewFocuspoint, this, $$args, Sidebar, [87, 72]);
   }));
   append($$anchor, div);
   return pop({ ...legacy_api() });
@@ -4912,7 +5027,7 @@ create_custom_element(Sidebar, {}, [], [], true);
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 mark_module_start();
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root7 = add_locations(template(`<div class="wizard svelte-840dcp"><!> <!></div>`), FocuspointWizard[FILENAME], [[25, 0]]);
+var root7 = add_locations(template(`<div class="wizard svelte-840dcp"><!> <!></div>`), FocuspointWizard[FILENAME], [[36, 0]]);
 var $$css3 = {
   hash: "svelte-840dcp",
   code: "\n    .wizard.svelte-840dcp {\n        display: grid;\n        grid-template-columns: auto 300px;\n    }\n"
@@ -4921,11 +5036,21 @@ function FocuspointWizard($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, FocuspointWizard);
   append_styles($$anchor, $$css3);
+  const $$stores = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   validate_prop_bindings($$props, [], [], FocuspointWizard);
   let itemFormElName = prop($$props, "itemFormElName", 7), itemFormElValue = prop($$props, "itemFormElValue", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
   onMount(() => {
     initStores(itemFormElValue(), wizardConfig());
+    window.parent.frames.list_frame.document.addEventListener(`${itemFormElName()}-save`, handleSave);
   });
+  onDestroy(() => {
+    window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName()}-save`, handleSave);
+  });
+  const handleSave = () => {
+    const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName()}"]`);
+    hiddenInput.value = JSON.stringify($focuspoints());
+  };
   var div = root7();
   var node = child(div);
   Image(node, {

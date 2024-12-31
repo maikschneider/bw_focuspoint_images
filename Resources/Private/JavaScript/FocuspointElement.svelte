@@ -20,12 +20,6 @@
             additionalCssClasses: ['modal-image-manipulation', 'cropper'],
             buttons: [
                 {
-                    btnClass: 'btn-default float-start',
-                    name: 'preview',
-                    icon: 'actions-view',
-                    text: 'buttonPreviewText',
-                },
-                {
                     btnClass: 'btn-default',
                     name: 'dismiss',
                     icon: 'actions-close',
@@ -36,6 +30,7 @@
                     name: 'save',
                     icon: 'actions-document-save',
                     text: 'buttonSaveText',
+                    trigger: onModalSave,
                 },
             ],
             content: html`
@@ -52,15 +47,20 @@
         })
     }
 
+    function onModalSave() {
+        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-save`, {}))
+        window.parent.TYPO3.Modal.dismiss();
+    }
+
     function onLinkSelection(e) {
-        window.document.dispatchEvent(new CustomEvent(`${JSON.parse(itemFormElName)}-link-selected`, {
+        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-link-selected`, {
             detail: {link: e.currentTarget.value}
         }))
     }
 </script>
 
 <div>
-    <input type="hidden" name={itemFormElName} />
+    <input type="hidden" name={itemFormElName} value={itemFormElValue} />
     <button on:click|preventDefault={() => openModal()} class="btn btn-default">
         {@html icon}
         {TYPO3.lang['wizard.button']}
