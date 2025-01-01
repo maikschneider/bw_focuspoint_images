@@ -1,5 +1,5 @@
 <script>
-    import {focuspoints, createNewFocuspoint, wizardConfigStore, getIcon, iconStore} from '../store.svelte'
+    import {focuspoints, createNewFocuspoint, wizardConfigStore, getIcon, iconStore, activateFocuspoint} from '../store.svelte'
     import {onMount} from "svelte";
     import Select from "./Fields/Select.svelte";
     import Text from "./Fields/Text.svelte";
@@ -47,11 +47,12 @@
                     <h4 class="panel-title" id="cropper-accordion-heading-{index}">
                         <a
                                 role="button"
+                                on:click={() => activateFocuspoint(index)}
                                 data-bs-toggle="collapse"
                                 href="#cropper-collapse-{index}"
-                                aria-expanded="false"
+                                aria-expanded={focuspoint.active}
                                 aria-controls="cropper-collapse-1"
-                                class="t3js-crop-variant-trigger collapsed"
+                                class:collapsed={!focuspoint.active}
                                 data-crop-variant-id="default"
                                 data-crop-variant="">
                             <span>
@@ -63,7 +64,9 @@
                 </div>
                 <div
                         id="cropper-collapse-{index}"
-                        class="panel-collapse collapse"
+                        class="panel-collapse"
+                        class:collapse={!focuspoint.active}
+                        class:show={focuspoint.active}
                         role="tabpanel"
                         aria-labelledby="cropper-accordion-heading-{index}">
                     <div class="panel-body">

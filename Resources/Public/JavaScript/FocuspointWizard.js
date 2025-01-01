@@ -512,15 +512,6 @@ function mark_reactions(signal, status) {
 // node_modules/svelte/src/internal/client/warnings.js
 var bold = "font-weight: bold";
 var normal = "font-weight: normal";
-function assignment_value_stale(property, location) {
-  if (dev_fallback_default) {
-    console.warn(`%c[svelte] assignment_value_stale
-%cAssignment to \`${property}\` property (${location}) will evaluate to the right-hand side, not the value of \`${property}\` following the assignment. This may result in unexpected behaviour.
-https://svelte.dev/e/assignment_value_stale`, bold, normal);
-  } else {
-    console.warn(`https://svelte.dev/e/assignment_value_stale`);
-  }
-}
 function event_handler_invalid(handler, suggestion) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] event_handler_invalid
@@ -2355,26 +2346,6 @@ if (dev_fallback_default) {
   throw_rune_error("$bindable");
 }
 
-// node_modules/svelte/src/internal/client/dev/assign.js
-function compare(a, b, property, location) {
-  if (a !== b) {
-    assignment_value_stale(
-      property,
-      /** @type {string} */
-      sanitize_location(location)
-    );
-  }
-  return a;
-}
-function assign(object, property, value, location) {
-  return compare(
-    object[property] = value,
-    untrack(() => object[property]),
-    property,
-    location
-  );
-}
-
 // node_modules/svelte/src/internal/client/dev/css.js
 var all_styles = /* @__PURE__ */ new Map();
 function register_style(hash2, style) {
@@ -3665,6 +3636,37 @@ function get_option_value(option) {
   }
 }
 
+// node_modules/svelte/src/internal/client/dom/elements/bindings/this.js
+function is_bound_this(bound_value, element_or_component) {
+  return bound_value === element_or_component || bound_value?.[STATE_SYMBOL] === element_or_component;
+}
+function bind_this(element_or_component = {}, update2, get_value, get_parts) {
+  effect(() => {
+    var old_parts;
+    var parts;
+    render_effect(() => {
+      old_parts = parts;
+      parts = get_parts?.() || [];
+      untrack(() => {
+        if (element_or_component !== get_value(...parts)) {
+          update2(element_or_component, ...parts);
+          if (old_parts && is_bound_this(get_value(...old_parts), element_or_component)) {
+            update2(null, ...old_parts);
+          }
+        }
+      });
+    });
+    return () => {
+      queue_micro_task(() => {
+        if (parts && is_bound_this(get_value(...parts), element_or_component)) {
+          update2(null, ...parts);
+        }
+      });
+    };
+  });
+  return element_or_component;
+}
+
 // node_modules/svelte/src/internal/client/dom/legacy/event-modifiers.js
 function preventDefault(fn) {
   return function(...args) {
@@ -4432,6 +4434,7 @@ var focuspoints = writable([]);
 var initStores = (itemFormElValue, wizardConfig) => {
   wizardConfigStore.set(JSON.parse(wizardConfig));
   focuspoints.set(JSON.parse(JSON.parse(itemFormElValue)));
+  activateFocuspoint(0);
 };
 var createNewFocuspoint = () => {
   const config = get2(wizardConfigStore);
@@ -4442,6 +4445,7 @@ var createNewFocuspoint = () => {
     height: parseFloat(config.defaultHeight)
   };
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
+  activateFocuspoint(get2(focuspoints).length - 1);
 };
 var iconStore = writable({});
 var getIcon = async (iconName) => {
@@ -4456,15 +4460,29 @@ var getIcon = async (iconName) => {
     });
   });
 };
+var activateFocuspoint = (index2) => {
+  focuspoints.update((store) => {
+    store.forEach((focuspoint, i) => {
+      focuspoint.active = i === index2 ? !focuspoint.active : false;
+    });
+    return store;
+  });
+};
 
 // Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_1 = add_locations(template(`<div class="draggable svelte-1r6hc0p"><span>Focuspoint</span></div>`), Image[FILENAME], [[76, 8, [[77, 12]]]]);
-var root = add_locations(template(`<div class="cropper-bg svelte-1r6hc0p" touch-action="none"><!> <img alt="Image" unselectable="on" class="svelte-1r6hc0p"></div>`), Image[FILENAME], [[73, 0, [[81, 4]]]]);
+var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-a2y2kl"><span></span></div>`), Image[FILENAME], [[135, 12, [[143, 16]]]]);
+var root = add_locations(template(`<div class="cropper-bg svelte-a2y2kl" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-a2y2kl"></div></div>`), Image[FILENAME], [
+  [
+    132,
+    0,
+    [[133, 4, [[146, 8]]]]
+  ]
+]);
 var $$css = {
-  hash: "svelte-1r6hc0p",
-  code: "\n    .draggable.svelte-1r6hc0p {\n        position: absolute;\n    }\n\n    img.svelte-1r6hc0p {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-1r6hc0p {\n        padding: 20px;\n    }\n"
+  hash: "svelte-a2y2kl",
+  code: "\n    .draggable.svelte-a2y2kl {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-a2y2kl {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-a2y2kl {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-a2y2kl {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-a2y2kl {\n        padding: 20px;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -4474,44 +4492,105 @@ function Image($$anchor, $$props) {
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   validate_prop_bindings($$props, [], [], Image);
   let image = prop($$props, "image", 7);
-  interact(".draggable").draggable({
-    // keep the element within the area of it's parent
+  let canvasHeight = state(0);
+  let canvasWidth = state(0);
+  let img;
+  interact(".draggable").resizable({
+    edges: {
+      left: true,
+      right: true,
+      bottom: true,
+      top: true
+    },
+    modifiers: [
+      interact.modifiers.restrictEdges({ outer: "parent", endOnly: true })
+    ],
+    listeners: {
+      move(event2) {
+        const index2 = parseInt(event2.target.getAttribute("data-index"));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].width = event2.rect.width / get(canvasWidth), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].height = event2.rect.height / get(canvasHeight), untrack($focuspoints));
+        const x = $focuspoints()[index2].x * get(canvasWidth) + event2.deltaRect.left;
+        const y = $focuspoints()[index2].y * get(canvasHeight) + event2.deltaRect.top;
+        store_mutate(focuspoints, untrack($focuspoints)[index2].x = x / get(canvasWidth), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].y = y / get(canvasHeight), untrack($focuspoints));
+      }
+    }
+  }).draggable({
     modifiers: [
       interact.modifiers.restrictRect({ restriction: "parent", endOnly: true })
     ],
-    // enable autoScroll
     autoScroll: true,
     listeners: {
-      // call this function on every dragmove event
-      move: dragMoveListener,
-      end(event2) {
-        var textEl = event2.target.querySelector("p");
-        textEl && assign(textEl, "textContent", "moved a distance of " + Math.sqrt(Math.pow(event2.pageX - event2.x0, 2) + Math.pow(event2.pageY - event2.y0, 2) | 0).toFixed(2) + "px", "Resources/\u200BPrivate/\u200BJavaScript/\u200Bcomponents/\u200BImage.svelte:27:35");
+      move(event2) {
+        const index2 = parseInt(event2.target.getAttribute("data-index"));
+        const x = $focuspoints()[index2].x * get(canvasWidth) + event2.dx;
+        const y = $focuspoints()[index2].y * get(canvasHeight) + event2.dy;
+        store_mutate(focuspoints, untrack($focuspoints)[index2].x = x / get(canvasWidth), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].y = y / get(canvasHeight), untrack($focuspoints));
       }
     }
   });
-  function dragMoveListener(event2) {
-    const target = event2.target;
-    const x = (parseFloat(target.getAttribute("data-x")) || 0) + event2.dx;
-    const y = (parseFloat(target.getAttribute("data-y")) || 0) + event2.dy;
-    target.style.transform = "translate(" + x + "px, " + y + "px)";
-    target.setAttribute("data-x", x);
-    target.setAttribute("data-y", y);
-  }
-  window.dragMoveListener = dragMoveListener;
-  var div = root();
-  var node = child(div);
-  each(node, 1, $focuspoints, index, ($$anchor2, focuspoint) => {
-    var div_1 = root_1();
-    template_effect(() => {
-      set_attribute(div_1, "data-x", get(focuspoint).x);
-      set_attribute(div_1, "data-y", get(focuspoint).y);
-    });
-    append($$anchor2, div_1);
+  onMount(() => {
+    if (img.complete) {
+      setCanvasSizes();
+    } else {
+      img.addEventListener("load", setCanvasSizes);
+    }
+    window.addEventListener("resize", setCanvasSizes);
   });
-  var img = sibling(node, 2);
+  onDestroy(() => {
+    window.removeEventListener("resize", setCanvasSizes);
+  });
+  function setCanvasSizes() {
+    setTimeout(
+      () => {
+        set(canvasHeight, proxy(img.parentElement.getBoundingClientRect().height, null, canvasHeight));
+        set(canvasWidth, proxy(img.parentElement.getBoundingClientRect().width, null, canvasWidth));
+      },
+      300
+    );
+  }
+  const getPositionX = derived(() => (index2) => {
+    return $focuspoints()[index2].x * get(canvasWidth);
+  });
+  const getPositionY = derived(() => (index2) => {
+    return $focuspoints()[index2].y * get(canvasHeight);
+  });
+  const getFocuspointWidth = derived(() => (index2) => {
+    return $focuspoints()[index2].width * get(canvasWidth);
+  });
+  const getFocuspointHeight = derived(() => (index2) => {
+    return $focuspoints()[index2].height * get(canvasHeight);
+  });
+  var div = root();
+  var div_1 = child(div);
+  var node = child(div_1);
+  each(node, 1, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
+    var div_2 = root_1();
+    set_attribute(div_2, "data-index", index2);
+    const stringified_text = derived(() => get(getPositionX)(index2) ?? "");
+    const stringified_text_1 = derived(() => get(getPositionY)(index2) ?? "");
+    const stringified_text_2 = derived(() => get(getFocuspointWidth)(index2) ?? "");
+    const stringified_text_3 = derived(() => get(getFocuspointHeight)(index2) ?? "");
+    const style_derived = derived(() => `transform:translate3d(${get(stringified_text)}px, ${get(stringified_text_1)}px, 0); width: ${get(stringified_text_2)}px; height: ${get(stringified_text_3)}px;`);
+    template_effect(() => set_attribute(div_2, "data-x", get(getPositionX)(index2)));
+    template_effect(() => set_attribute(div_2, "data-y", get(getPositionY)(index2)));
+    var span = child(div_2);
+    span.textContent = `Focuspoint ${index2 + 1}`;
+    reset(div_2);
+    template_effect(() => {
+      set_attribute(div_2, "style", get(style_derived));
+      toggle_class(div_2, "active", get(focuspoint).active);
+    });
+    event("click", div_2, () => activateFocuspoint(index2));
+    append($$anchor2, div_2);
+  });
+  var img_1 = sibling(node, 2);
+  bind_this(img_1, ($$value) => img = $$value, () => img);
+  reset(div_1);
   reset(div);
-  template_effect(() => set_attribute(img, "src", image()));
+  template_effect(() => set_attribute(img_1, "src", image()));
   append($$anchor, div);
   return pop({
     get image() {
@@ -4886,7 +4965,7 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 // Resources/Private/JavaScript/components/Sidebar.svelte
 mark_module_start();
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"><div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="cropper-collapse-1" class="t3js-crop-variant-trigger collapsed" data-crop-variant-id="default" data-crop-variant=""><span><!> </span></a></h4></div> <div class="panel-collapse collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div></div>`), Sidebar[FILENAME], [
+var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"><div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span><!> </span></a></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div></div>`), Sidebar[FILENAME], [
   [
     43,
     8,
@@ -4902,14 +4981,14 @@ var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" ro
               [
                 47,
                 20,
-                [[48, 24, [[57, 28]]]]
+                [[48, 24, [[58, 28]]]]
               ]
             ]
           ],
           [
-            64,
+            65,
             16,
-            [[69, 20, [[74, 24]]]]
+            [[72, 20, [[77, 24]]]]
           ]
         ]
       ]
@@ -4920,7 +4999,7 @@ var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhk
   [
     39,
     0,
-    [[86, 4, [[87, 8]]]]
+    [[89, 4, [[90, 8]]]]
   ]
 ]);
 var $$css2 = {
@@ -5004,6 +5083,13 @@ function Sidebar($$anchor, $$props) {
     reset(div_4);
     reset(div_2);
     reset(div_1);
+    template_effect(() => {
+      set_attribute(a, "aria-expanded", get(focuspoint).active);
+      toggle_class(a, "collapsed", !get(focuspoint).active);
+      toggle_class(div_4, "collapse", !get(focuspoint).active);
+      toggle_class(div_4, "show", get(focuspoint).active);
+    });
+    event("click", a, () => activateFocuspoint(index2));
     event("click", button, preventDefault(() => deleteFocuspoint(index2)));
     append($$anchor2, div_1);
   });
@@ -5016,7 +5102,7 @@ function Sidebar($$anchor, $$props) {
   reset(div_6);
   reset(div);
   event("click", button_1, preventDefault(function(...$$args) {
-    apply(() => createNewFocuspoint, this, $$args, Sidebar, [87, 72]);
+    apply(() => createNewFocuspoint, this, $$args, Sidebar, [90, 72]);
   }));
   append($$anchor, div);
   return pop({ ...legacy_api() });

@@ -3912,12 +3912,12 @@ mark_module_start();
 FocuspointElement[FILENAME] = "Resources/Private/JavaScript/FocuspointElement.svelte";
 var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden" data-formengine-input-name="focuspoint-hidden-link-field"></form></div>`), FocuspointElement[FILENAME], [
   [
-    62,
+    63,
     0,
     [
-      [63, 4],
       [64, 4],
-      [69, 4, [[70, 8]]]
+      [65, 4],
+      [70, 4, [[71, 8]]]
     ]
   ]
 ]);
@@ -3940,7 +3940,8 @@ function FocuspointElement($$anchor, $$props) {
           btnClass: "btn-default",
           name: "dismiss",
           icon: "actions-close",
-          text: "buttonDismissText"
+          text: "buttonDismissText",
+          trigger: () => window.parent.TYPO3.Modal.dismiss()
         },
         {
           btnClass: "btn-primary",

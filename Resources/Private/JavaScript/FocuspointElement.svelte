@@ -24,6 +24,7 @@
                     name: 'dismiss',
                     icon: 'actions-close',
                     text: 'buttonDismissText',
+                    trigger: () => window.parent.TYPO3.Modal.dismiss(),
                 },
                 {
                     btnClass: 'btn-primary',

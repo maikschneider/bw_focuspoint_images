@@ -8,6 +8,7 @@ export const focuspoints = writable([]);
 export const initStores = (itemFormElValue, wizardConfig) => {
     wizardConfigStore.set(JSON.parse(wizardConfig));
     focuspoints.set(JSON.parse(JSON.parse(itemFormElValue)));
+    activateFocuspoint(0);
 }
 
 export const createNewFocuspoint = () => {
@@ -19,6 +20,7 @@ export const createNewFocuspoint = () => {
         height: parseFloat(config.defaultHeight),
     };
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
+    activateFocuspoint(get(focuspoints).length - 1);
 }
 
 export const iconStore = writable({});
@@ -34,5 +36,14 @@ export const getIcon = async (iconName) => {
             store[iconName] = html;
             return store
         });
+    })
+}
+
+export const activateFocuspoint = (index) => {
+    focuspoints.update((store) => {
+        store.forEach((focuspoint, i) => {
+            focuspoint.active = i === index ? !focuspoint.active : false;
+        });
+        return store;
     })
 }
