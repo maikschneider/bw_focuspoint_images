@@ -1,5 +1,13 @@
 <script>
-    import {focuspoints, createNewFocuspoint, wizardConfigStore, getIcon, iconStore, activateFocuspoint} from '../store.svelte'
+    import {
+        focuspoints,
+        createNewFocuspoint,
+        wizardConfigStore,
+        getIcon,
+        iconStore,
+        activateFocuspoint,
+        focusPointName
+    } from '../store.svelte'
     import {onMount} from "svelte";
     import Select from "./Fields/Select.svelte";
     import Text from "./Fields/Text.svelte";
@@ -11,6 +19,8 @@
         getIcon('actions-delete')
         getIcon('actions-add')
     })
+
+    let focuspointName = $derived((focuspoint, index) => focusPointName(index))
 
     function deleteFocuspoint(index) {
         $focuspoints = $focuspoints.filter((focuspoint, i) => i !== index)
@@ -57,7 +67,7 @@
                                 data-crop-variant="">
                             <span>
                                 {@html $iconStore['actions-chevron-up']}
-                                Focuspoint {index + 1}
+                                {focuspointName(focuspoint, index)}
                             </span>
                         </a>
                     </h4>

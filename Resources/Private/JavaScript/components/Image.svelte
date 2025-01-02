@@ -1,11 +1,12 @@
 <script>
     import interact from 'interactjs';
-    import {activateFocuspoint, focuspoints} from "../store.svelte";
+    import {activateFocuspoint, focusPointName, focuspoints} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
 
     let {image} = $props()
     let canvasHeight = $state(0)
     let canvasWidth = $state(0)
+    let focuspointName = $derived((focuspoint, index) => focusPointName(index))
     let img
 
     interact('.draggable')
@@ -140,7 +141,7 @@
                     style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
                     data-x="{getPositionX(index)}"
                     data-y="{getPositionY(index)}">
-                <span>Focuspoint {index + 1}</span>
+                <span>{focuspointName(focuspoint, index)}</span>
             </div>
         {/each}
         <img bind:this={img} src={image} alt="Selected" unselectable="on" />

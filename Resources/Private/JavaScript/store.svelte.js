@@ -8,7 +8,6 @@ export const focuspoints = writable([]);
 export const initStores = (itemFormElValue, wizardConfig) => {
     wizardConfigStore.set(JSON.parse(wizardConfig));
     focuspoints.set(JSON.parse(JSON.parse(itemFormElValue)));
-    activateFocuspoint(0);
 }
 
 export const createNewFocuspoint = () => {
@@ -46,4 +45,27 @@ export const activateFocuspoint = (index) => {
         });
         return store;
     })
+}
+
+export const focusPointName = (index) => {
+    const config = get(wizardConfigStore);
+    const nameFields = Object.entries(config.fields).filter(([key, value]) => {
+        return value['useAsName'] === true || value['useAsName'] === 'true' || value['useAsName'] === '1' || value['useAsName'] === 1;
+    }).map(([key, value]) => {
+        return key;
+    });
+
+
+    const defaultName = 'Focus Point ' + (index + 1);
+    if (nameFields.length === 0) {
+        return defaultName;
+    }
+
+    const store = get(focuspoints);
+    const names = Object.entries(store[index]).filter(([key, value]) => { return nameFields.includes(key) && value !== null && value !== '' }).map(([key, value]) => { return value })
+    if (names.length === 0) {
+        return defaultName;
+    }
+
+    return names.join(', ');
 }
