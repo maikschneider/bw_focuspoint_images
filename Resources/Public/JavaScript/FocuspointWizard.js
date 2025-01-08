@@ -216,7 +216,7 @@ class FocuspointWizard {
         const request = $.ajax({
             type: 'GET',
             url: url,
-            contentType: 'json'
+            contentType: 'application/json'
         });
         // get link browser url + link info
         request.done(function (response) {
