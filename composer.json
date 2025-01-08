@@ -13,7 +13,7 @@
     "typo3/cms-base-distribution": "^12.0",
     "bk2k/bootstrap-package": "dev-master",
     "helhum/typo3-console": "^8.0",
-    "ssch/typo3-rector": "^1.2 || ^2.0",
+    "ssch/typo3-rector": "^1.2 || ^2.0 || ^3.0",
     "friendsofphp/php-cs-fixer": "^3.6.0"
   },
   "autoload": {
