@@ -4696,7 +4696,7 @@ import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
 import Modal from "@typo3/backend/modal.js";
 mark_module_start();
 Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
-var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div class="form-wizards-wrap"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="input-group-addon"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" class="form-control form-control-clearable" readonly=""> <input type="text" class="form-control form-control-clearable"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input" class="close text-black"><!></button></div> <button class="btn btn-default"><!></button></div></div> <div class="form-wizards-items-aside form-wizards-items-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default"><!></button></div></div></div></div>`), Link[FILENAME], [
+var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div class="form-wizards-wrap"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" class="form-control form-control-clearable" readonly=""> <input type="text" class="form-control form-control-clearable"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input" class="close text-black"><!></button></div> <button class="btn btn-default"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default"><!></button></div></div></div></div>`), Link[FILENAME], [
   [
     62,
     0,
@@ -4869,41 +4869,40 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 // Resources/Private/JavaScript/components/Sidebar.svelte
 mark_module_start();
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_13 = add_locations(template(`<div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"><div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span><!> </span></a></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div></div>`), Sidebar[FILENAME], [
+var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" class="panel-button" data-crop-variant-id="default" data-crop-variant=""><span class="caret"></span> <span class="panel-title"> </span></button></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div>`), Sidebar[FILENAME], [
   [
     53,
-    8,
+    12,
     [
       [
-        55,
-        12,
+        54,
+        16,
         [
           [
-            56,
-            16,
+            55,
+            20,
             [
-              [
-                57,
-                20,
-                [[58, 24, [[68, 28]]]]
-              ]
+              [56, 24, [[65, 28], [66, 28]]]
             ]
-          ],
-          [
-            75,
-            16,
-            [[82, 20, [[87, 24]]]]
           ]
         ]
+      ],
+      [
+        72,
+        16,
+        [[79, 20, [[84, 24]]]]
       ]
     ]
   ]
 ]);
-var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><!> <div class="pt-3"><button class="btn btn-success w-100 "><!> Add focuspoint</button></div></div>`), Sidebar[FILENAME], [
+var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> Add focuspoint</button></div></div>`), Sidebar[FILENAME], [
   [
     49,
     0,
-    [[99, 4, [[100, 8]]]]
+    [
+      [50, 4],
+      [97, 4, [[98, 8]]]
+    ]
   ]
 ]);
 var $$css2 = {
@@ -4916,8 +4915,8 @@ function Sidebar($$anchor, $$props) {
   append_styles($$anchor, $$css2);
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
+  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   validate_prop_bindings($$props, [], [], Sidebar);
   onMount(() => {
     getIcon("actions-chevron-up");
@@ -4935,38 +4934,34 @@ function Sidebar($$anchor, $$props) {
     link: Link
   };
   var div = root6();
-  var node = child(div);
-  each(node, 1, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
-    var div_1 = root_13();
-    var div_2 = child(div_1);
+  var div_1 = child(div);
+  each(div_1, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
+    var div_2 = root_13();
     var div_3 = child(div_2);
     var h4 = child(div_3);
     set_attribute(h4, "id", `cropper-accordion-heading-${index2 ?? ""}`);
-    var a = child(h4);
-    set_attribute(a, "href", `#cropper-collapse-${index2 ?? ""}`);
-    var span = child(a);
-    var node_1 = child(span);
-    html(node_1, () => $iconStore()["actions-chevron-up"], false, false);
-    var text2 = sibling(node_1);
-    template_effect(() => set_text(text2, ` ${get(focuspointName)(get(focuspoint), index2) ?? ""}`));
+    var button = child(h4);
+    var span = sibling(child(button), 2);
+    var text2 = child(span, true);
+    template_effect(() => set_text(text2, get(focuspointName)(get(focuspoint), index2)));
     reset(span);
-    reset(a);
+    reset(button);
     reset(h4);
     reset(div_3);
     var div_4 = sibling(div_3, 2);
     set_attribute(div_4, "id", `cropper-collapse-${index2 ?? ""}`);
     set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2 ?? ""}`);
     var div_5 = child(div_4);
-    var node_2 = child(div_5);
-    each(node_2, 1, () => Object.entries($wizardConfigStore().fields), index, ($$anchor3, $$item) => {
+    var node = child(div_5);
+    each(node, 1, () => Object.entries($wizardConfigStore().fields), index, ($$anchor3, $$item) => {
       let key = () => get($$item)[0];
       key();
       let field = () => get($$item)[1];
       field();
       var fragment = comment();
-      var node_3 = first_child(fragment);
+      var node_1 = first_child(fragment);
       var config = derived(() => field() ?? {});
-      component(node_3, () => components[field().type], ($$anchor4, $$component) => {
+      component(node_1, () => components[field().type], ($$anchor4, $$component) => {
         $$component($$anchor4, {
           index: index2,
           get name() {
@@ -4979,35 +4974,35 @@ function Sidebar($$anchor, $$props) {
       });
       append($$anchor3, fragment);
     });
-    var button = sibling(node_2, 2);
-    var node_4 = child(button);
-    html(node_4, () => $iconStore()["actions-delete"], false, false);
+    var button_1 = sibling(node, 2);
+    var node_2 = child(button_1);
+    html(node_2, () => $iconStore()["actions-delete"], false, false);
     next();
-    reset(button);
+    reset(button_1);
     reset(div_5);
     reset(div_4);
     reset(div_2);
-    reset(div_1);
     template_effect(() => {
-      set_attribute(a, "aria-expanded", get(focuspoint).active);
-      toggle_class(a, "collapsed", !get(focuspoint).active);
+      set_attribute(button, "aria-expanded", get(focuspoint).active);
+      toggle_class(button, "collapsed", !get(focuspoint).active);
       toggle_class(div_4, "collapse", !get(focuspoint).active);
       toggle_class(div_4, "show", get(focuspoint).active);
     });
-    event("click", a, () => activateFocuspoint(index2));
-    event("click", button, preventDefault(() => deleteFocuspoint(index2)));
-    append($$anchor2, div_1);
+    event("click", button, () => activateFocuspoint(index2));
+    event("click", button_1, preventDefault(() => deleteFocuspoint(index2)));
+    append($$anchor2, div_2);
   });
-  var div_6 = sibling(node, 2);
-  var button_1 = child(div_6);
-  var node_5 = child(button_1);
-  html(node_5, () => $iconStore()["actions-add"], false, false);
+  reset(div_1);
+  var div_6 = sibling(div_1, 2);
+  var button_2 = child(div_6);
+  var node_3 = child(button_2);
+  html(node_3, () => $iconStore()["actions-add"], false, false);
   next();
-  reset(button_1);
+  reset(button_2);
   reset(div_6);
   reset(div);
-  event("click", button_1, preventDefault(function(...$$args) {
-    apply(() => createNewFocuspoint, this, $$args, Sidebar, [100, 72]);
+  event("click", button_2, preventDefault(function(...$$args) {
+    apply(() => createNewFocuspoint, this, $$args, Sidebar, [98, 72]);
   }));
   append($$anchor, div);
   return pop({ ...legacy_api() });

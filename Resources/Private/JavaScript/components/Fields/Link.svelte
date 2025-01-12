@@ -66,7 +66,7 @@
     <div class="form-wizards-wrap">
         <div class="form-wizards-element">
             <div class="input-group t3js-form-field-link">
-                <span class="input-group-addon">{@html previewIcon}</span>
+                <span class="t3js-form-field-link-icon input-group-text">{@html previewIcon}</span>
                 <input class="form-control" title="" value="" readonly="" hidden="">
                 <div class="form-control-clearable-wrapper">
                     <input
@@ -98,7 +98,7 @@
                 </button>
             </div>
         </div>
-        <div class="form-wizards-items-aside form-wizards-items-aside--field-control">
+        <div class="form-wizards-item-aside formwizards-item-aside--field-control">
             <div class="btn-group">
                 <button
                         on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">

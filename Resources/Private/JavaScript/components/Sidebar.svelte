@@ -47,29 +47,26 @@
 </style>
 
 <div class="modal-panel-sidebar">
-
+    <div class="panel-group" role="tablist" aria-multiselectable="false">
     {#each $focuspoints as focuspoint, index}
-
-        <div class="panel-group" role="tablist" aria-multiselectable="false">
 
             <div class="panel panel-default" data-crop-variant-container="default">
                 <div class="panel-heading" role="tab">
                     <h4 class="panel-title" id="cropper-accordion-heading-{index}">
-                        <a
-                                role="button"
+                        <button
                                 on:click={() => activateFocuspoint(index)}
                                 data-bs-toggle="collapse"
-                                href="#cropper-collapse-{index}"
                                 aria-expanded={focuspoint.active}
                                 aria-controls="cropper-collapse-1"
                                 class:collapsed={!focuspoint.active}
+                                class="panel-button"
                                 data-crop-variant-id="default"
                                 data-crop-variant="">
-                            <span>
-                                {@html $iconStore['actions-chevron-up']}
+                            <span class="caret"></span>
+                            <span class="panel-title">
                                 {focuspointName(focuspoint, index)}
                             </span>
-                        </a>
+                        </button>
                     </h4>
                 </div>
                 <div
@@ -93,8 +90,9 @@
                 </div>
             </div>
 
-        </div>
+
     {/each}
+    </div>
 
     <div class="pt-3">
         <button class="btn btn-success w-100 " on:click|preventDefault={createNewFocuspoint}>
