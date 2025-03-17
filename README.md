@@ -69,6 +69,7 @@ mod.tx_bwfocuspointimages.settings.fields {
     name {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
         type = text
+        useAsName = 1
     }
 
     description {
