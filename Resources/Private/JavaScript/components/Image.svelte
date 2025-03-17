@@ -52,6 +52,12 @@
                         $focuspoints[index].x = (x / canvasWidth)
                         $focuspoints[index].y = (y / canvasHeight)
                     },
+                    end(event) {
+                        const index = parseInt(event.target.getAttribute('data-index'))
+                        if ($focuspoints[index].active) {
+                            activateFocuspoint(index)
+                        }
+                    }
                 }
             })
 

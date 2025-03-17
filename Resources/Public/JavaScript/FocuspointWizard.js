@@ -4376,12 +4376,12 @@ var focusPointName = (index2) => {
 // Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-a2y2kl"><span> </span></div>`), Image[FILENAME], [[136, 12, [[144, 16]]]]);
+var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-a2y2kl"><span> </span></div>`), Image[FILENAME], [[142, 12, [[150, 16]]]]);
 var root = add_locations(template(`<div class="cropper-bg svelte-a2y2kl" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-a2y2kl"></div></div>`), Image[FILENAME], [
   [
-    133,
+    139,
     0,
-    [[134, 4, [[147, 8]]]]
+    [[140, 4, [[153, 8]]]]
   ]
 ]);
 var $$css = {
@@ -4433,6 +4433,12 @@ function Image($$anchor, $$props) {
         const y = $focuspoints()[index2].y * get(canvasHeight) + event2.dy;
         store_mutate(focuspoints, untrack($focuspoints)[index2].x = x / get(canvasWidth), untrack($focuspoints));
         store_mutate(focuspoints, untrack($focuspoints)[index2].y = y / get(canvasHeight), untrack($focuspoints));
+      },
+      end(event2) {
+        const index2 = parseInt(event2.target.getAttribute("data-index"));
+        if ($focuspoints()[index2].active) {
+          activateFocuspoint(index2);
+        }
       }
     }
   });
