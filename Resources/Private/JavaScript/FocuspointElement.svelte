@@ -15,7 +15,9 @@
         })
     })
 
-    function openModal(e) {
+    function onButtonClick(e) {
+        e.preventDefault()
+
         Modal.advanced({
             additionalCssClasses: ['modal-image-manipulation', 'cropper'],
             buttons: [
@@ -62,13 +64,13 @@
 
 <div>
     <input type="hidden" name={itemFormElName} value={itemFormElValue} />
-    <button on:click|preventDefault={() => openModal()} class="btn btn-default">
+    <button onclick={(e) => onButtonClick(e)} class="btn btn-default">
         {@html icon}
         {TYPO3.lang['wizard.button']}
     </button>
 
     <form name="editform">
         <input
-                type="hidden" on:change={onLinkSelection} data-formengine-input-name="focuspoint-hidden-link-field" />
+                type="hidden" onchange={onLinkSelection} data-formengine-input-name="focuspoint-hidden-link-field" />
     </form>
 </div>

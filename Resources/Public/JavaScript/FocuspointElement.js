@@ -1239,12 +1239,6 @@ function create_effect(type, fn, sync, push2 = true) {
   }
   return effect2;
 }
-function teardown(fn) {
-  const effect2 = create_effect(RENDER_EFFECT, null, false);
-  set_signal_status(effect2, CLEAN);
-  effect2.teardown = fn;
-  return effect2;
-}
 function user_effect(fn) {
   validate_effect("$effect");
   var defer = active_effect !== null && (active_effect.f & BRANCH_EFFECT) !== 0 && component_context !== null && !component_context.m;
@@ -1454,13 +1448,6 @@ function process_idle_tasks() {
   const tasks = current_queued_idle_tasks.slice();
   current_queued_idle_tasks = [];
   run_all(tasks);
-}
-function queue_micro_task(fn) {
-  if (!is_micro_task_queued) {
-    is_micro_task_queued = true;
-    queueMicrotask(process_micro_tasks);
-  }
-  current_queued_micro_tasks.push(fn);
 }
 function queue_idle_task(fn) {
   if (!is_idle_task_queued) {
@@ -2230,50 +2217,15 @@ function add_form_reset_listener() {
   }
 }
 
-// node_modules/svelte/src/internal/client/dom/elements/bindings/shared.js
-function without_reactive_context(fn) {
-  var previous_reaction = active_reaction;
-  var previous_effect = active_effect;
-  set_active_reaction(null);
-  set_active_effect(null);
-  try {
-    return fn();
-  } finally {
-    set_active_reaction(previous_reaction);
-    set_active_effect(previous_effect);
-  }
-}
-
 // node_modules/svelte/src/internal/client/dom/elements/events.js
 var all_registered_events = /* @__PURE__ */ new Set();
 var root_event_handles = /* @__PURE__ */ new Set();
-function create_event(event_name, dom, handler, options) {
-  function target_handler(event2) {
-    if (!options.capture) {
-      handle_event_propagation.call(dom, event2);
-    }
-    if (!event2.cancelBubble) {
-      return without_reactive_context(() => {
-        return handler.call(this, event2);
-      });
-    }
+function delegate(events) {
+  for (var i5 = 0; i5 < events.length; i5++) {
+    all_registered_events.add(events[i5]);
   }
-  if (event_name.startsWith("pointer") || event_name.startsWith("touch") || event_name === "wheel") {
-    queue_micro_task(() => {
-      dom.addEventListener(event_name, target_handler, options);
-    });
-  } else {
-    dom.addEventListener(event_name, target_handler, options);
-  }
-  return target_handler;
-}
-function event(event_name, dom, handler, capture, passive2) {
-  var options = { capture, passive: passive2 };
-  var target_handler = create_event(event_name, dom, handler, options);
-  if (dom === document.body || dom === window || dom === document) {
-    teardown(() => {
-      dom.removeEventListener(event_name, target_handler, options);
-    });
+  for (var fn of root_event_handles) {
+    fn(events);
   }
 }
 function handle_event_propagation(event2) {
@@ -2796,18 +2748,6 @@ function srcset_url_equal(element2, srcset) {
     // contain relative or absolute URLs.
     (src_url_equal(element_urls[i5][0], url) || src_url_equal(url, element_urls[i5][0]))
   );
-}
-
-// node_modules/svelte/src/internal/client/dom/legacy/event-modifiers.js
-function preventDefault(fn) {
-  return function(...args) {
-    var event2 = (
-      /** @type {Event} */
-      args[0]
-    );
-    event2.preventDefault();
-    return fn?.apply(this, args);
-  };
 }
 
 // node_modules/svelte/src/index-client.js
@@ -3910,14 +3850,18 @@ i4?.({ LitElement: r4 });
 // Resources/Private/JavaScript/FocuspointElement.svelte
 mark_module_start();
 FocuspointElement[FILENAME] = "Resources/Private/JavaScript/FocuspointElement.svelte";
+function onLinkSelection(e4, itemFormElName) {
+  window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-link-selected`, { detail: { link: e4.currentTarget.value } }));
+}
+var on_click = (e4, onButtonClick) => onButtonClick(e4);
 var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden" data-formengine-input-name="focuspoint-hidden-link-field"></form></div>`), FocuspointElement[FILENAME], [
   [
-    63,
+    65,
     0,
     [
-      [64, 4],
-      [65, 4],
-      [70, 4, [[71, 8]]]
+      [66, 4],
+      [67, 4],
+      [72, 4, [[73, 8]]]
     ]
   ]
 ]);
@@ -3932,7 +3876,8 @@ function FocuspointElement($$anchor, $$props) {
       set(icon, proxy(html2, null, icon));
     });
   });
-  function openModal(e4) {
+  function onButtonClick(e4) {
+    e4.preventDefault();
     Modal.advanced({
       additionalCssClasses: ["modal-image-manipulation", "cropper"],
       buttons: [
@@ -3968,13 +3913,11 @@ function FocuspointElement($$anchor, $$props) {
     window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-save`, {}));
     window.parent.TYPO3.Modal.dismiss();
   }
-  function onLinkSelection(e4) {
-    window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-link-selected`, { detail: { link: e4.currentTarget.value } }));
-  }
   var div = root();
   var input = child(div);
   remove_input_defaults(input);
   var button = sibling(input, 2);
+  button.__click = [on_click, onButtonClick];
   var node = child(button);
   html(node, () => get(icon), false, false);
   var text2 = sibling(node);
@@ -3982,14 +3925,13 @@ function FocuspointElement($$anchor, $$props) {
   reset(button);
   var form = sibling(button, 2);
   var input_1 = child(form);
+  input_1.__change = [onLinkSelection, itemFormElName];
   reset(form);
   reset(div);
   template_effect(() => {
     set_attribute(input, "name", itemFormElName());
     set_value(input, itemFormElValue());
   });
-  event("click", button, preventDefault(() => openModal()));
-  event("change", input_1, onLinkSelection);
   append($$anchor, div);
   return pop({
     get itemFormElName() {
@@ -4024,6 +3966,7 @@ function FocuspointElement($$anchor, $$props) {
   });
 }
 mark_module_end(FocuspointElement);
+delegate(["click", "change"]);
 customElements.define("focuspoint-element", create_custom_element(
   FocuspointElement,
   {

@@ -2430,6 +2430,14 @@ function event(event_name, dom, handler, capture, passive2) {
     });
   }
 }
+function delegate(events) {
+  for (var i = 0; i < events.length; i++) {
+    all_registered_events.add(events[i]);
+  }
+  for (var fn of root_event_handles) {
+    fn(events);
+  }
+}
 function handle_event_propagation(event2) {
   var handler_element = this;
   var owner_document = (
@@ -4376,17 +4384,17 @@ var focusPointName = (index2) => {
 // Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-a2y2kl"><span> </span></div>`), Image[FILENAME], [[142, 12, [[150, 16]]]]);
-var root = add_locations(template(`<div class="cropper-bg svelte-a2y2kl" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-a2y2kl"></div></div>`), Image[FILENAME], [
+var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-1uzqkcl"><span> </span></div>`), Image[FILENAME], [[144, 12, [[152, 16]]]]);
+var root = add_locations(template(`<div class="cropper-bg svelte-1uzqkcl" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-1uzqkcl"></div></div>`), Image[FILENAME], [
   [
-    139,
+    141,
     0,
-    [[140, 4, [[153, 8]]]]
+    [[142, 4, [[155, 8]]]]
   ]
 ]);
 var $$css = {
-  hash: "svelte-a2y2kl",
-  code: "\n    .draggable.svelte-a2y2kl {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-a2y2kl {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-a2y2kl {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-a2y2kl {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-a2y2kl {\n        padding: 20px;\n    }\n"
+  hash: "svelte-1uzqkcl",
+  code: "\n    .draggable.svelte-1uzqkcl {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-1uzqkcl {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-1uzqkcl {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-1uzqkcl {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-1uzqkcl {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -4479,6 +4487,7 @@ function Image($$anchor, $$props) {
   var node = child(div_1);
   each(node, 1, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
     var div_2 = root_1();
+    div_2.__click = () => activateFocuspoint(index2);
     set_attribute(div_2, "data-index", index2);
     const stringified_text = derived(() => get(getPositionX)(index2) ?? "");
     const stringified_text_1 = derived(() => get(getPositionY)(index2) ?? "");
@@ -4496,7 +4505,6 @@ function Image($$anchor, $$props) {
       set_attribute(div_2, "style", get(style_derived));
       toggle_class(div_2, "active", get(focuspoint).active);
     });
-    event("click", div_2, () => activateFocuspoint(index2));
     append($$anchor2, div_2);
   });
   var img_1 = sibling(node, 2);
@@ -4517,6 +4525,7 @@ function Image($$anchor, $$props) {
   });
 }
 mark_module_end(Image);
+delegate(["click"]);
 create_custom_element(Image, { image: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Fields/Select.svelte
@@ -5019,10 +5028,10 @@ create_custom_element(Sidebar, {}, [], [], true);
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 mark_module_start();
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root7 = add_locations(template(`<div class="wizard svelte-840dcp"><!> <!></div>`), FocuspointWizard[FILENAME], [[36, 0]]);
+var root7 = add_locations(template(`<div class="wizard svelte-129cc1i"><!> <!></div>`), FocuspointWizard[FILENAME], [[38, 0]]);
 var $$css3 = {
-  hash: "svelte-840dcp",
-  code: "\n    .wizard.svelte-840dcp {\n        display: grid;\n        grid-template-columns: auto 300px;\n    }\n"
+  hash: "svelte-129cc1i",
+  code: "\n    .wizard.svelte-129cc1i {\n        display: grid;\n        max-height: 100%;\n        grid-template-columns: auto 300px;\n        grid-template-rows: 100%;\n    }\n"
 };
 function FocuspointWizard($$anchor, $$props) {
   check_target(new.target);

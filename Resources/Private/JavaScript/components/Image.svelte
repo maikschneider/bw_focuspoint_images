@@ -133,6 +133,8 @@
 
     .cropper-bg {
         padding: 20px;
+        display: flex;
+        justify-content: center;
     }
 </style>
 
@@ -140,7 +142,7 @@
     <div>
         {#each $focuspoints as focuspoint, index}
             <div
-                    on:click={() => activateFocuspoint(index)}
+                    onclick={() => activateFocuspoint(index)}
                     class:active={focuspoint.active}
                     data-index={index}
                     class="draggable style1 resizable"

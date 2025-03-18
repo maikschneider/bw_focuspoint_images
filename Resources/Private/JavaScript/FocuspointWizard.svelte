@@ -3,7 +3,9 @@
 <style>
     .wizard {
         display: grid;
+        max-height: 100%;
         grid-template-columns: auto 300px;
+        grid-template-rows: 100%;
     }
 </style>
 
