@@ -31,7 +31,7 @@ class FocuspointProcessor extends FilesProcessor
         // the TCA is configured to use max. 1 image, however the file collector returns an array
         foreach ($processedData['image'] as $file) {
             $points = $file->getProperty('focus_points') ?: '[]';
-            $points = json_decode((string)$points, false);
+            $points = json_decode((string)$points, false) ?: [];
 
             foreach ($points as $point) {
                 $point->x *= 100;
