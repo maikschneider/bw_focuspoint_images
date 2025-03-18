@@ -7,64 +7,66 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
+indent_style = space
+indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# CSS-Files
-[*.css]
-indent_style = space
-indent_size = 4
-
-# HTML-Files
-[*.html]
-indent_style = space
-indent_size = 4
-
-# TMPL-Files
-[*.tmpl]
-indent_style = space
-indent_size = 4
-
-# LESS-Files
-[*.less]
-indent_style = space
-indent_size = 4
-
-# JS-Files
-[*.js]
-indent_style = space
-indent_size = 4
-
-# PHP-Files
-[*.php]
-indent_style = space
-indent_size = 4
-
-[{*.rst, *.rst.txt}]
-charset = utf-8
-end_of_line = lf
-insert_final_newline = true
-trim_trailing_whitespace = true
-indent_style = space
-indent_size = 3
-max_line_length = 80
-
-# MD-Files
-[*.md]
-charset = utf-8
-end_of_line = lf
-insert_final_newline = true
-trim_trailing_whitespace = true
-indent_style = space
-indent_size = 4
-max_line_length = 80
-
-# YML-Files
-[*.yml]
-indent_style = space
-indent_size = 4
-
-# package.json or .travis.yml
-[{package.json,.travis.yml}]
-indent_style = space
+# TS/JS-Files
+[*.{ts,js}]
 indent_size = 2
+
+# JSON-Files
+[{*.json,.prettierrc}]
+indent_style = tab
+
+# YAML-Files
+[*.{yaml,yml}]
+indent_size = 2
+
+# NEON-Files
+[*.neon]
+indent_size = 2
+indent_style = tab
+
+# package.json
+[package.json]
+indent_size = 2
+
+# TypoScript
+[*.{typoscript,tsconfig}]
+indent_size = 2
+
+# XLF-Files
+[*.xlf]
+indent_style = tab
+
+# SQL-Files
+[*.sql]
+indent_style = tab
+indent_size = 2
+
+# .htaccess
+[{_.htaccess,.htaccess}]
+indent_style = tab
+
+[/var/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+[*.php]
+indent_style = unset
+
+[.ddev/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+# end of file
