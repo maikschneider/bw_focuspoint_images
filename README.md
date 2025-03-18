@@ -137,10 +137,6 @@ plugin.tx_bwfocuspointimages {
 }
 ```
 
-To use the default rendering of **fluid\_styled\_content**, set Layout
-and Partial path to your `styles.content` setting and use the **Default**
-layout in your **FocuspointImage** template file.
-
 For developers
 ==============
 
@@ -191,33 +187,14 @@ tt_content.your_list_type {
 }
 ```
 
-Upgrade
+License
 =======
 
-To version 4.x
----------------
-
-* TypoScript paths changed:
-* Old: `EXT:bw_focuspoint_images/Configuration/setup.txt`
-* New: `EXT:bw_focuspoint_images/Configuration/setup.typoscript`
-
-To version 3.x
----------------
-
-In version ```3.0.0``` the configuration of focuspoint fields has been moved to **PageTS** in order to make different settings possible in the page tree.
-
-Old TypoScript: ```plugin.tx_bwfocuspointimages.settings.fields..```
-
-New PageTS: ```mod.tx_bwfocuspointimages.settings.fields..```
-
-Just move your existing configuration to PageTS and adjust the prefix from ```plugin``` to ```mod```.
-
+This project is licensed under [GNU General Public License 2.0 (or later)](LICENSE.md).
 
 Contribute
 ==========
 
 This extension was made by Maik Schneider: Feel free to contribute!
-
-* [Github-Repository](https://github.com/maikschneider/bw_focuspoint_images)
 
 Thanks to [blueways](https://www.blueways.de/) and [XIMA](https://www.xima.de/)!
