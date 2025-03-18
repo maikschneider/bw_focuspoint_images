@@ -69,6 +69,6 @@
 
     <form name="editform">
         <input
-                type="hidden" onchange={onLinkSelection} data-formengine-input-name="focuspoint-hidden-link-field" />
+                type="hidden" onchange={onLinkSelection} data-formengine-input-name={`${itemFormElName}-hidden-link-field`} />
     </form>
 </div>

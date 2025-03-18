@@ -3854,7 +3854,7 @@ function onLinkSelection(e4, itemFormElName) {
   window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-link-selected`, { detail: { link: e4.currentTarget.value } }));
 }
 var on_click = (e4, onButtonClick) => onButtonClick(e4);
-var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden" data-formengine-input-name="focuspoint-hidden-link-field"></form></div>`), FocuspointElement[FILENAME], [
+var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden"></form></div>`), FocuspointElement[FILENAME], [
   [
     63,
     0,
@@ -3929,6 +3929,7 @@ function FocuspointElement($$anchor, $$props) {
   template_effect(() => {
     set_attribute(input, "name", itemFormElName());
     set_value(input, itemFormElValue());
+    set_attribute(input_1, "data-formengine-input-name", `${itemFormElName()}-hidden-link-field`);
   });
   append($$anchor, div);
   return pop({

@@ -4784,7 +4784,7 @@ function Link($$anchor, $$props) {
     let url = TYPO3.settings.ajaxUrls["wizard_focuspoint_linkbrowserurl"];
     url += "&pid=" + $wizardConfigStore().pid;
     url += "&fieldName=" + name();
-    url += "&inputName=focuspoint-hidden-link-field";
+    url += `&inputName=${$wizardConfigStore().itemFormElName}-hidden-link-field`;
     if ($focuspoints()[index2()][name()]) {
       url += "&inputValue=" + $focuspoints()[index2()][name()];
     }
