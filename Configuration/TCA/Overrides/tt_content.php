@@ -43,7 +43,6 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverr
     'assets' => [
         'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:sys_file_metadata.label',
         'config' => [
-            'maxitems' => 1,
             'filter' => [
                 [
                     'parameters' => [
@@ -70,5 +69,3 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverr
         ],
     ],
 ];
-
-//$GLOBALS['TCA']['sys_file_reference']['palettes']['imageoverlayPalette']['showitem'] = 'focus_points';
