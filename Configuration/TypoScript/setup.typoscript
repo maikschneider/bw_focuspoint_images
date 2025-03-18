@@ -13,8 +13,7 @@ tt_content.bw_focuspoint_images_svg {
 		10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
 		10 {
 			references.fieldName = assets
-			as = image
+			as = images
 		}
 	}
 }
-
