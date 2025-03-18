@@ -6,7 +6,7 @@ $EM_CONF[$_EXTKEY] = [
     'category' => 'plugin',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.0.0-12.9.99',
+            'typo3' => '12.0.0-13.9.99',
         ],
         'conflicts' => [
         ],
