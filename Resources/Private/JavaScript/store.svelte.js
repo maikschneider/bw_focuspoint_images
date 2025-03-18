@@ -5,9 +5,9 @@ export const wizardConfigStore = writable(null);
 
 export const focuspoints = writable([]);
 
-export const initStores = (itemFormElValue, wizardConfig) => {
+export const initStores = (hiddenInput, wizardConfig, hiddenElement) => {
     wizardConfigStore.set(JSON.parse(wizardConfig));
-    focuspoints.set(JSON.parse(JSON.parse(itemFormElValue)));
+    focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : '[]'));
 }
 
 export const createNewFocuspoint = () => {

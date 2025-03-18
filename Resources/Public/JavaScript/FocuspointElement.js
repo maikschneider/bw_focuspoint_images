@@ -3856,12 +3856,12 @@ function onLinkSelection(e4, itemFormElName) {
 var on_click = (e4, onButtonClick) => onButtonClick(e4);
 var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden" data-formengine-input-name="focuspoint-hidden-link-field"></form></div>`), FocuspointElement[FILENAME], [
   [
-    65,
+    63,
     0,
     [
-      [66, 4],
-      [67, 4],
-      [72, 4, [[73, 8]]]
+      [64, 4],
+      [65, 4],
+      [70, 4, [[71, 8]]]
     ]
   ]
 ]);
@@ -3885,14 +3885,14 @@ function FocuspointElement($$anchor, $$props) {
           btnClass: "btn-default",
           name: "dismiss",
           icon: "actions-close",
-          text: "buttonDismissText",
+          text: TYPO3.lang["wizard.button.cancel"],
           trigger: () => window.parent.TYPO3.Modal.dismiss()
         },
         {
           btnClass: "btn-primary",
           name: "save",
           icon: "actions-document-save",
-          text: "buttonSaveText",
+          text: TYPO3.lang["wizard.button.save"],
           trigger: onModalSave
         }
       ],
@@ -3901,11 +3901,9 @@ function FocuspointElement($$anchor, $$props) {
                         style="height: 100%; width: 100%;"
                         image="${image()}"
                         itemFormElName="${itemFormElName()}"
-                        itemFormElValue="${itemFormElValue()}"
                         wizardConfig="${wizardConfig()}"></focuspoint-wizard>    `,
       size: Modal.sizes.full,
-      style: Modal.styles.dark,
-      title: "modalTitle",
+      title: TYPO3.lang["wizard.focuspoints.title"],
       staticBackdrop: true
     });
   }

@@ -4322,9 +4322,9 @@ function get2(store) {
 import Icons from "@typo3/backend/icons.js";
 var wizardConfigStore = writable(null);
 var focuspoints = writable([]);
-var initStores = (itemFormElValue, wizardConfig) => {
+var initStores = (hiddenInput, wizardConfig, hiddenElement) => {
   wizardConfigStore.set(JSON.parse(wizardConfig));
-  focuspoints.set(JSON.parse(JSON.parse(itemFormElValue)));
+  focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : "[]"));
 };
 var createNewFocuspoint = () => {
   const config = get2(wizardConfigStore);
@@ -4384,17 +4384,17 @@ var focusPointName = (index2) => {
 // Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-1uzqkcl"><span> </span></div>`), Image[FILENAME], [[150, 12, [[158, 16]]]]);
-var root = add_locations(template(`<div class="cropper-bg svelte-1uzqkcl" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-1uzqkcl"></div></div>`), Image[FILENAME], [
+var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-okbrz5"><span> </span></div>`), Image[FILENAME], [[156, 12, [[164, 16]]]]);
+var root = add_locations(template(`<div class="cropper-bg svelte-okbrz5" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-okbrz5"></div></div>`), Image[FILENAME], [
   [
-    147,
+    153,
     0,
-    [[148, 4, [[161, 8]]]]
+    [[154, 4, [[167, 8]]]]
   ]
 ]);
 var $$css = {
-  hash: "svelte-1uzqkcl",
-  code: "\n    .draggable.svelte-1uzqkcl {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-1uzqkcl {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-1uzqkcl {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-1uzqkcl {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-1uzqkcl {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n    }\n"
+  hash: "svelte-okbrz5",
+  code: "\n    .draggable.svelte-okbrz5 {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-okbrz5 {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-okbrz5 {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-okbrz5 {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-okbrz5 {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(255, 255, 255, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -5034,7 +5034,7 @@ create_custom_element(Sidebar, {}, [], [], true);
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 mark_module_start();
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root7 = add_locations(template(`<div class="wizard svelte-129cc1i"><!> <!></div>`), FocuspointWizard[FILENAME], [[38, 0]]);
+var root7 = add_locations(template(`<div class="wizard svelte-129cc1i"><!> <!></div>`), FocuspointWizard[FILENAME], [[41, 0]]);
 var $$css3 = {
   hash: "svelte-129cc1i",
   code: "\n    .wizard.svelte-129cc1i {\n        display: grid;\n        max-height: 100%;\n        grid-template-columns: auto 300px;\n        grid-template-rows: 100%;\n    }\n"
@@ -5046,17 +5046,19 @@ function FocuspointWizard($$anchor, $$props) {
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   validate_prop_bindings($$props, [], [], FocuspointWizard);
-  let itemFormElName = prop($$props, "itemFormElName", 7), itemFormElValue = prop($$props, "itemFormElValue", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
+  let itemFormElName = prop($$props, "itemFormElName", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
+  const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName()}"]`);
   onMount(() => {
-    initStores(itemFormElValue(), wizardConfig());
+    initStores(hiddenInput, wizardConfig());
     window.parent.frames.list_frame.document.addEventListener(`${itemFormElName()}-save`, handleSave);
   });
   onDestroy(() => {
     window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName()}-save`, handleSave);
+    store_set(focuspoints, proxy([], null, $focuspoints));
   });
   const handleSave = () => {
-    const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName()}"]`);
-    hiddenInput.value = JSON.stringify($focuspoints());
+    const hiddenInput2 = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName()}"]`);
+    hiddenInput2.value = JSON.stringify($focuspoints());
   };
   var div = root7();
   var node = child(div);
@@ -5075,13 +5077,6 @@ function FocuspointWizard($$anchor, $$props) {
     },
     set itemFormElName($$value) {
       itemFormElName($$value);
-      flush_sync();
-    },
-    get itemFormElValue() {
-      return itemFormElValue();
-    },
-    set itemFormElValue($$value) {
-      itemFormElValue($$value);
       flush_sync();
     },
     get wizardConfig() {
@@ -5106,7 +5101,6 @@ customElements.define("focuspoint-wizard", create_custom_element(
   FocuspointWizard,
   {
     itemFormElName: {},
-    itemFormElValue: {},
     wizardConfig: {},
     image: {}
   },

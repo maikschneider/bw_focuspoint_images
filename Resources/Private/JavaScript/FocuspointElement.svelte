@@ -25,14 +25,14 @@
                     btnClass: 'btn-default',
                     name: 'dismiss',
                     icon: 'actions-close',
-                    text: 'buttonDismissText',
+                    text: TYPO3.lang['wizard.button.cancel'],
                     trigger: () => window.parent.TYPO3.Modal.dismiss(),
                 },
                 {
                     btnClass: 'btn-primary',
                     name: 'save',
                     icon: 'actions-document-save',
-                    text: 'buttonSaveText',
+                    text: TYPO3.lang['wizard.button.save'],
                     trigger: onModalSave,
                 },
             ],
@@ -41,11 +41,9 @@
                         style="height: 100%; width: 100%;"
                         image="${image}"
                         itemFormElName="${itemFormElName}"
-                        itemFormElValue="${itemFormElValue}"
                         wizardConfig="${wizardConfig}"></focuspoint-wizard>    `,
             size: Modal.sizes.full,
-            style: Modal.styles.dark,
-            title: 'modalTitle',
+            title: TYPO3.lang['wizard.focuspoints.title'],
             staticBackdrop: true
         })
     }

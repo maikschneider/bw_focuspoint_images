@@ -16,15 +16,18 @@
     import {initStores} from './store.svelte';
     import {focuspoints} from './store.svelte';
 
-    let {itemFormElName, itemFormElValue, wizardConfig, image} = $props()
+    let {itemFormElName, wizardConfig, image} = $props()
+
+    const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName}"]`)
 
     onMount(() => {
-        initStores(itemFormElValue, wizardConfig)
+        initStores(hiddenInput, wizardConfig)
         window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-save`, handleSave)
     });
 
     onDestroy(() => {
         window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-save`, handleSave)
+        $focuspoints = []
     });
 
     const handleSave = () => {
