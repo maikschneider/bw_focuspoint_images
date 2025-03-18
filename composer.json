@@ -45,7 +45,9 @@
 			"typo3/class-alias-loader": true,
 			"typo3/cms-composer-installers": true
 		},
-		"sort-packages": true
+		"lock": false,
+		"sort-packages": true,
+		"vendor-dir": "vendor"
 	},
 	"extra": {
 		"typo3/cms": {
