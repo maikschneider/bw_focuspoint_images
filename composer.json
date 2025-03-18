@@ -17,7 +17,8 @@
   ],
   "require": {
     "ext-json": "*",
-    "typo3/cms-core": "^12.4 || ^13.4"
+    "typo3/cms-core": "^12.4 || ^13.4",
+    "typo3/cms-fluid-styled-content": "^12.4 || ^13.4"
   },
   "require-dev": {
     "armin/editorconfig-cli": "^2.0",

@@ -1,96 +1,103 @@
-<h1>{data.header}</h1>
+<f:layout name="Default" />
 
-<div class="focuspoint" style="width:{image.properties.width}px">
+<f:section name="Main">
 
-    <f:image image="{image}"/>
+    <f:if condition="{image}">
+        <div class="focuspoint" style="width:{image.properties.width}px">
 
-    <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-        <f:for each="{points}" as="point" iteration="i">
-            <f:if condition="{point.link}">
-                <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
-            </f:if>
-            <rect x="{point.x}%"
-                  y="{point.y}%"
-                  id="focuspoint-{image.uid}-{i.cycle}"
-                  stroke="{point.color}"
-                  stroke-width="2px"
-                  class="focuspoint__svg__rect"
-                  width="{point.width}%"
-                  height="{point.height}%"
-                  opacity="0.7"
-                  fill="{point.color}"/>
-            <f:if condition="{point.link}">
-                </a>
-            </f:if>
-            <text x="{point.textX}%" fill="#FFF" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
-                {point.name}
-            </text>
-        </f:for>
-    </svg>
+            <f:image image="{image}" />
 
-    <f:for each="{points}" as="point" iteration="i">
-        <div class="focuspoint__description" id="focuspoint-{image.uid}-{i.cycle}-description">
-            <h3>{point.name}</h3>
-            <p><f:format.nl2br>{point.description}</f:format.nl2br></p>
+            <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
+                <f:for each="{points}" as="point" iteration="i">
+                    <f:if condition="{point.link}">
+                        <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
+                    </f:if>
+                    <rect
+                        x="{point.x}%"
+                        y="{point.y}%"
+                        id="focuspoint-{image.uid}-{i.cycle}"
+                        stroke="{point.color}"
+                        stroke-width="2px"
+                        class="focuspoint__svg__rect"
+                        width="{point.width}%"
+                        height="{point.height}%"
+                        opacity="0.7"
+                        fill="{point.color}" />
+                    <f:if condition="{point.link}">
+                        </a>
+                    </f:if>
+                    <text x="{point.textX}%" fill="#FFF" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
+                        {point.name}
+                    </text>
+                </f:for>
+            </svg>
+
+            <f:for each="{points}" as="point" iteration="i">
+                <div class="focuspoint__description" id="focuspoint-{image.uid}-{i.cycle}-description">
+                    <h3>{point.name}</h3>
+                    <p>
+                        <f:format.nl2br>{point.description}</f:format.nl2br>
+                    </p>
+                </div>
+            </f:for>
+
         </div>
-    </f:for>
+    </f:if>
 
-</div>
+    <script>
+        const rects = document.getElementsByClassName('focuspoint__svg__rect');
+        for (let i = 0; i < rects.length; i++) {
+            rects[i].addEventListener('mouseover', function () {
+                document.getElementById(this.getAttribute('id') + '-description').setAttribute('style', 'display:inherit');
+            });
+            rects[i].addEventListener('mouseout', function () {
+                document.getElementById(this.getAttribute('id') + '-description').setAttribute('style', '');
+            });
+        }
+    </script>
 
-<script>
-    const rects = document.getElementsByClassName('focuspoint__svg__rect');
-    for (let i = 0; i < rects.length; i++) {
-        rects[i].addEventListener('mouseover', function () {
-            document.getElementById(this.getAttribute('id') + '-description').setAttribute('style', 'display:inherit');
-        });
-        rects[i].addEventListener('mouseout', function () {
-            document.getElementById(this.getAttribute('id') + '-description').setAttribute('style', '');
-        });
-    }
-</script>
+    <style type="text/css">
+        .focuspoint {
+            display: grid;
+            grid-template-columns: 100%;
+            grid-template-rows: auto min-content;
+            max-width: 100%;
+        }
 
-<style type="text/css">
-    .focuspoint {
-        display: grid;
-        grid-template-columns: 100%;
-        grid-template-rows: auto min-content;
-        max-width: 100%;
-    }
+        .focuspoint img {
+            grid-column: 1 / 2;
+            grid-row: 1 / 3;
+            max-width: 100%;
+            height: auto;
+        }
 
-    .focuspoint img {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-        max-width: 100%;
-        height: auto;
-    }
+        .focuspoint__svg {
+            grid-column: 1 / 2;
+            grid-row: 1 / 3;
+            align-self: stretch;
+            justify-self: stretch;
+            width: 100%;
+        }
 
-    .focuspoint__svg {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-        align-self: stretch;
-        justify-self: stretch;
-        width: 100%;
-    }
+        .focuspoint__svg rect:hover {
+            opacity: 1;
+            fill: transparent;
+            stroke-dasharray: 2px;
+        }
 
-    .focuspoint__svg rect:hover {
-        opacity: 1;
-        fill: transparent;
-        stroke-dasharray: 2px;
-    }
+        .focuspoint__svg rect:hover + text {
+            display: none;
+        }
 
-    .focuspoint__svg rect:hover + text {
-        display: none;
-    }
+        .focuspoint__description {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 12px 12px 0 12px;
+            display: none;
+        }
 
-    .focuspoint__description {
-        grid-column: 1 / 2;
-        grid-row: 2 / 3;
-        background: rgba(0, 0, 0, 0.6);
-        color: #fff;
-        padding: 12px 12px 0 12px;
-        display: none;
-    }
+    </style>
 
-</style>
-
-
+</f:section>
