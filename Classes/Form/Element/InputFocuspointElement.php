@@ -34,9 +34,6 @@ class InputFocuspointElement extends AbstractFormElement
             $parameterArray['fieldConf']['config']
         );
 
-        // migrate saved focuspoints (old link fields to new syntax)
-        $this->migrateOldTypolinkSyntax($parameterArray, $config);
-
         // get image
         $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
         if (!$file instanceof File) {
@@ -66,7 +63,6 @@ class InputFocuspointElement extends AbstractFormElement
         }
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
 
-        $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_js.xlf';
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
         $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointElement.js');
 
@@ -112,49 +108,6 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray['html'] = $templateView->render();
 
         return $resultArray;
-    }
-
-    /**
-     * Migrate old typolink markup (v2.3.3) to the t3:// syntax
-     *
-     * @deprecated
-     */
-    protected function migrateOldTypolinkSyntax(array &$parameterArray, array $config): void
-    {
-        if (!$parameterArray['itemFormElValue'] || !is_array(json_decode((string)$parameterArray['itemFormElValue'], true))) {
-            return;
-        }
-
-        $itemFormElValue = json_decode((string)$parameterArray['itemFormElValue'], true);
-
-        if ($itemFormElValue === []) {
-            return;
-        }
-
-        $linkFields = array_filter($config['focusPoints']['singlePoint']['fields'] ?? [], static function ($point): bool {
-            return $point['type'] === 'link';
-        });
-
-        foreach ($itemFormElValue as $key => $item) {
-            foreach ($linkFields as $fieldName => $field) {
-                if (!isset($item[$fieldName])) {
-                    continue;
-                }
-                if (!is_array($item[$fieldName])) {
-                    continue;
-                }
-                // construct new link
-                $link = $item[$fieldName];
-                $target = $link['target'] ?: '-';
-                $newSyntax = 't3://' . $link['key'] . '?uid=' . $link['uid'] . ' ' . $target;
-
-                // replace link
-                $itemFormElValue[$key][$fieldName] = $newSyntax;
-            }
-        }
-
-        // save new item value back tp parameterArray
-        $parameterArray['itemFormElValue'] = json_encode($itemFormElValue);
     }
 
     /**
