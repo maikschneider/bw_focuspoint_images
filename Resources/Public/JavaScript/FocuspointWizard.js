@@ -597,17 +597,6 @@ function reset(node) {
   }
   hydrate_node = node;
 }
-function next(count = 1) {
-  if (hydrating) {
-    var i = count;
-    var node = hydrate_node;
-    while (i--) {
-      node = /** @type {TemplateNode} */
-      get_next_sibling(node);
-    }
-    hydrate_node = node;
-  }
-}
 function remove_nodes() {
   var depth = 0;
   var node = hydrate_node;
@@ -4900,7 +4889,7 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 // Resources/Private/JavaScript/components/Sidebar.svelte
 mark_module_start();
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" class="panel-button" data-crop-variant-id="default" data-crop-variant=""><span class="caret"></span> <span class="panel-title"> </span></button></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> Delete</button></div></div></div>`), Sidebar[FILENAME], [
+var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" class="panel-button" data-crop-variant-id="default" data-crop-variant=""><span class="caret"></span> <span class="panel-title"> </span></button></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
     53,
     12,
@@ -4926,7 +4915,7 @@ var root_13 = add_locations(template(`<div class="panel panel-default" data-crop
     ]
   ]
 ]);
-var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> Add focuspoint</button></div></div>`), Sidebar[FILENAME], [
+var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button></div></div>`), Sidebar[FILENAME], [
   [
     49,
     0,
@@ -5008,7 +4997,8 @@ function Sidebar($$anchor, $$props) {
     var button_1 = sibling(node, 2);
     var node_2 = child(button_1);
     html(node_2, () => $iconStore()["actions-delete"], false, false);
-    next();
+    var text_1 = sibling(node_2);
+    text_1.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.delete"] ?? ""}`;
     reset(button_1);
     reset(div_5);
     reset(div_4);
@@ -5028,7 +5018,8 @@ function Sidebar($$anchor, $$props) {
   var button_2 = child(div_6);
   var node_3 = child(button_2);
   html(node_3, () => $iconStore()["actions-add"], false, false);
-  next();
+  var text_2 = sibling(node_3);
+  text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.addnew"] ?? ""}`;
   reset(button_2);
   reset(div_6);
   reset(div);
