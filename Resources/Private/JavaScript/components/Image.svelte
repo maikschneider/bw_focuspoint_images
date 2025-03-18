@@ -8,6 +8,7 @@
     let canvasWidth = $state(0)
     let focuspointName = $derived((focuspoint, index) => focusPointName(index))
     let img
+    let isDarkMode = $state(false)
 
     interact('.draggable')
             .resizable({
@@ -75,6 +76,13 @@
         }
 
         window.addEventListener('resize', setCanvasSizes)
+
+        const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
+        const theme = document.querySelector('html').getAttribute('data-theme');
+        const darkModePrefer = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light')) {
+            isDarkMode = true
+        }
     })
 
     onDestroy(() => {
@@ -142,15 +150,19 @@
         display: flex;
         justify-content: center;
 
-        --chess-color: rgba(255, 255, 255, 0.1);
+        --chess-color: rgba(0, 0, 0, 0.1);
         opacity: 0.8;
         background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);
         background-size: 20px 20px;
         background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
+
+    .cropper-bg--dark {
+        --chess-color: rgba(255, 255, 255, 0.1);
+    }
 </style>
 
-<div class="cropper-bg" touch-action="none">
+<div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div>
         {#each $focuspoints as focuspoint, index}
             <div

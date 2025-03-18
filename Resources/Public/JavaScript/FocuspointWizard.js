@@ -4384,17 +4384,17 @@ var focusPointName = (index2) => {
 // Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-okbrz5"><span> </span></div>`), Image[FILENAME], [[156, 12, [[164, 16]]]]);
-var root = add_locations(template(`<div class="cropper-bg svelte-okbrz5" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-okbrz5"></div></div>`), Image[FILENAME], [
+var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-p55p0l"><span> </span></div>`), Image[FILENAME], [[168, 12, [[176, 16]]]]);
+var root = add_locations(template(`<div class="cropper-bg svelte-p55p0l" touch-action="none"><div><!> <img alt="Selected" unselectable="on" class="svelte-p55p0l"></div></div>`), Image[FILENAME], [
   [
-    153,
+    165,
     0,
-    [[154, 4, [[167, 8]]]]
+    [[166, 4, [[179, 8]]]]
   ]
 ]);
 var $$css = {
-  hash: "svelte-okbrz5",
-  code: "\n    .draggable.svelte-okbrz5 {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-okbrz5 {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-okbrz5 {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-okbrz5 {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-okbrz5 {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(255, 255, 255, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;\n    }\n"
+  hash: "svelte-p55p0l",
+  code: "\n    .draggable.svelte-p55p0l {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n    }\n\n    .style1.svelte-p55p0l {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n    }\n\n    .style1.active.svelte-p55p0l {\n        border-color: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n\n    img.svelte-p55p0l {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: 100%;\n    }\n\n    .cropper-bg.svelte-p55p0l {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;\n    }\n\n    .cropper-bg--dark.svelte-p55p0l {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -4408,6 +4408,7 @@ function Image($$anchor, $$props) {
   let canvasWidth = state(0);
   let focuspointName = derived(() => (focuspoint, index2) => focusPointName(index2));
   let img;
+  let isDarkMode = state(false);
   interact(".draggable").resizable({
     edges: {
       left: true,
@@ -4463,6 +4464,12 @@ function Image($$anchor, $$props) {
       img.addEventListener("load", setCanvasSizes);
     }
     window.addEventListener("resize", setCanvasSizes);
+    const colorScheme = document.querySelector("html").getAttribute("data-color-scheme");
+    const theme = document.querySelector("html").getAttribute("data-theme");
+    const darkModePrefer = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (strict_equals(colorScheme, "dark") || strict_equals(theme, "auto") && darkModePrefer && strict_equals(colorScheme, "light", false)) {
+      set(isDarkMode, true);
+    }
   });
   onDestroy(() => {
     window.removeEventListener("resize", setCanvasSizes);
@@ -4517,7 +4524,10 @@ function Image($$anchor, $$props) {
   bind_this(img_1, ($$value) => img = $$value, () => img);
   reset(div_1);
   reset(div);
-  template_effect(() => set_attribute(img_1, "src", image()));
+  template_effect(() => {
+    toggle_class(div, "cropper-bg--dark", get(isDarkMode));
+    set_attribute(img_1, "src", image());
+  });
   append($$anchor, div);
   return pop({
     get image() {

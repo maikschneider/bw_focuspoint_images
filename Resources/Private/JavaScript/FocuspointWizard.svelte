@@ -42,4 +42,3 @@
     <Image image={image} />
     <Sidebar />
 </div>
-
