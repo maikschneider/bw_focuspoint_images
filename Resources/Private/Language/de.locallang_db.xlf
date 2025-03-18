@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2017-02-25T18:47:00Z"
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" datatype="plaintext" original="messages" date="2023-04-04T09:23:21Z"
 		  product-name="bw_focuspoint_images">
 		<header/>
 		<body>
@@ -12,7 +12,6 @@
 				<source>Focus Point Image</source>
 				<target>Fokuspunkt Bild</target>
 			</trans-unit>
-
 			<trans-unit id="wizard.button">
 				<source>Open Editor</source>
 				<target>Editor öffnen</target>
@@ -67,6 +66,7 @@
 				<target>Rot</target>
 			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
+				<source />
 				<target>Seite</target>
 			</trans-unit>
 			<trans-unit id="wizard.target">
@@ -85,7 +85,6 @@
 				<source>Top</source>
 				<target>Oberstes Fenster</target>
 			</trans-unit>
-
 			<trans-unit id="tca.wizard.svg.title">
 				<source>SVG Focuspoints</source>
 				<target>SVG Fokuspunkte</target>

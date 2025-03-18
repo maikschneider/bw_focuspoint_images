@@ -1,6 +1,3 @@
-#
-# Table structure for table 'sys_file_reference'
-#
 CREATE TABLE sys_file_reference (
-    focus_points TEXT DEFAULT NULL
+		focus_points TEXT DEFAULT NULL
 );

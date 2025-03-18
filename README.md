@@ -181,13 +181,13 @@ To decode the JSON data and use the information in your template, use the `Focus
 
 ```typo3_typoscript
 tt_content.your_list_type {
-	dataProcessing {
-		15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
-		15 {
-			references.fieldName = assets
-			as = image
-		}
-	}
+    dataProcessing {
+        15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+        15 {
+            references.fieldName = assets
+            as = image
+        }
+    }
 }
 ```
 
@@ -198,8 +198,8 @@ To version 4.x
 ---------------
 
 * TypoScript paths changed:
-  * Old: `EXT:bw_focuspoint_images/Configuration/setup.txt`
-  * New: `EXT:bw_focuspoint_images/Configuration/setup.typoscript`
+* Old: `EXT:bw_focuspoint_images/Configuration/setup.txt`
+* New: `EXT:bw_focuspoint_images/Configuration/setup.typoscript`
 
 To version 3.x
 ---------------

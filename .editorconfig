@@ -58,10 +58,26 @@ trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
 
+[/Documentation/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
 [*.php]
 indent_style = unset
 
 [.ddev/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+[{Resources/Public/JavaScript/FocuspointElement.js,Resources/Public/JavaScript/FocuspointWizard.js}]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset

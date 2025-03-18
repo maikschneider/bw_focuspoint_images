@@ -1,96 +1,97 @@
 {
-  "name": "blueways/bw-focuspoint-images",
-  "description": "Image Editor for adding focus points to images",
-  "license": [
-    "GPL-2.0-or-later"
-  ],
-  "type": "typo3-cms-extension",
-  "keywords": [
-    "TYPO3 CMS"
-  ],
-  "authors": [
-    {
-      "name": "Maik Schneider",
-      "email": "schneider.maik@me.com",
-      "role": "Developer"
-    }
-  ],
-  "require": {
-    "ext-json": "*",
-    "typo3/cms-core": "^12.4 || ^13.4",
-    "typo3/cms-fluid-styled-content": "^12.4 || ^13.4"
-  },
-  "require-dev": {
-    "armin/editorconfig-cli": "^2.0",
-    "bk2k/bootstrap-package": "^15.0",
-    "ergebnis/composer-normalize": "^2.45",
-    "friendsofphp/php-cs-fixer": "^3.6.0",
-    "helhum/typo3-console": "^8.2",
-    "helmich/typo3-typoscript-lint": "^3.3",
-    "nikic/php-parser": "4.19.4 as 5.3.1",
-    "saschaegerer/phpstan-typo3": "^1.10",
-    "ssch/typo3-rector": "^1.2",
-    "symfony/translation": "^7.2",
-    "typo3/cms-base-distribution": "^12.4 || ^13.4",
-    "typo3/cms-lowlevel": "^12.4 || ^13.4"
-  },
-  "autoload": {
-    "psr-4": {
-      "Blueways\\BwFocuspointImages\\": "Classes"
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "ergebnis/composer-normalize": true,
-      "typo3/class-alias-loader": true,
-      "typo3/cms-composer-installers": true
-    },
-    "sort-packages": true
-  },
-  "extra": {
-    "typo3/cms": {
-      "extension-key": "bw_focuspoint_images",
-      "web-dir": "public"
-    }
-  },
-  "scripts": {
-    "ci:composer:normalize": "@composer normalize --no-check-lock --dry-run",
-    "ci:editorconfig:lint": "ec --strict --git-only -n",
-    "ci:php:fixer": "php-cs-fixer --config=php-cs-fixer.php fix --dry-run --format=checkstyle > php-cs-fixer.xml || true",
-    "ci:php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' -print0 | xargs -0 -n 1 -P 4 php -l",
-    "ci:php:stan": "phpstan --no-progress --error-format=checkstyle > phpstan.xml || true",
-    "ci:rector": "rector --no-interaction --dry-run",
-    "ci:sca": [
-      "@ci:composer:normalize",
-      "@ci:editorconfig:lint",
-      "@ci:php:lint",
-      "@ci:php:fixer",
-      "@ci:php:stan",
-      "@ci:php:rector",
-      "@ci:typoscript:lint",
-      "@ci:xml:lint",
-      "@ci:yaml:lint"
-    ],
-    "ci:typoscript:lint": "typoscript-lint --fail-on-warnings",
-    "ci:xml:lint": "find ./ -name '*.xlf' ! -path './vendor/*' ! -path './var/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
-    "ci:yaml:lint": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint",
-    "composer:normalize": "@composer normalize --no-check-lock",
-    "editorconfig:lint": "ec --strict --fix --git-only -n",
-    "php:fixer": "php-cs-fixer --config=php-cs-fixer.php fix",
-    "php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' ! -path './public/*' -print0 | xargs -0 -n 1 -P 4 php -l",
-    "php:stan": "phpstan --generate-baseline=phpstan-baseline.neon --allow-empty-baseline",
-    "rector": "rector",
-    "sca": [
-      "@composer:normalize",
-      "@php:lint",
-      "@php:fixer",
-      "@php:stan",
-      "@typoscript:lint",
-      "@xml:lint",
-      "@yaml:lint"
-    ],
-    "typoscript:lint": "typoscript-lint",
-    "xml:lint": "find ./ -name '*.xlf' ! -path './vendor/*' ! -path './var/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
-    "yaml:lint": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint"
-  }
+	"name": "blueways/bw-focuspoint-images",
+	"description": "Image Editor for adding focus points to images",
+	"license": [
+		"GPL-2.0-or-later"
+	],
+	"type": "typo3-cms-extension",
+	"keywords": [
+		"TYPO3 CMS"
+	],
+	"authors": [
+		{
+			"name": "Maik Schneider",
+			"email": "schneider.maik@me.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"ext-json": "*",
+		"typo3/cms-core": "^12.4 || ^13.4",
+		"typo3/cms-fluid-styled-content": "^12.4 || ^13.4"
+	},
+	"require-dev": {
+		"armin/editorconfig-cli": "^2.0",
+		"bk2k/bootstrap-package": "^15.0",
+		"ergebnis/composer-normalize": "^2.45",
+		"friendsofphp/php-cs-fixer": "^3.6.0",
+		"helhum/typo3-console": "^8.2",
+		"helmich/typo3-typoscript-lint": "^3.3",
+		"nikic/php-parser": "4.19.4 as 5.3.1",
+		"saschaegerer/phpstan-typo3": "^1.10",
+		"ssch/typo3-rector": "^1.2",
+		"symfony/translation": "^7.2",
+		"typo3/cms-base-distribution": "^12.4 || ^13.4",
+		"typo3/cms-lowlevel": "^12.4 || ^13.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"Blueways\\BwFocuspointImages\\": "Classes"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"ergebnis/composer-normalize": true,
+			"typo3/class-alias-loader": true,
+			"typo3/cms-composer-installers": true
+		},
+		"sort-packages": true
+	},
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "bw_focuspoint_images",
+			"web-dir": "public"
+		}
+	},
+	"scripts": {
+		"ci:composer:normalize": "@composer normalize --no-check-lock --dry-run",
+		"ci:editorconfig:lint": "ec --strict --git-only -n",
+		"ci:php:fixer": "php-cs-fixer --config=php-cs-fixer.php fix --dry-run --format=checkstyle > php-cs-fixer.xml || true",
+		"ci:php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' -print0 | xargs -0 -n 1 -P 4 php -l",
+		"ci:php:stan": "phpstan --no-progress --error-format=checkstyle > phpstan.xml || true",
+		"ci:rector": "rector --no-interaction --dry-run",
+		"ci:sca": [
+			"@ci:composer:normalize",
+			"@ci:editorconfig:lint",
+			"@ci:php:lint",
+			"@ci:php:fixer",
+			"@ci:php:stan",
+			"@ci:php:rector",
+			"@ci:typoscript:lint",
+			"@ci:xml:lint",
+			"@ci:yaml:lint"
+		],
+		"ci:typoscript:lint": "typoscript-lint --fail-on-warnings",
+		"ci:xml:lint": "find ./ -name '*.xlf' ! -path './vendor/*' ! -path './var/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
+		"ci:yaml:lint": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint",
+		"composer:normalize": "@composer normalize --no-check-lock",
+		"editorconfig:lint": "ec --strict --fix --git-only -n",
+		"php:fixer": "php-cs-fixer --config=php-cs-fixer.php fix",
+		"php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' ! -path './public/*' -print0 | xargs -0 -n 1 -P 4 php -l",
+		"php:stan": "phpstan --generate-baseline=phpstan-baseline.neon --allow-empty-baseline",
+		"rector": "rector",
+		"sca": [
+			"@composer:normalize",
+			"@editorconfig:lint",
+			"@php:lint",
+			"@php:fixer",
+			"@php:stan",
+			"@typoscript:lint",
+			"@xml:lint",
+			"@yaml:lint"
+		],
+		"typoscript:lint": "typoscript-lint",
+		"xml:lint": "find ./ -name '*.xlf' ! -path './vendor/*' ! -path './var/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
+		"yaml:lint": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint"
+	}
 }

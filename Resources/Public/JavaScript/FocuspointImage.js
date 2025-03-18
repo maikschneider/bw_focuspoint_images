@@ -9,5 +9,3 @@ document.querySelectorAll('.focuspoint__svg__rect').forEach(rect => {
         description.setAttribute('style', '');
     });
 })
-
-

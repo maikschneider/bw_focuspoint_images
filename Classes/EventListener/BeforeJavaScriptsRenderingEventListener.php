@@ -10,8 +10,11 @@ class BeforeJavaScriptsRenderingEventListener
     public function __invoke(BeforeJavaScriptsRenderingEvent $event): void
     {
         if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isBackend()) {
-            $event->getAssetCollector()->addJavaScript('focuspoint-wizard',
-                'EXT:bw_focuspoint_images/Resources/Public/JavaScript/FocuspointWizard.js', ['type' => 'module']);
+            $event->getAssetCollector()->addJavaScript(
+                'focuspoint-wizard',
+                'EXT:bw_focuspoint_images/Resources/Public/JavaScript/FocuspointWizard.js',
+                ['type' => 'module']
+            );
         }
     }
 }

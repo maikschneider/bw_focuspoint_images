@@ -6,7 +6,6 @@ use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Exception;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -53,10 +52,10 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid']);
-        foreach($wizardConfig['fields'] ?? [] as $fieldName => $fieldConfig) {
+        foreach ($wizardConfig['fields'] ?? [] as $fieldName => $fieldConfig) {
             $wizardConfig['fields'][$fieldName]['title'] = $this->getLanguageService()->sL($fieldConfig['title']);
             if (isset($fieldConfig['options'])) {
-                foreach($fieldConfig['options'] as $optionKey => $option) {
+                foreach ($fieldConfig['options'] as $optionKey => $option) {
                     $wizardConfig['fields'][$fieldName]['options'][$optionKey] = $this->getLanguageService()->sL($option);
                 }
             }
