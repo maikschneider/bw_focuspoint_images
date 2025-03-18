@@ -59,7 +59,18 @@
     }
 </script>
 
-<div class="form-group">
+<style>
+    .v12 .form-wizards-wrap {
+        display: flex;
+        gap: 5px;
+    }
+
+    .v12 .btn-default {
+        height: 32px;
+    }
+</style>
+
+<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>

@@ -4716,49 +4716,54 @@ import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
 import Modal from "@typo3/backend/modal.js";
 mark_module_start();
 Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
-var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div class="form-wizards-wrap"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" class="form-control form-control-clearable" readonly=""> <input type="text" class="form-control form-control-clearable"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input" class="close text-black"><!></button></div> <button class="btn btn-default"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default"><!></button></div></div></div></div>`), Link[FILENAME], [
+var root5 = add_locations(template(`<div class="form-group svelte-oaqvsi"><label class="form-label"> </label> <div class="form-wizards-wrap svelte-oaqvsi"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" class="form-control form-control-clearable" readonly=""> <input type="text" class="form-control form-control-clearable"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input" class="close text-black"><!></button></div> <button class="btn btn-default svelte-oaqvsi"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default svelte-oaqvsi"><!></button></div></div></div></div>`), Link[FILENAME], [
   [
-    62,
+    73,
     0,
     [
-      [63, 4],
+      [74, 4],
       [
-        66,
+        77,
         4,
         [
           [
-            67,
+            78,
             8,
             [
               [
-                68,
+                79,
                 12,
                 [
-                  [69, 16],
-                  [70, 16],
+                  [80, 16],
+                  [81, 16],
                   [
-                    71,
+                    82,
                     16,
-                    [[72, 20], [79, 20], [85, 20]]
+                    [[83, 20], [90, 20], [96, 20]]
                   ],
-                  [96, 16]
+                  [107, 16]
                 ]
               ]
             ]
           ],
           [
-            101,
+            112,
             8,
-            [[102, 12, [[103, 16]]]]
+            [[113, 12, [[114, 16]]]]
           ]
         ]
       ]
     ]
   ]
 ]);
+var $$css2 = {
+  hash: "svelte-oaqvsi",
+  code: "\n    .v12.svelte-oaqvsi .form-wizards-wrap:where(.svelte-oaqvsi) {\n        display: flex;\n        gap: 5px;\n    }\n\n    .v12.svelte-oaqvsi .btn-default:where(.svelte-oaqvsi) {\n        height: 32px;\n    }\n"
+};
 function Link($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Link);
+  append_styles($$anchor, $$css2);
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
@@ -4844,6 +4849,7 @@ function Link($$anchor, $$props) {
   reset(div_1);
   reset(div);
   template_effect(() => {
+    toggle_class(div, "v12", $wizardConfigStore() && $wizardConfigStore().typo3Version < 13);
     set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
     set_text(text2, config().title);
     set_attribute(input, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
@@ -4889,50 +4895,50 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 // Resources/Private/JavaScript/components/Sidebar.svelte
 mark_module_start();
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" class="panel-button" data-crop-variant-id="default" data-crop-variant=""><span class="caret"></span> <span class="panel-title"> </span></button></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
+var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" class="panel-button svelte-1sv0c22" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1sv0c22"></span> <span class="panel-title"> </span></button></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
-    53,
+    72,
     12,
     [
       [
-        54,
+        73,
         16,
         [
           [
-            55,
+            74,
             20,
             [
-              [56, 24, [[65, 28], [66, 28]]]
+              [75, 24, [[84, 28], [85, 28]]]
             ]
           ]
         ]
       ],
       [
-        72,
+        91,
         16,
-        [[79, 20, [[84, 24]]]]
+        [[98, 20, [[103, 24]]]]
       ]
     ]
   ]
 ]);
-var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1kzhkn4"><div class="panel-group svelte-1kzhkn4" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button></div></div>`), Sidebar[FILENAME], [
+var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1sv0c22"><div class="panel-group svelte-1sv0c22" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button></div></div>`), Sidebar[FILENAME], [
   [
-    49,
+    68,
     0,
     [
-      [50, 4],
-      [97, 4, [[98, 8]]]
+      [69, 4],
+      [116, 4, [[117, 8]]]
     ]
   ]
 ]);
-var $$css2 = {
-  hash: "svelte-1kzhkn4",
-  code: "\n    .modal-panel-sidebar.svelte-1kzhkn4 {\n        padding-top: 0;\n    }\n\n    .panel-group.svelte-1kzhkn4 {\n        margin-top: 0;\n        margin-bottom: 0;\n    }\n"
+var $$css3 = {
+  hash: "svelte-1sv0c22",
+  code: '\n    .modal-panel-sidebar.svelte-1sv0c22 {\n        padding-top: 0;\n    }\n\n    .panel-group.svelte-1sv0c22 {\n        margin-top: 0;\n        margin-bottom: 0;\n    }\n\n    .v12.svelte-1sv0c22 .panel-button:where(.svelte-1sv0c22) {\n        border: 0;\n        color: #FFF;\n        background: none;\n        gap: 10px;\n        align-items: center;\n        justify-content: start !important;\n        width: 100%;\n    }\n\n    .v12.svelte-1sv0c22 .panel-button[aria-expanded="true"]:where(.svelte-1sv0c22) {\n        border-left: 2px solid #ff8700;\n    }\n\n    .v12.svelte-1sv0c22 .caret:where(.svelte-1sv0c22) {\n        border-top-color: #FFF;\n    }\n\n'
 };
 function Sidebar($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Sidebar);
-  append_styles($$anchor, $$css2);
+  append_styles($$anchor, $$css3);
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
@@ -5023,8 +5029,9 @@ function Sidebar($$anchor, $$props) {
   reset(button_2);
   reset(div_6);
   reset(div);
+  template_effect(() => toggle_class(div, "v12", $wizardConfigStore() && $wizardConfigStore().typo3Version < 13));
   event("click", button_2, preventDefault(function(...$$args) {
-    apply(() => createNewFocuspoint, this, $$args, Sidebar, [98, 72]);
+    apply(() => createNewFocuspoint, this, $$args, Sidebar, [117, 72]);
   }));
   append($$anchor, div);
   return pop({ ...legacy_api() });
@@ -5036,14 +5043,14 @@ create_custom_element(Sidebar, {}, [], [], true);
 mark_module_start();
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
 var root7 = add_locations(template(`<div class="wizard svelte-129cc1i"><!> <!></div>`), FocuspointWizard[FILENAME], [[41, 0]]);
-var $$css3 = {
+var $$css4 = {
   hash: "svelte-129cc1i",
   code: "\n    .wizard.svelte-129cc1i {\n        display: grid;\n        max-height: 100%;\n        grid-template-columns: auto 300px;\n        grid-template-rows: 100%;\n    }\n"
 };
 function FocuspointWizard($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, FocuspointWizard);
-  append_styles($$anchor, $$css3);
+  append_styles($$anchor, $$css4);
   const $$stores = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   validate_prop_bindings($$props, [], [], FocuspointWizard);

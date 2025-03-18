@@ -18,6 +18,8 @@
     function onButtonClick(e) {
         e.preventDefault()
 
+        const typo3Version = JSON.parse(wizardConfig).typo3Version
+
         Modal.advanced({
             additionalCssClasses: ['modal-image-manipulation', 'cropper'],
             buttons: [
@@ -38,12 +40,13 @@
             ],
             content: html`
                 <focuspoint-wizard
-                        style="height: 100%; width: 100%;"
-                        image="${image}"
-                        itemFormElName="${itemFormElName}"
-                        wizardConfig="${wizardConfig}"></focuspoint-wizard>    `,
+                    style="height: 100%; width: 100%;"
+                    image="${image}"
+                    itemFormElName="${itemFormElName}"
+                    wizardConfig="${wizardConfig}"></focuspoint-wizard>`,
             size: Modal.sizes.full,
             title: TYPO3.lang['wizard.focuspoints.title'],
+            style: typo3Version < 13 ? Modal.styles.dark : null,
             staticBackdrop: true
         })
     }
@@ -68,7 +71,6 @@
     </button>
 
     <form name="editform">
-        <input
-                type="hidden" onchange={onLinkSelection} data-formengine-input-name={`${itemFormElName}-hidden-link-field`} />
+        <input type="hidden" onchange={onLinkSelection} data-formengine-input-name={`${itemFormElName}-hidden-link-field`} />
     </form>
 </div>

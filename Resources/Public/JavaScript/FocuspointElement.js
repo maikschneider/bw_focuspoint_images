@@ -3856,12 +3856,12 @@ function onLinkSelection(e4, itemFormElName) {
 var on_click = (e4, onButtonClick) => onButtonClick(e4);
 var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden"></form></div>`), FocuspointElement[FILENAME], [
   [
-    63,
+    66,
     0,
     [
-      [64, 4],
-      [65, 4],
-      [70, 4, [[71, 8]]]
+      [67, 4],
+      [68, 4],
+      [73, 4, [[74, 8]]]
     ]
   ]
 ]);
@@ -3878,6 +3878,7 @@ function FocuspointElement($$anchor, $$props) {
   });
   function onButtonClick(e4) {
     e4.preventDefault();
+    const typo3Version = JSON.parse(wizardConfig()).typo3Version;
     Modal.advanced({
       additionalCssClasses: ["modal-image-manipulation", "cropper"],
       buttons: [
@@ -3898,12 +3899,13 @@ function FocuspointElement($$anchor, $$props) {
       ],
       content: x`
                 <focuspoint-wizard
-                        style="height: 100%; width: 100%;"
-                        image="${image()}"
-                        itemFormElName="${itemFormElName()}"
-                        wizardConfig="${wizardConfig()}"></focuspoint-wizard>    `,
+                    style="height: 100%; width: 100%;"
+                    image="${image()}"
+                    itemFormElName="${itemFormElName()}"
+                    wizardConfig="${wizardConfig()}"></focuspoint-wizard>`,
       size: Modal.sizes.full,
       title: TYPO3.lang["wizard.focuspoints.title"],
+      style: typo3Version < 13 ? Modal.styles.dark : null,
       staticBackdrop: true
     });
   }

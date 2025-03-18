@@ -5,14 +5,13 @@ namespace Blueways\BwFocuspointImages\Form\Element;
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Exception;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Core\Utility\StringUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
@@ -25,6 +24,7 @@ class InputFocuspointElement extends AbstractFormElement
      */
     public function render(): array
     {
+        $version = VersionNumberUtility::convertVersionStringToArray(VersionNumberUtility::getNumericTypo3Version());
         $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
@@ -61,6 +61,7 @@ class InputFocuspointElement extends AbstractFormElement
             }
         }
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
+        $wizardConfig['typo3Version'] = $version['version_main'];
 
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
         $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointElement.js');
@@ -69,7 +70,6 @@ class InputFocuspointElement extends AbstractFormElement
             'itemFormElName' => $parameterArray['itemFormElName'],
             'itemFormElValue' => $parameterArray['itemFormElValue'],
             'wizardConfig' => $wizardConfig,
-
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
@@ -79,25 +79,9 @@ class InputFocuspointElement extends AbstractFormElement
                 true
             ),
             'image' => $file,
-            'formEngine' => [
-                'field' => [
-                    'id' => 'bwfocuspointwizard' . random_int(1, 9999),
-                    'value' => $parameterArray['itemFormElValue'],
-                    'name' => $parameterArray['itemFormElName'],
-                ],
-                'validation' => '[]',
-            ],
             'config' => $config,
             'pid' => $this->data['databaseRow']['pid'],
-            'wizardUri' => $this->getWizardUri($config['focusPoints'], $file, $this->data['databaseRow']['pid']),
         ];
-
-        if ($arguments['isAllowedFileExtension']) {
-            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
-            if (isset($config['eval']) && GeneralUtility::inList($config['eval'], 'required')) {
-                $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
-            }
-        }
 
         // Build html
         $templateView = GeneralUtility::makeInstance(StandaloneView::class);
@@ -133,20 +117,5 @@ class InputFocuspointElement extends AbstractFormElement
         }
 
         return $file;
-    }
-
-    protected function getWizardUri(array $focusPoints, File $image, int $pid): string
-    {
-        $routeName = 'ajax_wizard_focuspoint';
-        $arguments = [
-            'focusPoints' => $focusPoints,
-            'image' => $image->getUid(),
-            'pid' => $pid,
-        ];
-        $uriArguments['arguments'] = json_encode($arguments);
-        $uriArguments['signature'] = GeneralUtility::hmac($uriArguments['arguments'], $routeName);
-
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        return (string)$uriBuilder->buildUriFromRoute($routeName, $uriArguments);
     }
 }

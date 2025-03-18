@@ -44,9 +44,28 @@
         margin-top: 0;
         margin-bottom: 0;
     }
+
+    .v12 .panel-button {
+        border: 0;
+        color: #FFF;
+        background: none;
+        gap: 10px;
+        align-items: center;
+        justify-content: start !important;
+        width: 100%;
+    }
+
+    .v12 .panel-button[aria-expanded="true"] {
+        border-left: 2px solid #ff8700;
+    }
+
+    .v12 .caret {
+        border-top-color: #FFF;
+    }
+
 </style>
 
-<div class="modal-panel-sidebar">
+<div class="modal-panel-sidebar" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
     <div class="panel-group" role="tablist" aria-multiselectable="false">
     {#each $focuspoints as focuspoint, index}
 
