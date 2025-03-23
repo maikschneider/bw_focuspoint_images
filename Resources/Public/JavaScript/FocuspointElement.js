@@ -6,6 +6,7 @@ if (typeof window !== "undefined")
   (window.__svelte ||= { v: /* @__PURE__ */ new Set() }).v.add(PUBLIC_VERSION);
 
 // node_modules/svelte/src/constants.js
+var EACH_ITEM_REACTIVE = 1;
 var EACH_INDEX_REACTIVE = 1 << 1;
 var EACH_IS_CONTROLLED = 1 << 2;
 var EACH_IS_ANIMATED = 1 << 3;
@@ -147,6 +148,17 @@ function safe_equals(value) {
 }
 
 // node_modules/svelte/src/internal/client/errors.js
+function bind_invalid_checkbox_value() {
+  if (dev_fallback_default) {
+    const error = new Error(`bind_invalid_checkbox_value
+Using \`bind:value\` together with a checkbox input is not allowed. Use \`bind:checked\` instead
+https://svelte.dev/e/bind_invalid_checkbox_value`);
+    error.name = "Svelte error";
+    throw error;
+  } else {
+    throw new Error(`https://svelte.dev/e/bind_invalid_checkbox_value`);
+  }
+}
 function bind_invalid_export(component2, key, name) {
   if (dev_fallback_default) {
     const error = new Error(`bind_invalid_export
@@ -573,6 +585,30 @@ function reset(node) {
     throw HYDRATION_ERROR;
   }
   hydrate_node = node;
+}
+function remove_nodes() {
+  var depth = 0;
+  var node = hydrate_node;
+  while (true) {
+    if (node.nodeType === 8) {
+      var data = (
+        /** @type {Comment} */
+        node.data
+      );
+      if (data === HYDRATION_END) {
+        if (depth === 0) return node;
+        depth -= 1;
+      } else if (data === HYDRATION_START || data === HYDRATION_START_ELSE) {
+        depth += 1;
+      }
+    }
+    var next2 = (
+      /** @type {TemplateNode} */
+      get_next_sibling(node)
+    );
+    node.remove();
+    node = next2;
+  }
 }
 
 // node_modules/svelte/src/internal/client/dev/ownership.js
@@ -1430,6 +1466,30 @@ function pause_children(effect2, transitions, local) {
     child2 = sibling2;
   }
 }
+function resume_effect(effect2) {
+  resume_children(effect2, true);
+}
+function resume_children(effect2, local) {
+  if ((effect2.f & INERT) === 0) return;
+  if (check_dirtiness(effect2)) {
+    update_effect(effect2);
+  }
+  effect2.f ^= INERT;
+  var child2 = effect2.first;
+  while (child2 !== null) {
+    var sibling2 = child2.next;
+    var transparent = (child2.f & EFFECT_TRANSPARENT) !== 0 || (child2.f & BRANCH_EFFECT) !== 0;
+    resume_children(child2, transparent ? local : false);
+    child2 = sibling2;
+  }
+  if (effect2.transitions !== null) {
+    for (const transition2 of effect2.transitions) {
+      if (transition2.is_global || local) {
+        transition2.in();
+      }
+    }
+  }
+}
 
 // node_modules/svelte/src/internal/client/dom/task.js
 var request_idle_callback = typeof requestIdleCallback === "undefined" ? (cb) => setTimeout(cb, 1) : requestIdleCallback;
@@ -1448,6 +1508,13 @@ function process_idle_tasks() {
   const tasks = current_queued_idle_tasks.slice();
   current_queued_idle_tasks = [];
   run_all(tasks);
+}
+function queue_micro_task(fn) {
+  if (!is_micro_task_queued) {
+    is_micro_task_queued = true;
+    queueMicrotask(process_micro_tasks);
+  }
+  current_queued_micro_tasks.push(fn);
 }
 function queue_idle_task(fn) {
   if (!is_idle_task_queued) {
@@ -2150,6 +2217,17 @@ if (dev_fallback_default) {
   throw_rune_error("$bindable");
 }
 
+// node_modules/svelte/src/internal/client/dev/css.js
+var all_styles = /* @__PURE__ */ new Map();
+function register_style(hash2, style) {
+  var styles = all_styles.get(hash2);
+  if (!styles) {
+    styles = /* @__PURE__ */ new Set();
+    all_styles.set(hash2, styles);
+  }
+  styles.add(style);
+}
+
 // node_modules/svelte/src/internal/client/dev/elements.js
 function add_locations(fn, filename, locations) {
   return (...args) => {
@@ -2215,6 +2293,33 @@ function add_form_reset_listener() {
       { capture: true }
     );
   }
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/bindings/shared.js
+function without_reactive_context(fn) {
+  var previous_reaction = active_reaction;
+  var previous_effect = active_effect;
+  set_active_reaction(null);
+  set_active_effect(null);
+  try {
+    return fn();
+  } finally {
+    set_active_reaction(previous_reaction);
+    set_active_effect(previous_effect);
+  }
+}
+function listen_to_event_and_reset_event(element2, event2, handler, on_reset = handler) {
+  element2.addEventListener(event2, () => without_reactive_context(handler));
+  const prev = element2.__on_r;
+  if (prev) {
+    element2.__on_r = () => {
+      prev();
+      on_reset(true);
+    };
+  } else {
+    element2.__on_r = () => on_reset(true);
+  }
+  add_form_reset_listener();
 }
 
 // node_modules/svelte/src/internal/client/dom/elements/events.js
@@ -2358,6 +2463,59 @@ function template(content, flags) {
     var clone = (
       /** @type {TemplateNode} */
       use_import_node ? document.importNode(node, true) : node.cloneNode(true)
+    );
+    if (is_fragment) {
+      var start = (
+        /** @type {TemplateNode} */
+        get_first_child(clone)
+      );
+      var end = (
+        /** @type {TemplateNode} */
+        clone.lastChild
+      );
+      assign_nodes(start, end);
+    } else {
+      assign_nodes(clone, clone);
+    }
+    return clone;
+  };
+}
+// @__NO_SIDE_EFFECTS__
+function ns_template(content, flags, ns = "svg") {
+  var has_start = !content.startsWith("<!>");
+  var is_fragment = (flags & TEMPLATE_FRAGMENT) !== 0;
+  var wrapped = `<${ns}>${has_start ? content : "<!>" + content}</${ns}>`;
+  var node;
+  return () => {
+    if (hydrating) {
+      assign_nodes(hydrate_node, null);
+      return hydrate_node;
+    }
+    if (!node) {
+      var fragment = (
+        /** @type {DocumentFragment} */
+        create_fragment_from_html(wrapped)
+      );
+      var root3 = (
+        /** @type {Element} */
+        get_first_child(fragment)
+      );
+      if (is_fragment) {
+        node = document.createDocumentFragment();
+        while (get_first_child(root3)) {
+          node.appendChild(
+            /** @type {Node} */
+            get_first_child(root3)
+          );
+        }
+      } else {
+        node = /** @type {Element} */
+        get_first_child(root3);
+      }
+    }
+    var clone = (
+      /** @type {TemplateNode} */
+      node.cloneNode(true)
     );
     if (is_fragment) {
       var start = (
@@ -2557,6 +2715,392 @@ function legacy_api() {
   };
 }
 
+// node_modules/svelte/src/internal/client/dom/blocks/each.js
+var current_each_item = null;
+function index(_2, i5) {
+  return i5;
+}
+function pause_effects(state2, items, controlled_anchor, items_map) {
+  var transitions = [];
+  var length = items.length;
+  for (var i5 = 0; i5 < length; i5++) {
+    pause_children(items[i5].e, transitions, true);
+  }
+  var is_controlled = length > 0 && transitions.length === 0 && controlled_anchor !== null;
+  if (is_controlled) {
+    var parent_node = (
+      /** @type {Element} */
+      /** @type {Element} */
+      controlled_anchor.parentNode
+    );
+    clear_text_content(parent_node);
+    parent_node.append(
+      /** @type {Element} */
+      controlled_anchor
+    );
+    items_map.clear();
+    link(state2, items[0].prev, items[length - 1].next);
+  }
+  run_out_transitions(transitions, () => {
+    for (var i6 = 0; i6 < length; i6++) {
+      var item = items[i6];
+      if (!is_controlled) {
+        items_map.delete(item.k);
+        link(state2, item.prev, item.next);
+      }
+      destroy_effect(item.e, !is_controlled);
+    }
+  });
+}
+function each(node, flags, get_collection, get_key, render_fn, fallback_fn = null) {
+  var anchor = node;
+  var state2 = { flags, items: /* @__PURE__ */ new Map(), first: null };
+  var is_controlled = (flags & EACH_IS_CONTROLLED) !== 0;
+  if (is_controlled) {
+    var parent_node = (
+      /** @type {Element} */
+      node
+    );
+    anchor = hydrating ? set_hydrate_node(
+      /** @type {Comment | Text} */
+      get_first_child(parent_node)
+    ) : parent_node.appendChild(create_text());
+  }
+  if (hydrating) {
+    hydrate_next();
+  }
+  var fallback2 = null;
+  var was_empty = false;
+  block(() => {
+    var collection = get_collection();
+    var array = is_array(collection) ? collection : collection == null ? [] : array_from(collection);
+    var length = array.length;
+    if (was_empty && length === 0) {
+      return;
+    }
+    was_empty = length === 0;
+    let mismatch = false;
+    if (hydrating) {
+      var is_else = (
+        /** @type {Comment} */
+        anchor.data === HYDRATION_START_ELSE
+      );
+      if (is_else !== (length === 0)) {
+        anchor = remove_nodes();
+        set_hydrate_node(anchor);
+        set_hydrating(false);
+        mismatch = true;
+      }
+    }
+    if (hydrating) {
+      var prev = null;
+      var item;
+      for (var i5 = 0; i5 < length; i5++) {
+        if (hydrate_node.nodeType === 8 && /** @type {Comment} */
+        hydrate_node.data === HYDRATION_END) {
+          anchor = /** @type {Comment} */
+          hydrate_node;
+          mismatch = true;
+          set_hydrating(false);
+          break;
+        }
+        var value = array[i5];
+        var key = get_key(value, i5);
+        item = create_item(
+          hydrate_node,
+          state2,
+          prev,
+          null,
+          value,
+          key,
+          i5,
+          render_fn,
+          flags,
+          get_collection
+        );
+        state2.items.set(key, item);
+        prev = item;
+      }
+      if (length > 0) {
+        set_hydrate_node(remove_nodes());
+      }
+    }
+    if (!hydrating) {
+      var effect2 = (
+        /** @type {Effect} */
+        active_reaction
+      );
+      reconcile(
+        array,
+        state2,
+        anchor,
+        render_fn,
+        flags,
+        (effect2.f & INERT) !== 0,
+        get_key,
+        get_collection
+      );
+    }
+    if (fallback_fn !== null) {
+      if (length === 0) {
+        if (fallback2) {
+          resume_effect(fallback2);
+        } else {
+          fallback2 = branch(() => fallback_fn(anchor));
+        }
+      } else if (fallback2 !== null) {
+        pause_effect(fallback2, () => {
+          fallback2 = null;
+        });
+      }
+    }
+    if (mismatch) {
+      set_hydrating(true);
+    }
+    get_collection();
+  });
+  if (hydrating) {
+    anchor = hydrate_node;
+  }
+}
+function reconcile(array, state2, anchor, render_fn, flags, is_inert, get_key, get_collection) {
+  var is_animated = (flags & EACH_IS_ANIMATED) !== 0;
+  var should_update = (flags & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
+  var length = array.length;
+  var items = state2.items;
+  var first = state2.first;
+  var current = first;
+  var seen;
+  var prev = null;
+  var to_animate;
+  var matched = [];
+  var stashed = [];
+  var value;
+  var key;
+  var item;
+  var i5;
+  if (is_animated) {
+    for (i5 = 0; i5 < length; i5 += 1) {
+      value = array[i5];
+      key = get_key(value, i5);
+      item = items.get(key);
+      if (item !== void 0) {
+        item.a?.measure();
+        (to_animate ??= /* @__PURE__ */ new Set()).add(item);
+      }
+    }
+  }
+  for (i5 = 0; i5 < length; i5 += 1) {
+    value = array[i5];
+    key = get_key(value, i5);
+    item = items.get(key);
+    if (item === void 0) {
+      var child_anchor = current ? (
+        /** @type {TemplateNode} */
+        current.e.nodes_start
+      ) : anchor;
+      prev = create_item(
+        child_anchor,
+        state2,
+        prev,
+        prev === null ? state2.first : prev.next,
+        value,
+        key,
+        i5,
+        render_fn,
+        flags,
+        get_collection
+      );
+      items.set(key, prev);
+      matched = [];
+      stashed = [];
+      current = prev.next;
+      continue;
+    }
+    if (should_update) {
+      update_item(item, value, i5, flags);
+    }
+    if ((item.e.f & INERT) !== 0) {
+      resume_effect(item.e);
+      if (is_animated) {
+        item.a?.unfix();
+        (to_animate ??= /* @__PURE__ */ new Set()).delete(item);
+      }
+    }
+    if (item !== current) {
+      if (seen !== void 0 && seen.has(item)) {
+        if (matched.length < stashed.length) {
+          var start = stashed[0];
+          var j2;
+          prev = start.prev;
+          var a3 = matched[0];
+          var b3 = matched[matched.length - 1];
+          for (j2 = 0; j2 < matched.length; j2 += 1) {
+            move(matched[j2], start, anchor);
+          }
+          for (j2 = 0; j2 < stashed.length; j2 += 1) {
+            seen.delete(stashed[j2]);
+          }
+          link(state2, a3.prev, b3.next);
+          link(state2, prev, a3);
+          link(state2, b3, start);
+          current = start;
+          prev = b3;
+          i5 -= 1;
+          matched = [];
+          stashed = [];
+        } else {
+          seen.delete(item);
+          move(item, current, anchor);
+          link(state2, item.prev, item.next);
+          link(state2, item, prev === null ? state2.first : prev.next);
+          link(state2, prev, item);
+          prev = item;
+        }
+        continue;
+      }
+      matched = [];
+      stashed = [];
+      while (current !== null && current.k !== key) {
+        if (is_inert || (current.e.f & INERT) === 0) {
+          (seen ??= /* @__PURE__ */ new Set()).add(current);
+        }
+        stashed.push(current);
+        current = current.next;
+      }
+      if (current === null) {
+        continue;
+      }
+      item = current;
+    }
+    matched.push(item);
+    prev = item;
+    current = item.next;
+  }
+  if (current !== null || seen !== void 0) {
+    var to_destroy = seen === void 0 ? [] : array_from(seen);
+    while (current !== null) {
+      if (is_inert || (current.e.f & INERT) === 0) {
+        to_destroy.push(current);
+      }
+      current = current.next;
+    }
+    var destroy_length = to_destroy.length;
+    if (destroy_length > 0) {
+      var controlled_anchor = (flags & EACH_IS_CONTROLLED) !== 0 && length === 0 ? anchor : null;
+      if (is_animated) {
+        for (i5 = 0; i5 < destroy_length; i5 += 1) {
+          to_destroy[i5].a?.measure();
+        }
+        for (i5 = 0; i5 < destroy_length; i5 += 1) {
+          to_destroy[i5].a?.fix();
+        }
+      }
+      pause_effects(state2, to_destroy, controlled_anchor, items);
+    }
+  }
+  if (is_animated) {
+    queue_micro_task(() => {
+      if (to_animate === void 0) return;
+      for (item of to_animate) {
+        item.a?.apply();
+      }
+    });
+  }
+  active_effect.first = state2.first && state2.first.e;
+  active_effect.last = prev && prev.e;
+}
+function update_item(item, value, index2, type) {
+  if ((type & EACH_ITEM_REACTIVE) !== 0) {
+    internal_set(item.v, value);
+  }
+  if ((type & EACH_INDEX_REACTIVE) !== 0) {
+    internal_set(
+      /** @type {Value<number>} */
+      item.i,
+      index2
+    );
+  } else {
+    item.i = index2;
+  }
+}
+function create_item(anchor, state2, prev, next2, value, key, index2, render_fn, flags, get_collection) {
+  var previous_each_item = current_each_item;
+  var reactive = (flags & EACH_ITEM_REACTIVE) !== 0;
+  var mutable = (flags & EACH_ITEM_IMMUTABLE) === 0;
+  var v2 = reactive ? mutable ? mutable_source(value) : source(value) : value;
+  var i5 = (flags & EACH_INDEX_REACTIVE) === 0 ? index2 : source(index2);
+  if (dev_fallback_default && reactive) {
+    v2.debug = () => {
+      var collection_index = typeof i5 === "number" ? index2 : i5.v;
+      get_collection()[collection_index];
+    };
+  }
+  var item = {
+    i: i5,
+    v: v2,
+    k: key,
+    a: null,
+    // @ts-expect-error
+    e: null,
+    prev,
+    next: next2
+  };
+  current_each_item = item;
+  try {
+    item.e = branch(() => render_fn(anchor, v2, i5), hydrating);
+    item.e.prev = prev && prev.e;
+    item.e.next = next2 && next2.e;
+    if (prev === null) {
+      state2.first = item;
+    } else {
+      prev.next = item;
+      prev.e.next = item.e;
+    }
+    if (next2 !== null) {
+      next2.prev = item;
+      next2.e.prev = item.e;
+    }
+    return item;
+  } finally {
+    current_each_item = previous_each_item;
+  }
+}
+function move(item, next2, anchor) {
+  var end = item.next ? (
+    /** @type {TemplateNode} */
+    item.next.e.nodes_start
+  ) : anchor;
+  var dest = next2 ? (
+    /** @type {TemplateNode} */
+    next2.e.nodes_start
+  ) : anchor;
+  var node = (
+    /** @type {TemplateNode} */
+    item.e.nodes_start
+  );
+  while (node !== end) {
+    var next_node = (
+      /** @type {TemplateNode} */
+      get_next_sibling(node)
+    );
+    dest.before(node);
+    node = next_node;
+  }
+}
+function link(state2, prev, next2) {
+  if (prev === null) {
+    state2.first = next2;
+  } else {
+    prev.next = next2;
+    prev.e.next = next2 && next2.e;
+  }
+  if (next2 !== null) {
+    next2.prev = prev;
+    next2.e.prev = prev && prev.e;
+  }
+}
+
 // node_modules/svelte/src/internal/client/dom/blocks/html.js
 function check_hash(element2, server_hash, value) {
   if (!server_hash || server_hash === hash(String(value ?? ""))) return;
@@ -2643,6 +3187,33 @@ function html(node, get_value, svg, mathml, skip_warning) {
   });
 }
 
+// node_modules/svelte/src/internal/client/dom/css.js
+function append_styles(anchor, css) {
+  queue_micro_task(() => {
+    var root3 = anchor.getRootNode();
+    var target = (
+      /** @type {ShadowRoot} */
+      root3.host ? (
+        /** @type {ShadowRoot} */
+        root3
+      ) : (
+        /** @type {Document} */
+        root3.head ?? /** @type {Document} */
+        root3.ownerDocument.head
+      )
+    );
+    if (!target.querySelector("#" + css.hash)) {
+      const style = document.createElement("style");
+      style.id = css.hash;
+      style.textContent = css.code;
+      target.appendChild(style);
+      if (dev_fallback_default) {
+        register_style(css.hash, style);
+      }
+    }
+  });
+}
+
 // node_modules/svelte/src/internal/client/dom/elements/attributes.js
 function remove_input_defaults(input) {
   if (!hydrating) return;
@@ -2664,16 +3235,6 @@ function remove_input_defaults(input) {
   input.__on_r = remove_defaults;
   queue_idle_task(remove_defaults);
   add_form_reset_listener();
-}
-function set_value(element2, value) {
-  var attributes = element2.__attributes ??= {};
-  if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
-  value ?? void 0) || // @ts-expect-error
-  // `progress` elements always need their value set when its `0`
-  element2.value === value && (value !== 0 || element2.nodeName !== "PROGRESS")) {
-    return;
-  }
-  element2.value = value;
 }
 function set_attribute(element2, attribute, value, skip_warning) {
   var attributes = element2.__attributes ??= {};
@@ -2748,6 +3309,59 @@ function srcset_url_equal(element2, srcset) {
     // contain relative or absolute URLs.
     (src_url_equal(element_urls[i5][0], url) || src_url_equal(url, element_urls[i5][0]))
   );
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/bindings/input.js
+function bind_value(input, get2, set2 = get2) {
+  var runes = is_runes();
+  listen_to_event_and_reset_event(input, "input", (is_reset) => {
+    if (dev_fallback_default && input.type === "checkbox") {
+      bind_invalid_checkbox_value();
+    }
+    var value = is_reset ? input.defaultValue : input.value;
+    value = is_numberlike_input(input) ? to_number(value) : value;
+    set2(value);
+    if (runes && value !== (value = get2())) {
+      var start = input.selectionStart;
+      var end = input.selectionEnd;
+      input.value = value ?? "";
+      if (end !== null) {
+        input.selectionStart = start;
+        input.selectionEnd = Math.min(end, input.value.length);
+      }
+    }
+  });
+  if (
+    // If we are hydrating and the value has since changed,
+    // then use the updated value from the input instead.
+    hydrating && input.defaultValue !== input.value || // If defaultValue is set, then value == defaultValue
+    // TODO Svelte 6: remove input.value check and set to empty string?
+    untrack(get2) == null && input.value
+  ) {
+    set2(is_numberlike_input(input) ? to_number(input.value) : input.value);
+  }
+  render_effect(() => {
+    if (dev_fallback_default && input.type === "checkbox") {
+      bind_invalid_checkbox_value();
+    }
+    var value = get2();
+    if (is_numberlike_input(input) && value === to_number(input.value)) {
+      return;
+    }
+    if (input.type === "date" && !value && !input.value) {
+      return;
+    }
+    if (value !== input.value) {
+      input.value = value ?? "";
+    }
+  });
+}
+function is_numberlike_input(input) {
+  var type = input.type;
+  return type === "number" || type === "range";
+}
+function to_number(value) {
+  return value === "" ? null : +value;
 }
 
 // node_modules/svelte/src/index-client.js
@@ -3847,6 +4461,112 @@ var i4 = globalThis.litElementPolyfillSupport;
 i4?.({ LitElement: r4 });
 (globalThis.litElementVersions ??= []).push("4.1.1");
 
+// Resources/Private/JavaScript/components/Preview.svelte
+mark_module_start();
+Preview[FILENAME] = "Resources/Private/JavaScript/components/Preview.svelte";
+var root_1 = add_locations(ns_template(`<rect fill="#000"></rect>`), Preview[FILENAME], [[45, 20]]);
+var root_2 = add_locations(ns_template(`<rect stroke="#ff8700" stroke-width="1.5px" fill="none"></rect>`), Preview[FILENAME], [[51, 16]]);
+var root = add_locations(template(`<div class="wrapper svelte-bwhiq6"><div class="preview svelte-bwhiq6"><img alt="Preview" class="svelte-bwhiq6"> <svg viewBox="0 0 200 200" preserveAspectRatio="none" class="focuspoint__svg svelte-bwhiq6" xmlns="http://www.w3.org/2000/svg"><mask><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5"></rect><!></mask><rect x="0" y="0" width="200" height="200" fill="#000"></rect><!></svg></div></div>`), Preview[FILENAME], [
+  [
+    38,
+    0,
+    [
+      [
+        39,
+        4,
+        [
+          [40, 8],
+          [
+            41,
+            8,
+            [
+              [42, 12, [[43, 16]]],
+              [49, 12]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]
+]);
+var $$css = {
+  hash: "svelte-bwhiq6",
+  code: "\n    .wrapper.svelte-bwhiq6 {\n        display: flex;\n        margin-bottom: 1rem;\n    }\n\n    .preview.svelte-bwhiq6 {\n        display: inline-block;\n        position: relative;\n    }\n\n    img.svelte-bwhiq6 {\n        max-width: 200px;\n        max-height: 200px;\n    }\n\n    svg.svelte-bwhiq6 {\n        position: absolute;\n        width: 100%;\n        height: 100%;\n        top: 0;\n        left: 0;\n    }\n"
+};
+function Preview($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Preview);
+  append_styles($$anchor, $$css);
+  validate_prop_bindings($$props, [], [], Preview);
+  let image = prop($$props, "image", 7), points = prop($$props, "points", 7), itemFormElName = prop($$props, "itemFormElName", 7);
+  function percentage(number) {
+    return number * 100 + "%";
+  }
+  function size(number) {
+    return number * 100;
+  }
+  var div = root();
+  var div_1 = child(div);
+  var img = child(div_1);
+  var svg = sibling(img, 2);
+  var mask = child(svg);
+  var node = sibling(child(mask));
+  each(node, 17, points, index, ($$anchor2, point) => {
+    var rect = root_1();
+    template_effect(() => set_attribute(rect, "x", percentage(get(point).x)));
+    template_effect(() => set_attribute(rect, "y", percentage(get(point).y)));
+    template_effect(() => set_attribute(rect, "width", size(get(point).width)));
+    template_effect(() => set_attribute(rect, "height", size(get(point).height)));
+    append($$anchor2, rect);
+  });
+  reset(mask);
+  var rect_1 = sibling(mask);
+  var node_1 = sibling(rect_1);
+  each(node_1, 17, points, index, ($$anchor2, point) => {
+    var rect_2 = root_2();
+    template_effect(() => set_attribute(rect_2, "x", percentage(get(point).x)));
+    template_effect(() => set_attribute(rect_2, "y", percentage(get(point).y)));
+    template_effect(() => set_attribute(rect_2, "width", size(get(point).width)));
+    template_effect(() => set_attribute(rect_2, "height", size(get(point).height)));
+    append($$anchor2, rect_2);
+  });
+  reset(svg);
+  reset(div_1);
+  reset(div);
+  template_effect(() => {
+    set_attribute(img, "src", image());
+    set_attribute(mask, "id", `mask${itemFormElName() ?? ""}`);
+    set_attribute(rect_1, "mask", `url(#mask${itemFormElName() ?? ""})`);
+  });
+  append($$anchor, div);
+  return pop({
+    get image() {
+      return image();
+    },
+    set image($$value) {
+      image($$value);
+      flush_sync();
+    },
+    get points() {
+      return points();
+    },
+    set points($$value) {
+      points($$value);
+      flush_sync();
+    },
+    get itemFormElName() {
+      return itemFormElName();
+    },
+    set itemFormElName($$value) {
+      itemFormElName($$value);
+      flush_sync();
+    },
+    ...legacy_api()
+  });
+}
+mark_module_end(Preview);
+create_custom_element(Preview, { image: {}, points: {}, itemFormElName: {} }, [], [], true);
+
 // Resources/Private/JavaScript/FocuspointElement.svelte
 mark_module_start();
 FocuspointElement[FILENAME] = "Resources/Private/JavaScript/FocuspointElement.svelte";
@@ -3854,14 +4574,14 @@ function onLinkSelection(e4, itemFormElName) {
   window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-link-selected`, { detail: { link: e4.currentTarget.value } }));
 }
 var on_click = (e4, onButtonClick) => onButtonClick(e4);
-var root = add_locations(template(`<div><input type="hidden"> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden"></form></div>`), FocuspointElement[FILENAME], [
+var root2 = add_locations(template(`<div><input type="hidden"> <!> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden"></form></div>`), FocuspointElement[FILENAME], [
   [
-    66,
+    68,
     0,
     [
-      [67, 4],
-      [68, 4],
-      [73, 4, [[74, 8]]]
+      [69, 4],
+      [71, 4],
+      [76, 4, [[77, 8]]]
     ]
   ]
 ]);
@@ -3871,6 +4591,7 @@ function FocuspointElement($$anchor, $$props) {
   validate_prop_bindings($$props, [], [], FocuspointElement);
   let itemFormElName = prop($$props, "itemFormElName", 7), itemFormElValue = prop($$props, "itemFormElValue", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
   let icon = state("");
+  let previewPoints = JSON.parse(itemFormElValue() ? itemFormElValue() : "[]");
   onMount(() => {
     Icons.getIcon("content-target", Icons.sizes.small).then((html2) => {
       set(icon, proxy(html2, null, icon));
@@ -3913,14 +4634,24 @@ function FocuspointElement($$anchor, $$props) {
     window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-save`, {}));
     window.parent.TYPO3.Modal.dismiss();
   }
-  var div = root();
+  var div = root2();
   var input = child(div);
   remove_input_defaults(input);
-  var button = sibling(input, 2);
+  var node = sibling(input, 2);
+  Preview(node, {
+    get image() {
+      return image();
+    },
+    points: previewPoints,
+    get itemFormElName() {
+      return itemFormElName();
+    }
+  });
+  var button = sibling(node, 2);
   button.__click = [on_click, onButtonClick];
-  var node = child(button);
-  html(node, () => get(icon), false, false);
-  var text2 = sibling(node);
+  var node_1 = child(button);
+  html(node_1, () => get(icon), false, false);
+  var text2 = sibling(node_1);
   text2.nodeValue = ` ${TYPO3.lang["wizard.button"] ?? ""}`;
   reset(button);
   var form = sibling(button, 2);
@@ -3930,9 +4661,9 @@ function FocuspointElement($$anchor, $$props) {
   reset(div);
   template_effect(() => {
     set_attribute(input, "name", itemFormElName());
-    set_value(input, itemFormElValue());
     set_attribute(input_1, "data-formengine-input-name", `${itemFormElName()}-hidden-link-field`);
   });
+  bind_value(input, itemFormElValue);
   append($$anchor, div);
   return pop({
     get itemFormElName() {

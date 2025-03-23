@@ -5,9 +5,11 @@
     import Modal from '@typo3/backend/modal.js'
     import Icons from '@typo3/backend/icons.js'
     import {html} from "lit"
+    import Preview from "./components/Preview.svelte";
 
     let {itemFormElName, itemFormElValue, wizardConfig, image} = $props()
     let icon = $state('')
+    let previewPoints = JSON.parse(itemFormElValue ? itemFormElValue : '[]')
 
     onMount(() => {
         Icons.getIcon('content-target', Icons.sizes.small).then((html) => {
@@ -64,7 +66,8 @@
 </script>
 
 <div>
-    <input type="hidden" name={itemFormElName} value={itemFormElValue} />
+    <input type="hidden" name={itemFormElName} bind:value={itemFormElValue} />
+    <Preview image={image} points={previewPoints} itemFormElName={itemFormElName} />
     <button onclick={(e) => onButtonClick(e)} class="btn btn-default">
         {@html icon}
         {TYPO3.lang['wizard.button']}
