@@ -142,7 +142,7 @@
         -webkit-user-select: none;
         user-select: none;
         max-width: 100%;
-        max-height: 100%;
+        max-height: calc(100vh - 200px);
     }
 
     .cropper-bg {
@@ -160,10 +160,14 @@
     .cropper-bg--dark {
         --chess-color: rgba(255, 255, 255, 0.1);
     }
+
+    .wrapper {
+        align-self: center;
+    }
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
-    <div>
+    <div class="wrapper">
         {#each $focuspoints as focuspoint, index}
             <div
                     onclick={() => activateFocuspoint(index)}

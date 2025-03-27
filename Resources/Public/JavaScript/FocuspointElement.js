@@ -4620,7 +4620,7 @@ function FocuspointElement($$anchor, $$props) {
       ],
       content: x`
                 <focuspoint-wizard
-                    style="height: 100%; width: 100%;"
+                    style="height: 100%; width: 100%; display: grid;"
                     image="${image()}"
                     itemFormElName="${itemFormElName()}"
                     wizardConfig="${wizardConfig()}"></focuspoint-wizard>`,
