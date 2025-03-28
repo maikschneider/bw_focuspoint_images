@@ -896,17 +896,6 @@ function reset(node) {
   }
   hydrate_node = node;
 }
-function next(count = 1) {
-  if (hydrating) {
-    var i = count;
-    var node = hydrate_node;
-    while (i--) {
-      node = /** @type {TemplateNode} */
-      get_next_sibling(node);
-    }
-    hydrate_node = node;
-  }
-}
 function remove_nodes() {
   var depth = 0;
   var node = hydrate_node;
@@ -5389,32 +5378,32 @@ function onSaveButtonClick(__2, $focuspoints, jsonPoints, itemFormElName) {
     Notification.error("Error", "Invalid JSON", 5);
   }
 }
-var root7 = add_locations(template(`<div class="d-flex justify-content-center align-items-center"><fieldset class="form-section"><h3 class="form-section-headline">Settings</h3> <div class="row"><label for="points">Import / Export</label> <div class="form-group"><textarea id="points" rows="10" cols="50"></textarea> <div class="d-flex justify-content-between"><div><button class="btn btn-default"><!>Copy</button> <button class="btn btn-default"><!>Paste</button></div> <div><button class="btn btn-default"><!> Undo</button> <button class="btn btn-primary"><!> Save</button></div></div></div></div></fieldset></div>`), Settings[FILENAME], [
+var root7 = add_locations(template(`<div class="d-flex justify-content-center align-items-center"><fieldset class="form-section"><h3 class="form-section-headline"></h3> <div class="row"><label for="points">Import / Export</label> <div class="form-group"><textarea id="points" rows="10" cols="50"></textarea> <div class="d-flex justify-content-between"><div><button class="btn btn-default"><!> </button> <button class="btn btn-default"><!> </button></div> <div><button class="btn btn-default"><!> </button> <button class="btn btn-primary"><!> </button></div></div></div></div></fieldset></div>`), Settings[FILENAME], [
   [
-    55,
+    59,
     0,
     [
       [
-        57,
+        61,
         4,
         [
-          [58, 8],
+          [62, 8],
           [
-            59,
+            63,
             8,
             [
-              [60, 12],
+              [64, 12],
               [
-                61,
+                65,
                 12,
                 [
-                  [62, 20],
+                  [66, 20],
                   [
-                    71,
+                    75,
                     16,
                     [
-                      [72, 20, [[73, 24], [75, 24]]],
-                      [78, 20, [[79, 24], [82, 24]]]
+                      [76, 20, [[77, 24], [80, 24]]],
+                      [84, 20, [[85, 24], [88, 24]]]
                     ]
                   ]
                 ]
@@ -5454,11 +5443,13 @@ function Settings($$anchor, $$props) {
   });
   function onCopyButtonClick() {
     navigator.clipboard.writeText(focuspointArea.value);
-    Notification.success("Copied", "The current focuspoint configuration has been copied to the clipboard", 2);
+    Notification.success(window.parent.frames.list_frame.TYPO3.lang["wizard.settings.copied"], window.parent.frames.list_frame.TYPO3.lang["wizard.settings.copied.message"], 3);
   }
   var div = root7();
   var fieldset = child(div);
-  var div_1 = sibling(child(fieldset), 2);
+  var h3 = child(fieldset);
+  h3.textContent = window.parent.frames.list_frame.TYPO3.lang["wizard.button.settings"];
+  var div_1 = sibling(h3, 2);
   var label = child(div_1);
   let classes;
   var div_2 = sibling(label, 2);
@@ -5472,13 +5463,15 @@ function Settings($$anchor, $$props) {
   button.__click = onCopyButtonClick;
   var node = child(button);
   html(node, () => $iconStore()["actions-clipboard"], false, false);
-  next();
+  var text_1 = sibling(node);
+  text_1.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.copy"] ?? ""}`;
   reset(button);
   var button_1 = sibling(button, 2);
   button_1.__click = [onPasteButtonClick, jsonPoints];
   var node_1 = child(button_1);
   html(node_1, () => $iconStore()["actions-clipboard-paste"], false, false);
-  next();
+  var text_2 = sibling(node_1);
+  text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.paste"] ?? ""}`;
   reset(button_1);
   reset(div_4);
   var div_5 = sibling(div_4, 2);
@@ -5486,7 +5479,8 @@ function Settings($$anchor, $$props) {
   button_2.__click = [onUndoButtonClick, jsonPoints, $focuspoints];
   var node_2 = child(button_2);
   html(node_2, () => $iconStore()["actions-undo"], false, false);
-  next();
+  var text_3 = sibling(node_2);
+  text_3.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.undo"] ?? ""}`;
   reset(button_2);
   var button_3 = sibling(button_2, 2);
   button_3.__click = [
@@ -5497,7 +5491,8 @@ function Settings($$anchor, $$props) {
   ];
   var node_3 = child(button_3);
   html(node_3, () => $iconStore()["actions-check"], false, false);
-  next();
+  var text_4 = sibling(node_3);
+  text_4.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.accept"] ?? ""}`;
   reset(button_3);
   reset(div_5);
   reset(div_3);

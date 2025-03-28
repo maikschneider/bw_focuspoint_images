@@ -109,6 +109,29 @@
 				<source>Unable to provide image manipulation, because original dimensions of the image are unknown.</source>
 				<target>Der Focuspoint Editor ist nicht verfügbar, weil die originalen Abmaße des Bildes unbekannt sind.</target>
 			</trans-unit>
+			<trans-unit id="wizard.settings.copied">
+				<source>Copied</source>
+				<target>Kopiert</target>
+			</trans-unit>
+			<trans-unit id="wizard.settings.copied.message">
+				<source>The current focuspoint configuration has been copied to the clipboard</source>
+				<target>Die aktuelle Fokuspunkt-Konfiguration wurde in die Zwischenablage kopiert</target>
+			</trans-unit>
+			<trans-unit id="wizard.button.copy">
+				<source>Copy</source>
+				<target>Kopieren</target>
+			</trans-unit>
+			<trans-unit id="wizard.button.paste">
+				<source>Paste</source>
+				<target>Einfügen</target>
+			</trans-unit>
+			<trans-unit id="wizard.button.undo">
+				<source>Undo</source>
+				<target>Zurücksetzen</target>
+			</trans-unit>
+			<trans-unit id="wizard.button.accept">
+				<source>Übernehmen</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

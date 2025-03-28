@@ -29,7 +29,11 @@
 
     function onCopyButtonClick() {
         navigator.clipboard.writeText(focuspointArea.value);
-        Notification.success('Copied', 'The current focuspoint configuration has been copied to the clipboard', 2);
+        Notification.success(
+                window.parent.frames.list_frame.TYPO3.lang['wizard.settings.copied'],
+                window.parent.frames.list_frame.TYPO3.lang['wizard.settings.copied.message'],
+                3
+        );
     }
 
     function onPasteButtonClick() {
@@ -55,7 +59,7 @@
 <div class="d-flex justify-content-center align-items-center">
 
     <fieldset class="form-section">
-        <h3 class="form-section-headline">Settings</h3>
+        <h3 class="form-section-headline">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.settings']}</h3>
         <div class="row">
             <label class="form-label" class:has-error={hasError} class:has-change={hasChange} for="points">Import / Export</label>
             <div class="form-group">
@@ -70,19 +74,19 @@
                             cols="50"></textarea>
                 <div class="d-flex justify-content-between">
                     <div>
-                        <button class="btn btn-default" onclick={onCopyButtonClick}>{@html $iconStore['actions-clipboard']}Copy
+                        <button class="btn btn-default" onclick={onCopyButtonClick}>
+                            {@html $iconStore['actions-clipboard']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.copy']}
                         </button>
-                        <button class="btn btn-default" onclick={onPasteButtonClick}>{@html $iconStore['actions-clipboard-paste']}Paste
+                        <button class="btn btn-default" onclick={onPasteButtonClick}>
+                            {@html $iconStore['actions-clipboard-paste']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.paste']}
                         </button>
                     </div>
                     <div>
-                        <button disabled={!hasChange} class="btn btn-default" onclick={onUndoButtonClick}>{@html $iconStore['actions-undo']}
-                            Undo
+                        <button disabled={!hasChange} class="btn btn-default" onclick={onUndoButtonClick}>
+                            {@html $iconStore['actions-undo']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.undo']}
                         </button>
-                        <button
-                                disabled={!hasChange || hasError}
-                                class="btn btn-primary"
-                                onclick={onSaveButtonClick}>{@html $iconStore['actions-check']} Save
+                        <button disabled={!hasChange || hasError} class="btn btn-primary" onclick={onSaveButtonClick}>
+                            {@html $iconStore['actions-check']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.accept']}
                         </button>
                     </div>
                 </div>
