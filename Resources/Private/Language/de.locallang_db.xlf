@@ -24,6 +24,10 @@
 				<source>Save</source>
 				<target>Speichern</target>
 			</trans-unit>
+			<trans-unit id="wizard.button.settings">
+				<source>Settings</source>
+				<target>Einstellungen</target>
+			</trans-unit>
 			<trans-unit id="wizard.focuspoints.title">
 				<source>Focus Points</source>
 				<target>Fokuspunkte</target>

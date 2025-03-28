@@ -1,5 +1,11 @@
 <svelte:options customElement={{tag: 'focuspoint-element', shadow: 'none'}} />
 
+<style>
+    .btn--left {
+        margin-right: auto;
+    }
+</style>
+
 <script>
     import {onMount} from "svelte"
     import Modal from '@typo3/backend/modal.js'
@@ -25,6 +31,13 @@
         Modal.advanced({
             additionalCssClasses: ['modal-image-manipulation', 'cropper'],
             buttons: [
+                {
+                    btnClass: 'btn-default btn--left',
+                    name: 'settings',
+                    icon: 'actions-cog',
+                    text: TYPO3.lang['wizard.button.settings'],
+                    trigger: onModalSettings,
+                },
                 {
                     btnClass: 'btn-default',
                     name: 'dismiss',
@@ -56,6 +69,10 @@
     function onModalSave() {
         window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-save`, {}))
         window.parent.TYPO3.Modal.dismiss();
+    }
+
+    function onModalSettings() {
+        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
     }
 
     function onLinkSelection(e) {

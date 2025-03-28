@@ -4576,18 +4576,23 @@ function onLinkSelection(e4, itemFormElName) {
 var on_click = (e4, onButtonClick) => onButtonClick(e4);
 var root2 = add_locations(template(`<div><input type="hidden"> <!> <button class="btn btn-default"><!> </button> <form name="editform"><input type="hidden"></form></div>`), FocuspointElement[FILENAME], [
   [
-    68,
+    85,
     0,
     [
-      [69, 4],
-      [71, 4],
-      [76, 4, [[77, 8]]]
+      [86, 4],
+      [88, 4],
+      [93, 4, [[94, 8]]]
     ]
   ]
 ]);
+var $$css2 = {
+  hash: "svelte-1ihlcez",
+  code: "\n    /* (unused) .btn--left {\n        margin-right: auto;\n    }*/\n"
+};
 function FocuspointElement($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, FocuspointElement);
+  append_styles($$anchor, $$css2);
   validate_prop_bindings($$props, [], [], FocuspointElement);
   let itemFormElName = prop($$props, "itemFormElName", 7), itemFormElValue = prop($$props, "itemFormElValue", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
   let icon = state("");
@@ -4603,6 +4608,13 @@ function FocuspointElement($$anchor, $$props) {
     Modal.advanced({
       additionalCssClasses: ["modal-image-manipulation", "cropper"],
       buttons: [
+        {
+          btnClass: "btn-default btn--left",
+          name: "settings",
+          icon: "actions-cog",
+          text: TYPO3.lang["wizard.button.settings"],
+          trigger: onModalSettings
+        },
         {
           btnClass: "btn-default",
           name: "dismiss",
@@ -4633,6 +4645,9 @@ function FocuspointElement($$anchor, $$props) {
   function onModalSave() {
     window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-save`, {}));
     window.parent.TYPO3.Modal.dismiss();
+  }
+  function onModalSettings() {
+    window.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-settings`, {}));
   }
   var div = root2();
   var input = child(div);

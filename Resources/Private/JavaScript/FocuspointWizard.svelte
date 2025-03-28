@@ -15,18 +15,22 @@
     import Sidebar from "./components/Sidebar.svelte";
     import {initStores} from './store.svelte';
     import {focuspoints} from './store.svelte';
+    import Settings from "./components/Settings.svelte";
 
     let {itemFormElName, wizardConfig, image} = $props()
+    let isSettingsOpen = $state(false)
 
     const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName}"]`)
 
     onMount(() => {
         initStores(hiddenInput, wizardConfig)
         window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-save`, handleSave)
+        window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-settings`, handleSettings)
     });
 
     onDestroy(() => {
         window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-save`, handleSave)
+        window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-settings`, handleSettings)
         $focuspoints = []
     });
 
@@ -35,10 +39,18 @@
         hiddenInput.value = JSON.stringify($focuspoints)
     }
 
+    const handleSettings = () => {
+        isSettingsOpen = !isSettingsOpen
+    }
 
 </script>
 
 <div class="wizard">
-    <Image image={image} />
-    <Sidebar />
+    {#if isSettingsOpen}
+        <Settings />
+        <div></div>
+    {:else}
+        <Image image={image} />
+        <Sidebar />
+    {/if}
 </div>
