@@ -47,8 +47,7 @@
 
 <div class="wizard">
     {#if isSettingsOpen}
-        <Settings />
-        <div></div>
+        <Settings itemFormElName={itemFormElName} />
     {:else}
         <Image image={image} />
         <Sidebar />

@@ -2,8 +2,9 @@
 var PUBLIC_VERSION = "5";
 
 // node_modules/svelte/src/internal/disclose-version.js
-if (typeof window !== "undefined")
-  (window.__svelte ||= { v: /* @__PURE__ */ new Set() }).v.add(PUBLIC_VERSION);
+if (typeof window !== "undefined") {
+  ((window.__svelte ??= {}).v ??= /* @__PURE__ */ new Set()).add(PUBLIC_VERSION);
+}
 
 // node_modules/svelte/src/constants.js
 var EACH_ITEM_REACTIVE = 1;
@@ -28,92 +29,11 @@ var ELEMENT_PRESERVE_ATTRIBUTE_CASE = 1 << 1;
 var UNINITIALIZED = Symbol();
 var FILENAME = Symbol("filename");
 var HMR = Symbol("hmr");
-
-// node_modules/svelte/src/utils.js
-var regex_return_characters = /\r/g;
-function hash(str) {
-  str = str.replace(regex_return_characters, "");
-  let hash2 = 5381;
-  let i = str.length;
-  while (i--) hash2 = (hash2 << 5) - hash2 ^ str.charCodeAt(i);
-  return (hash2 >>> 0).toString(36);
-}
-var DOM_BOOLEAN_ATTRIBUTES = [
-  "allowfullscreen",
-  "async",
-  "autofocus",
-  "autoplay",
-  "checked",
-  "controls",
-  "default",
-  "disabled",
-  "formnovalidate",
-  "hidden",
-  "indeterminate",
-  "ismap",
-  "loop",
-  "multiple",
-  "muted",
-  "nomodule",
-  "novalidate",
-  "open",
-  "playsinline",
-  "readonly",
-  "required",
-  "reversed",
-  "seamless",
-  "selected",
-  "webkitdirectory"
-];
-var DOM_PROPERTIES = [
-  ...DOM_BOOLEAN_ATTRIBUTES,
-  "formNoValidate",
-  "isMap",
-  "noModule",
-  "playsInline",
-  "readOnly",
-  "value",
-  "inert",
-  "volume",
-  "defaultValue",
-  "defaultChecked",
-  "srcObject"
-];
-var PASSIVE_EVENTS = ["touchstart", "touchmove"];
-function is_passive_event(name) {
-  return PASSIVE_EVENTS.includes(name);
-}
-function sanitize_location(location) {
-  return location?.replace(/\//g, "/\u200B");
-}
+var NAMESPACE_HTML = "http://www.w3.org/1999/xhtml";
 
 // node_modules/esm-env/dev-fallback.js
 var node_env = globalThis.process?.env?.NODE_ENV;
-if (!node_env) {
-  console.warn("If bundling, conditions should include development or production. If not bundling, conditions or NODE_ENV should include development or production. See https://www.npmjs.com/package/esm-env for tips on setting conditions in popular bundlers and runtimes.");
-}
-var dev_fallback_default = node_env && !node_env.toLowerCase().includes("prod");
-
-// node_modules/svelte/src/internal/shared/utils.js
-var is_array = Array.isArray;
-var array_from = Array.from;
-var object_keys = Object.keys;
-var define_property = Object.defineProperty;
-var get_descriptor = Object.getOwnPropertyDescriptor;
-var get_descriptors = Object.getOwnPropertyDescriptors;
-var object_prototype = Object.prototype;
-var array_prototype = Array.prototype;
-var get_prototype_of = Object.getPrototypeOf;
-var noop = () => {
-};
-function run(fn) {
-  return fn();
-}
-function run_all(arr) {
-  for (var i = 0; i < arr.length; i++) {
-    arr[i]();
-  }
-}
+var dev_fallback_default = node_env && !node_env.toLowerCase().startsWith("prod");
 
 // node_modules/svelte/src/internal/client/constants.js
 var DERIVED = 1 << 1;
@@ -136,10 +56,66 @@ var LEGACY_DERIVED_PROP = 1 << 17;
 var INSPECT_EFFECT = 1 << 18;
 var HEAD_EFFECT = 1 << 19;
 var EFFECT_HAS_DERIVED = 1 << 20;
+var EFFECT_IS_UPDATING = 1 << 21;
 var STATE_SYMBOL = Symbol("$state");
 var STATE_SYMBOL_METADATA = Symbol("$state metadata");
 var LEGACY_PROPS = Symbol("legacy props");
 var LOADING_ATTR_SYMBOL = Symbol("");
+
+// node_modules/svelte/src/internal/shared/utils.js
+var is_array = Array.isArray;
+var index_of = Array.prototype.indexOf;
+var array_from = Array.from;
+var object_keys = Object.keys;
+var define_property = Object.defineProperty;
+var get_descriptor = Object.getOwnPropertyDescriptor;
+var get_descriptors = Object.getOwnPropertyDescriptors;
+var object_prototype = Object.prototype;
+var array_prototype = Array.prototype;
+var get_prototype_of = Object.getPrototypeOf;
+var is_extensible = Object.isExtensible;
+var noop = () => {
+};
+function run_all(arr) {
+  for (var i = 0; i < arr.length; i++) {
+    arr[i]();
+  }
+}
+
+// node_modules/svelte/src/internal/client/dom/task.js
+var request_idle_callback = typeof requestIdleCallback === "undefined" ? (cb) => setTimeout(cb, 1) : requestIdleCallback;
+var micro_tasks = [];
+var idle_tasks = [];
+function run_micro_tasks() {
+  var tasks = micro_tasks;
+  micro_tasks = [];
+  run_all(tasks);
+}
+function run_idle_tasks() {
+  var tasks = idle_tasks;
+  idle_tasks = [];
+  run_all(tasks);
+}
+function queue_micro_task(fn) {
+  if (micro_tasks.length === 0) {
+    queueMicrotask(run_micro_tasks);
+  }
+  micro_tasks.push(fn);
+}
+function queue_idle_task(fn) {
+  if (idle_tasks.length === 0) {
+    request_idle_callback(run_idle_tasks);
+  }
+  idle_tasks.push(fn);
+}
+function flush_tasks() {
+  if (micro_tasks.length > 0) {
+    run_micro_tasks();
+  }
+  if (idle_tasks.length > 0) {
+    run_idle_tasks();
+  }
+}
 
 // node_modules/svelte/src/internal/client/reactivity/equality.js
 function equals(value) {
@@ -162,28 +138,6 @@ https://svelte.dev/e/bind_invalid_checkbox_value`);
     throw error;
   } else {
     throw new Error(`https://svelte.dev/e/bind_invalid_checkbox_value`);
-  }
-}
-function bind_invalid_export(component2, key, name) {
-  if (dev_fallback_default) {
-    const error = new Error(`bind_invalid_export
-Component ${component2} has an export named \`${key}\` that a consumer component is trying to access using \`bind:${key}\`, which is disallowed. Instead, use \`bind:this\` (e.g. \`<${name} bind:this={component} />\`) and then access the property on the bound component instance (e.g. \`component.${key}\`)
-https://svelte.dev/e/bind_invalid_export`);
-    error.name = "Svelte error";
-    throw error;
-  } else {
-    throw new Error(`https://svelte.dev/e/bind_invalid_export`);
-  }
-}
-function bind_not_bindable(key, component2, name) {
-  if (dev_fallback_default) {
-    const error = new Error(`bind_not_bindable
-A component is attempting to bind to a non-bindable property \`${key}\` belonging to ${component2} (i.e. \`<${name} bind:${key}={...}>\`). To mark a property as bindable: \`let { ${key} = $bindable() } = $props()\`
-https://svelte.dev/e/bind_not_bindable`);
-    error.name = "Svelte error";
-    throw error;
-  } else {
-    throw new Error(`https://svelte.dev/e/bind_not_bindable`);
   }
 }
 function component_api_changed(parent, method, component2) {
@@ -318,17 +272,6 @@ https://svelte.dev/e/state_prototype_fixed`);
     throw new Error(`https://svelte.dev/e/state_prototype_fixed`);
   }
 }
-function state_unsafe_local_read() {
-  if (dev_fallback_default) {
-    const error = new Error(`state_unsafe_local_read
-Reading state that was created inside the same derived is forbidden. Consider using \`untrack\` to read locally created state
-https://svelte.dev/e/state_unsafe_local_read`);
-    error.name = "Svelte error";
-    throw error;
-  } else {
-    throw new Error(`https://svelte.dev/e/state_unsafe_local_read`);
-  }
-}
 function state_unsafe_mutation() {
   if (dev_fallback_default) {
     const error = new Error(`state_unsafe_mutation
@@ -344,125 +287,6 @@ https://svelte.dev/e/state_unsafe_mutation`);
 // node_modules/svelte/src/internal/flags/index.js
 var legacy_mode_flag = false;
 var tracing_mode_flag = false;
-function enable_legacy_mode_flag() {
-  legacy_mode_flag = true;
-}
-
-// node_modules/svelte/src/internal/shared/warnings.js
-var bold = "font-weight: bold";
-var normal = "font-weight: normal";
-function state_snapshot_uncloneable(properties) {
-  if (dev_fallback_default) {
-    console.warn(`%c[svelte] state_snapshot_uncloneable
-%c${properties ? `The following properties cannot be cloned with \`$state.snapshot\` \u2014 the return value contains the originals:
-
-${properties}` : "Value cannot be cloned with `$state.snapshot` \u2014 the original value was returned"}
-https://svelte.dev/e/state_snapshot_uncloneable`, bold, normal);
-  } else {
-    console.warn(`https://svelte.dev/e/state_snapshot_uncloneable`);
-  }
-}
-
-// node_modules/svelte/src/internal/shared/clone.js
-var empty = [];
-function snapshot(value, skip_warning = false) {
-  if (dev_fallback_default && !skip_warning) {
-    const paths = [];
-    const copy = clone(value, /* @__PURE__ */ new Map(), "", paths);
-    if (paths.length === 1 && paths[0] === "") {
-      state_snapshot_uncloneable();
-    } else if (paths.length > 0) {
-      const slice = paths.length > 10 ? paths.slice(0, 7) : paths.slice(0, 10);
-      const excess = paths.length - slice.length;
-      let uncloned = slice.map((path) => `- <value>${path}`).join("\n");
-      if (excess > 0) uncloned += `
-- ...and ${excess} more`;
-      state_snapshot_uncloneable(uncloned);
-    }
-    return copy;
-  }
-  return clone(value, /* @__PURE__ */ new Map(), "", empty);
-}
-function clone(value, cloned, path, paths, original = null) {
-  if (typeof value === "object" && value !== null) {
-    var unwrapped = cloned.get(value);
-    if (unwrapped !== void 0) return unwrapped;
-    if (value instanceof Map) return (
-      /** @type {Snapshot<T>} */
-      new Map(value)
-    );
-    if (value instanceof Set) return (
-      /** @type {Snapshot<T>} */
-      new Set(value)
-    );
-    if (is_array(value)) {
-      var copy = (
-        /** @type {Snapshot<any>} */
-        Array(value.length)
-      );
-      cloned.set(value, copy);
-      if (original !== null) {
-        cloned.set(original, copy);
-      }
-      for (var i = 0; i < value.length; i += 1) {
-        var element2 = value[i];
-        if (i in value) {
-          copy[i] = clone(element2, cloned, dev_fallback_default ? `${path}[${i}]` : path, paths);
-        }
-      }
-      return copy;
-    }
-    if (get_prototype_of(value) === object_prototype) {
-      copy = {};
-      cloned.set(value, copy);
-      if (original !== null) {
-        cloned.set(original, copy);
-      }
-      for (var key in value) {
-        copy[key] = clone(value[key], cloned, dev_fallback_default ? `${path}.${key}` : path, paths);
-      }
-      return copy;
-    }
-    if (value instanceof Date) {
-      return (
-        /** @type {Snapshot<T>} */
-        structuredClone(value)
-      );
-    }
-    if (typeof /** @type {T & { toJSON?: any } } */
-    value.toJSON === "function") {
-      return clone(
-        /** @type {T & { toJSON(): any } } */
-        value.toJSON(),
-        cloned,
-        dev_fallback_default ? `${path}.toJSON()` : path,
-        paths,
-        // Associate the instance with the toJSON clone
-        value
-      );
-    }
-  }
-  if (value instanceof EventTarget) {
-    return (
-      /** @type {Snapshot<T>} */
-      value
-    );
-  }
-  try {
-    return (
-      /** @type {Snapshot<T>} */
-      structuredClone(value)
-    );
-  } catch (e) {
-    if (dev_fallback_default) {
-      paths.push(path);
-    }
-    return (
-      /** @type {Snapshot<T>} */
-      value
-    );
-  }
-}
 
 // node_modules/svelte/src/internal/client/dev/tracing.js
 var tracing_expressions = null;
@@ -499,8 +323,261 @@ function get_stack(label) {
   return error;
 }
 
+// node_modules/svelte/src/internal/client/proxy.js
+var parent_metadata = null;
+function proxy(value, prev) {
+  if (typeof value !== "object" || value === null || STATE_SYMBOL in value) {
+    return value;
+  }
+  const prototype = get_prototype_of(value);
+  if (prototype !== object_prototype && prototype !== array_prototype) {
+    return value;
+  }
+  var sources = /* @__PURE__ */ new Map();
+  var is_proxied_array = is_array(value);
+  var version = state(0);
+  var stack2 = dev_fallback_default && tracing_mode_flag ? get_stack("CreatedAt") : null;
+  var reaction = active_reaction;
+  var with_parent = (fn) => {
+    var previous_reaction = active_reaction;
+    set_active_reaction(reaction);
+    var result;
+    if (dev_fallback_default) {
+      var previous_metadata = parent_metadata;
+      parent_metadata = metadata;
+      result = fn();
+      parent_metadata = previous_metadata;
+    } else {
+      result = fn();
+    }
+    set_active_reaction(previous_reaction);
+    return result;
+  };
+  if (is_proxied_array) {
+    sources.set("length", state(
+      /** @type {any[]} */
+      value.length,
+      stack2
+    ));
+  }
+  var metadata;
+  if (dev_fallback_default) {
+    metadata = {
+      parent: parent_metadata,
+      owners: null
+    };
+    if (prev) {
+      const prev_owners = prev.v?.[STATE_SYMBOL_METADATA]?.owners;
+      metadata.owners = prev_owners ? new Set(prev_owners) : null;
+    } else {
+      metadata.owners = parent_metadata === null ? component_context !== null ? /* @__PURE__ */ new Set([component_context.function]) : null : /* @__PURE__ */ new Set();
+    }
+  }
+  return new Proxy(
+    /** @type {any} */
+    value,
+    {
+      defineProperty(_, prop2, descriptor) {
+        if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
+          state_descriptors_fixed();
+        }
+        var s = sources.get(prop2);
+        if (s === void 0) {
+          s = with_parent(() => state(descriptor.value, stack2));
+          sources.set(prop2, s);
+        } else {
+          set(
+            s,
+            with_parent(() => proxy(descriptor.value))
+          );
+        }
+        return true;
+      },
+      deleteProperty(target, prop2) {
+        var s = sources.get(prop2);
+        if (s === void 0) {
+          if (prop2 in target) {
+            sources.set(
+              prop2,
+              with_parent(() => state(UNINITIALIZED, stack2))
+            );
+          }
+        } else {
+          if (is_proxied_array && typeof prop2 === "string") {
+            var ls = (
+              /** @type {Source<number>} */
+              sources.get("length")
+            );
+            var n = Number(prop2);
+            if (Number.isInteger(n) && n < ls.v) {
+              set(ls, n);
+            }
+          }
+          set(s, UNINITIALIZED);
+          update_version(version);
+        }
+        return true;
+      },
+      get(target, prop2, receiver) {
+        if (dev_fallback_default && prop2 === STATE_SYMBOL_METADATA) {
+          return metadata;
+        }
+        if (prop2 === STATE_SYMBOL) {
+          return value;
+        }
+        var s = sources.get(prop2);
+        var exists = prop2 in target;
+        if (s === void 0 && (!exists || get_descriptor(target, prop2)?.writable)) {
+          s = with_parent(() => state(proxy(exists ? target[prop2] : UNINITIALIZED), stack2));
+          sources.set(prop2, s);
+        }
+        if (s !== void 0) {
+          var v = get(s);
+          if (dev_fallback_default) {
+            var prop_metadata = v?.[STATE_SYMBOL_METADATA];
+            if (prop_metadata && prop_metadata?.parent !== metadata) {
+              widen_ownership(metadata, prop_metadata);
+            }
+          }
+          return v === UNINITIALIZED ? void 0 : v;
+        }
+        return Reflect.get(target, prop2, receiver);
+      },
+      getOwnPropertyDescriptor(target, prop2) {
+        var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
+        if (descriptor && "value" in descriptor) {
+          var s = sources.get(prop2);
+          if (s) descriptor.value = get(s);
+        } else if (descriptor === void 0) {
+          var source2 = sources.get(prop2);
+          var value2 = source2?.v;
+          if (source2 !== void 0 && value2 !== UNINITIALIZED) {
+            return {
+              enumerable: true,
+              configurable: true,
+              value: value2,
+              writable: true
+            };
+          }
+        }
+        return descriptor;
+      },
+      has(target, prop2) {
+        if (dev_fallback_default && prop2 === STATE_SYMBOL_METADATA) {
+          return true;
+        }
+        if (prop2 === STATE_SYMBOL) {
+          return true;
+        }
+        var s = sources.get(prop2);
+        var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop2);
+        if (s !== void 0 || active_effect !== null && (!has || get_descriptor(target, prop2)?.writable)) {
+          if (s === void 0) {
+            s = with_parent(() => state(has ? proxy(target[prop2]) : UNINITIALIZED, stack2));
+            sources.set(prop2, s);
+          }
+          var value2 = get(s);
+          if (value2 === UNINITIALIZED) {
+            return false;
+          }
+        }
+        return has;
+      },
+      set(target, prop2, value2, receiver) {
+        var s = sources.get(prop2);
+        var has = prop2 in target;
+        if (is_proxied_array && prop2 === "length") {
+          for (var i = value2; i < /** @type {Source<number>} */
+          s.v; i += 1) {
+            var other_s = sources.get(i + "");
+            if (other_s !== void 0) {
+              set(other_s, UNINITIALIZED);
+            } else if (i in target) {
+              other_s = with_parent(() => state(UNINITIALIZED, stack2));
+              sources.set(i + "", other_s);
+            }
+          }
+        }
+        if (s === void 0) {
+          if (!has || get_descriptor(target, prop2)?.writable) {
+            s = with_parent(() => state(void 0, stack2));
+            set(
+              s,
+              with_parent(() => proxy(value2))
+            );
+            sources.set(prop2, s);
+          }
+        } else {
+          has = s.v !== UNINITIALIZED;
+          set(
+            s,
+            with_parent(() => proxy(value2))
+          );
+        }
+        if (dev_fallback_default) {
+          var prop_metadata = value2?.[STATE_SYMBOL_METADATA];
+          if (prop_metadata && prop_metadata?.parent !== metadata) {
+            widen_ownership(metadata, prop_metadata);
+          }
+          check_ownership(metadata);
+        }
+        var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
+        if (descriptor?.set) {
+          descriptor.set.call(receiver, value2);
+        }
+        if (!has) {
+          if (is_proxied_array && typeof prop2 === "string") {
+            var ls = (
+              /** @type {Source<number>} */
+              sources.get("length")
+            );
+            var n = Number(prop2);
+            if (Number.isInteger(n) && n >= ls.v) {
+              set(ls, n + 1);
+            }
+          }
+          update_version(version);
+        }
+        return true;
+      },
+      ownKeys(target) {
+        get(version);
+        var own_keys = Reflect.ownKeys(target).filter((key2) => {
+          var source3 = sources.get(key2);
+          return source3 === void 0 || source3.v !== UNINITIALIZED;
+        });
+        for (var [key, source2] of sources) {
+          if (source2.v !== UNINITIALIZED && !(key in target)) {
+            own_keys.push(key);
+          }
+        }
+        return own_keys;
+      },
+      setPrototypeOf() {
+        state_prototype_fixed();
+      }
+    }
+  );
+}
+function update_version(signal, d = 1) {
+  set(signal, signal.v + d);
+}
+function get_proxied_value(value) {
+  try {
+    if (value !== null && typeof value === "object" && STATE_SYMBOL in value) {
+      return value[STATE_SYMBOL];
+    }
+  } catch {
+  }
+  return value;
+}
+function is(a, b) {
+  return Object.is(get_proxied_value(a), get_proxied_value(b));
+}
+
 // node_modules/svelte/src/internal/client/reactivity/sources.js
 var inspect_effects = /* @__PURE__ */ new Set();
+var old_values = /* @__PURE__ */ new Map();
 function set_inspect_effects(v) {
   inspect_effects = v;
 }
@@ -511,7 +588,8 @@ function source(v, stack2) {
     v,
     reactions: null,
     equals,
-    version: 0
+    rv: 0,
+    wv: 0
   };
   if (dev_fallback_default && tracing_mode_flag) {
     signal.created = stack2 ?? get_stack("CreatedAt");
@@ -519,8 +597,10 @@ function source(v, stack2) {
   }
   return signal;
 }
-function state(v) {
-  return /* @__PURE__ */ push_derived_source(source(v));
+function state(v, stack2) {
+  const s = source(v, stack2);
+  push_reaction_value(s);
+  return s;
 }
 // @__NO_SIDE_EFFECTS__
 function mutable_source(initial_value, immutable = false) {
@@ -533,60 +613,47 @@ function mutable_source(initial_value, immutable = false) {
   }
   return s;
 }
-// @__NO_SIDE_EFFECTS__
-function push_derived_source(source2) {
-  if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0) {
-    if (derived_sources === null) {
-      set_derived_sources([source2]);
-    } else {
-      derived_sources.push(source2);
-    }
-  }
-  return source2;
-}
-function set(source2, value) {
-  if (active_reaction !== null && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT)) !== 0 && // If the source was created locally within the current derived, then
-  // we allow the mutation.
-  (derived_sources === null || !derived_sources.includes(source2))) {
+function set(source2, value, should_proxy = false) {
+  if (active_reaction !== null && !untracking && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT)) !== 0 && !reaction_sources?.includes(source2)) {
     state_unsafe_mutation();
   }
-  return internal_set(source2, value);
+  let new_value = should_proxy ? proxy(value, source2) : value;
+  return internal_set(source2, new_value);
 }
 function internal_set(source2, value) {
   if (!source2.equals(value)) {
+    var old_value = source2.v;
+    if (is_destroying_effect) {
+      old_values.set(source2, value);
+    } else {
+      old_values.set(source2, old_value);
+    }
     source2.v = value;
-    source2.version = increment_version();
+    source2.wv = increment_write_version();
     if (dev_fallback_default && tracing_mode_flag) {
       source2.updated = get_stack("UpdatedAt");
+      if (active_effect != null) {
+        source2.trace_need_increase = true;
+        source2.trace_v ??= old_value;
+      }
     }
     mark_reactions(source2, DIRTY);
-    if (is_runes() && active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & BRANCH_EFFECT) === 0) {
-      if (new_deps !== null && new_deps.includes(source2)) {
-        set_signal_status(active_effect, DIRTY);
-        schedule_effect(active_effect);
+    if (is_runes() && active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
+      if (untracked_writes === null) {
+        set_untracked_writes([source2]);
       } else {
-        if (untracked_writes === null) {
-          set_untracked_writes([source2]);
-        } else {
-          untracked_writes.push(source2);
-        }
+        untracked_writes.push(source2);
       }
     }
     if (dev_fallback_default && inspect_effects.size > 0) {
       const inspects = Array.from(inspect_effects);
-      var previously_flushing_effect = is_flushing_effect;
-      set_is_flushing_effect(true);
-      try {
-        for (const effect2 of inspects) {
-          if ((effect2.f & CLEAN) !== 0) {
-            set_signal_status(effect2, MAYBE_DIRTY);
-          }
-          if (check_dirtiness(effect2)) {
-            update_effect(effect2);
-          }
+      for (const effect2 of inspects) {
+        if ((effect2.f & CLEAN) !== 0) {
+          set_signal_status(effect2, MAYBE_DIRTY);
         }
-      } finally {
-        set_is_flushing_effect(previously_flushing_effect);
+        if (check_dirtiness(effect2)) {
+          update_effect(effect2);
+        }
       }
       inspect_effects.clear();
     }
@@ -625,23 +692,124 @@ function mark_reactions(signal, status) {
   }
 }
 
-// node_modules/svelte/src/internal/client/warnings.js
-var bold2 = "font-weight: bold";
-var normal2 = "font-weight: normal";
-function console_log_state(method) {
-  if (dev_fallback_default) {
-    console.warn(`%c[svelte] console_log_state
-%cYour \`console.${method}\` contained \`$state\` proxies. Consider using \`$inspect(...)\` or \`$state.snapshot(...)\` instead
-https://svelte.dev/e/console_log_state`, bold2, normal2);
+// node_modules/svelte/src/internal/client/reactivity/deriveds.js
+// @__NO_SIDE_EFFECTS__
+function derived(fn) {
+  var flags = DERIVED | DIRTY;
+  var parent_derived = active_reaction !== null && (active_reaction.f & DERIVED) !== 0 ? (
+    /** @type {Derived} */
+    active_reaction
+  ) : null;
+  if (active_effect === null || parent_derived !== null && (parent_derived.f & UNOWNED) !== 0) {
+    flags |= UNOWNED;
   } else {
-    console.warn(`https://svelte.dev/e/console_log_state`);
+    active_effect.f |= EFFECT_HAS_DERIVED;
+  }
+  const signal = {
+    ctx: component_context,
+    deps: null,
+    effects: null,
+    equals,
+    f: flags,
+    fn,
+    reactions: null,
+    rv: 0,
+    v: (
+      /** @type {V} */
+      null
+    ),
+    wv: 0,
+    parent: parent_derived ?? active_effect
+  };
+  if (dev_fallback_default && tracing_mode_flag) {
+    signal.created = get_stack("CreatedAt");
+  }
+  return signal;
+}
+function user_derived(fn) {
+  const d = /* @__PURE__ */ derived(fn);
+  push_reaction_value(d);
+  return d;
+}
+// @__NO_SIDE_EFFECTS__
+function derived_safe_equal(fn) {
+  const signal = /* @__PURE__ */ derived(fn);
+  signal.equals = safe_equals;
+  return signal;
+}
+function destroy_derived_effects(derived3) {
+  var effects = derived3.effects;
+  if (effects !== null) {
+    derived3.effects = null;
+    for (var i = 0; i < effects.length; i += 1) {
+      destroy_effect(
+        /** @type {Effect} */
+        effects[i]
+      );
+    }
   }
 }
+var stack = [];
+function get_derived_parent_effect(derived3) {
+  var parent = derived3.parent;
+  while (parent !== null) {
+    if ((parent.f & DERIVED) === 0) {
+      return (
+        /** @type {Effect} */
+        parent
+      );
+    }
+    parent = parent.parent;
+  }
+  return null;
+}
+function execute_derived(derived3) {
+  var value;
+  var prev_active_effect = active_effect;
+  set_active_effect(get_derived_parent_effect(derived3));
+  if (dev_fallback_default) {
+    let prev_inspect_effects = inspect_effects;
+    set_inspect_effects(/* @__PURE__ */ new Set());
+    try {
+      if (stack.includes(derived3)) {
+        derived_references_self();
+      }
+      stack.push(derived3);
+      destroy_derived_effects(derived3);
+      value = update_reaction(derived3);
+    } finally {
+      set_active_effect(prev_active_effect);
+      set_inspect_effects(prev_inspect_effects);
+      stack.pop();
+    }
+  } else {
+    try {
+      destroy_derived_effects(derived3);
+      value = update_reaction(derived3);
+    } finally {
+      set_active_effect(prev_active_effect);
+    }
+  }
+  return value;
+}
+function update_derived(derived3) {
+  var value = execute_derived(derived3);
+  var status = (skip_reaction || (derived3.f & UNOWNED) !== 0) && derived3.deps !== null ? MAYBE_DIRTY : CLEAN;
+  set_signal_status(derived3, status);
+  if (!derived3.equals(value)) {
+    derived3.v = value;
+    derived3.wv = increment_write_version();
+  }
+}
+
+// node_modules/svelte/src/internal/client/warnings.js
+var bold = "font-weight: bold";
+var normal = "font-weight: normal";
 function event_handler_invalid(handler, suggestion) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] event_handler_invalid
 %c${handler} should be a function. Did you mean to ${suggestion}?
-https://svelte.dev/e/event_handler_invalid`, bold2, normal2);
+https://svelte.dev/e/event_handler_invalid`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/event_handler_invalid`);
   }
@@ -650,7 +818,7 @@ function hydration_attribute_changed(attribute, html2, value) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_attribute_changed
 %cThe \`${attribute}\` attribute on \`${html2}\` changed its value between server and client renders. The client value, \`${value}\`, will be ignored in favour of the server value
-https://svelte.dev/e/hydration_attribute_changed`, bold2, normal2);
+https://svelte.dev/e/hydration_attribute_changed`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/hydration_attribute_changed`);
   }
@@ -659,7 +827,7 @@ function hydration_html_changed(location) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_html_changed
 %c${location ? `The value of an \`{@html ...}\` block ${location} changed between server and client renders. The client value will be ignored in favour of the server value` : "The value of an `{@html ...}` block changed between server and client renders. The client value will be ignored in favour of the server value"}
-https://svelte.dev/e/hydration_html_changed`, bold2, normal2);
+https://svelte.dev/e/hydration_html_changed`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/hydration_html_changed`);
   }
@@ -668,7 +836,7 @@ function hydration_mismatch(location) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_mismatch
 %c${location ? `Hydration failed because the initial UI does not match what was rendered on the server. The error occurred near ${location}` : "Hydration failed because the initial UI does not match what was rendered on the server"}
-https://svelte.dev/e/hydration_mismatch`, bold2, normal2);
+https://svelte.dev/e/hydration_mismatch`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/hydration_mismatch`);
   }
@@ -677,7 +845,7 @@ function lifecycle_double_unmount() {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] lifecycle_double_unmount
 %cTried to unmount a component that was not mounted
-https://svelte.dev/e/lifecycle_double_unmount`, bold2, normal2);
+https://svelte.dev/e/lifecycle_double_unmount`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/lifecycle_double_unmount`);
   }
@@ -686,7 +854,7 @@ function ownership_invalid_mutation(component2, owner) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] ownership_invalid_mutation
 %c${component2 ? `${component2} mutated a value owned by ${owner}. This is strongly discouraged. Consider passing values to child components with \`bind:\`, or use a callback instead` : "Mutating a value outside the component that created it is strongly discouraged. Consider passing values to child components with `bind:`, or use a callback instead"}
-https://svelte.dev/e/ownership_invalid_mutation`, bold2, normal2);
+https://svelte.dev/e/ownership_invalid_mutation`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/ownership_invalid_mutation`);
   }
@@ -695,7 +863,7 @@ function state_proxy_equality_mismatch(operator) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] state_proxy_equality_mismatch
 %cReactive \`$state(...)\` proxies and the values they proxy have different identities. Because of this, comparisons with \`${operator}\` will produce unexpected results
-https://svelte.dev/e/state_proxy_equality_mismatch`, bold2, normal2);
+https://svelte.dev/e/state_proxy_equality_mismatch`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/state_proxy_equality_mismatch`);
   }
@@ -764,333 +932,6 @@ function remove_nodes() {
   }
 }
 
-// node_modules/svelte/src/internal/client/dev/ownership.js
-var boundaries = {};
-var chrome_pattern = /at (?:.+ \()?(.+):(\d+):(\d+)\)?$/;
-var firefox_pattern = /@(.+):(\d+):(\d+)$/;
-function get_stack2() {
-  const stack2 = new Error().stack;
-  if (!stack2) return null;
-  const entries = [];
-  for (const line of stack2.split("\n")) {
-    let match = chrome_pattern.exec(line) ?? firefox_pattern.exec(line);
-    if (match) {
-      entries.push({
-        file: match[1],
-        line: +match[2],
-        column: +match[3]
-      });
-    }
-  }
-  return entries;
-}
-function get_component() {
-  const stack2 = get_stack2()?.slice(4);
-  if (!stack2) return null;
-  for (let i = 0; i < stack2.length; i++) {
-    const entry = stack2[i];
-    const modules = boundaries[entry.file];
-    if (!modules) {
-      if (i === 0) return null;
-      continue;
-    }
-    for (const module of modules) {
-      if (module.end == null) {
-        return null;
-      }
-      if (module.start.line < entry.line && module.end.line > entry.line) {
-        return module.component;
-      }
-    }
-  }
-  return null;
-}
-var ADD_OWNER = Symbol("ADD_OWNER");
-function mark_module_start() {
-  const start = get_stack2()?.[2];
-  if (start) {
-    (boundaries[start.file] ??= []).push({
-      start,
-      // @ts-expect-error
-      end: null,
-      // @ts-expect-error we add the component at the end, since HMR will overwrite the function
-      component: null
-    });
-  }
-}
-function mark_module_end(component2) {
-  const end = get_stack2()?.[2];
-  if (end) {
-    const boundaries_file = boundaries[end.file];
-    const boundary2 = boundaries_file[boundaries_file.length - 1];
-    boundary2.end = end;
-    boundary2.component = component2;
-  }
-}
-function widen_ownership(from, to) {
-  if (to.owners === null) {
-    return;
-  }
-  while (from) {
-    if (from.owners === null) {
-      to.owners = null;
-      break;
-    }
-    for (const owner of from.owners) {
-      to.owners.add(owner);
-    }
-    from = from.parent;
-  }
-}
-function has_owner(metadata, component2) {
-  if (metadata.owners === null) {
-    return true;
-  }
-  return metadata.owners.has(component2) || metadata.parent !== null && has_owner(metadata.parent, component2);
-}
-function get_owner(metadata) {
-  return metadata?.owners?.values().next().value ?? get_owner(
-    /** @type {ProxyMetadata} */
-    metadata.parent
-  );
-}
-var skip = false;
-function check_ownership(metadata) {
-  if (skip) return;
-  const component2 = get_component();
-  if (component2 && !has_owner(metadata, component2)) {
-    let original = get_owner(metadata);
-    if (original[FILENAME] !== component2[FILENAME]) {
-      ownership_invalid_mutation(component2[FILENAME], original[FILENAME]);
-    } else {
-      ownership_invalid_mutation();
-    }
-  }
-}
-
-// node_modules/svelte/src/internal/client/proxy.js
-function proxy(value, parent = null, prev) {
-  var stack2 = null;
-  if (dev_fallback_default && tracing_mode_flag) {
-    stack2 = get_stack("CreatedAt");
-  }
-  if (typeof value !== "object" || value === null || STATE_SYMBOL in value) {
-    return value;
-  }
-  const prototype = get_prototype_of(value);
-  if (prototype !== object_prototype && prototype !== array_prototype) {
-    return value;
-  }
-  var sources = /* @__PURE__ */ new Map();
-  var is_proxied_array = is_array(value);
-  var version = source(0);
-  if (is_proxied_array) {
-    sources.set("length", source(
-      /** @type {any[]} */
-      value.length,
-      stack2
-    ));
-  }
-  var metadata;
-  if (dev_fallback_default) {
-    metadata = {
-      parent,
-      owners: null
-    };
-    if (prev) {
-      const prev_owners = prev.v?.[STATE_SYMBOL_METADATA]?.owners;
-      metadata.owners = prev_owners ? new Set(prev_owners) : null;
-    } else {
-      metadata.owners = parent === null ? component_context !== null ? /* @__PURE__ */ new Set([component_context.function]) : null : /* @__PURE__ */ new Set();
-    }
-  }
-  return new Proxy(
-    /** @type {any} */
-    value,
-    {
-      defineProperty(_, prop2, descriptor) {
-        if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
-          state_descriptors_fixed();
-        }
-        var s = sources.get(prop2);
-        if (s === void 0) {
-          s = source(descriptor.value, stack2);
-          sources.set(prop2, s);
-        } else {
-          set(s, proxy(descriptor.value, metadata));
-        }
-        return true;
-      },
-      deleteProperty(target, prop2) {
-        var s = sources.get(prop2);
-        if (s === void 0) {
-          if (prop2 in target) {
-            sources.set(prop2, source(UNINITIALIZED, stack2));
-          }
-        } else {
-          if (is_proxied_array && typeof prop2 === "string") {
-            var ls = (
-              /** @type {Source<number>} */
-              sources.get("length")
-            );
-            var n = Number(prop2);
-            if (Number.isInteger(n) && n < ls.v) {
-              set(ls, n);
-            }
-          }
-          set(s, UNINITIALIZED);
-          update_version(version);
-        }
-        return true;
-      },
-      get(target, prop2, receiver) {
-        if (dev_fallback_default && prop2 === STATE_SYMBOL_METADATA) {
-          return metadata;
-        }
-        if (prop2 === STATE_SYMBOL) {
-          return value;
-        }
-        var s = sources.get(prop2);
-        var exists = prop2 in target;
-        if (s === void 0 && (!exists || get_descriptor(target, prop2)?.writable)) {
-          s = source(proxy(exists ? target[prop2] : UNINITIALIZED, metadata), stack2);
-          sources.set(prop2, s);
-        }
-        if (s !== void 0) {
-          var v = get(s);
-          if (dev_fallback_default) {
-            var prop_metadata = v?.[STATE_SYMBOL_METADATA];
-            if (prop_metadata && prop_metadata?.parent !== metadata) {
-              widen_ownership(metadata, prop_metadata);
-            }
-          }
-          return v === UNINITIALIZED ? void 0 : v;
-        }
-        return Reflect.get(target, prop2, receiver);
-      },
-      getOwnPropertyDescriptor(target, prop2) {
-        var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
-        if (descriptor && "value" in descriptor) {
-          var s = sources.get(prop2);
-          if (s) descriptor.value = get(s);
-        } else if (descriptor === void 0) {
-          var source2 = sources.get(prop2);
-          var value2 = source2?.v;
-          if (source2 !== void 0 && value2 !== UNINITIALIZED) {
-            return {
-              enumerable: true,
-              configurable: true,
-              value: value2,
-              writable: true
-            };
-          }
-        }
-        return descriptor;
-      },
-      has(target, prop2) {
-        if (dev_fallback_default && prop2 === STATE_SYMBOL_METADATA) {
-          return true;
-        }
-        if (prop2 === STATE_SYMBOL) {
-          return true;
-        }
-        var s = sources.get(prop2);
-        var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop2);
-        if (s !== void 0 || active_effect !== null && (!has || get_descriptor(target, prop2)?.writable)) {
-          if (s === void 0) {
-            s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED, stack2);
-            sources.set(prop2, s);
-          }
-          var value2 = get(s);
-          if (value2 === UNINITIALIZED) {
-            return false;
-          }
-        }
-        return has;
-      },
-      set(target, prop2, value2, receiver) {
-        var s = sources.get(prop2);
-        var has = prop2 in target;
-        if (is_proxied_array && prop2 === "length") {
-          for (var i = value2; i < /** @type {Source<number>} */
-          s.v; i += 1) {
-            var other_s = sources.get(i + "");
-            if (other_s !== void 0) {
-              set(other_s, UNINITIALIZED);
-            } else if (i in target) {
-              other_s = source(UNINITIALIZED, stack2);
-              sources.set(i + "", other_s);
-            }
-          }
-        }
-        if (s === void 0) {
-          if (!has || get_descriptor(target, prop2)?.writable) {
-            s = source(void 0, stack2);
-            set(s, proxy(value2, metadata));
-            sources.set(prop2, s);
-          }
-        } else {
-          has = s.v !== UNINITIALIZED;
-          set(s, proxy(value2, metadata));
-        }
-        if (dev_fallback_default) {
-          var prop_metadata = value2?.[STATE_SYMBOL_METADATA];
-          if (prop_metadata && prop_metadata?.parent !== metadata) {
-            widen_ownership(metadata, prop_metadata);
-          }
-          check_ownership(metadata);
-        }
-        var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
-        if (descriptor?.set) {
-          descriptor.set.call(receiver, value2);
-        }
-        if (!has) {
-          if (is_proxied_array && typeof prop2 === "string") {
-            var ls = (
-              /** @type {Source<number>} */
-              sources.get("length")
-            );
-            var n = Number(prop2);
-            if (Number.isInteger(n) && n >= ls.v) {
-              set(ls, n + 1);
-            }
-          }
-          update_version(version);
-        }
-        return true;
-      },
-      ownKeys(target) {
-        get(version);
-        var own_keys = Reflect.ownKeys(target).filter((key2) => {
-          var source3 = sources.get(key2);
-          return source3 === void 0 || source3.v !== UNINITIALIZED;
-        });
-        for (var [key, source2] of sources) {
-          if (source2.v !== UNINITIALIZED && !(key in target)) {
-            own_keys.push(key);
-          }
-        }
-        return own_keys;
-      },
-      setPrototypeOf() {
-        state_prototype_fixed();
-      }
-    }
-  );
-}
-function update_version(signal, d = 1) {
-  set(signal, signal.v + d);
-}
-function get_proxied_value(value) {
-  if (value !== null && typeof value === "object" && STATE_SYMBOL in value) {
-    return value[STATE_SYMBOL];
-  }
-  return value;
-}
-function is(a, b) {
-  return Object.is(get_proxied_value(a), get_proxied_value(b));
-}
-
 // node_modules/svelte/src/internal/client/dev/equality.js
 function init_array_prototype_warnings() {
   const array_prototype2 = Array.prototype;
@@ -1154,6 +995,7 @@ function strict_equals(a, b, equal = true) {
 // node_modules/svelte/src/internal/client/dom/operations.js
 var $window;
 var $document;
+var is_firefox;
 var first_child_getter;
 var next_sibling_getter;
 function init_operations() {
@@ -1162,16 +1004,22 @@ function init_operations() {
   }
   $window = window;
   $document = document;
+  is_firefox = /Firefox/.test(navigator.userAgent);
   var element_prototype = Element.prototype;
   var node_prototype = Node.prototype;
+  var text_prototype = Text.prototype;
   first_child_getter = get_descriptor(node_prototype, "firstChild").get;
   next_sibling_getter = get_descriptor(node_prototype, "nextSibling").get;
-  element_prototype.__click = void 0;
-  element_prototype.__className = "";
-  element_prototype.__attributes = null;
-  element_prototype.__styles = null;
-  element_prototype.__e = void 0;
-  Text.prototype.__t = void 0;
+  if (is_extensible(element_prototype)) {
+    element_prototype.__click = void 0;
+    element_prototype.__className = void 0;
+    element_prototype.__attributes = null;
+    element_prototype.__style = void 0;
+    element_prototype.__e = void 0;
+  }
+  if (is_extensible(text_prototype)) {
+    text_prototype.__t = void 0;
+  }
   if (dev_fallback_default) {
     element_prototype.__svelte_meta = null;
     init_array_prototype_warnings();
@@ -1259,125 +1107,614 @@ function clear_text_content(node) {
   node.textContent = "";
 }
 
-// node_modules/svelte/src/internal/client/reactivity/deriveds.js
-// @__NO_SIDE_EFFECTS__
-function derived(fn) {
-  var flags = DERIVED | DIRTY;
-  if (active_effect === null) {
-    flags |= UNOWNED;
-  } else {
-    active_effect.f |= EFFECT_HAS_DERIVED;
-  }
-  var parent_derived = active_reaction !== null && (active_reaction.f & DERIVED) !== 0 ? (
-    /** @type {Derived} */
-    active_reaction
-  ) : null;
-  const signal = {
-    children: null,
-    ctx: component_context,
-    deps: null,
-    equals,
-    f: flags,
-    fn,
-    reactions: null,
-    v: (
-      /** @type {V} */
-      null
-    ),
-    version: 0,
-    parent: parent_derived ?? active_effect
-  };
-  if (dev_fallback_default && tracing_mode_flag) {
-    signal.created = get_stack("CreatedAt");
-  }
-  if (parent_derived !== null) {
-    (parent_derived.children ??= []).push(signal);
-  }
-  return signal;
+// node_modules/svelte/src/internal/client/runtime.js
+var handled_errors = /* @__PURE__ */ new WeakSet();
+var is_throwing_error = false;
+var is_flushing = false;
+var last_scheduled_effect = null;
+var is_updating_effect = false;
+var is_destroying_effect = false;
+function set_is_destroying_effect(value) {
+  is_destroying_effect = value;
 }
-// @__NO_SIDE_EFFECTS__
-function derived_safe_equal(fn) {
-  const signal = /* @__PURE__ */ derived(fn);
-  signal.equals = safe_equals;
-  return signal;
+var queued_root_effects = [];
+var dev_effect_stack = [];
+var active_reaction = null;
+var untracking = false;
+function set_active_reaction(reaction) {
+  active_reaction = reaction;
 }
-function destroy_derived_children(derived3) {
-  var children = derived3.children;
-  if (children !== null) {
-    derived3.children = null;
-    for (var i = 0; i < children.length; i += 1) {
-      var child2 = children[i];
-      if ((child2.f & DERIVED) !== 0) {
-        destroy_derived(
-          /** @type {Derived} */
-          child2
-        );
-      } else {
-        destroy_effect(
-          /** @type {Effect} */
-          child2
-        );
-      }
+var active_effect = null;
+function set_active_effect(effect2) {
+  active_effect = effect2;
+}
+var reaction_sources = null;
+function set_reaction_sources(sources) {
+  reaction_sources = sources;
+}
+function push_reaction_value(value) {
+  if (active_reaction !== null && active_reaction.f & EFFECT_IS_UPDATING) {
+    if (reaction_sources === null) {
+      set_reaction_sources([value]);
+    } else {
+      reaction_sources.push(value);
     }
   }
 }
-var stack = [];
-function get_derived_parent_effect(derived3) {
-  var parent = derived3.parent;
-  while (parent !== null) {
-    if ((parent.f & DERIVED) === 0) {
-      return (
+var new_deps = null;
+var skipped_deps = 0;
+var untracked_writes = null;
+function set_untracked_writes(value) {
+  untracked_writes = value;
+}
+var write_version = 1;
+var read_version = 0;
+var skip_reaction = false;
+var captured_signals = null;
+function increment_write_version() {
+  return ++write_version;
+}
+function check_dirtiness(reaction) {
+  var flags = reaction.f;
+  if ((flags & DIRTY) !== 0) {
+    return true;
+  }
+  if ((flags & MAYBE_DIRTY) !== 0) {
+    var dependencies = reaction.deps;
+    var is_unowned = (flags & UNOWNED) !== 0;
+    if (dependencies !== null) {
+      var i;
+      var dependency;
+      var is_disconnected = (flags & DISCONNECTED) !== 0;
+      var is_unowned_connected = is_unowned && active_effect !== null && !skip_reaction;
+      var length = dependencies.length;
+      if (is_disconnected || is_unowned_connected) {
+        var derived3 = (
+          /** @type {Derived} */
+          reaction
+        );
+        var parent = derived3.parent;
+        for (i = 0; i < length; i++) {
+          dependency = dependencies[i];
+          if (is_disconnected || !dependency?.reactions?.includes(derived3)) {
+            (dependency.reactions ??= []).push(derived3);
+          }
+        }
+        if (is_disconnected) {
+          derived3.f ^= DISCONNECTED;
+        }
+        if (is_unowned_connected && parent !== null && (parent.f & UNOWNED) === 0) {
+          derived3.f ^= UNOWNED;
+        }
+      }
+      for (i = 0; i < length; i++) {
+        dependency = dependencies[i];
+        if (check_dirtiness(
+          /** @type {Derived} */
+          dependency
+        )) {
+          update_derived(
+            /** @type {Derived} */
+            dependency
+          );
+        }
+        if (dependency.wv > reaction.wv) {
+          return true;
+        }
+      }
+    }
+    if (!is_unowned || active_effect !== null && !skip_reaction) {
+      set_signal_status(reaction, CLEAN);
+    }
+  }
+  return false;
+}
+function propagate_error(error, effect2) {
+  var current = effect2;
+  while (current !== null) {
+    if ((current.f & BOUNDARY_EFFECT) !== 0) {
+      try {
+        current.fn(error);
+        return;
+      } catch {
+        current.f ^= BOUNDARY_EFFECT;
+      }
+    }
+    current = current.parent;
+  }
+  is_throwing_error = false;
+  throw error;
+}
+function should_rethrow_error(effect2) {
+  return (effect2.f & DESTROYED) === 0 && (effect2.parent === null || (effect2.parent.f & BOUNDARY_EFFECT) === 0);
+}
+function handle_error(error, effect2, previous_effect, component_context2) {
+  if (is_throwing_error) {
+    if (previous_effect === null) {
+      is_throwing_error = false;
+    }
+    if (should_rethrow_error(effect2)) {
+      throw error;
+    }
+    return;
+  }
+  if (previous_effect !== null) {
+    is_throwing_error = true;
+  }
+  if (!dev_fallback_default || component_context2 === null || !(error instanceof Error) || handled_errors.has(error)) {
+    propagate_error(error, effect2);
+    return;
+  }
+  handled_errors.add(error);
+  const component_stack = [];
+  const effect_name = effect2.fn?.name;
+  if (effect_name) {
+    component_stack.push(effect_name);
+  }
+  let current_context = component_context2;
+  while (current_context !== null) {
+    if (dev_fallback_default) {
+      var filename = current_context.function?.[FILENAME];
+      if (filename) {
+        const file = filename.split("/").pop();
+        component_stack.push(file);
+      }
+    }
+    current_context = current_context.p;
+  }
+  const indent = is_firefox ? "  " : "	";
+  define_property(error, "message", {
+    value: error.message + `
+${component_stack.map((name) => `
+${indent}in ${name}`).join("")}
+`
+  });
+  define_property(error, "component_stack", {
+    value: component_stack
+  });
+  const stack2 = error.stack;
+  if (stack2) {
+    const lines = stack2.split("\n");
+    const new_lines = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.includes("svelte/src/internal")) {
+        continue;
+      }
+      new_lines.push(line);
+    }
+    define_property(error, "stack", {
+      value: new_lines.join("\n")
+    });
+  }
+  propagate_error(error, effect2);
+  if (should_rethrow_error(effect2)) {
+    throw error;
+  }
+}
+function schedule_possible_effect_self_invalidation(signal, effect2, root9 = true) {
+  var reactions = signal.reactions;
+  if (reactions === null) return;
+  for (var i = 0; i < reactions.length; i++) {
+    var reaction = reactions[i];
+    if (reaction_sources?.includes(signal)) continue;
+    if ((reaction.f & DERIVED) !== 0) {
+      schedule_possible_effect_self_invalidation(
+        /** @type {Derived} */
+        reaction,
+        effect2,
+        false
+      );
+    } else if (effect2 === reaction) {
+      if (root9) {
+        set_signal_status(reaction, DIRTY);
+      } else if ((reaction.f & CLEAN) !== 0) {
+        set_signal_status(reaction, MAYBE_DIRTY);
+      }
+      schedule_effect(
         /** @type {Effect} */
-        parent
+        reaction
       );
     }
-    parent = parent.parent;
   }
-  return null;
 }
-function execute_derived(derived3) {
-  var value;
-  var prev_active_effect = active_effect;
-  set_active_effect(get_derived_parent_effect(derived3));
-  if (dev_fallback_default) {
-    let prev_inspect_effects = inspect_effects;
-    set_inspect_effects(/* @__PURE__ */ new Set());
-    try {
-      if (stack.includes(derived3)) {
-        derived_references_self();
+function update_reaction(reaction) {
+  var previous_deps = new_deps;
+  var previous_skipped_deps = skipped_deps;
+  var previous_untracked_writes = untracked_writes;
+  var previous_reaction = active_reaction;
+  var previous_skip_reaction = skip_reaction;
+  var previous_reaction_sources = reaction_sources;
+  var previous_component_context = component_context;
+  var previous_untracking = untracking;
+  var flags = reaction.f;
+  new_deps = /** @type {null | Value[]} */
+  null;
+  skipped_deps = 0;
+  untracked_writes = null;
+  skip_reaction = (flags & UNOWNED) !== 0 && (untracking || !is_updating_effect || active_reaction === null);
+  active_reaction = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) === 0 ? reaction : null;
+  reaction_sources = null;
+  set_component_context(reaction.ctx);
+  untracking = false;
+  read_version++;
+  reaction.f |= EFFECT_IS_UPDATING;
+  try {
+    var result = (
+      /** @type {Function} */
+      (0, reaction.fn)()
+    );
+    var deps = reaction.deps;
+    if (new_deps !== null) {
+      var i;
+      remove_reactions(reaction, skipped_deps);
+      if (deps !== null && skipped_deps > 0) {
+        deps.length = skipped_deps + new_deps.length;
+        for (i = 0; i < new_deps.length; i++) {
+          deps[skipped_deps + i] = new_deps[i];
+        }
+      } else {
+        reaction.deps = deps = new_deps;
       }
-      stack.push(derived3);
-      destroy_derived_children(derived3);
-      value = update_reaction(derived3);
-    } finally {
-      set_active_effect(prev_active_effect);
-      set_inspect_effects(prev_inspect_effects);
-      stack.pop();
+      if (!skip_reaction) {
+        for (i = skipped_deps; i < deps.length; i++) {
+          (deps[i].reactions ??= []).push(reaction);
+        }
+      }
+    } else if (deps !== null && skipped_deps < deps.length) {
+      remove_reactions(reaction, skipped_deps);
+      deps.length = skipped_deps;
     }
-  } else {
-    try {
-      destroy_derived_children(derived3);
-      value = update_reaction(derived3);
-    } finally {
-      set_active_effect(prev_active_effect);
+    if (is_runes() && untracked_writes !== null && !untracking && deps !== null && (reaction.f & (DERIVED | MAYBE_DIRTY | DIRTY)) === 0) {
+      for (i = 0; i < /** @type {Source[]} */
+      untracked_writes.length; i++) {
+        schedule_possible_effect_self_invalidation(
+          untracked_writes[i],
+          /** @type {Effect} */
+          reaction
+        );
+      }
+    }
+    if (previous_reaction !== null) {
+      read_version++;
+      if (untracked_writes !== null) {
+        if (previous_untracked_writes === null) {
+          previous_untracked_writes = untracked_writes;
+        } else {
+          previous_untracked_writes.push(.../** @type {Source[]} */
+          untracked_writes);
+        }
+      }
+    }
+    return result;
+  } finally {
+    new_deps = previous_deps;
+    skipped_deps = previous_skipped_deps;
+    untracked_writes = previous_untracked_writes;
+    active_reaction = previous_reaction;
+    skip_reaction = previous_skip_reaction;
+    reaction_sources = previous_reaction_sources;
+    set_component_context(previous_component_context);
+    untracking = previous_untracking;
+    reaction.f ^= EFFECT_IS_UPDATING;
+  }
+}
+function remove_reaction(signal, dependency) {
+  let reactions = dependency.reactions;
+  if (reactions !== null) {
+    var index2 = index_of.call(reactions, signal);
+    if (index2 !== -1) {
+      var new_length = reactions.length - 1;
+      if (new_length === 0) {
+        reactions = dependency.reactions = null;
+      } else {
+        reactions[index2] = reactions[new_length];
+        reactions.pop();
+      }
     }
   }
-  return value;
-}
-function update_derived(derived3) {
-  var value = execute_derived(derived3);
-  var status = (skip_reaction || (derived3.f & UNOWNED) !== 0) && derived3.deps !== null ? MAYBE_DIRTY : CLEAN;
-  set_signal_status(derived3, status);
-  if (!derived3.equals(value)) {
-    derived3.v = value;
-    derived3.version = increment_version();
+  if (reactions === null && (dependency.f & DERIVED) !== 0 && // Destroying a child effect while updating a parent effect can cause a dependency to appear
+  // to be unused, when in fact it is used by the currently-updating parent. Checking `new_deps`
+  // allows us to skip the expensive work of disconnecting and immediately reconnecting it
+  (new_deps === null || !new_deps.includes(dependency))) {
+    set_signal_status(dependency, MAYBE_DIRTY);
+    if ((dependency.f & (UNOWNED | DISCONNECTED)) === 0) {
+      dependency.f ^= DISCONNECTED;
+    }
+    destroy_derived_effects(
+      /** @type {Derived} **/
+      dependency
+    );
+    remove_reactions(
+      /** @type {Derived} **/
+      dependency,
+      0
+    );
   }
 }
-function destroy_derived(derived3) {
-  destroy_derived_children(derived3);
-  remove_reactions(derived3, 0);
-  set_signal_status(derived3, DESTROYED);
-  derived3.v = derived3.children = derived3.deps = derived3.ctx = derived3.reactions = null;
+function remove_reactions(signal, start_index) {
+  var dependencies = signal.deps;
+  if (dependencies === null) return;
+  for (var i = start_index; i < dependencies.length; i++) {
+    remove_reaction(signal, dependencies[i]);
+  }
+}
+function update_effect(effect2) {
+  var flags = effect2.f;
+  if ((flags & DESTROYED) !== 0) {
+    return;
+  }
+  set_signal_status(effect2, CLEAN);
+  var previous_effect = active_effect;
+  var previous_component_context = component_context;
+  var was_updating_effect = is_updating_effect;
+  active_effect = effect2;
+  is_updating_effect = true;
+  if (dev_fallback_default) {
+    var previous_component_fn = dev_current_component_function;
+    set_dev_current_component_function(effect2.component_function);
+  }
+  try {
+    if ((flags & BLOCK_EFFECT) !== 0) {
+      destroy_block_effect_children(effect2);
+    } else {
+      destroy_effect_children(effect2);
+    }
+    execute_effect_teardown(effect2);
+    var teardown2 = update_reaction(effect2);
+    effect2.teardown = typeof teardown2 === "function" ? teardown2 : null;
+    effect2.wv = write_version;
+    var deps = effect2.deps;
+    if (dev_fallback_default && tracing_mode_flag && (effect2.f & DIRTY) !== 0 && deps !== null) {
+      for (let i = 0; i < deps.length; i++) {
+        var dep = deps[i];
+        if (dep.trace_need_increase) {
+          dep.wv = increment_write_version();
+          dep.trace_need_increase = void 0;
+          dep.trace_v = void 0;
+        }
+      }
+    }
+    if (dev_fallback_default) {
+      dev_effect_stack.push(effect2);
+    }
+  } catch (error) {
+    handle_error(error, effect2, previous_effect, previous_component_context || effect2.ctx);
+  } finally {
+    is_updating_effect = was_updating_effect;
+    active_effect = previous_effect;
+    if (dev_fallback_default) {
+      set_dev_current_component_function(previous_component_fn);
+    }
+  }
+}
+function log_effect_stack() {
+  console.error(
+    "Last ten effects were: ",
+    dev_effect_stack.slice(-10).map((d) => d.fn)
+  );
+  dev_effect_stack = [];
+}
+function infinite_loop_guard() {
+  try {
+    effect_update_depth_exceeded();
+  } catch (error) {
+    if (dev_fallback_default) {
+      define_property(error, "stack", {
+        value: ""
+      });
+    }
+    if (last_scheduled_effect !== null) {
+      if (dev_fallback_default) {
+        try {
+          handle_error(error, last_scheduled_effect, null, null);
+        } catch (e) {
+          log_effect_stack();
+          throw e;
+        }
+      } else {
+        handle_error(error, last_scheduled_effect, null, null);
+      }
+    } else {
+      if (dev_fallback_default) {
+        log_effect_stack();
+      }
+      throw error;
+    }
+  }
+}
+function flush_queued_root_effects() {
+  var was_updating_effect = is_updating_effect;
+  try {
+    var flush_count = 0;
+    is_updating_effect = true;
+    while (queued_root_effects.length > 0) {
+      if (flush_count++ > 1e3) {
+        infinite_loop_guard();
+      }
+      var root_effects = queued_root_effects;
+      var length = root_effects.length;
+      queued_root_effects = [];
+      for (var i = 0; i < length; i++) {
+        var collected_effects = process_effects(root_effects[i]);
+        flush_queued_effects(collected_effects);
+      }
+    }
+  } finally {
+    is_flushing = false;
+    is_updating_effect = was_updating_effect;
+    last_scheduled_effect = null;
+    if (dev_fallback_default) {
+      dev_effect_stack = [];
+    }
+    old_values.clear();
+  }
+}
+function flush_queued_effects(effects) {
+  var length = effects.length;
+  if (length === 0) return;
+  for (var i = 0; i < length; i++) {
+    var effect2 = effects[i];
+    if ((effect2.f & (DESTROYED | INERT)) === 0) {
+      try {
+        if (check_dirtiness(effect2)) {
+          update_effect(effect2);
+          if (effect2.deps === null && effect2.first === null && effect2.nodes_start === null) {
+            if (effect2.teardown === null) {
+              unlink_effect(effect2);
+            } else {
+              effect2.fn = null;
+            }
+          }
+        }
+      } catch (error) {
+        handle_error(error, effect2, null, effect2.ctx);
+      }
+    }
+  }
+}
+function schedule_effect(signal) {
+  if (!is_flushing) {
+    is_flushing = true;
+    queueMicrotask(flush_queued_root_effects);
+  }
+  var effect2 = last_scheduled_effect = signal;
+  while (effect2.parent !== null) {
+    effect2 = effect2.parent;
+    var flags = effect2.f;
+    if ((flags & (ROOT_EFFECT | BRANCH_EFFECT)) !== 0) {
+      if ((flags & CLEAN) === 0) return;
+      effect2.f ^= CLEAN;
+    }
+  }
+  queued_root_effects.push(effect2);
+}
+function process_effects(root9) {
+  var effects = [];
+  var effect2 = root9;
+  while (effect2 !== null) {
+    var flags = effect2.f;
+    var is_branch = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) !== 0;
+    var is_skippable_branch = is_branch && (flags & CLEAN) !== 0;
+    if (!is_skippable_branch && (flags & INERT) === 0) {
+      if ((flags & EFFECT) !== 0) {
+        effects.push(effect2);
+      } else if (is_branch) {
+        effect2.f ^= CLEAN;
+      } else {
+        var previous_active_reaction = active_reaction;
+        try {
+          active_reaction = effect2;
+          if (check_dirtiness(effect2)) {
+            update_effect(effect2);
+          }
+        } catch (error) {
+          handle_error(error, effect2, null, effect2.ctx);
+        } finally {
+          active_reaction = previous_active_reaction;
+        }
+      }
+      var child2 = effect2.first;
+      if (child2 !== null) {
+        effect2 = child2;
+        continue;
+      }
+    }
+    var parent = effect2.parent;
+    effect2 = effect2.next;
+    while (effect2 === null && parent !== null) {
+      effect2 = parent.next;
+      parent = parent.parent;
+    }
+  }
+  return effects;
+}
+function flushSync(fn) {
+  var result;
+  if (fn) {
+    is_flushing = true;
+    flush_queued_root_effects();
+    result = fn();
+  }
+  flush_tasks();
+  while (queued_root_effects.length > 0) {
+    is_flushing = true;
+    flush_queued_root_effects();
+    flush_tasks();
+  }
+  return (
+    /** @type {T} */
+    result
+  );
+}
+function get(signal) {
+  var flags = signal.f;
+  var is_derived = (flags & DERIVED) !== 0;
+  if (captured_signals !== null) {
+    captured_signals.add(signal);
+  }
+  if (active_reaction !== null && !untracking) {
+    if (!reaction_sources?.includes(signal)) {
+      var deps = active_reaction.deps;
+      if (signal.rv < read_version) {
+        signal.rv = read_version;
+        if (new_deps === null && deps !== null && deps[skipped_deps] === signal) {
+          skipped_deps++;
+        } else if (new_deps === null) {
+          new_deps = [signal];
+        } else if (!skip_reaction || !new_deps.includes(signal)) {
+          new_deps.push(signal);
+        }
+      }
+    }
+  } else if (is_derived && /** @type {Derived} */
+  signal.deps === null && /** @type {Derived} */
+  signal.effects === null) {
+    var derived3 = (
+      /** @type {Derived} */
+      signal
+    );
+    var parent = derived3.parent;
+    if (parent !== null && (parent.f & UNOWNED) === 0) {
+      derived3.f ^= UNOWNED;
+    }
+  }
+  if (is_derived) {
+    derived3 = /** @type {Derived} */
+    signal;
+    if (check_dirtiness(derived3)) {
+      update_derived(derived3);
+    }
+  }
+  if (dev_fallback_default && tracing_mode_flag && tracing_expressions !== null && active_reaction !== null && tracing_expressions.reaction === active_reaction) {
+    if (signal.debug) {
+      signal.debug();
+    } else if (signal.created) {
+      var entry = tracing_expressions.entries.get(signal);
+      if (entry === void 0) {
+        entry = { read: [] };
+        tracing_expressions.entries.set(signal, entry);
+      }
+      entry.read.push(get_stack("TracedAt"));
+    }
+  }
+  if (is_destroying_effect && old_values.has(signal)) {
+    return old_values.get(signal);
+  }
+  return signal.v;
+}
+function untrack(fn) {
+  var previous_untracking = untracking;
+  try {
+    untracking = true;
+    return fn();
+  } finally {
+    untracking = previous_untracking;
+  }
+}
+var STATUS_MASK = ~(DIRTY | MAYBE_DIRTY | CLEAN);
+function set_signal_status(signal, status) {
+  signal.f = signal.f & STATUS_MASK | status;
 }
 
 // node_modules/svelte/src/internal/client/reactivity/effects.js
@@ -1385,7 +1722,7 @@ function validate_effect(rune) {
   if (active_effect === null && active_reaction === null) {
     effect_orphan(rune);
   }
-  if (active_reaction !== null && (active_reaction.f & UNOWNED) !== 0) {
+  if (active_reaction !== null && (active_reaction.f & UNOWNED) !== 0 && active_effect === null) {
     effect_in_unowned_derived();
   }
   if (is_destroying_effect) {
@@ -1403,17 +1740,15 @@ function push_effect(effect2, parent_effect) {
   }
 }
 function create_effect(type, fn, sync, push2 = true) {
-  var is_root = (type & ROOT_EFFECT) !== 0;
-  var parent_effect = active_effect;
+  var parent = active_effect;
   if (dev_fallback_default) {
-    while (parent_effect !== null && (parent_effect.f & INSPECT_EFFECT) !== 0) {
-      parent_effect = parent_effect.parent;
+    while (parent !== null && (parent.f & INSPECT_EFFECT) !== 0) {
+      parent = parent.parent;
     }
   }
   var effect2 = {
     ctx: component_context,
     deps: null,
-    deriveds: null,
     nodes_start: null,
     nodes_end: null,
     f: type | DIRTY,
@@ -1421,41 +1756,37 @@ function create_effect(type, fn, sync, push2 = true) {
     fn,
     last: null,
     next: null,
-    parent: is_root ? null : parent_effect,
+    parent,
     prev: null,
     teardown: null,
     transitions: null,
-    version: 0
+    wv: 0
   };
   if (dev_fallback_default) {
     effect2.component_function = dev_current_component_function;
   }
   if (sync) {
-    var previously_flushing_effect = is_flushing_effect;
     try {
-      set_is_flushing_effect(true);
       update_effect(effect2);
       effect2.f |= EFFECT_RAN;
     } catch (e) {
       destroy_effect(effect2);
       throw e;
-    } finally {
-      set_is_flushing_effect(previously_flushing_effect);
     }
   } else if (fn !== null) {
     schedule_effect(effect2);
   }
-  var inert = sync && effect2.deps === null && effect2.first === null && effect2.nodes_start === null && effect2.teardown === null && (effect2.f & EFFECT_HAS_DERIVED) === 0;
-  if (!inert && !is_root && push2) {
-    if (parent_effect !== null) {
-      push_effect(effect2, parent_effect);
+  var inert = sync && effect2.deps === null && effect2.first === null && effect2.nodes_start === null && effect2.teardown === null && (effect2.f & (EFFECT_HAS_DERIVED | BOUNDARY_EFFECT)) === 0;
+  if (!inert && push2) {
+    if (parent !== null) {
+      push_effect(effect2, parent);
     }
     if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0) {
       var derived3 = (
         /** @type {Derived} */
         active_reaction
       );
-      (derived3.children ??= []).push(effect2);
+      (derived3.effects ??= []).push(effect2);
     }
   }
   return effect2;
@@ -1489,15 +1820,6 @@ function user_effect(fn) {
     return signal;
   }
 }
-function user_pre_effect(fn) {
-  validate_effect("$effect.pre");
-  if (dev_fallback_default) {
-    define_property(fn, "name", {
-      value: "$effect.pre"
-    });
-  }
-  return render_effect(fn);
-}
 function effect_root(fn) {
   const effect2 = create_effect(ROOT_EFFECT, fn, true);
   return () => {
@@ -1526,13 +1848,15 @@ function effect(fn) {
 function render_effect(fn) {
   return create_effect(RENDER_EFFECT, fn, true);
 }
-function template_effect(fn) {
+function template_effect(fn, thunks = [], d = derived) {
+  const deriveds = thunks.map(d);
+  const effect2 = () => fn(...deriveds.map(get));
   if (dev_fallback_default) {
-    define_property(fn, "name", {
+    define_property(effect2, "name", {
       value: "{expression}"
     });
   }
-  return block(fn);
+  return block(effect2);
 }
 function block(fn, flags = 0) {
   return create_effect(RENDER_EFFECT | BLOCK_EFFECT | flags, fn, true);
@@ -1555,21 +1879,16 @@ function execute_effect_teardown(effect2) {
     }
   }
 }
-function destroy_effect_deriveds(signal) {
-  var deriveds = signal.deriveds;
-  if (deriveds !== null) {
-    signal.deriveds = null;
-    for (var i = 0; i < deriveds.length; i += 1) {
-      destroy_derived(deriveds[i]);
-    }
-  }
-}
 function destroy_effect_children(signal, remove_dom = false) {
   var effect2 = signal.first;
   signal.first = signal.last = null;
   while (effect2 !== null) {
     var next2 = effect2.next;
-    destroy_effect(effect2, remove_dom);
+    if ((effect2.f & ROOT_EFFECT) !== 0) {
+      effect2.parent = null;
+    } else {
+      destroy_effect(effect2, remove_dom);
+    }
     effect2 = next2;
   }
 }
@@ -1599,7 +1918,6 @@ function destroy_effect(effect2, remove_dom = true) {
     removed = true;
   }
   destroy_effect_children(effect2, remove_dom && !removed);
-  destroy_effect_deriveds(effect2);
   remove_reactions(effect2, 0);
   set_signal_status(effect2, DESTROYED);
   var transitions = effect2.transitions;
@@ -1671,10 +1989,14 @@ function resume_effect(effect2) {
 }
 function resume_children(effect2, local) {
   if ((effect2.f & INERT) === 0) return;
-  if (check_dirtiness(effect2)) {
-    update_effect(effect2);
-  }
   effect2.f ^= INERT;
+  if ((effect2.f & CLEAN) === 0) {
+    effect2.f ^= CLEAN;
+  }
+  if (check_dirtiness(effect2)) {
+    set_signal_status(effect2, DIRTY);
+    schedule_effect(effect2);
+  }
   var child2 = effect2.first;
   while (child2 !== null) {
     var sibling2 = child2.next;
@@ -1691,44 +2013,113 @@ function resume_children(effect2, local) {
   }
 }
 
-// node_modules/svelte/src/internal/client/dom/task.js
-var request_idle_callback = typeof requestIdleCallback === "undefined" ? (cb) => setTimeout(cb, 1) : requestIdleCallback;
-var is_micro_task_queued = false;
-var is_idle_task_queued = false;
-var current_queued_micro_tasks = [];
-var current_queued_idle_tasks = [];
-function process_micro_tasks() {
-  is_micro_task_queued = false;
-  const tasks = current_queued_micro_tasks.slice();
-  current_queued_micro_tasks = [];
-  run_all(tasks);
-}
-function process_idle_tasks() {
-  is_idle_task_queued = false;
-  const tasks = current_queued_idle_tasks.slice();
-  current_queued_idle_tasks = [];
-  run_all(tasks);
-}
-function queue_micro_task(fn) {
-  if (!is_micro_task_queued) {
-    is_micro_task_queued = true;
-    queueMicrotask(process_micro_tasks);
+// node_modules/svelte/src/internal/client/dev/ownership.js
+var boundaries = {};
+var chrome_pattern = /at (?:.+ \()?(.+):(\d+):(\d+)\)?$/;
+var firefox_pattern = /@(.+):(\d+):(\d+)$/;
+function get_stack2() {
+  const stack2 = new Error().stack;
+  if (!stack2) return null;
+  const entries = [];
+  for (const line of stack2.split("\n")) {
+    let match = chrome_pattern.exec(line) ?? firefox_pattern.exec(line);
+    if (match) {
+      entries.push({
+        file: match[1],
+        line: +match[2],
+        column: +match[3]
+      });
+    }
   }
-  current_queued_micro_tasks.push(fn);
+  return entries;
 }
-function queue_idle_task(fn) {
-  if (!is_idle_task_queued) {
-    is_idle_task_queued = true;
-    request_idle_callback(process_idle_tasks);
+function get_component() {
+  const stack2 = get_stack2()?.slice(4);
+  if (!stack2) return null;
+  for (let i = 0; i < stack2.length; i++) {
+    const entry = stack2[i];
+    const modules = boundaries[entry.file];
+    if (!modules) {
+      if (i === 0) return null;
+      continue;
+    }
+    for (const module of modules) {
+      if (module.end == null) {
+        return null;
+      }
+      if (module.start.line < entry.line && module.end.line > entry.line) {
+        return module.component;
+      }
+    }
   }
-  current_queued_idle_tasks.push(fn);
+  return null;
 }
-function flush_tasks() {
-  if (is_micro_task_queued) {
-    process_micro_tasks();
+var ADD_OWNER = Symbol("ADD_OWNER");
+function mark_module_start() {
+  const start = get_stack2()?.[2];
+  if (start) {
+    (boundaries[start.file] ??= []).push({
+      start,
+      // @ts-expect-error
+      end: null,
+      // @ts-expect-error we add the component at the end, since HMR will overwrite the function
+      component: null
+    });
   }
-  if (is_idle_task_queued) {
-    process_idle_tasks();
+}
+function mark_module_end(component2) {
+  const end = get_stack2()?.[2];
+  if (end) {
+    const boundaries_file = boundaries[end.file];
+    const boundary2 = boundaries_file[boundaries_file.length - 1];
+    boundary2.end = end;
+    boundary2.component = component2;
+  }
+}
+function widen_ownership(from, to) {
+  if (to.owners === null) {
+    return;
+  }
+  while (from) {
+    if (from.owners === null) {
+      to.owners = null;
+      break;
+    }
+    for (const owner of from.owners) {
+      to.owners.add(owner);
+    }
+    from = from.parent;
+  }
+}
+function has_owner(metadata, component2) {
+  if (metadata.owners === null) {
+    return true;
+  }
+  return metadata.owners.has(component2) || // This helps avoid false positives when using HMR, where the component function is replaced
+  FILENAME in component2 && [...metadata.owners].some(
+    (owner) => (
+      /** @type {any} */
+      owner[FILENAME] === component2[FILENAME]
+    )
+  ) || metadata.parent !== null && has_owner(metadata.parent, component2);
+}
+function get_owner(metadata) {
+  return metadata?.owners?.values().next().value ?? get_owner(
+    /** @type {ProxyMetadata} */
+    metadata.parent
+  );
+}
+var skip = false;
+function check_ownership(metadata) {
+  if (skip) return;
+  const component2 = get_component();
+  if (component2 && !has_owner(metadata, component2)) {
+    let original = get_owner(metadata);
+    if (original[FILENAME] !== component2[FILENAME]) {
+      ownership_invalid_mutation(component2[FILENAME], original[FILENAME]);
+    } else {
+      ownership_invalid_mutation();
+    }
   }
 }
 
@@ -1756,600 +2147,20 @@ https://svelte.dev/e/store_invalid_shape`);
   }
 }
 
-// node_modules/svelte/src/internal/client/runtime.js
-var FLUSH_MICROTASK = 0;
-var FLUSH_SYNC = 1;
-var handled_errors = /* @__PURE__ */ new WeakSet();
-var is_throwing_error = false;
-var scheduler_mode = FLUSH_MICROTASK;
-var is_micro_task_queued2 = false;
-var last_scheduled_effect = null;
-var is_flushing_effect = false;
-var is_destroying_effect = false;
-function set_is_flushing_effect(value) {
-  is_flushing_effect = value;
-}
-function set_is_destroying_effect(value) {
-  is_destroying_effect = value;
-}
-var queued_root_effects = [];
-var flush_count = 0;
-var dev_effect_stack = [];
-var active_reaction = null;
-function set_active_reaction(reaction) {
-  active_reaction = reaction;
-}
-var active_effect = null;
-function set_active_effect(effect2) {
-  active_effect = effect2;
-}
-var derived_sources = null;
-function set_derived_sources(sources) {
-  derived_sources = sources;
-}
-var new_deps = null;
-var skipped_deps = 0;
-var untracked_writes = null;
-function set_untracked_writes(value) {
-  untracked_writes = value;
-}
-var current_version = 1;
-var skip_reaction = false;
-var captured_signals = null;
+// node_modules/svelte/src/internal/client/context.js
 var component_context = null;
+function set_component_context(context) {
+  component_context = context;
+}
 var dev_current_component_function = null;
-function increment_version() {
-  return ++current_version;
-}
-function is_runes() {
-  return !legacy_mode_flag || component_context !== null && component_context.l === null;
-}
-function check_dirtiness(reaction) {
-  var flags = reaction.f;
-  if ((flags & DIRTY) !== 0) {
-    return true;
-  }
-  if ((flags & MAYBE_DIRTY) !== 0) {
-    var dependencies = reaction.deps;
-    var is_unowned = (flags & UNOWNED) !== 0;
-    if (dependencies !== null) {
-      var i;
-      if ((flags & DISCONNECTED) !== 0) {
-        for (i = 0; i < dependencies.length; i++) {
-          (dependencies[i].reactions ??= []).push(reaction);
-        }
-        reaction.f ^= DISCONNECTED;
-      }
-      for (i = 0; i < dependencies.length; i++) {
-        var dependency = dependencies[i];
-        if (check_dirtiness(
-          /** @type {Derived} */
-          dependency
-        )) {
-          update_derived(
-            /** @type {Derived} */
-            dependency
-          );
-        }
-        if (is_unowned && active_effect !== null && !skip_reaction && !dependency?.reactions?.includes(reaction)) {
-          (dependency.reactions ??= []).push(reaction);
-        }
-        if (dependency.version > reaction.version) {
-          return true;
-        }
-      }
-    }
-    if (!is_unowned || active_effect !== null && !skip_reaction) {
-      set_signal_status(reaction, CLEAN);
-    }
-  }
-  return false;
-}
-function propagate_error(error, effect2) {
-  var current = effect2;
-  while (current !== null) {
-    if ((current.f & BOUNDARY_EFFECT) !== 0) {
-      try {
-        current.fn(error);
-        return;
-      } catch {
-        current.f ^= BOUNDARY_EFFECT;
-      }
-    }
-    current = current.parent;
-  }
-  is_throwing_error = false;
-  throw error;
-}
-function should_rethrow_error(effect2) {
-  return (effect2.f & DESTROYED) === 0 && (effect2.parent === null || (effect2.parent.f & BOUNDARY_EFFECT) === 0);
-}
-function handle_error(error, effect2, previous_effect, component_context2) {
-  if (is_throwing_error) {
-    if (previous_effect === null) {
-      is_throwing_error = false;
-    }
-    if (should_rethrow_error(effect2)) {
-      throw error;
-    }
-    return;
-  }
-  if (previous_effect !== null) {
-    is_throwing_error = true;
-  }
-  if (!dev_fallback_default || component_context2 === null || !(error instanceof Error) || handled_errors.has(error)) {
-    propagate_error(error, effect2);
-    return;
-  }
-  handled_errors.add(error);
-  const component_stack = [];
-  const effect_name = effect2.fn?.name;
-  if (effect_name) {
-    component_stack.push(effect_name);
-  }
-  let current_context = component_context2;
-  while (current_context !== null) {
-    if (dev_fallback_default) {
-      var filename = current_context.function?.[FILENAME];
-      if (filename) {
-        const file = filename.split("/").pop();
-        component_stack.push(file);
-      }
-    }
-    current_context = current_context.p;
-  }
-  const indent = /Firefox/.test(navigator.userAgent) ? "  " : "	";
-  define_property(error, "message", {
-    value: error.message + `
-${component_stack.map((name) => `
-${indent}in ${name}`).join("")}
-`
-  });
-  define_property(error, "component_stack", {
-    value: component_stack
-  });
-  const stack2 = error.stack;
-  if (stack2) {
-    const lines = stack2.split("\n");
-    const new_lines = [];
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.includes("svelte/src/internal")) {
-        continue;
-      }
-      new_lines.push(line);
-    }
-    define_property(error, "stack", {
-      value: new_lines.join("\n")
-    });
-  }
-  propagate_error(error, effect2);
-  if (should_rethrow_error(effect2)) {
-    throw error;
-  }
-}
-function update_reaction(reaction) {
-  var previous_deps = new_deps;
-  var previous_skipped_deps = skipped_deps;
-  var previous_untracked_writes = untracked_writes;
-  var previous_reaction = active_reaction;
-  var previous_skip_reaction = skip_reaction;
-  var prev_derived_sources = derived_sources;
-  var previous_component_context = component_context;
-  var flags = reaction.f;
-  new_deps = /** @type {null | Value[]} */
-  null;
-  skipped_deps = 0;
-  untracked_writes = null;
-  active_reaction = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) === 0 ? reaction : null;
-  skip_reaction = !is_flushing_effect && (flags & UNOWNED) !== 0;
-  derived_sources = null;
-  component_context = reaction.ctx;
-  try {
-    var result = (
-      /** @type {Function} */
-      (0, reaction.fn)()
-    );
-    var deps = reaction.deps;
-    if (new_deps !== null) {
-      var i;
-      remove_reactions(reaction, skipped_deps);
-      if (deps !== null && skipped_deps > 0) {
-        deps.length = skipped_deps + new_deps.length;
-        for (i = 0; i < new_deps.length; i++) {
-          deps[skipped_deps + i] = new_deps[i];
-        }
-      } else {
-        reaction.deps = deps = new_deps;
-      }
-      if (!skip_reaction) {
-        for (i = skipped_deps; i < deps.length; i++) {
-          (deps[i].reactions ??= []).push(reaction);
-        }
-      }
-    } else if (deps !== null && skipped_deps < deps.length) {
-      remove_reactions(reaction, skipped_deps);
-      deps.length = skipped_deps;
-    }
-    return result;
-  } finally {
-    new_deps = previous_deps;
-    skipped_deps = previous_skipped_deps;
-    untracked_writes = previous_untracked_writes;
-    active_reaction = previous_reaction;
-    skip_reaction = previous_skip_reaction;
-    derived_sources = prev_derived_sources;
-    component_context = previous_component_context;
-  }
-}
-function remove_reaction(signal, dependency) {
-  let reactions = dependency.reactions;
-  if (reactions !== null) {
-    var index2 = reactions.indexOf(signal);
-    if (index2 !== -1) {
-      var new_length = reactions.length - 1;
-      if (new_length === 0) {
-        reactions = dependency.reactions = null;
-      } else {
-        reactions[index2] = reactions[new_length];
-        reactions.pop();
-      }
-    }
-  }
-  if (reactions === null && (dependency.f & DERIVED) !== 0 && // Destroying a child effect while updating a parent effect can cause a dependency to appear
-  // to be unused, when in fact it is used by the currently-updating parent. Checking `new_deps`
-  // allows us to skip the expensive work of disconnecting and immediately reconnecting it
-  (new_deps === null || !new_deps.includes(dependency))) {
-    set_signal_status(dependency, MAYBE_DIRTY);
-    if ((dependency.f & (UNOWNED | DISCONNECTED)) === 0) {
-      dependency.f ^= DISCONNECTED;
-    }
-    remove_reactions(
-      /** @type {Derived} **/
-      dependency,
-      0
-    );
-  }
-}
-function remove_reactions(signal, start_index) {
-  var dependencies = signal.deps;
-  if (dependencies === null) return;
-  for (var i = start_index; i < dependencies.length; i++) {
-    remove_reaction(signal, dependencies[i]);
-  }
-}
-function update_effect(effect2) {
-  var flags = effect2.f;
-  if ((flags & DESTROYED) !== 0) {
-    return;
-  }
-  set_signal_status(effect2, CLEAN);
-  var previous_effect = active_effect;
-  var previous_component_context = component_context;
-  active_effect = effect2;
-  if (dev_fallback_default) {
-    var previous_component_fn = dev_current_component_function;
-    dev_current_component_function = effect2.component_function;
-  }
-  try {
-    if ((flags & BLOCK_EFFECT) !== 0) {
-      destroy_block_effect_children(effect2);
-    } else {
-      destroy_effect_children(effect2);
-    }
-    destroy_effect_deriveds(effect2);
-    execute_effect_teardown(effect2);
-    var teardown2 = update_reaction(effect2);
-    effect2.teardown = typeof teardown2 === "function" ? teardown2 : null;
-    effect2.version = current_version;
-    if (dev_fallback_default) {
-      dev_effect_stack.push(effect2);
-    }
-  } catch (error) {
-    handle_error(error, effect2, previous_effect, previous_component_context || effect2.ctx);
-  } finally {
-    active_effect = previous_effect;
-    if (dev_fallback_default) {
-      dev_current_component_function = previous_component_fn;
-    }
-  }
-}
-function log_effect_stack() {
-  console.error(
-    "Last ten effects were: ",
-    dev_effect_stack.slice(-10).map((d) => d.fn)
-  );
-  dev_effect_stack = [];
-}
-function infinite_loop_guard() {
-  if (flush_count > 1e3) {
-    flush_count = 0;
-    try {
-      effect_update_depth_exceeded();
-    } catch (error) {
-      if (dev_fallback_default) {
-        define_property(error, "stack", {
-          value: ""
-        });
-      }
-      if (last_scheduled_effect !== null) {
-        if (dev_fallback_default) {
-          try {
-            handle_error(error, last_scheduled_effect, null, null);
-          } catch (e) {
-            log_effect_stack();
-            throw e;
-          }
-        } else {
-          handle_error(error, last_scheduled_effect, null, null);
-        }
-      } else {
-        if (dev_fallback_default) {
-          log_effect_stack();
-        }
-        throw error;
-      }
-    }
-  }
-  flush_count++;
-}
-function flush_queued_root_effects(root_effects) {
-  var length = root_effects.length;
-  if (length === 0) {
-    return;
-  }
-  infinite_loop_guard();
-  var previously_flushing_effect = is_flushing_effect;
-  is_flushing_effect = true;
-  try {
-    for (var i = 0; i < length; i++) {
-      var effect2 = root_effects[i];
-      if ((effect2.f & CLEAN) === 0) {
-        effect2.f ^= CLEAN;
-      }
-      var collected_effects = [];
-      process_effects(effect2, collected_effects);
-      flush_queued_effects(collected_effects);
-    }
-  } finally {
-    is_flushing_effect = previously_flushing_effect;
-  }
-}
-function flush_queued_effects(effects) {
-  var length = effects.length;
-  if (length === 0) return;
-  for (var i = 0; i < length; i++) {
-    var effect2 = effects[i];
-    if ((effect2.f & (DESTROYED | INERT)) === 0) {
-      try {
-        if (check_dirtiness(effect2)) {
-          update_effect(effect2);
-          if (effect2.deps === null && effect2.first === null && effect2.nodes_start === null) {
-            if (effect2.teardown === null) {
-              unlink_effect(effect2);
-            } else {
-              effect2.fn = null;
-            }
-          }
-        }
-      } catch (error) {
-        handle_error(error, effect2, null, effect2.ctx);
-      }
-    }
-  }
-}
-function process_deferred() {
-  is_micro_task_queued2 = false;
-  if (flush_count > 1001) {
-    return;
-  }
-  const previous_queued_root_effects = queued_root_effects;
-  queued_root_effects = [];
-  flush_queued_root_effects(previous_queued_root_effects);
-  if (!is_micro_task_queued2) {
-    flush_count = 0;
-    last_scheduled_effect = null;
-    if (dev_fallback_default) {
-      dev_effect_stack = [];
-    }
-  }
-}
-function schedule_effect(signal) {
-  if (scheduler_mode === FLUSH_MICROTASK) {
-    if (!is_micro_task_queued2) {
-      is_micro_task_queued2 = true;
-      queueMicrotask(process_deferred);
-    }
-  }
-  last_scheduled_effect = signal;
-  var effect2 = signal;
-  while (effect2.parent !== null) {
-    effect2 = effect2.parent;
-    var flags = effect2.f;
-    if ((flags & (ROOT_EFFECT | BRANCH_EFFECT)) !== 0) {
-      if ((flags & CLEAN) === 0) return;
-      effect2.f ^= CLEAN;
-    }
-  }
-  queued_root_effects.push(effect2);
-}
-function process_effects(effect2, collected_effects) {
-  var current_effect = effect2.first;
-  var effects = [];
-  main_loop: while (current_effect !== null) {
-    var flags = current_effect.f;
-    var is_branch = (flags & BRANCH_EFFECT) !== 0;
-    var is_skippable_branch = is_branch && (flags & CLEAN) !== 0;
-    var sibling2 = current_effect.next;
-    if (!is_skippable_branch && (flags & INERT) === 0) {
-      if ((flags & RENDER_EFFECT) !== 0) {
-        if (is_branch) {
-          current_effect.f ^= CLEAN;
-        } else {
-          try {
-            if (check_dirtiness(current_effect)) {
-              update_effect(current_effect);
-            }
-          } catch (error) {
-            handle_error(error, current_effect, null, current_effect.ctx);
-          }
-        }
-        var child2 = current_effect.first;
-        if (child2 !== null) {
-          current_effect = child2;
-          continue;
-        }
-      } else if ((flags & EFFECT) !== 0) {
-        effects.push(current_effect);
-      }
-    }
-    if (sibling2 === null) {
-      let parent = current_effect.parent;
-      while (parent !== null) {
-        if (effect2 === parent) {
-          break main_loop;
-        }
-        var parent_sibling = parent.next;
-        if (parent_sibling !== null) {
-          current_effect = parent_sibling;
-          continue main_loop;
-        }
-        parent = parent.parent;
-      }
-    }
-    current_effect = sibling2;
-  }
-  for (var i = 0; i < effects.length; i++) {
-    child2 = effects[i];
-    collected_effects.push(child2);
-    process_effects(child2, collected_effects);
-  }
-}
-function flush_sync(fn) {
-  var previous_scheduler_mode = scheduler_mode;
-  var previous_queued_root_effects = queued_root_effects;
-  try {
-    infinite_loop_guard();
-    const root_effects = [];
-    scheduler_mode = FLUSH_SYNC;
-    queued_root_effects = root_effects;
-    is_micro_task_queued2 = false;
-    flush_queued_root_effects(previous_queued_root_effects);
-    var result = fn?.();
-    flush_tasks();
-    if (queued_root_effects.length > 0 || root_effects.length > 0) {
-      flush_sync();
-    }
-    flush_count = 0;
-    last_scheduled_effect = null;
-    if (dev_fallback_default) {
-      dev_effect_stack = [];
-    }
-    return result;
-  } finally {
-    scheduler_mode = previous_scheduler_mode;
-    queued_root_effects = previous_queued_root_effects;
-  }
-}
-function get(signal) {
-  var flags = signal.f;
-  var is_derived = (flags & DERIVED) !== 0;
-  if (is_derived && (flags & DESTROYED) !== 0) {
-    var value = execute_derived(
-      /** @type {Derived} */
-      signal
-    );
-    destroy_derived(
-      /** @type {Derived} */
-      signal
-    );
-    return value;
-  }
-  if (captured_signals !== null) {
-    captured_signals.add(signal);
-  }
-  if (active_reaction !== null) {
-    if (derived_sources !== null && derived_sources.includes(signal)) {
-      state_unsafe_local_read();
-    }
-    var deps = active_reaction.deps;
-    if (new_deps === null && deps !== null && deps[skipped_deps] === signal) {
-      skipped_deps++;
-    } else if (new_deps === null) {
-      new_deps = [signal];
-    } else {
-      new_deps.push(signal);
-    }
-    if (untracked_writes !== null && active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & BRANCH_EFFECT) === 0 && untracked_writes.includes(signal)) {
-      set_signal_status(active_effect, DIRTY);
-      schedule_effect(active_effect);
-    }
-  } else if (is_derived && /** @type {Derived} */
-  signal.deps === null) {
-    var derived3 = (
-      /** @type {Derived} */
-      signal
-    );
-    var parent = derived3.parent;
-    var target = derived3;
-    while (parent !== null) {
-      if ((parent.f & DERIVED) !== 0) {
-        var parent_derived = (
-          /** @type {Derived} */
-          parent
-        );
-        target = parent_derived;
-        parent = parent_derived.parent;
-      } else {
-        var parent_effect = (
-          /** @type {Effect} */
-          parent
-        );
-        if (!parent_effect.deriveds?.includes(target)) {
-          (parent_effect.deriveds ??= []).push(target);
-        }
-        break;
-      }
-    }
-  }
-  if (is_derived) {
-    derived3 = /** @type {Derived} */
-    signal;
-    if (check_dirtiness(derived3)) {
-      update_derived(derived3);
-    }
-  }
-  if (dev_fallback_default && tracing_mode_flag && tracing_expressions !== null && active_reaction !== null && tracing_expressions.reaction === active_reaction) {
-    if (signal.debug) {
-      signal.debug();
-    } else if (signal.created) {
-      var entry = tracing_expressions.entries.get(signal);
-      if (entry === void 0) {
-        entry = { read: [] };
-        tracing_expressions.entries.set(signal, entry);
-      }
-      entry.read.push(get_stack("TracedAt"));
-    }
-  }
-  return signal.v;
-}
-function untrack(fn) {
-  const previous_reaction = active_reaction;
-  try {
-    active_reaction = null;
-    return fn();
-  } finally {
-    active_reaction = previous_reaction;
-  }
-}
-var STATUS_MASK = ~(DIRTY | MAYBE_DIRTY | CLEAN);
-function set_signal_status(signal, status) {
-  signal.f = signal.f & STATUS_MASK | status;
+function set_dev_current_component_function(fn) {
+  dev_current_component_function = fn;
 }
 function push(props, runes = false, fn) {
-  component_context = {
+  var ctx = component_context = {
     p: component_context,
     c: null,
+    d: false,
     e: null,
     m: false,
     s: props,
@@ -2364,6 +2175,9 @@ function push(props, runes = false, fn) {
       r2: source(false)
     };
   }
+  teardown(() => {
+    ctx.d = true;
+  });
   if (dev_fallback_default) {
     component_context.function = fn;
     dev_current_component_function = fn;
@@ -2401,74 +2215,73 @@ function pop(component2) {
   return component2 || /** @type {T} */
   {};
 }
-function deep_read_state(value) {
-  if (typeof value !== "object" || !value || value instanceof EventTarget) {
-    return;
-  }
-  if (STATE_SYMBOL in value) {
-    deep_read(value);
-  } else if (!Array.isArray(value)) {
-    for (let key in value) {
-      const prop2 = value[key];
-      if (typeof prop2 === "object" && prop2 && STATE_SYMBOL in prop2) {
-        deep_read(prop2);
-      }
-    }
-  }
+function is_runes() {
+  return !legacy_mode_flag || component_context !== null && component_context.l === null;
 }
-function deep_read(value, visited = /* @__PURE__ */ new Set()) {
-  if (typeof value === "object" && value !== null && // We don't want to traverse DOM elements
-  !(value instanceof EventTarget) && !visited.has(value)) {
-    visited.add(value);
-    if (value instanceof Date) {
-      value.getTime();
-    }
-    for (let key in value) {
-      try {
-        deep_read(value[key], visited);
-      } catch (e) {
-      }
-    }
-    const proto = get_prototype_of(value);
-    if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
-      const descriptors = get_descriptors(proto);
-      for (let key in descriptors) {
-        const get3 = descriptors[key].get;
-        if (get3) {
-          try {
-            get3.call(value);
-          } catch (e) {
-          }
-        }
-      }
-    }
-  }
+
+// node_modules/svelte/src/utils.js
+var regex_return_characters = /\r/g;
+function hash(str) {
+  str = str.replace(regex_return_characters, "");
+  let hash2 = 5381;
+  let i = str.length;
+  while (i--) hash2 = (hash2 << 5) - hash2 ^ str.charCodeAt(i);
+  return (hash2 >>> 0).toString(36);
 }
-if (dev_fallback_default) {
-  let throw_rune_error = function(rune) {
-    if (!(rune in globalThis)) {
-      let value;
-      Object.defineProperty(globalThis, rune, {
-        configurable: true,
-        // eslint-disable-next-line getter-return
-        get: () => {
-          if (value !== void 0) {
-            return value;
-          }
-          rune_outside_svelte(rune);
-        },
-        set: (v) => {
-          value = v;
-        }
-      });
-    }
-  };
-  throw_rune_error("$state");
-  throw_rune_error("$effect");
-  throw_rune_error("$derived");
-  throw_rune_error("$inspect");
-  throw_rune_error("$props");
-  throw_rune_error("$bindable");
+var DOM_BOOLEAN_ATTRIBUTES = [
+  "allowfullscreen",
+  "async",
+  "autofocus",
+  "autoplay",
+  "checked",
+  "controls",
+  "default",
+  "disabled",
+  "formnovalidate",
+  "hidden",
+  "indeterminate",
+  "inert",
+  "ismap",
+  "loop",
+  "multiple",
+  "muted",
+  "nomodule",
+  "novalidate",
+  "open",
+  "playsinline",
+  "readonly",
+  "required",
+  "reversed",
+  "seamless",
+  "selected",
+  "webkitdirectory",
+  "defer",
+  "disablepictureinpicture",
+  "disableremoteplayback"
+];
+var DOM_PROPERTIES = [
+  ...DOM_BOOLEAN_ATTRIBUTES,
+  "formNoValidate",
+  "isMap",
+  "noModule",
+  "playsInline",
+  "readOnly",
+  "value",
+  "volume",
+  "defaultValue",
+  "defaultChecked",
+  "srcObject",
+  "noValidate",
+  "allowFullscreen",
+  "disablePictureInPicture",
+  "disableRemotePlayback"
+];
+var PASSIVE_EVENTS = ["touchstart", "touchmove"];
+function is_passive_event(name) {
+  return PASSIVE_EVENTS.includes(name);
+}
+function sanitize_location(location) {
+  return location?.replace(/\//g, "/\u200B");
 }
 
 // node_modules/svelte/src/internal/client/dev/css.js
@@ -2584,14 +2397,14 @@ function listen_to_event_and_reset_event(element2, event2, handler, on_reset = h
 // node_modules/svelte/src/internal/client/dom/elements/events.js
 var all_registered_events = /* @__PURE__ */ new Set();
 var root_event_handles = /* @__PURE__ */ new Set();
-function create_event(event_name, dom, handler, options) {
+function create_event(event_name, dom, handler, options = {}) {
   function target_handler(event2) {
     if (!options.capture) {
       handle_event_propagation.call(dom, event2);
     }
     if (!event2.cancelBubble) {
       return without_reactive_context(() => {
-        return handler.call(this, event2);
+        return handler?.call(this, event2);
       });
     }
   }
@@ -2671,8 +2484,10 @@ function handle_event_propagation(event2) {
       current_target.host || null;
       try {
         var delegated = current_target["__" + event_name];
-        if (delegated !== void 0 && !/** @type {any} */
-        current_target.disabled) {
+        if (delegated != null && (!/** @type {any} */
+        current_target.disabled || // DOM could've been updated already by the time this is reached, so we check this as well
+        // -> the target could not have been disabled because it emits the event in the first place
+        event2.target === current_target)) {
           if (is_array(delegated)) {
             var [fn, ...data] = delegated;
             fn.apply(current_target, [event2, ...data]);
@@ -2715,12 +2530,11 @@ function apply(thunk, element2, args, component2, loc, has_side_effects = false,
   } catch (e) {
     error = e;
   }
-  if (typeof handler === "function") {
-    handler.apply(element2, args);
-  } else if (has_side_effects || handler != null || error) {
+  if (typeof handler !== "function" && (has_side_effects || handler != null || error)) {
     const filename = component2?.[FILENAME];
     const location = loc ? ` at ${filename}:${loc[0]}:${loc[1]}` : ` in ${filename}`;
-    const event_name = args[0].type;
+    const phase = args[0]?.eventPhase < Event.BUBBLING_PHASE ? "capture" : "";
+    const event_name = args[0]?.type + phase;
     const description = `\`${event_name}\` handler${location}`;
     const suggestion = remove_parens ? "remove the trailing `()`" : "add a leading `() =>`";
     event_handler_invalid(description, suggestion);
@@ -2728,6 +2542,7 @@ function apply(thunk, element2, args, component2, loc, has_side_effects = false,
       throw error;
     }
   }
+  handler?.apply(element2, args);
 }
 
 // node_modules/svelte/src/internal/client/dom/blocks/svelte-head.js
@@ -2770,24 +2585,24 @@ function template(content, flags) {
       if (!is_fragment) node = /** @type {Node} */
       get_first_child(node);
     }
-    var clone2 = (
+    var clone = (
       /** @type {TemplateNode} */
-      use_import_node ? document.importNode(node, true) : node.cloneNode(true)
+      use_import_node || is_firefox ? document.importNode(node, true) : node.cloneNode(true)
     );
     if (is_fragment) {
       var start = (
         /** @type {TemplateNode} */
-        get_first_child(clone2)
+        get_first_child(clone)
       );
       var end = (
         /** @type {TemplateNode} */
-        clone2.lastChild
+        clone.lastChild
       );
       assign_nodes(start, end);
     } else {
-      assign_nodes(clone2, clone2);
+      assign_nodes(clone, clone);
     }
-    return clone2;
+    return clone;
   };
 }
 function comment() {
@@ -2823,7 +2638,7 @@ function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
   if (str !== (text2.__t ??= text2.nodeValue)) {
     text2.__t = str;
-    text2.nodeValue = str == null ? "" : str + "";
+    text2.nodeValue = str + "";
   }
 }
 function mount(component2, options) {
@@ -2992,15 +2807,15 @@ function legacy_api() {
 }
 
 // node_modules/svelte/src/internal/client/dom/blocks/if.js
-function if_block(node, fn, elseif = false) {
-  if (hydrating) {
+function if_block(node, fn, [root_index, hydrate_index] = [0, 0]) {
+  if (hydrating && root_index === 0) {
     hydrate_next();
   }
   var anchor = node;
   var consequent_effect = null;
   var alternate_effect = null;
   var condition = UNINITIALIZED;
-  var flags = elseif ? EFFECT_TRANSPARENT : 0;
+  var flags = root_index > 0 ? EFFECT_TRANSPARENT : 0;
   var has_branch = false;
   const set_branch = (fn2, flag = true) => {
     has_branch = true;
@@ -3009,16 +2824,30 @@ function if_block(node, fn, elseif = false) {
   const update_branch = (new_condition, fn2) => {
     if (condition === (condition = new_condition)) return;
     let mismatch = false;
-    if (hydrating) {
-      const is_else = (
-        /** @type {Comment} */
-        anchor.data === HYDRATION_START_ELSE
-      );
+    if (hydrating && hydrate_index !== -1) {
+      if (root_index === 0) {
+        const data = (
+          /** @type {Comment} */
+          anchor.data
+        );
+        if (data === HYDRATION_START) {
+          hydrate_index = 0;
+        } else if (data === HYDRATION_START_ELSE) {
+          hydrate_index = Infinity;
+        } else {
+          hydrate_index = parseInt(data.substring(1));
+          if (hydrate_index !== hydrate_index) {
+            hydrate_index = condition ? Infinity : -1;
+          }
+        }
+      }
+      const is_else = hydrate_index > root_index;
       if (!!condition === is_else) {
         anchor = remove_nodes();
         set_hydrate_node(anchor);
         set_hydrating(false);
         mismatch = true;
+        hydrate_index = -1;
       }
     }
     if (condition) {
@@ -3036,7 +2865,7 @@ function if_block(node, fn, elseif = false) {
       if (alternate_effect) {
         resume_effect(alternate_effect);
       } else if (fn2) {
-        alternate_effect = branch(() => fn2(anchor));
+        alternate_effect = branch(() => fn2(anchor, [root_index + 1, hydrate_index]));
       }
       if (consequent_effect) {
         pause_effect(consequent_effect, () => {
@@ -3116,9 +2945,12 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
   }
   var fallback2 = null;
   var was_empty = false;
-  block(() => {
+  var each_array = derived_safe_equal(() => {
     var collection = get_collection();
-    var array = is_array(collection) ? collection : collection == null ? [] : array_from(collection);
+    return is_array(collection) ? collection : collection == null ? [] : array_from(collection);
+  });
+  block(() => {
+    var array = get(each_array);
     var length = array.length;
     if (was_empty && length === 0) {
       return;
@@ -3171,20 +3003,7 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
       }
     }
     if (!hydrating) {
-      var effect2 = (
-        /** @type {Effect} */
-        active_reaction
-      );
-      reconcile(
-        array,
-        state2,
-        anchor,
-        render_fn,
-        flags,
-        (effect2.f & INERT) !== 0,
-        get_key,
-        get_collection
-      );
+      reconcile(array, state2, anchor, render_fn, flags, get_key, get_collection);
     }
     if (fallback_fn !== null) {
       if (length === 0) {
@@ -3202,13 +3021,13 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
     if (mismatch) {
       set_hydrating(true);
     }
-    get_collection();
+    get(each_array);
   });
   if (hydrating) {
     anchor = hydrate_node;
   }
 }
-function reconcile(array, state2, anchor, render_fn, flags, is_inert, get_key, get_collection) {
+function reconcile(array, state2, anchor, render_fn, flags, get_key, get_collection) {
   var is_animated = (flags & EACH_IS_ANIMATED) !== 0;
   var should_update = (flags & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
   var length = array.length;
@@ -3307,7 +3126,7 @@ function reconcile(array, state2, anchor, render_fn, flags, is_inert, get_key, g
       matched = [];
       stashed = [];
       while (current !== null && current.k !== key) {
-        if (is_inert || (current.e.f & INERT) === 0) {
+        if ((current.e.f & INERT) === 0) {
           (seen ??= /* @__PURE__ */ new Set()).add(current);
         }
         stashed.push(current);
@@ -3325,7 +3144,7 @@ function reconcile(array, state2, anchor, render_fn, flags, is_inert, get_key, g
   if (current !== null || seen !== void 0) {
     var to_destroy = seen === void 0 ? [] : array_from(seen);
     while (current !== null) {
-      if (is_inert || (current.e.f & INERT) === 0) {
+      if ((current.e.f & INERT) === 0) {
         to_destroy.push(current);
       }
       current = current.next;
@@ -3393,7 +3212,7 @@ function create_item(anchor, state2, prev, next2, value, key, index2, render_fn,
   };
   current_each_item = item;
   try {
-    item.e = branch(() => render_fn(anchor, v, i), hydrating);
+    item.e = branch(() => render_fn(anchor, v, i, get_collection), hydrating);
     item.e.prev = prev && prev.e;
     item.e.next = next2 && next2.e;
     if (prev === null) {
@@ -3582,7 +3401,194 @@ function append_styles(anchor, css) {
   });
 }
 
+// node_modules/svelte/src/internal/shared/attributes.js
+var whitespace = [..." 	\n\r\f\xA0\v\uFEFF"];
+function to_class(value, hash2, directives) {
+  var classname = value == null ? "" : "" + value;
+  if (hash2) {
+    classname = classname ? classname + " " + hash2 : hash2;
+  }
+  if (directives) {
+    for (var key in directives) {
+      if (directives[key]) {
+        classname = classname ? classname + " " + key : key;
+      } else if (classname.length) {
+        var len = key.length;
+        var a = 0;
+        while ((a = classname.indexOf(key, a)) >= 0) {
+          var b = a + len;
+          if ((a === 0 || whitespace.includes(classname[a - 1])) && (b === classname.length || whitespace.includes(classname[b]))) {
+            classname = (a === 0 ? "" : classname.substring(0, a)) + classname.substring(b + 1);
+          } else {
+            a = b;
+          }
+        }
+      }
+    }
+  }
+  return classname === "" ? null : classname;
+}
+function append_styles2(styles, important = false) {
+  var separator = important ? " !important;" : ";";
+  var css = "";
+  for (var key in styles) {
+    var value = styles[key];
+    if (value != null && value !== "") {
+      css += " " + key + ": " + value + separator;
+    }
+  }
+  return css;
+}
+function to_css_name(name) {
+  if (name[0] !== "-" || name[1] !== "-") {
+    return name.toLowerCase();
+  }
+  return name;
+}
+function to_style(value, styles) {
+  if (styles) {
+    var new_style = "";
+    var normal_styles;
+    var important_styles;
+    if (Array.isArray(styles)) {
+      normal_styles = styles[0];
+      important_styles = styles[1];
+    } else {
+      normal_styles = styles;
+    }
+    if (value) {
+      value = String(value).replaceAll(/\s*\/\*.*?\*\/\s*/g, "").trim();
+      var in_str = false;
+      var in_apo = 0;
+      var in_comment = false;
+      var reserved_names = [];
+      if (normal_styles) {
+        reserved_names.push(...Object.keys(normal_styles).map(to_css_name));
+      }
+      if (important_styles) {
+        reserved_names.push(...Object.keys(important_styles).map(to_css_name));
+      }
+      var start_index = 0;
+      var name_index = -1;
+      const len = value.length;
+      for (var i = 0; i < len; i++) {
+        var c = value[i];
+        if (in_comment) {
+          if (c === "/" && value[i - 1] === "*") {
+            in_comment = false;
+          }
+        } else if (in_str) {
+          if (in_str === c) {
+            in_str = false;
+          }
+        } else if (c === "/" && value[i + 1] === "*") {
+          in_comment = true;
+        } else if (c === '"' || c === "'") {
+          in_str = c;
+        } else if (c === "(") {
+          in_apo++;
+        } else if (c === ")") {
+          in_apo--;
+        }
+        if (!in_comment && in_str === false && in_apo === 0) {
+          if (c === ":" && name_index === -1) {
+            name_index = i;
+          } else if (c === ";" || i === len - 1) {
+            if (name_index !== -1) {
+              var name = to_css_name(value.substring(start_index, name_index).trim());
+              if (!reserved_names.includes(name)) {
+                if (c !== ";") {
+                  i++;
+                }
+                var property = value.substring(start_index, i).trim();
+                new_style += " " + property + ";";
+              }
+            }
+            start_index = i + 1;
+            name_index = -1;
+          }
+        }
+      }
+    }
+    if (normal_styles) {
+      new_style += append_styles2(normal_styles);
+    }
+    if (important_styles) {
+      new_style += append_styles2(important_styles, true);
+    }
+    new_style = new_style.trim();
+    return new_style === "" ? null : new_style;
+  }
+  return value == null ? null : String(value);
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/class.js
+function set_class(dom, is_html, value, hash2, prev_classes, next_classes) {
+  var prev = dom.__className;
+  if (hydrating || prev !== value) {
+    var next_class_name = to_class(value, hash2, next_classes);
+    if (!hydrating || next_class_name !== dom.getAttribute("class")) {
+      if (next_class_name == null) {
+        dom.removeAttribute("class");
+      } else if (is_html) {
+        dom.className = next_class_name;
+      } else {
+        dom.setAttribute("class", next_class_name);
+      }
+    }
+    dom.__className = value;
+  } else if (next_classes && prev_classes !== next_classes) {
+    for (var key in next_classes) {
+      var is_present = !!next_classes[key];
+      if (prev_classes == null || is_present !== !!prev_classes[key]) {
+        dom.classList.toggle(key, is_present);
+      }
+    }
+  }
+  return next_classes;
+}
+
+// node_modules/svelte/src/internal/client/dom/elements/style.js
+function update_styles(dom, prev = {}, next2, priority) {
+  for (var key in next2) {
+    var value = next2[key];
+    if (prev[key] !== value) {
+      if (next2[key] == null) {
+        dom.style.removeProperty(key);
+      } else {
+        dom.style.setProperty(key, value, priority);
+      }
+    }
+  }
+}
+function set_style(dom, value, prev_styles, next_styles) {
+  var prev = dom.__style;
+  if (hydrating || prev !== value) {
+    var next_style_attr = to_style(value, next_styles);
+    if (!hydrating || next_style_attr !== dom.getAttribute("style")) {
+      if (next_style_attr == null) {
+        dom.removeAttribute("style");
+      } else {
+        dom.style.cssText = next_style_attr;
+      }
+    }
+    dom.__style = value;
+  } else if (next_styles) {
+    if (Array.isArray(next_styles)) {
+      update_styles(dom, prev_styles?.[0], next_styles[0]);
+      update_styles(dom, prev_styles?.[1], next_styles[1], "important");
+    } else {
+      update_styles(dom, prev_styles, next_styles);
+    }
+  }
+  return next_styles;
+}
+
 // node_modules/svelte/src/internal/client/dom/elements/attributes.js
+var CLASS = Symbol("class");
+var STYLE = Symbol("style");
+var IS_CUSTOM_ELEMENT = Symbol("is custom element");
+var IS_HTML = Symbol("is html");
 function remove_input_defaults(input) {
   if (!hydrating) return;
   var already_removed = false;
@@ -3605,17 +3611,17 @@ function remove_input_defaults(input) {
   add_form_reset_listener();
 }
 function set_value(element2, value) {
-  var attributes = element2.__attributes ??= {};
+  var attributes = get_attributes(element2);
   if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
   value ?? void 0) || // @ts-expect-error
-  // `progress` elements always need their value set when its `0`
+  // `progress` elements always need their value set when it's `0`
   element2.value === value && (value !== 0 || element2.nodeName !== "PROGRESS")) {
     return;
   }
-  element2.value = value;
+  element2.value = value ?? "";
 }
 function set_attribute(element2, attribute, value, skip_warning) {
-  var attributes = element2.__attributes ??= {};
+  var attributes = get_attributes(element2);
   if (hydrating) {
     attributes[attribute] = element2.getAttribute(attribute);
     if (attribute === "src" || attribute === "srcset" || attribute === "href" && element2.nodeName === "LINK") {
@@ -3626,9 +3632,6 @@ function set_attribute(element2, attribute, value, skip_warning) {
     }
   }
   if (attributes[attribute] === (attributes[attribute] = value)) return;
-  if (attribute === "style" && "__styles" in element2) {
-    element2.__styles = {};
-  }
   if (attribute === "loading") {
     element2[LOADING_ATTR_SYMBOL] = value;
   }
@@ -3639,6 +3642,16 @@ function set_attribute(element2, attribute, value, skip_warning) {
   } else {
     element2.setAttribute(attribute, value);
   }
+}
+function get_attributes(element2) {
+  return (
+    /** @type {Record<string | symbol, unknown>} **/
+    // @ts-expect-error
+    element2.__attributes ??= {
+      [IS_CUSTOM_ELEMENT]: element2.nodeName.includes("-"),
+      [IS_HTML]: element2.namespaceURI === NAMESPACE_HTML
+    }
+  );
 }
 var setters_cache = /* @__PURE__ */ new Map();
 function get_setters(element2) {
@@ -3687,17 +3700,6 @@ function srcset_url_equal(element2, srcset) {
     // contain relative or absolute URLs.
     (src_url_equal(element_urls[i][0], url) || src_url_equal(url, element_urls[i][0]))
   );
-}
-
-// node_modules/svelte/src/internal/client/dom/elements/class.js
-function toggle_class(dom, class_name, value) {
-  if (value) {
-    if (dom.classList.contains(class_name)) return;
-    dom.classList.add(class_name);
-  } else {
-    if (!dom.classList.contains(class_name)) return;
-    dom.classList.remove(class_name);
-  }
 }
 
 // node_modules/svelte/src/internal/client/dom/elements/bindings/input.js
@@ -3881,66 +3883,33 @@ function preventDefault(fn) {
   };
 }
 
-// node_modules/svelte/src/internal/client/dom/legacy/lifecycle.js
-function init(immutable = false) {
-  const context = (
-    /** @type {ComponentContextLegacy} */
-    component_context
-  );
-  const callbacks = context.l.u;
-  if (!callbacks) return;
-  let props = () => deep_read_state(context.s);
-  if (immutable) {
-    let version = 0;
-    let prev = (
-      /** @type {Record<string, any>} */
-      {}
-    );
-    const d = derived(() => {
-      let changed = false;
-      const props2 = context.s;
-      for (const key in props2) {
-        if (props2[key] !== prev[key]) {
-          prev[key] = props2[key];
-          changed = true;
-        }
-      }
-      if (changed) version++;
-      return version;
-    });
-    props = () => get(d);
-  }
-  if (callbacks.b.length) {
-    user_pre_effect(() => {
-      observe_all(context, props);
-      run_all(callbacks.b);
-    });
-  }
-  user_effect(() => {
-    const fns = untrack(() => callbacks.m.map(run));
-    return () => {
-      for (const fn of fns) {
-        if (typeof fn === "function") {
-          fn();
-        }
-      }
-    };
-  });
-  if (callbacks.a.length) {
-    user_effect(() => {
-      observe_all(context, props);
-      run_all(callbacks.a);
-    });
-  }
-}
-function observe_all(context, props) {
-  if (context.l.s) {
-    for (const signal of context.l.s) get(signal);
-  }
-  props();
-}
-
 // node_modules/svelte/src/index-client.js
+if (dev_fallback_default) {
+  let throw_rune_error = function(rune) {
+    if (!(rune in globalThis)) {
+      let value;
+      Object.defineProperty(globalThis, rune, {
+        configurable: true,
+        // eslint-disable-next-line getter-return
+        get: () => {
+          if (value !== void 0) {
+            return value;
+          }
+          rune_outside_svelte(rune);
+        },
+        set: (v) => {
+          value = v;
+        }
+      });
+    }
+  };
+  throw_rune_error("$state");
+  throw_rune_error("$effect");
+  throw_rune_error("$derived");
+  throw_rune_error("$inspect");
+  throw_rune_error("$props");
+  throw_rune_error("$bindable");
+}
 function onMount(fn) {
   if (component_context === null) {
     lifecycle_outside_component("onMount");
@@ -3988,15 +3957,71 @@ function subscribe_to_store(store, run2, invalidate) {
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
 
+// node_modules/svelte/src/store/shared/index.js
+var subscriber_queue = [];
+function writable(value, start = noop) {
+  let stop = null;
+  const subscribers = /* @__PURE__ */ new Set();
+  function set2(new_value) {
+    if (safe_not_equal(value, new_value)) {
+      value = new_value;
+      if (stop) {
+        const run_queue = !subscriber_queue.length;
+        for (const subscriber of subscribers) {
+          subscriber[1]();
+          subscriber_queue.push(subscriber, value);
+        }
+        if (run_queue) {
+          for (let i = 0; i < subscriber_queue.length; i += 2) {
+            subscriber_queue[i][0](subscriber_queue[i + 1]);
+          }
+          subscriber_queue.length = 0;
+        }
+      }
+    }
+  }
+  function update2(fn) {
+    set2(fn(
+      /** @type {T} */
+      value
+    ));
+  }
+  function subscribe(run2, invalidate = noop) {
+    const subscriber = [run2, invalidate];
+    subscribers.add(subscriber);
+    if (subscribers.size === 1) {
+      stop = start(set2, update2) || noop;
+    }
+    run2(
+      /** @type {T} */
+      value
+    );
+    return () => {
+      subscribers.delete(subscriber);
+      if (subscribers.size === 0 && stop) {
+        stop();
+        stop = null;
+      }
+    };
+  }
+  return { set: set2, update: update2, subscribe };
+}
+function get2(store) {
+  let value;
+  subscribe_to_store(store, (_) => value = _)();
+  return value;
+}
+
 // node_modules/svelte/src/internal/client/reactivity/store.js
 var is_store_binding = false;
+var IS_UNMOUNTED = Symbol();
 function store_get(store, store_name, stores) {
   const entry = stores[store_name] ??= {
     store: null,
     source: mutable_source(void 0),
     unsubscribe: noop
   };
-  if (entry.store !== store) {
+  if (entry.store !== store && !(IS_UNMOUNTED in stores)) {
     entry.unsubscribe();
     entry.store = store ?? null;
     if (store == null) {
@@ -4014,6 +4039,9 @@ function store_get(store, store_name, stores) {
       is_synchronous_callback = false;
     }
   }
+  if (store && IS_UNMOUNTED in stores) {
+    return get2(store);
+  }
   return get(entry.source);
 }
 function store_set(store, value) {
@@ -4022,13 +4050,19 @@ function store_set(store, value) {
 }
 function setup_stores() {
   const stores = {};
-  teardown(() => {
-    for (var store_name in stores) {
-      const ref = stores[store_name];
-      ref.unsubscribe();
-    }
-  });
-  return stores;
+  function cleanup() {
+    teardown(() => {
+      for (var store_name in stores) {
+        const ref = stores[store_name];
+        ref.unsubscribe();
+      }
+      define_property(stores, IS_UNMOUNTED, {
+        enumerable: false,
+        value: true
+      });
+    });
+  }
+  return [stores, cleanup];
 }
 function store_mutate(store, expression, new_value) {
   store.set(new_value);
@@ -4045,18 +4079,8 @@ function capture_store_binding(fn) {
 }
 
 // node_modules/svelte/src/internal/client/reactivity/props.js
-function with_parent_branch(fn) {
-  var effect2 = active_effect;
-  var previous_effect = active_effect;
-  while (effect2 !== null && (effect2.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
-    effect2 = effect2.parent;
-  }
-  try {
-    set_active_effect(effect2);
-    return fn();
-  } finally {
-    set_active_effect(previous_effect);
-  }
+function has_destroyed_component_ctx(current_value) {
+  return current_value.ctx?.d ?? false;
 }
 function prop(props, key, flags, fallback2) {
   var immutable = (flags & PROPS_IS_IMMUTABLE) !== 0;
@@ -4075,7 +4099,7 @@ function prop(props, key, flags, fallback2) {
     props[key];
   }
   var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-  var setter = get_descriptor(props, key)?.set ?? (is_entry_props && bindable && key in props ? (v) => props[key] = v : void 0);
+  var setter = bindable && (get_descriptor(props, key)?.set ?? (is_entry_props && key in props && ((v) => props[key] = v))) || void 0;
   var fallback_value = (
     /** @type {V} */
     fallback2
@@ -4118,11 +4142,11 @@ function prop(props, key, flags, fallback2) {
       return value;
     };
   } else {
-    var derived_getter = with_parent_branch(
-      () => (immutable ? derived : derived_safe_equal)(() => (
+    var derived_getter = (immutable ? derived : derived_safe_equal)(
+      () => (
         /** @type {V} */
         props[key]
-      ))
+      )
     );
     derived_getter.f |= LEGACY_DERIVED_PROP;
     getter = () => {
@@ -4151,19 +4175,20 @@ function prop(props, key, flags, fallback2) {
   var from_child = false;
   var was_from_child = false;
   var inner_current_value = mutable_source(prop_value);
-  var current_value = with_parent_branch(
-    () => derived(() => {
-      var parent_value = getter();
-      var child_value = get(inner_current_value);
-      if (from_child) {
-        from_child = false;
-        was_from_child = true;
-        return child_value;
-      }
-      was_from_child = false;
-      return inner_current_value.v = parent_value;
-    })
-  );
+  var current_value = derived(() => {
+    var parent_value = getter();
+    var child_value = get(inner_current_value);
+    if (from_child) {
+      from_child = false;
+      was_from_child = true;
+      return child_value;
+    }
+    was_from_child = false;
+    return inner_current_value.v = parent_value;
+  });
+  if (bindable) {
+    get(current_value);
+  }
   if (!immutable) current_value.equals = safe_equals;
   return function(value, mutation) {
     if (captured_signals !== null) {
@@ -4179,28 +4204,18 @@ function prop(props, key, flags, fallback2) {
         if (fallback_used && fallback_value !== void 0) {
           fallback_value = new_value;
         }
+        if (has_destroyed_component_ctx(current_value)) {
+          return value;
+        }
         untrack(() => get(current_value));
       }
       return value;
     }
+    if (has_destroyed_component_ctx(current_value)) {
+      return current_value.v;
+    }
     return get(current_value);
   };
-}
-
-// node_modules/svelte/src/internal/client/validate.js
-function validate_prop_bindings($$props, bindable, exports, component2) {
-  for (const key in $$props) {
-    var setter = get_descriptor($$props, key)?.set;
-    var name = component2.name;
-    if (setter) {
-      if (exports.includes(key)) {
-        bind_invalid_export(component2[FILENAME], key, name);
-      }
-      if (!bindable.includes(key)) {
-        bind_not_bindable(key, component2[FILENAME], name);
-      }
-    }
-  }
 }
 
 // node_modules/svelte/src/legacy/legacy-client.js
@@ -4250,7 +4265,7 @@ var Svelte4Component = class {
       recover: options.recover
     });
     if (!options?.props?.$$host || options.sync === false) {
-      flush_sync();
+      flushSync();
     }
     this.#events = props.$$events;
     for (const key of Object.keys(this.#instance)) {
@@ -4571,87 +4586,8 @@ function validate_store(store, name) {
   }
 }
 
-// node_modules/svelte/src/internal/client/dev/console-log.js
-function log_if_contains_state(method, ...objects) {
-  untrack(() => {
-    try {
-      let has_state = false;
-      const transformed = [];
-      for (const obj of objects) {
-        if (obj && typeof obj === "object" && STATE_SYMBOL in obj) {
-          transformed.push(snapshot(obj, true));
-          has_state = true;
-        } else {
-          transformed.push(obj);
-        }
-      }
-      if (has_state) {
-        console_log_state(method);
-        console.log("%c[snapshot]", "color: grey", ...transformed);
-      }
-    } catch {
-    }
-  });
-  return objects;
-}
-
 // Resources/Private/JavaScript/components/Image.svelte
 import interact from "interactjs";
-
-// node_modules/svelte/src/store/shared/index.js
-var subscriber_queue = [];
-function writable(value, start = noop) {
-  let stop = null;
-  const subscribers = /* @__PURE__ */ new Set();
-  function set2(new_value) {
-    if (safe_not_equal(value, new_value)) {
-      value = new_value;
-      if (stop) {
-        const run_queue = !subscriber_queue.length;
-        for (const subscriber of subscribers) {
-          subscriber[1]();
-          subscriber_queue.push(subscriber, value);
-        }
-        if (run_queue) {
-          for (let i = 0; i < subscriber_queue.length; i += 2) {
-            subscriber_queue[i][0](subscriber_queue[i + 1]);
-          }
-          subscriber_queue.length = 0;
-        }
-      }
-    }
-  }
-  function update2(fn) {
-    set2(fn(
-      /** @type {T} */
-      value
-    ));
-  }
-  function subscribe(run2, invalidate = noop) {
-    const subscriber = [run2, invalidate];
-    subscribers.add(subscriber);
-    if (subscribers.size === 1) {
-      stop = start(set2, update2) || noop;
-    }
-    run2(
-      /** @type {T} */
-      value
-    );
-    return () => {
-      subscribers.delete(subscriber);
-      if (subscribers.size === 0 && stop) {
-        stop();
-        stop = null;
-      }
-    };
-  }
-  return { set: set2, update: update2, subscribe };
-}
-function get2(store) {
-  let value;
-  subscribe_to_store(store, (_) => value = _)();
-  return value;
-}
 
 // Resources/Private/JavaScript/store.svelte.js
 import Icons from "@typo3/backend/icons.js";
@@ -4719,8 +4655,8 @@ var focusPointName = (index2) => {
 // Resources/Private/JavaScript/components/Image.svelte
 mark_module_start();
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_1 = add_locations(template(`<div class="draggable style1 resizable svelte-13yn81k"><span> </span></div>`), Image[FILENAME], [[172, 12, [[180, 16]]]]);
-var root = add_locations(template(`<div class="cropper-bg svelte-13yn81k" touch-action="none"><div class="wrapper svelte-13yn81k"><!> <img alt="Selected" unselectable="on" class="svelte-13yn81k"></div></div>`), Image[FILENAME], [
+var root_1 = add_locations(template(`<div><span> </span></div>`), Image[FILENAME], [[172, 12, [[180, 16]]]]);
+var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-13yn81k"><!> <img alt="Selected" unselectable="on" class="svelte-13yn81k"></div></div>`), Image[FILENAME], [
   [
     169,
     0,
@@ -4735,13 +4671,12 @@ function Image($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Image);
   append_styles($$anchor, $$css);
-  const $$stores = setup_stores();
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  validate_prop_bindings($$props, [], [], Image);
   let image = prop($$props, "image", 7);
   let canvasHeight = state(0);
   let canvasWidth = state(0);
-  let focuspointName = derived(() => (focuspoint, index2) => focusPointName(index2));
+  let focuspointName = user_derived(() => (focuspoint, index2) => focusPointName(index2));
   let img;
   let isDarkMode = state(false);
   interact(".draggable").resizable({
@@ -4812,68 +4747,84 @@ function Image($$anchor, $$props) {
   function setCanvasSizes() {
     setTimeout(
       () => {
-        set(canvasHeight, proxy(img.parentElement.getBoundingClientRect().height, null, canvasHeight));
-        set(canvasWidth, proxy(img.parentElement.getBoundingClientRect().width, null, canvasWidth));
+        set(canvasHeight, img.parentElement.getBoundingClientRect().height, true);
+        set(canvasWidth, img.parentElement.getBoundingClientRect().width, true);
       },
       300
     );
   }
-  const getPositionX = derived(() => (index2) => {
+  const getPositionX = user_derived(() => (index2) => {
     return $focuspoints()[index2].x * get(canvasWidth);
   });
-  const getPositionY = derived(() => (index2) => {
+  const getPositionY = user_derived(() => (index2) => {
     return $focuspoints()[index2].y * get(canvasHeight);
   });
-  const getFocuspointWidth = derived(() => (index2) => {
+  const getFocuspointWidth = user_derived(() => (index2) => {
     return $focuspoints()[index2].width * get(canvasWidth);
   });
-  const getFocuspointHeight = derived(() => (index2) => {
+  const getFocuspointHeight = user_derived(() => (index2) => {
     return $focuspoints()[index2].height * get(canvasHeight);
   });
   var div = root();
+  let classes;
   var div_1 = child(div);
   var node = child(div_1);
   each(node, 1, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
     var div_2 = root_1();
     div_2.__click = () => activateFocuspoint(index2);
     set_attribute(div_2, "data-index", index2);
-    const stringified_text = derived(() => get(getPositionX)(index2) ?? "");
-    const stringified_text_1 = derived(() => get(getPositionY)(index2) ?? "");
-    const stringified_text_2 = derived(() => get(getFocuspointWidth)(index2) ?? "");
-    const stringified_text_3 = derived(() => get(getFocuspointHeight)(index2) ?? "");
-    const style_derived = derived(() => `transform:translate3d(${get(stringified_text)}px, ${get(stringified_text_1)}px, 0); width: ${get(stringified_text_2)}px; height: ${get(stringified_text_3)}px;`);
-    template_effect(() => set_attribute(div_2, "data-x", get(getPositionX)(index2)));
-    template_effect(() => set_attribute(div_2, "data-y", get(getPositionY)(index2)));
+    let classes_1;
     var span = child(div_2);
     var text2 = child(span, true);
-    template_effect(() => set_text(text2, get(focuspointName)(get(focuspoint), index2)));
     reset(span);
     reset(div_2);
-    template_effect(() => {
-      set_attribute(div_2, "style", get(style_derived));
-      toggle_class(div_2, "active", get(focuspoint).active);
-    });
+    template_effect(
+      ($0, $1, $2, $3, $4, $5, $6, $7) => {
+        classes_1 = set_class(div_2, 1, "draggable style1 resizable svelte-13yn81k", null, classes_1, $0);
+        set_style(div_2, `transform:translate3d(${$1 ?? ""}px, ${$2 ?? ""}px, 0); width: ${$3 ?? ""}px; height: ${$4 ?? ""}px;`);
+        set_attribute(div_2, "data-x", $5);
+        set_attribute(div_2, "data-y", $6);
+        set_text(text2, $7);
+      },
+      [
+        () => ({ active: get(focuspoint).active }),
+        () => get(getPositionX)(index2),
+        () => get(getPositionY)(index2),
+        () => get(getFocuspointWidth)(index2),
+        () => get(getFocuspointHeight)(index2),
+        () => get(getPositionX)(index2),
+        () => get(getPositionY)(index2),
+        () => get(focuspointName)(get(focuspoint), index2)
+      ]
+    );
     append($$anchor2, div_2);
   });
   var img_1 = sibling(node, 2);
   bind_this(img_1, ($$value) => img = $$value, () => img);
   reset(div_1);
   reset(div);
-  template_effect(() => {
-    toggle_class(div, "cropper-bg--dark", get(isDarkMode));
-    set_attribute(img_1, "src", image());
-  });
+  template_effect(
+    ($0) => {
+      classes = set_class(div, 1, "cropper-bg svelte-13yn81k", null, classes, $0);
+      set_attribute(img_1, "src", image());
+    },
+    [
+      () => ({ "cropper-bg--dark": get(isDarkMode) })
+    ]
+  );
   append($$anchor, div);
-  return pop({
+  var $$pop = pop({
     get image() {
       return image();
     },
     set image($$value) {
       image($$value);
-      flush_sync();
+      flushSync();
     },
     ...legacy_api()
   });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Image);
 delegate(["click"]);
@@ -4887,9 +4838,8 @@ var root2 = add_locations(template(`<div class="form-group"><label class="form-l
 function Select($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Select);
-  const $$stores = setup_stores();
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  validate_prop_bindings($$props, [], [], Select);
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   let options = Object.entries(config().options).map(([value, label]) => ({ value, label }));
   var div = root2();
@@ -4923,30 +4873,32 @@ function Select($$anchor, $$props) {
   });
   bind_select_value(select, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
   append($$anchor, div);
-  return pop({
+  var $$pop = pop({
     get config() {
       return config();
     },
     set config($$value) {
       config($$value);
-      flush_sync();
+      flushSync();
     },
     get index() {
       return index2();
     },
     set index($$value) {
       index2($$value);
-      flush_sync();
+      flushSync();
     },
     get name() {
       return name();
     },
     set name($$value) {
       name($$value);
-      flush_sync();
+      flushSync();
     },
     ...legacy_api()
   });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Select);
 create_custom_element(Select, { config: {}, index: {}, name: {} }, [], [], true);
@@ -4958,9 +4910,8 @@ var root3 = add_locations(template(`<div class="form-group"><label class="form-l
 function Text2($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Text2);
-  const $$stores = setup_stores();
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  validate_prop_bindings($$props, [], [], Text2);
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   var div = root3();
   var label = child(div);
@@ -4976,30 +4927,32 @@ function Text2($$anchor, $$props) {
   });
   bind_value(input, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
   append($$anchor, div);
-  return pop({
+  var $$pop = pop({
     get config() {
       return config();
     },
     set config($$value) {
       config($$value);
-      flush_sync();
+      flushSync();
     },
     get index() {
       return index2();
     },
     set index($$value) {
       index2($$value);
-      flush_sync();
+      flushSync();
     },
     get name() {
       return name();
     },
     set name($$value) {
       name($$value);
-      flush_sync();
+      flushSync();
     },
     ...legacy_api()
   });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Text2);
 create_custom_element(Text2, { config: {}, index: {}, name: {} }, [], [], true);
@@ -5011,9 +4964,8 @@ var root4 = add_locations(template(`<div class="form-group"><label class="form-l
 function Textarea($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Textarea);
-  const $$stores = setup_stores();
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  validate_prop_bindings($$props, [], [], Textarea);
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   var div = root4();
   var label = child(div);
@@ -5029,30 +4981,32 @@ function Textarea($$anchor, $$props) {
   });
   bind_value(textarea, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
   append($$anchor, div);
-  return pop({
+  var $$pop = pop({
     get config() {
       return config();
     },
     set config($$value) {
       config($$value);
-      flush_sync();
+      flushSync();
     },
     get index() {
       return index2();
     },
     set index($$value) {
       index2($$value);
-      flush_sync();
+      flushSync();
     },
     get name() {
       return name();
     },
     set name($$value) {
       name($$value);
-      flush_sync();
+      flushSync();
     },
     ...legacy_api()
   });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Textarea);
 create_custom_element(Textarea, { config: {}, index: {}, name: {} }, [], [], true);
@@ -5062,7 +5016,7 @@ import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
 import Modal from "@typo3/backend/modal.js";
 mark_module_start();
 Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
-var root5 = add_locations(template(`<div class="form-group svelte-oaqvsi"><label class="form-label"> </label> <div class="form-wizards-wrap svelte-oaqvsi"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" class="form-control form-control-clearable" readonly=""> <input type="text" class="form-control form-control-clearable"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input" class="close text-black"><!></button></div> <button class="btn btn-default svelte-oaqvsi"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default svelte-oaqvsi"><!></button></div></div></div></div>`), Link[FILENAME], [
+var root5 = add_locations(template(`<div><label class="form-label"> </label> <div class="form-wizards-wrap svelte-oaqvsi"><div class="form-wizards-element"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text"><!></span> <input class="form-control" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" readonly=""> <input type="text"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input"><!></button></div> <button class="btn btn-default svelte-oaqvsi"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default svelte-oaqvsi"><!></button></div></div></div></div>`), Link[FILENAME], [
   [
     73,
     0,
@@ -5110,16 +5064,15 @@ function Link($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Link);
   append_styles($$anchor, $$css2);
-  const $$stores = setup_stores();
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
   const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
-  validate_prop_bindings($$props, [], [], Link);
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   let linkBrowserData = state(null);
   let readOnly = state(true);
-  let previewText = derived(() => get(linkBrowserData)?.preview?.text ?? "");
-  let previewIcon = derived(() => get(linkBrowserData)?.preview?.icon ?? "");
+  let previewText = user_derived(() => get(linkBrowserData)?.preview?.text ?? "");
+  let previewIcon = user_derived(() => get(linkBrowserData)?.preview?.icon ?? "");
   onMount(() => {
     updateLinkBrowserInfo();
     getIcon("actions-close");
@@ -5139,7 +5092,7 @@ function Link($$anchor, $$props) {
       url += "&inputValue=" + $focuspoints()[index2()][name()];
     }
     return new AjaxRequest(url).get().then(async (response) => {
-      set(linkBrowserData, proxy(await response.resolve(), null, linkBrowserData));
+      set(linkBrowserData, await response.resolve(), true);
     });
   }
   function openModal() {
@@ -5158,6 +5111,7 @@ function Link($$anchor, $$props) {
     get(linkBrowserData).preview = null;
   }
   var div = root5();
+  let classes;
   var label = child(div);
   var text2 = child(label, true);
   reset(label);
@@ -5168,12 +5122,16 @@ function Link($$anchor, $$props) {
   var node = child(span);
   html(node, () => get(previewIcon), false, false);
   reset(span);
-  var div_4 = sibling(span, 4);
-  var input = child(div_4);
-  remove_input_defaults(input);
-  var input_1 = sibling(input, 2);
+  var input = sibling(span, 2);
+  var div_4 = sibling(input, 2);
+  var input_1 = child(div_4);
   remove_input_defaults(input_1);
-  var button = sibling(input_1, 2);
+  let classes_1;
+  var input_2 = sibling(input_1, 2);
+  remove_input_defaults(input_2);
+  let classes_2;
+  var button = sibling(input_2, 2);
+  let classes_3;
   var node_1 = child(button);
   html(node_1, () => $iconStore()["actions-close"], false, false);
   reset(button);
@@ -5194,46 +5152,60 @@ function Link($$anchor, $$props) {
   reset(div_5);
   reset(div_1);
   reset(div);
-  template_effect(() => {
-    toggle_class(div, "v12", $wizardConfigStore() && $wizardConfigStore().typo3Version < 13);
-    set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
-    set_text(text2, config().title);
-    set_attribute(input, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
-    set_value(input, get(previewText));
-    toggle_class(input, "hidden", !get(readOnly));
-    set_attribute(input_1, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
-    toggle_class(input_1, "hidden", get(readOnly));
-    toggle_class(button, "hidden", strict_equals($focuspoints()[index2()][name()], ""));
-  });
-  bind_value(input_1, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
+  template_effect(
+    ($0, $1, $2, $3) => {
+      classes = set_class(div, 1, "form-group svelte-oaqvsi", null, classes, $0);
+      set_attribute(label, "for", `input-${index2() ?? ""}-${name() ?? ""}`);
+      set_text(text2, config().title);
+      set_attribute(input_1, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+      classes_1 = set_class(input_1, 1, "form-control form-control-clearable", null, classes_1, $1);
+      set_value(input_1, get(previewText));
+      classes_2 = set_class(input_2, 1, "form-control form-control-clearable", null, classes_2, $2);
+      set_attribute(input_2, "id", `input-${index2() ?? ""}-${name() ?? ""}`);
+      classes_3 = set_class(button, 1, "close text-black", null, classes_3, $3);
+    },
+    [
+      () => ({
+        v12: $wizardConfigStore() && $wizardConfigStore().typo3Version < 13
+      }),
+      () => ({ hidden: !get(readOnly) }),
+      () => ({ hidden: get(readOnly) }),
+      () => ({
+        hidden: strict_equals($focuspoints()[index2()][name()], "")
+      })
+    ]
+  );
+  bind_value(input_2, () => $focuspoints()[index2()][name()], ($$value) => store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = $$value, untrack($focuspoints)));
   event("click", button, preventDefault(onInputClear));
   event("click", button_1, preventDefault(() => set(readOnly, !get(readOnly))));
   event("click", button_2, preventDefault(openModal));
   append($$anchor, div);
-  return pop({
+  var $$pop = pop({
     get config() {
       return config();
     },
     set config($$value) {
       config($$value);
-      flush_sync();
+      flushSync();
     },
     get index() {
       return index2();
     },
     set index($$value) {
       index2($$value);
-      flush_sync();
+      flushSync();
     },
     get name() {
       return name();
     },
     set name($$value) {
       name($$value);
-      flush_sync();
+      flushSync();
     },
     ...legacy_api()
   });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Link);
 create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
@@ -5241,7 +5213,7 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 // Resources/Private/JavaScript/components/Sidebar.svelte
 mark_module_start();
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" class="panel-button svelte-1sv0c22" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1sv0c22"></span> <span class="panel-title"> </span></button></h4></div> <div class="panel-collapse" role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
+var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1sv0c22"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
     72,
     12,
@@ -5253,9 +5225,7 @@ var root_13 = add_locations(template(`<div class="panel panel-default" data-crop
           [
             74,
             20,
-            [
-              [75, 24, [[84, 28], [85, 28]]]
-            ]
+            [[75, 24, [[84, 28], [85, 28]]]]
           ]
         ]
       ],
@@ -5267,14 +5237,11 @@ var root_13 = add_locations(template(`<div class="panel panel-default" data-crop
     ]
   ]
 ]);
-var root6 = add_locations(template(`<div class="modal-panel-sidebar svelte-1sv0c22"><div class="panel-group svelte-1sv0c22" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button></div></div>`), Sidebar[FILENAME], [
+var root6 = add_locations(template(`<div><div class="panel-group svelte-1sv0c22" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button></div></div>`), Sidebar[FILENAME], [
   [
     68,
     0,
-    [
-      [69, 4],
-      [116, 4, [[117, 8]]]
-    ]
+    [[69, 4], [116, 4, [[117, 8]]]]
   ]
 ]);
 var $$css3 = {
@@ -5285,19 +5252,18 @@ function Sidebar($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Sidebar);
   append_styles($$anchor, $$css3);
-  const $$stores = setup_stores();
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
   const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
-  validate_prop_bindings($$props, [], [], Sidebar);
   onMount(() => {
     getIcon("actions-chevron-up");
     getIcon("actions-delete");
     getIcon("actions-add");
   });
-  let focuspointName = derived(() => (focuspoint, index2) => focusPointName(index2));
+  let focuspointName = user_derived(() => (focuspoint, index2) => focusPointName(index2));
   function deleteFocuspoint(index2) {
-    store_set(focuspoints, proxy($focuspoints().filter((focuspoint, i) => strict_equals(i, index2, false)), null, $focuspoints));
+    store_set(focuspoints, $focuspoints().filter((focuspoint, i) => strict_equals(i, index2, false)));
   }
   const components = {
     text: Text2,
@@ -5306,6 +5272,7 @@ function Sidebar($$anchor, $$props) {
     link: Link
   };
   var div = root6();
+  let classes;
   var div_1 = child(div);
   each(div_1, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
     var div_2 = root_13();
@@ -5313,15 +5280,16 @@ function Sidebar($$anchor, $$props) {
     var h4 = child(div_3);
     set_attribute(h4, "id", `cropper-accordion-heading-${index2 ?? ""}`);
     var button = child(h4);
+    let classes_1;
     var span = sibling(child(button), 2);
     var text2 = child(span, true);
-    template_effect(() => set_text(text2, get(focuspointName)(get(focuspoint), index2)));
     reset(span);
     reset(button);
     reset(h4);
     reset(div_3);
     var div_4 = sibling(div_3, 2);
     set_attribute(div_4, "id", `cropper-collapse-${index2 ?? ""}`);
+    let classes_2;
     set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2 ?? ""}`);
     var div_5 = child(div_4);
     var node = child(div_5);
@@ -5332,7 +5300,7 @@ function Sidebar($$anchor, $$props) {
       field();
       var fragment = comment();
       var node_1 = first_child(fragment);
-      var config = derived(() => field() ?? {});
+      const expression = user_derived(() => field() ?? {});
       component(node_1, () => components[field().type], ($$anchor4, $$component) => {
         $$component($$anchor4, {
           index: index2,
@@ -5340,7 +5308,7 @@ function Sidebar($$anchor, $$props) {
             return key();
           },
           get config() {
-            return get(config);
+            return get(expression);
           }
         });
       });
@@ -5355,12 +5323,22 @@ function Sidebar($$anchor, $$props) {
     reset(div_5);
     reset(div_4);
     reset(div_2);
-    template_effect(() => {
-      set_attribute(button, "aria-expanded", get(focuspoint).active);
-      toggle_class(button, "collapsed", !get(focuspoint).active);
-      toggle_class(div_4, "collapse", !get(focuspoint).active);
-      toggle_class(div_4, "show", get(focuspoint).active);
-    });
+    template_effect(
+      ($0, $1, $2) => {
+        set_attribute(button, "aria-expanded", get(focuspoint).active);
+        classes_1 = set_class(button, 1, "panel-button svelte-1sv0c22", null, classes_1, $0);
+        set_text(text2, $1);
+        classes_2 = set_class(div_4, 1, "panel-collapse", null, classes_2, $2);
+      },
+      [
+        () => ({ collapsed: !get(focuspoint).active }),
+        () => get(focuspointName)(get(focuspoint), index2),
+        () => ({
+          collapse: !get(focuspoint).active,
+          show: get(focuspoint).active
+        })
+      ]
+    );
     event("click", button, () => activateFocuspoint(index2));
     event("click", button_1, preventDefault(() => deleteFocuspoint(index2)));
     append($$anchor2, div_2);
@@ -5375,76 +5353,210 @@ function Sidebar($$anchor, $$props) {
   reset(button_2);
   reset(div_6);
   reset(div);
-  template_effect(() => toggle_class(div, "v12", $wizardConfigStore() && $wizardConfigStore().typo3Version < 13));
+  template_effect(($0) => classes = set_class(div, 1, "modal-panel-sidebar svelte-1sv0c22", null, classes, $0), [
+    () => ({
+      v12: $wizardConfigStore() && $wizardConfigStore().typo3Version < 13
+    })
+  ]);
   event("click", button_2, preventDefault(function(...$$args) {
     apply(() => createNewFocuspoint, this, $$args, Sidebar, [117, 72]);
   }));
   append($$anchor, div);
-  return pop({ ...legacy_api() });
+  var $$pop = pop({ ...legacy_api() });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Sidebar);
 create_custom_element(Sidebar, {}, [], [], true);
 
-// node_modules/svelte/src/internal/flags/legacy.js
-enable_legacy_mode_flag();
-
 // Resources/Private/JavaScript/components/Settings.svelte
+import Notification from "@typo3/backend/notification.js";
 mark_module_start();
 Settings[FILENAME] = "Resources/Private/JavaScript/components/Settings.svelte";
-var root7 = add_locations(template(`<div class="settings svelte-muy3hg"><h2>Settings</h2> <div><label>Import / Export</label> <textarea rows="10" cols="50"></textarea></div></div>`), Settings[FILENAME], [
+function onPasteButtonClick(_, jsonPoints) {
+  navigator.clipboard.readText().then((text2) => {
+    set(jsonPoints, text2, true);
+  });
+}
+function onUndoButtonClick(__1, jsonPoints, $focuspoints) {
+  set(jsonPoints, JSON.stringify($focuspoints()), true);
+}
+function onSaveButtonClick(__2, $focuspoints, jsonPoints, itemFormElName) {
+  try {
+    store_set(focuspoints, JSON.parse(get(jsonPoints)));
+    window.parent.frames.list_frame.document.dispatchEvent(new CustomEvent(`${itemFormElName()}-settings`, {}));
+  } catch (e) {
+    Notification.error("Error", "Invalid JSON", 5);
+  }
+}
+var root7 = add_locations(template(`<div class="d-flex justify-content-center align-items-center"><fieldset class="form-section"><h3 class="form-section-headline">Settings</h3> <div class="row"><label for="points">Import / Export</label> <div class="form-group"><textarea id="points" rows="10" cols="50"></textarea> <div class="d-flex justify-content-between"><div><button class="btn btn-default"><!>Copy</button> <button class="btn btn-default"><!>Paste</button></div> <div><button class="btn btn-default"><!> Undo</button> <button class="btn btn-primary"><!> Save</button></div></div></div></div></fieldset></div>`), Settings[FILENAME], [
   [
-    16,
+    55,
     0,
     [
-      [17, 4],
-      [18, 4, [[19, 8], [20, 8]]]
+      [
+        57,
+        4,
+        [
+          [58, 8],
+          [
+            59,
+            8,
+            [
+              [60, 12],
+              [
+                61,
+                12,
+                [
+                  [62, 20],
+                  [
+                    71,
+                    16,
+                    [
+                      [72, 20, [[73, 24], [75, 24]]],
+                      [78, 20, [[79, 24], [82, 24]]]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
     ]
   ]
 ]);
-var $$css4 = {
-  hash: "svelte-muy3hg",
-  code: "\n    .settings.svelte-muy3hg {\n        padding: 2rem;\n    }\n"
-};
 function Settings($$anchor, $$props) {
   check_target(new.target);
-  push($$props, false, Settings);
-  append_styles($$anchor, $$css4);
-  const $$stores = setup_stores();
+  push($$props, true, Settings);
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  onMount(() => {
-    console.log(...log_if_contains_state("log", $focuspoints()));
+  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
+  let itemFormElName = prop($$props, "itemFormElName", 7);
+  let focuspointArea;
+  let jsonPoints = state(proxy(JSON.stringify($focuspoints())));
+  let hasError = state(false);
+  let hasChange = state(false);
+  user_effect(() => {
+    try {
+      JSON.parse(get(jsonPoints));
+      set(hasError, false);
+    } catch (e) {
+      set(hasError, true);
+    }
+    set(hasChange, strict_equals(get(jsonPoints), JSON.stringify($focuspoints()), false));
   });
-  init();
+  onMount(() => {
+    getIcon("actions-clipboard");
+    getIcon("actions-clipboard-paste");
+    getIcon("actions-check");
+    getIcon("actions-undo");
+  });
+  function onCopyButtonClick() {
+    navigator.clipboard.writeText(focuspointArea.value);
+    Notification.success("Copied", "The current focuspoint configuration has been copied to the clipboard", 2);
+  }
   var div = root7();
-  var div_1 = sibling(child(div), 2);
-  var textarea = sibling(child(div_1), 2);
+  var fieldset = child(div);
+  var div_1 = sibling(child(fieldset), 2);
+  var label = child(div_1);
+  let classes;
+  var div_2 = sibling(label, 2);
+  var textarea = child(div_2);
   remove_textarea_child(textarea);
-  template_effect(() => set_value(textarea, JSON.stringify($focuspoints())));
+  let classes_1;
+  bind_this(textarea, ($$value) => focuspointArea = $$value, () => focuspointArea);
+  var div_3 = sibling(textarea, 2);
+  var div_4 = child(div_3);
+  var button = child(div_4);
+  button.__click = onCopyButtonClick;
+  var node = child(button);
+  html(node, () => $iconStore()["actions-clipboard"], false, false);
+  next();
+  reset(button);
+  var button_1 = sibling(button, 2);
+  button_1.__click = [onPasteButtonClick, jsonPoints];
+  var node_1 = child(button_1);
+  html(node_1, () => $iconStore()["actions-clipboard-paste"], false, false);
+  next();
+  reset(button_1);
+  reset(div_4);
+  var div_5 = sibling(div_4, 2);
+  var button_2 = child(div_5);
+  button_2.__click = [onUndoButtonClick, jsonPoints, $focuspoints];
+  var node_2 = child(button_2);
+  html(node_2, () => $iconStore()["actions-undo"], false, false);
+  next();
+  reset(button_2);
+  var button_3 = sibling(button_2, 2);
+  button_3.__click = [
+    onSaveButtonClick,
+    $focuspoints,
+    jsonPoints,
+    itemFormElName
+  ];
+  var node_3 = child(button_3);
+  html(node_3, () => $iconStore()["actions-check"], false, false);
+  next();
+  reset(button_3);
+  reset(div_5);
+  reset(div_3);
+  reset(div_2);
   reset(div_1);
+  reset(fieldset);
   reset(div);
+  template_effect(
+    ($0, $1) => {
+      classes = set_class(label, 1, "form-label", null, classes, $0);
+      classes_1 = set_class(textarea, 1, "form-control t3js-formengine-textarea formengine-textarea mb-3", null, classes_1, $1);
+      button_2.disabled = !get(hasChange);
+      button_3.disabled = !get(hasChange) || get(hasError);
+    },
+    [
+      () => ({
+        "has-error": get(hasError),
+        "has-change": get(hasChange)
+      }),
+      () => ({
+        "has-error": get(hasError),
+        "has-change": get(hasChange)
+      })
+    ]
+  );
+  bind_value(textarea, () => get(jsonPoints), ($$value) => set(jsonPoints, $$value));
   append($$anchor, div);
-  return pop({ ...legacy_api() });
+  var $$pop = pop({
+    get itemFormElName() {
+      return itemFormElName();
+    },
+    set itemFormElName($$value) {
+      itemFormElName($$value);
+      flushSync();
+    },
+    ...legacy_api()
+  });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(Settings);
-create_custom_element(Settings, {}, [], [], true);
+delegate(["click"]);
+create_custom_element(Settings, { itemFormElName: {} }, [], [], true);
 
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 mark_module_start();
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root_14 = add_locations(template(`<!> <div></div>`, 1), FocuspointWizard[FILENAME], [[51, 8]]);
 var root_2 = add_locations(template(`<!> <!>`, 1), FocuspointWizard[FILENAME], []);
 var root8 = add_locations(template(`<div class="wizard svelte-129cc1i"><!></div>`), FocuspointWizard[FILENAME], [[48, 0]]);
-var $$css5 = {
+var $$css4 = {
   hash: "svelte-129cc1i",
   code: "\n    .wizard.svelte-129cc1i {\n        display: grid;\n        max-height: 100%;\n        grid-template-columns: auto 300px;\n        grid-template-rows: 100%;\n    }\n"
 };
 function FocuspointWizard($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, FocuspointWizard);
-  append_styles($$anchor, $$css5);
-  const $$stores = setup_stores();
+  append_styles($$anchor, $$css4);
+  const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  validate_prop_bindings($$props, [], [], FocuspointWizard);
   let itemFormElName = prop($$props, "itemFormElName", 7), wizardConfig = prop($$props, "wizardConfig", 7), image = prop($$props, "image", 7);
   let isSettingsOpen = state(false);
   const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName()}"]`);
@@ -5456,7 +5568,7 @@ function FocuspointWizard($$anchor, $$props) {
   onDestroy(() => {
     window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName()}-save`, handleSave);
     window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName()}-settings`, handleSettings);
-    store_set(focuspoints, proxy([], null, $focuspoints));
+    store_set(focuspoints, []);
   });
   const handleSave = () => {
     const hiddenInput2 = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName()}"]`);
@@ -5469,22 +5581,22 @@ function FocuspointWizard($$anchor, $$props) {
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var fragment = root_14();
-      var node_1 = first_child(fragment);
-      Settings(node_1, {});
-      next(2);
-      append($$anchor2, fragment);
+      Settings($$anchor2, {
+        get itemFormElName() {
+          return itemFormElName();
+        }
+      });
     };
     var alternate = ($$anchor2) => {
       var fragment_1 = root_2();
-      var node_2 = first_child(fragment_1);
-      Image(node_2, {
+      var node_1 = first_child(fragment_1);
+      Image(node_1, {
         get image() {
           return image();
         }
       });
-      var node_3 = sibling(node_2, 2);
-      Sidebar(node_3, {});
+      var node_2 = sibling(node_1, 2);
+      Sidebar(node_2, {});
       append($$anchor2, fragment_1);
     };
     if_block(node, ($$render) => {
@@ -5494,30 +5606,32 @@ function FocuspointWizard($$anchor, $$props) {
   }
   reset(div);
   append($$anchor, div);
-  return pop({
+  var $$pop = pop({
     get itemFormElName() {
       return itemFormElName();
     },
     set itemFormElName($$value) {
       itemFormElName($$value);
-      flush_sync();
+      flushSync();
     },
     get wizardConfig() {
       return wizardConfig();
     },
     set wizardConfig($$value) {
       wizardConfig($$value);
-      flush_sync();
+      flushSync();
     },
     get image() {
       return image();
     },
     set image($$value) {
       image($$value);
-      flush_sync();
+      flushSync();
     },
     ...legacy_api()
   });
+  $$cleanup();
+  return $$pop;
 }
 mark_module_end(FocuspointWizard);
 customElements.define("focuspoint-wizard", create_custom_element(

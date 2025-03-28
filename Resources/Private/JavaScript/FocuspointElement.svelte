@@ -72,7 +72,7 @@
     }
 
     function onModalSettings() {
-        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
+        document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
     }
 
     function onLinkSelection(e) {

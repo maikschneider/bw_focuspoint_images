@@ -1,22 +1,92 @@
 <script>
-    import {focuspoints} from '../store.svelte';
+    import {focuspoints, getIcon, iconStore} from '../store.svelte';
+    import Notification from "@typo3/backend/notification.js";
     import {onMount} from "svelte";
 
-    onMount(() => {
-        console.log($focuspoints);
+    let {itemFormElName} = $props()
+    let focuspointArea;
+    let jsonPoints = $state(JSON.stringify($focuspoints));
+    let hasError = $state(false)
+    let hasChange = $state(false)
+
+    $effect(() => {
+        try {
+            JSON.parse(jsonPoints)
+            hasError = false
+        } catch (e) {
+            hasError = true
+        }
+
+        hasChange = jsonPoints !== JSON.stringify($focuspoints)
     });
+
+    onMount(() => {
+        getIcon('actions-clipboard')
+        getIcon('actions-clipboard-paste')
+        getIcon('actions-check')
+        getIcon('actions-undo')
+    });
+
+    function onCopyButtonClick() {
+        navigator.clipboard.writeText(focuspointArea.value);
+        Notification.success('Copied', 'The current focuspoint configuration has been copied to the clipboard', 2);
+    }
+
+    function onPasteButtonClick() {
+        navigator.clipboard.readText().then(text => {
+            jsonPoints = text
+        });
+    }
+
+    function onUndoButtonClick() {
+        jsonPoints = JSON.stringify($focuspoints);
+    }
+
+    function onSaveButtonClick() {
+        try {
+            $focuspoints = JSON.parse(jsonPoints);
+            window.parent.frames.list_frame.document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
+        } catch (e) {
+            Notification.error('Error', 'Invalid JSON', 5);
+        }
+    }
 </script>
 
-<style>
-    .settings {
-        padding: 2rem;
-    }
-</style>
+<div class="d-flex justify-content-center align-items-center">
 
-<div class="settings">
-    <h2>Settings</h2>
-    <div>
-        <label>Import / Export</label>
-        <textarea rows="10" cols="50" >{JSON.stringify($focuspoints)}</textarea>
-    </div>
+    <fieldset class="form-section">
+        <h3 class="form-section-headline">Settings</h3>
+        <div class="row">
+            <label class="form-label" class:has-error={hasError} class:has-change={hasChange} for="points">Import / Export</label>
+            <div class="form-group">
+                    <textarea
+                            class="form-control t3js-formengine-textarea formengine-textarea mb-3"
+                            bind:this={focuspointArea}
+                            bind:value={jsonPoints}
+                            class:has-error={hasError}
+                            class:has-change={hasChange}
+                            id="points"
+                            rows="10"
+                            cols="50"></textarea>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-default" onclick={onCopyButtonClick}>{@html $iconStore['actions-clipboard']}Copy
+                        </button>
+                        <button class="btn btn-default" onclick={onPasteButtonClick}>{@html $iconStore['actions-clipboard-paste']}Paste
+                        </button>
+                    </div>
+                    <div>
+                        <button disabled={!hasChange} class="btn btn-default" onclick={onUndoButtonClick}>{@html $iconStore['actions-undo']}
+                            Undo
+                        </button>
+                        <button
+                                disabled={!hasChange || hasError}
+                                class="btn btn-primary"
+                                onclick={onSaveButtonClick}>{@html $iconStore['actions-check']} Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
 </div>
