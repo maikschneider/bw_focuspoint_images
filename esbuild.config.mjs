@@ -43,7 +43,6 @@ async function build() {
     devMode = false;
     buildConfig.sourcemap = false
     buildConfig.minify = true
-    buildConfig.outExtension = {'.js': '.min.js'}
     await esbuild.build(buildConfig)
 }
 
