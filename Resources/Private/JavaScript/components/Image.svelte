@@ -75,7 +75,7 @@
             img.addEventListener('load', setCanvasSizes)
         }
 
-        window.addEventListener('resize', setCanvasSizes)
+        window.addEventListener('resize', updateCanvasSizes)
 
         const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
         const theme = document.querySelector('html').getAttribute('data-theme');
@@ -91,9 +91,13 @@
 
     function setCanvasSizes() {
         setTimeout(() => {
-            canvasHeight = img.parentElement.getBoundingClientRect().height
-            canvasWidth = img.parentElement.getBoundingClientRect().width
+            updateCanvasSizes()
         }, 300)
+    }
+
+    export function updateCanvasSizes() {
+        canvasHeight = img.parentElement.getBoundingClientRect().height
+        canvasWidth = img.parentElement.getBoundingClientRect().width
     }
 
     const getPositionX = $derived((index) => {
