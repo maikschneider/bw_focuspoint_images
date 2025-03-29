@@ -130,7 +130,8 @@
 				<target>Zurücksetzen</target>
 			</trans-unit>
 			<trans-unit id="wizard.button.accept">
-				<source>Übernehmen</source>
+				<source>Accept</source>
+				<target>Übernehmen</target>
 			</trans-unit>
 		</body>
 	</file>
