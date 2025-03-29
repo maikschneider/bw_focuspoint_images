@@ -38,6 +38,7 @@
 <style>
     .modal-panel-sidebar {
         padding-top: 0;
+        --typo3-state-primary-bg: #ff8700;
     }
 
     .panel-group {
