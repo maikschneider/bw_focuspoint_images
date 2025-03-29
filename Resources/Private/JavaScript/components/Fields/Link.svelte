@@ -65,6 +65,10 @@
         gap: 5px;
     }
 
+    .v12 .form-wizards-element {
+        width: 100%;
+    }
+
     .v12 .btn-default {
         height: 32px;
     }
