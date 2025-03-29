@@ -56,7 +56,13 @@
     }
 </script>
 
-<div class="d-flex justify-content-center align-items-center">
+<style>
+    .wrapper {
+        grid-column: 1 / 4;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center wrapper">
 
     <fieldset class="form-section">
         <h3 class="form-section-headline">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.settings']}</h3>
