@@ -86,7 +86,7 @@
     })
 
     onDestroy(() => {
-        window.removeEventListener('resize', setCanvasSizes)
+        window.removeEventListener('resize', updateCanvasSizes)
     })
 
     function setCanvasSizes() {
