@@ -75,6 +75,7 @@ mod.tx_bwfocuspointimages.settings.fields {
     description {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.description
         type = textarea
+        displayCond = FIELD:name:REQ:true
     }
 
     color {

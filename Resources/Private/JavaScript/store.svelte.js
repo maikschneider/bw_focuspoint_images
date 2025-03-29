@@ -10,6 +10,54 @@ export const initStores = (hiddenInput, wizardConfig, hiddenElement) => {
     focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : '[]'));
 }
 
+/**
+ * Evaluate a condition, e.g. FIELD:name:REQ:true
+ *
+ * @param fieldName
+ * @param point
+ * @returns {boolean}
+ */
+export const fieldMeetsCondition = (fieldName, point) => {
+    const condition = get(wizardConfigStore).fields[fieldName].displayCond;
+    if (!condition) {
+        return true;
+    }
+
+    const [type, field, operator, value] = condition.split(':');
+    if (type !== 'FIELD') {
+        return false;
+    }
+
+    switch (operator) {
+        case 'REQ':
+            return point[field] !== null && point[field] !== '';
+        case '!=':
+            return point[field] !== value;
+        case '=':
+            return point[field] === value;
+        case '>':
+            return parseInt(point[field]) > parseInt(value);
+        case '<':
+            return parseInt(point[field]) < parseInt(value);
+        case '>=':
+            return parseInt(point[field]) >= parseInt(value);
+        case '<=':
+            return parseInt(point[field]) <= parseInt(value);
+        case 'IN':
+            return value.split(',').includes(point[field]);
+        case '!IN':
+            return !value.split(',').includes(point[field]);
+        case '-':
+            const [min, max] = value.split('-');
+            return point[field] >= min && point[field] <= max;
+        case '!-':
+            const [min2, max2] = value.split('-');
+            return point[field] < min2 || point[field] > max2;
+        default:
+            return false;
+    }
+}
+
 export const createNewFocuspoint = () => {
     const config = get(wizardConfigStore);
     const newFocuspoint = {
