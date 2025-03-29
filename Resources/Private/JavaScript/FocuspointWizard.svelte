@@ -4,7 +4,7 @@
     .wizard {
         display: grid;
         max-height: 100%;
-        grid-template-columns: 1fr 1px 300px;
+        grid-template-columns: 1fr 1px var(--sidebar-width, 300px);
         grid-template-rows: 100%;
     }
 
@@ -74,7 +74,7 @@
     }
 </script>
 
-<div class="wizard" style="grid-template-columns: 1fr 1px {sidebarWidth}px;">
+<div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
     <Image bind:this={imageComponent} image={image} />
     <div class="resize-handle"></div>
     <Sidebar />
