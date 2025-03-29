@@ -1,11 +1,5 @@
 <svelte:options customElement={{tag: 'focuspoint-element', shadow: 'none'}} />
 
-<style>
-    .btn--left {
-        margin-right: auto;
-    }
-</style>
-
 <script>
     import {onMount} from "svelte"
     import Modal from '@typo3/backend/modal.js'
