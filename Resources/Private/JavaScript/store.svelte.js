@@ -11,12 +11,12 @@ export const initStores = (hiddenInput, wizardConfig, hiddenElement) => {
 }
 
 /**
- * Evaluate a condition, e.g. FIELD:name:REQ:true
- *
- * @param fieldName
- * @param point
- * @returns {boolean}
- */
+* Evaluate a condition, e.g. FIELD:name:REQ:true
+*
+* @param fieldName
+* @param point
+* @returns {boolean}
+*/
 export const fieldMeetsCondition = (fieldName, point) => {
     const condition = get(wizardConfigStore).fields[fieldName].displayCond;
     if (!condition) {
