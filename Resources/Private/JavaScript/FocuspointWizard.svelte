@@ -76,6 +76,6 @@
 
 <div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
     <Image bind:this={imageComponent} image={image} />
-    <div class="resize-handle"></div>
+    <div class="resize-handle" aria-label="Resize sidebar"></div>
     <Sidebar />
 </div>
