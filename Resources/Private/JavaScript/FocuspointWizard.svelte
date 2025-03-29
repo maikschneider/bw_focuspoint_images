@@ -26,7 +26,7 @@
     }
 
     .resize-handle:hover:after {
-        background: var(--scaffold-content-navigation-drag-bg-hover);
+        background: var(--scaffold-content-navigation-drag-bg-hover, #bbb);
     }
 </style>
 
