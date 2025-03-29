@@ -66,6 +66,7 @@
     onDestroy(() => {
         window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-save`, handleSave)
         $focuspoints = []
+        interact('.resize-handle').unset()
     });
 
     const handleSave = () => {
