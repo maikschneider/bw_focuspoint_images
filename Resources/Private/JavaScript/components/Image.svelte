@@ -11,62 +11,62 @@
     let isDarkMode = $state(false)
 
     interact('.draggable')
-            .resizable({
-                edges: {left: true, right: true, bottom: true, top: true},
-                modifiers: [
-                    interact.modifiers.restrictEdges({
-                        outer: "parent",
-                        endOnly: true
-                    }),
-                ],
-                listeners: {
-                    move(event) {
-                        const index = parseInt(event.target.getAttribute('data-index'))
+        .resizable({
+            edges: {left: true, right: true, bottom: true, top: true},
+            modifiers: [
+                interact.modifiers.restrictEdges({
+                    outer: "parent",
+                    endOnly: true
+                }),
+            ],
+            listeners: {
+                move(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'))
 
-                        $focuspoints[index].width = event.rect.width / canvasWidth
-                        $focuspoints[index].height = event.rect.height / canvasHeight
+                    $focuspoints[index].width = event.rect.width / canvasWidth
+                    $focuspoints[index].height = event.rect.height / canvasHeight
 
-                        const x = ($focuspoints[index].x * canvasWidth) + event.deltaRect.left
-                        const y = ($focuspoints[index].y * canvasHeight) + event.deltaRect.top
+                    const x = ($focuspoints[index].x * canvasWidth) + event.deltaRect.left
+                    const y = ($focuspoints[index].y * canvasHeight) + event.deltaRect.top
 
-                        $focuspoints[index].x = (x / canvasWidth)
-                        $focuspoints[index].y = (y / canvasHeight)
-                    },
-                    end(event) {
-                        const index = parseInt(event.target.getAttribute('data-index'))
-                        if ($focuspoints[index].active) {
-                            activateFocuspoint(index)
-                        }
+                    $focuspoints[index].x = (x / canvasWidth)
+                    $focuspoints[index].y = (y / canvasHeight)
+                },
+                end(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'))
+                    if ($focuspoints[index].active) {
+                        activateFocuspoint(index)
                     }
                 }
-            })
-            .draggable({
-                modifiers: [
-                    interact.modifiers.restrictRect({
-                        restriction: 'parent',
-                        endOnly: true
-                    })
-                ],
-                autoScroll: true,
-                listeners: {
-                    // call this function on every dragmove event
-                    move(event) {
-                        const index = parseInt(event.target.getAttribute('data-index'))
+            }
+        })
+        .draggable({
+            modifiers: [
+                interact.modifiers.restrictRect({
+                    restriction: 'parent',
+                    endOnly: true
+                })
+            ],
+            autoScroll: true,
+            listeners: {
+                // call this function on every dragmove event
+                move(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'))
 
-                        const x = ($focuspoints[index].x * canvasWidth) + event.dx;
-                        const y = ($focuspoints[index].y * canvasHeight) + event.dy;
+                    const x = ($focuspoints[index].x * canvasWidth) + event.dx;
+                    const y = ($focuspoints[index].y * canvasHeight) + event.dy;
 
-                        $focuspoints[index].x = (x / canvasWidth)
-                        $focuspoints[index].y = (y / canvasHeight)
-                    },
-                    end(event) {
-                        const index = parseInt(event.target.getAttribute('data-index'))
-                        if ($focuspoints[index].active) {
-                            activateFocuspoint(index)
-                        }
+                    $focuspoints[index].x = (x / canvasWidth)
+                    $focuspoints[index].y = (y / canvasHeight)
+                },
+                end(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'))
+                    if ($focuspoints[index].active) {
+                        activateFocuspoint(index)
                     }
                 }
-            })
+            }
+        })
 
     onMount(() => {
         if (img.complete) {
@@ -132,10 +132,13 @@
         border: 1px dashed rgba(255, 255, 255, 0.8);
         color: white;
         padding: 10px;
+        --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);
     }
+
 
     .style1.active {
         border-color: #ff8700;
+        --typo3-state-primary-bg: #ff8700;
         border-style: solid;
         background-color: rgba(0, 0, 0, 0.8);
     }
@@ -158,7 +161,7 @@
         opacity: 0.8;
         background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);
         background-size: 20px 20px;
-        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0;
     }
 
     .cropper-bg--dark {
@@ -168,20 +171,40 @@
     .wrapper {
         align-self: center;
     }
+
+    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-ne {
+        top: -3px;
+    }
+
+    .ui-resizable-handle.ui-resizable-sw, .ui-resizable-handle.ui-resizable-se {
+        bottom: -3px;
+    }
+
+    .ui-resizable-handle.ui-resizable-ne, .ui-resizable-handle.ui-resizable-se {
+        right: -3px;
+    }
+
+    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-sw {
+        left: -3px;
+    }
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div class="wrapper">
         {#each $focuspoints as focuspoint, index}
             <div
-                    onclick={() => activateFocuspoint(index)}
-                    class:active={focuspoint.active}
-                    data-index={index}
-                    class="draggable style1 resizable"
-                    style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
-                    data-x="{getPositionX(index)}"
-                    data-y="{getPositionY(index)}">
-                <span>{focuspointName(focuspoint, index)}</span>
+                onclick={() => activateFocuspoint(index)}
+                class:active={focuspoint.active}
+                data-index={index}
+                class="draggable style1 resizable"
+                style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
+                data-x="{getPositionX(index)}"
+                data-y="{getPositionY(index)}">
+                <span class="text-break">{focuspointName(focuspoint, index)}</span>
+                <span class="ui-resizable-handle ui-resizable-nw"></span>
+                <span class="ui-resizable-handle ui-resizable-ne"></span>
+                <span class="ui-resizable-handle ui-resizable-sw"></span>
+                <span class="ui-resizable-handle ui-resizable-se"></span>
             </div>
         {/each}
         <img bind:this={img} src={image} alt="Selected" unselectable="on" />

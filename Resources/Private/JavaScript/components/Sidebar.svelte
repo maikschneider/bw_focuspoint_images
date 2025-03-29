@@ -39,6 +39,7 @@
     .modal-panel-sidebar {
         padding-top: 0;
         width: 100%;
+        --typo3-state-primary-bg: #ff8700;
         --typo3-component-border-radius: 0;
         --panel-border-radius: 0;
     }
