@@ -49,6 +49,12 @@
         initStores(hiddenInput, wizardConfig)
         window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-save`, handleSave)
 
+        // Restore saved sidebar width if available
+        const savedWidth = localStorage.getItem('focuspoint-sidebar-width')
+        if (savedWidth && parseInt(savedWidth) >= minSidebarWidth) {
+            sidebarWidth = parseInt(savedWidth)
+        }
+
         interact('.resize-handle').draggable({
             axis: 'x',
             listeners: {
@@ -56,6 +62,7 @@
                     const newWidth = sidebarWidth + event.dx * -1
                     if (newWidth >= minSidebarWidth) {
                         sidebarWidth = newWidth
+                        localStorage.setItem('focuspoint-sidebar-width', sidebarWidth.toString())
                         imageComponent?.updateCanvasSizes()
                     }
                 }
