@@ -56,14 +56,12 @@ image and start adding your focus areas.
 
 ### Configuration
 
-#### PageTS
-
 To configure the fields in the focus point wizard, use the following
 **PageTS** settings. You can choose between **text**, **textarea**, **select** and **link** inputs in the wizard.
 
 This example configuration is used to generate the output shown in Example 1
 
-``` {.typoscript}
+```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
 
     name {
@@ -85,13 +83,29 @@ mod.tx_bwfocuspointimages.settings.fields {
             green = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.green
             blue = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.blue
         }
+        default = red
     }
 
     link {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
+        displayCond = FIELD:color:=:red
     }
 
+}
+```
+
+#### Field Display Conditions
+
+You can use `displayCond` in your wizard field configuration to control when a field should be visible, similar to [TYPO3's TCA displayCond feature](https://docs.typo3.org/m/typo3/reference-tca/main/en-us/Columns/DisplayConditions.html).
+
+```typoscript
+mod.tx_bwfocuspointimages.settings.fields {
+    description {
+        title = Description
+        type = textarea
+        displayCond = FIELD:name:REQ:true  # Show only if name field has a value
+    }
 }
 ```
 
@@ -99,7 +113,7 @@ mod.tx_bwfocuspointimages.settings.fields {
 
 You can customize the display of the link wizard. Use the additional ```linkPopup``` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for [link inputs](https://docs.typo3.org/m/typo3/reference-tca/11.5/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html#linkpopup).
 
-``` {.typoscript}
+```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
 
     email {
@@ -127,7 +141,7 @@ mod.tx_bwfocuspointimages.settings.fields {
 
 To override templates set your own paths via constants:
 
-``` {.typoscript}
+```typoscript
 plugin.tx_bwfocuspointimages {
     view {
         templateRootPath =
@@ -146,7 +160,7 @@ extended for the field `focus_points`. This field is used to save the settings m
 To use the editor in other content elements with FAL images, use the
 following TCA to activate the palette:
 
-``` {.php}
+```php
 $GLOBALS['TCA']['tt_content']['types']['your_list_type']['columnsOverrides'] = [
     'assets' => [
         'config' => [
@@ -175,7 +189,7 @@ This snippet assumes that references are done via `assets` column. Change this t
 
 To decode the JSON data and use the information in your template, use the `FocuspointProcessor`:
 
-```typo3_typoscript
+```typoscript
 tt_content.your_list_type {
     dataProcessing {
         15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor

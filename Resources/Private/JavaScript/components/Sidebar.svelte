@@ -6,7 +6,7 @@
         getIcon,
         iconStore,
         activateFocuspoint,
-        focusPointName
+        focusPointName, fieldMeetsCondition
     } from '../store.svelte'
     import {onMount} from "svelte";
     import Select from "./Fields/Select.svelte";
@@ -101,7 +101,9 @@
                         aria-labelledby="cropper-accordion-heading-{index}">
                     <div class="panel-body">
                         {#each Object.entries($wizardConfigStore.fields) as [key, field]}
-                            <svelte:component this={components[field.type]} index={index} name={key} config={field ?? {}} />
+                            {#if fieldMeetsCondition(key, focuspoint)}
+                                <svelte:component this={components[field.type]} index={index} name={key} config={field ?? {}} />
+                            {/if}
                         {/each}
 
                         <button
