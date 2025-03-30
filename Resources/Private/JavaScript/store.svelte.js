@@ -23,9 +23,14 @@ export const fieldMeetsCondition = (fieldName, point) => {
         return true;
     }
 
-    const [type, field, operator, value] = condition.split(':');
-    if (type !== 'FIELD') {
-        return false;
+    const parts = condition.split(':');
+    if (parts.length < 4 || parts[0] !== 'FIELD') {
+        return true;
+    }
+
+    const [type, field, operator, value] = parts;
+    if (!point.hasOwnProperty(field)) {
+        return true;
     }
 
     switch (operator) {
@@ -35,24 +40,44 @@ export const fieldMeetsCondition = (fieldName, point) => {
             return point[field] !== value;
         case '=':
             return point[field] === value;
-        case '>':
-            return parseInt(point[field]) > parseInt(value);
-        case '<':
-            return parseInt(point[field]) < parseInt(value);
-        case '>=':
-            return parseInt(point[field]) >= parseInt(value);
-        case '<=':
-            return parseInt(point[field]) <= parseInt(value);
+        case '>': {
+            const pointVal = parseInt(point[field], 10);
+            const compareVal = parseInt(value, 10);
+            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal > compareVal;
+        }
+        case '<': {
+            const pointVal = parseInt(point[field], 10);
+            const compareVal = parseInt(value, 10);
+            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal < compareVal;
+        }
+        case '>=': {
+            const pointVal = parseInt(point[field], 10);
+            const compareVal = parseInt(value, 10);
+            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal >= compareVal;
+        }
+        case '<=': {
+            const pointVal = parseInt(point[field], 10);
+            const compareVal = parseInt(value, 10);
+            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal <= compareVal;
+        }
         case 'IN':
             return value.split(',').includes(point[field]);
         case '!IN':
             return !value.split(',').includes(point[field]);
-        case '-':
-            const [min, max] = value.split('-');
-            return point[field] >= min && point[field] <= max;
-        case '!-':
-            const [min2, max2] = value.split('-');
-            return point[field] < min2 || point[field] > max2;
+        case '-': {
+            const range = value.split('-');
+            if (range.length !== 2) return false;
+            const [min, max] = range;
+            const pointVal = parseInt(point[field], 10);
+            return !isNaN(pointVal) && pointVal >= parseInt(min, 10) && pointVal <= parseInt(max, 10);
+        }
+        case '!-': {
+            const range = value.split('-');
+            if (range.length !== 2) return false;
+            const [min, max] = range;
+            const pointVal = parseInt(point[field], 10);
+            return !isNaN(pointVal) && (pointVal < parseInt(min, 10) || pointVal > parseInt(max, 10));
+        }
         default:
             return false;
     }
