@@ -85,12 +85,20 @@ export const fieldMeetsCondition = (fieldName, point) => {
 
 export const createNewFocuspoint = () => {
     const config = get(wizardConfigStore);
-    const newFocuspoint = {
-        x: 0.333,
-        y: 0.333,
-        width: parseFloat(config.defaultWidth),
-        height: parseFloat(config.defaultHeight),
-    };
+
+    // create a new focuspoint with default fields
+    const newFocuspoint = Object.keys(config.fields).reduce((acc, key) => {
+      acc[key] = null;
+      return acc;
+    }, {});
+
+    // set default values
+    newFocuspoint.x = 0.333;
+    newFocuspoint.y =  0.333;
+    newFocuspoint.width = parseFloat(config.defaultWidth);
+    newFocuspoint.height = parseFloat(config.defaultHeight);
+
+    // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
     activateFocuspoint(get(focuspoints).length - 1);
 }
