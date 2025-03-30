@@ -29,7 +29,7 @@ export const fieldMeetsCondition = (fieldName, point) => {
     }
 
     const [type, field, operator, value] = parts;
-    if (!point.hasOwnProperty(field)) {
+    if (!Object.hasOwn(point, field)) {
         return true;
     }
 
