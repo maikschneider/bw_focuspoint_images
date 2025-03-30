@@ -88,7 +88,7 @@ export const createNewFocuspoint = () => {
 
     // create a new focuspoint with default fields
     const newFocuspoint = Object.keys(config.fields).reduce((acc, key) => {
-      acc[key] = null;
+      acc[key] = config.fields[key].default ?? null;
       return acc;
     }, {});
 
