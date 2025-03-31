@@ -10,11 +10,6 @@ use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-/**
-* Contains a preview rendering for the page module of CType="textmedia"
-*
-* @internal this is a concrete TYPO3 hook implementation and solely used for EXT:frontend and not part of TYPO3's Core API.
-*/
 class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
     public function renderPageModulePreviewContent(GridColumnItem $item): string
@@ -42,17 +37,25 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 
         foreach ($fileReferences as $reference) {
             $image = $reference->getOriginalFile()->process(
-                ProcessedFile::CONTEXT_IMAGEPREVIEW,
+                ProcessedFile::CONTEXT_IMAGECROPSCALEMASK,
                 [
-                    'width' => '200m',
-                    'height' => '200m',
+                    'maxWidth' => 200,
+                    'maxHeight' => 200,
                 ]
             );
+
+            $attributes = [
+                'src' => $image->getPublicUrl() ?? '',
+                'width' => $image->getProperty('width'),
+                'height' => $image->getProperty('height'),
+                'alt' => $reference->getAlternative() ?: $reference->getName(),
+                'loading' => 'lazy',
+            ];
 
             $content .= '<div class="preview-thumbnails-element">';
             $content .= '<div class="preview-thumbnails-element-image">';
             $content .= '<div class="bw-focuspoint-image">';
-            $content .= '<img src="' . $image->getPublicUrl() . '" width="200" height="200" loading="lazy" alt="Focuspoint image"/>';
+            $content .= '<img ' . GeneralUtility::implodeAttributes($attributes, true) . '/>';
             $content .= $this->getSvgForFileReference($reference);
             $content .= '</div>';
             $content .= '</div>';
