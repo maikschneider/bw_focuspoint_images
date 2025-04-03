@@ -85,16 +85,17 @@ mod.tx_bwfocuspointimages.settings.fields {
         default = red
     }
 
-    highlight {
-        title = Highlight
+    hasLink {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink
         type = checkbox
-        label = Yes
+        label = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink.yes
+        default = true
     }
 
     link {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
-        displayCond = FIELD:color:=:red
+        displayCond = FIELD:hasLink:REQ:true
     }
 
 }
