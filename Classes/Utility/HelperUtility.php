@@ -44,36 +44,26 @@ class HelperUtility
         return $this->typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
     }
 
-    public function getConfigForWizardAction(int $pid): array
+    public function getConfigForWizardAction(int $pid, string $type = ''): array
     {
         $pageTs = $this->getPagesTSconfig($pid)['mod']['tx_bwfocuspointimages']['settings'] ?? [];
         $pageTs['pid'] = $pid;
+
+        if ($type !== '') {
+            foreach ($pageTs['fields'] as $fieldName => $fieldConfig) {
+                $typesOverride = $fieldConfig['types'][$type] ?? [];
+
+                foreach ($typesOverride as $property => $value) {
+                    $pageTs['fields'][$fieldName][$property] = $value;
+                }
+
+                if (isset($typesOverride['disabled']) && filter_var($typesOverride['disabled'], FILTER_VALIDATE_BOOLEAN)) {
+                    unset($pageTs['fields'][$fieldName]);
+                }
+            }
+        }
+
         return $pageTs;
-    }
-
-    public function getConfigForFormElement(int $pid, array $formElementConfig): array
-    {
-        $defaultConfig = [
-            'file_field' => 'uid_local',
-            'focusPoints' => [
-                'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
-                'singlePoint' => [
-                    'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
-                ],
-            ],
-            'missingPageTSWarning' => false,
-        ];
-
-        // override default config from TCA config
-        $config = array_replace_recursive($defaultConfig, $formElementConfig);
-
-        // read pageTS
-        $tsSettings = $this->getConfigForWizardAction($pid);
-
-        // override single point settings from pageTS
-        $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'], $tsSettings);
-
-        return $config;
     }
 
     public function getLinkExplanation(string $itemValue): array

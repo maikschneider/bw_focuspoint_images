@@ -5,6 +5,7 @@ namespace Blueways\BwFocuspointImages\Form\Element;
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Exception;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
@@ -28,15 +29,22 @@ class InputFocuspointElement extends AbstractFormElement
         $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
         $resultArray = $this->initializeResultArray();
         $parameterArray = $this->data['parameterArray'];
-        $config = $helperUtility->getConfigForFormElement(
-            $this->data['databaseRow']['pid'],
-            $parameterArray['fieldConf']['config']
-        );
 
-        // get image
-        $file = $this->getFile($this->data['databaseRow'], $config['file_field']);
+        $file = $this->getFile($this->data['databaseRow'], 'uid_local');
         if (!$file instanceof File) {
             return $resultArray;
+        }
+
+        if ($file->isMissing()) {
+            return $this->createErrorMessage($resultArray, 'tca.missing-file-message');
+        }
+
+        if (!$file->isImage()) {
+            return $this->createErrorMessage($resultArray, 'tca.supported-types-message');
+        }
+
+        if (!$file->getProperty('width')) {
+            return $this->createErrorMessage($resultArray, 'tca.no-image-dimensions');
         }
 
         $fieldInformationResult = $this->renderFieldInformation();
@@ -51,7 +59,8 @@ class InputFocuspointElement extends AbstractFormElement
         $fieldWizardHtml = $fieldWizardResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
-        $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid']);
+        $elementType = $this->getElementType() ?? '';
+        $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid'], $elementType);
         foreach ($wizardConfig['fields'] ?? [] as $fieldName => $fieldConfig) {
             $wizardConfig['fields'][$fieldName]['title'] = $this->getLanguageService()->sL($fieldConfig['title']);
             if (isset($fieldConfig['options'])) {
@@ -73,14 +82,7 @@ class InputFocuspointElement extends AbstractFormElement
             'fieldInformation' => $fieldInformationHtml,
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
-            'isAllowedFileExtension' => in_array(
-                strtolower($file->getExtension()),
-                GeneralUtility::trimExplode(',', strtolower((string)$config['allowedExtensions'])),
-                true
-            ),
             'image' => $file,
-            'config' => $config,
-            'pid' => $this->data['databaseRow']['pid'],
         ];
 
         // Build html
@@ -95,10 +97,8 @@ class InputFocuspointElement extends AbstractFormElement
 
     /**
      * Get file object
-     *
-     * @param string $fieldName
      */
-    protected function getFile(array $row, $fieldName): ?File
+    protected function getFile(array $row, string $fieldName): ?File
     {
         $file = null;
         $fileUid = empty($row[$fieldName]) ? null : $row[$fieldName];
@@ -117,5 +117,39 @@ class InputFocuspointElement extends AbstractFormElement
         }
 
         return $file;
+    }
+
+    protected function createErrorMessage(array $resultArray, string $messageLanguageKey): array
+    {
+        $resultArray['html'] = '<div class="callout callout-warning">';
+        $resultArray['html'] .= $this->getLanguageService()->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:' . $messageLanguageKey);
+        $resultArray['html'] .= '</div>';
+        return $resultArray;
+    }
+
+    /**
+     * This should typically be CType of tt_content.
+     */
+    public function getElementType(): ?string
+    {
+        $currentRecord = $this->data['databaseRow'];
+
+        // Check if this file reference is related to a tt_content element
+        $tableName = $currentRecord['tablenames'];
+        if ($tableName !== 'tt_content') {
+            return $tableName;
+        }
+
+        $parentUid = $currentRecord['uid_foreign'];
+        if (!$parentUid || !MathUtility::canBeInterpretedAsInteger($parentUid)) {
+            return null;
+        }
+
+        $parentRecord = BackendUtility::getRecord($tableName, $parentUid);
+        if ($parentRecord && isset($parentRecord['CType'])) {
+            return $parentRecord['CType'];
+        }
+
+        return null;
     }
 }

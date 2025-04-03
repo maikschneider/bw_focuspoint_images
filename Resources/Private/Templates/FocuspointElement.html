@@ -7,41 +7,15 @@
     </f:if>
     <div class="form-wizards-wrap">
         <div class="form-wizards-element">
-
-            <f:if condition="{isAllowedFileExtension} && {image.properties.width}">
-                <f:then>
-                    <div class="form-control-wrap">
-                        <focuspoint-element
-                            image="{f:uri.image(image: image, maxWidth: 2000, maxHeight: 2000)}"
-                            itemFormElName="{itemFormElName}"
-                            itemFormElValue="{itemFormElValue}"
-                            wizardConfig="{wizardConfig->f:format.json()}">
-                        </focuspoint-element>
-                    </div>
-                </f:then>
-                <f:else>
-                    <div class="media-body">
-                        <f:if condition="{image.properties.width}">
-                            <f:then>
-                                <p>
-                                    <em>
-                                        <f:translate id="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.supported-types-message" />
-                                        <br /> {config.allowedExtensions -> f:format.case(mode: 'upper')} </em>
-                                </p>
-                            </f:then>
-                            <f:else>
-                                <h4 class="alert-title">
-                                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.no-image-dimensions" />
-                                </h4>
-                                <p class="alert-message">
-                                    <f:translate key="LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.no-image-dimensions-message" />
-                                </p>
-                            </f:else>
-                        </f:if>
-                    </div>
-                </f:else>
+            <f:if condition="{image.properties.width}">
+                <div class="form-control-wrap">
+                    <focuspoint-element
+                        image="{f:uri.image(image: image, maxWidth: 2000, maxHeight: 2000)}"
+                        itemFormElName="{itemFormElName}"
+                        itemFormElValue="{itemFormElValue}"
+                        wizardConfig="{wizardConfig->f:format.json()}"></focuspoint-element>
+                </div>
             </f:if>
-
         </div>
         <div class="form-wizards-items-bottom">
             {fieldWizard -> f:format.raw()}
