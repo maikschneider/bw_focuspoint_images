@@ -65,6 +65,14 @@
 				<source>Red</source>
 				<target>Rot</target>
 			</trans-unit>
+			<trans-unit id="wizard.fields.hasLink">
+				<source>Is linked</source>
+				<target>Hat Link</target>
+			</trans-unit>
+			<trans-unit id="wizard.fields.hasLink.yes">
+				<source>Yes</source>
+				<target>Ja</target>
+			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source />
 				<target>Seite</target>
