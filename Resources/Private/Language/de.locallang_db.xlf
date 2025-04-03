@@ -93,6 +93,10 @@
 				<source>Displays the focus points of an image using SVG</source>
 				<target>Zeigt ein Bild mit hinzugefügten Fokuspunkten an</target>
 			</trans-unit>
+			<trans-unit id="tca.missing-file-message">
+				<source>File not found</source>
+				<target>Datei nicht gefunden</target>
+			</trans-unit>
 			<trans-unit id="tca.supported-types-message">
 				<source>Focuspoint Editor is only available for supported types</source>
 				<target>Focuspoint Editor ist nur für unterstützte Bildformate verfügbar</target>
@@ -100,10 +104,6 @@
 			<trans-unit id="tca.no-image-dimensions">
 				<source>No image dimensions could be determined.</source>
 				<target>Es konnten keine Bildmaße festgestellt werden.</target>
-			</trans-unit>
-			<trans-unit id="tca.no-image-dimensions-message">
-				<source>Unable to provide image manipulation, because original dimensions of the image are unknown.</source>
-				<target>Der Focuspoint Editor ist nicht verfügbar, weil die originalen Abmaße des Bildes unbekannt sind.</target>
 			</trans-unit>
 		</body>
 	</file>
