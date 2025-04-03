@@ -15,7 +15,11 @@
         {config?.title ?? config.title}
     </label>
     <div class="form-check form-check-type-icon-toggle">
-        <input type="checkbox" class="form-check-input" id="input-{index}-{name}" bind:checked={$focuspoints[index][name]} />
+        <input
+            type="checkbox"
+            class="form-check-input"
+            bind:checked={$focuspoints[index][name]}
+            aria-labelledby="label-{index}-{name}" />
         <label class="form-check-label" for="input-{index}-{name}">
             <span class="form-check-label-icon">
                 <span class="form-check-label-icon-checked">
