@@ -86,6 +86,11 @@ mod.tx_bwfocuspointimages.settings.fields {
         default = red
     }
 
+    highlight {
+        title = Highlight
+        type = checkbox
+    }
+
     link {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
