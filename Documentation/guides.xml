@@ -7,6 +7,13 @@
     <extension
             class="\T3Docs\Typo3DocsTheme\DependencyInjection\Typo3DocsThemeExtension"
             typo3-core-preferred="stable"
+            project-home="https://extensions.typo3.org/extension/bw_focuspoint_images/"
+            project-contact="https://typo3.slack.com/team/U907MUMLZ"
+            project-repository="https://github.com/maikschneider/bw_focuspoint_images"
+            project-issues="https://github.com/maikschneider/bw_focuspoint_images/issues"
+            project-discussions="https://github.com/maikschneider/bw_focuspoint_images/discussions"
+            edit-on-github-branch="main"
+            edit-on-github="maikschneider/bw_focuspoint_images"
             interlink-shortcode="blueways/bw-focuspoint-images" />
     <project
             title="Bw Focuspoint Images"
