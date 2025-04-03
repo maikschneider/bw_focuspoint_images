@@ -12,7 +12,7 @@
 
 <div class="form-group">
     <label class="form-label" for="input-{index}-{name}">
-        {config.title}
+        {config?.title ?? config.title}
     </label>
     <div class="form-check form-check-type-icon-toggle">
         <input type="checkbox" class="form-check-input" id="input-{index}-{name}" bind:checked={$focuspoints[index][name]} />
