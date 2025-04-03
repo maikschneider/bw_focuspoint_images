@@ -57,7 +57,7 @@ class HelperUtility
                     $pageTs['fields'][$fieldName][$property] = $value;
                 }
 
-                if (isset($typesOverride['disabled']) && filter_var($typesOverride['disabled'], FILTER_VALIDATE_BOOLEAN)) {
+                if (filter_var($pageTs['fields'][$fieldName]['disabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
                     unset($pageTs['fields'][$fieldName]);
                 }
             }
