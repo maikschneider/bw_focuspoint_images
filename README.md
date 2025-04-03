@@ -56,8 +56,7 @@ image and start adding your focus areas.
 
 ### Configuration
 
-To configure the fields in the focus point wizard, use the following
-**PageTS** settings. You can choose between **text**, **textarea**, **select** and **link** inputs in the wizard.
+To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select**, **link** and **checkbox** inputs in the wizard.
 
 This example configuration is used to generate the output shown in Example 1
 
@@ -89,6 +88,7 @@ mod.tx_bwfocuspointimages.settings.fields {
     highlight {
         title = Highlight
         type = checkbox
+        label = Yes
     }
 
     link {
