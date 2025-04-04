@@ -92,7 +92,7 @@
 
 <div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
     {#if isSettingsOpen}
-        <Settings itemFormElName={itemFormElName} />
+        <Settings itemFormElName={itemFormElName} bind:isSettingsOpenValue={isSettingsOpen} />
     {:else}
         <Image bind:this={imageComponent} image={image} />
         <div class="resize-handle" aria-label="Resize sidebar"></div>

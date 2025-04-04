@@ -3,7 +3,7 @@
     import Notification from "@typo3/backend/notification.js";
     import {onMount} from "svelte";
 
-    let {itemFormElName} = $props()
+    let {itemFormElName, isSettingsOpenValue = $bindable()} = $props()
     let focuspointArea;
     let jsonPoints = $state(JSON.stringify($focuspoints));
     let hasError = $state(false)
@@ -60,12 +60,25 @@
     .wrapper {
         grid-column: 1 / 4;
     }
+
+    .btn-close {
+        background: transparent;
+        border: none;
+        height: fit-content;
+        padding-top: 0;
+    }
 </style>
 
 <div class="d-flex justify-content-center align-items-center wrapper">
 
     <fieldset class="form-section">
-        <h3 class="form-section-headline">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.settings']}</h3>
+        <div class="d-flex justify-content-between">
+            <h3 class="form-section-headline">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.settings']}</h3>
+            <button onclick={() => isSettingsOpenValue = false} aria-label="Close settings" class="btn-close">
+                {@html $iconStore['actions-close']}
+                <span class="visually-hidden">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.cancel']}</span>
+            </button>
+        </div>
         <div class="row">
             <label class="form-label" class:has-error={hasError} class:has-change={hasChange} for="points">Import / Export</label>
             <div class="form-group">
