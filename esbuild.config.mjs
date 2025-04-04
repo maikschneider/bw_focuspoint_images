@@ -30,6 +30,7 @@ const buildConfig = {
             }
         })],
     logLevel: "info",
+    sourcemap: true,
     external: ["@typo3/*", "interactjs"],
 };
 
