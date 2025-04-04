@@ -15,7 +15,7 @@ TYPO3 Extension: Focus Point Images
    en
 
 :Author:
-   Maik Schneider, blueways
+   Maik Schneider, XIMA MEDIA GmbH
 
 :License:
    This document is published under the
