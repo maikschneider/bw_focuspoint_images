@@ -54,6 +54,12 @@
 			<trans-unit id="wizard.fields.link">
 				<source>Link</source>
 			</trans-unit>
+			<trans-unit id="wizard.fields.hasLink">
+				<source>Is linked</source>
+			</trans-unit>
+			<trans-unit id="wizard.fields.hasLink.yes">
+				<source>Yes</source>
+			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source>Page</source>
 			</trans-unit>
