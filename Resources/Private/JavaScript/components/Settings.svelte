@@ -66,6 +66,7 @@
         border: none;
         height: fit-content;
         padding-top: 0;
+        color: var(--icon-color-primary, currentColor)
     }
 </style>
 
