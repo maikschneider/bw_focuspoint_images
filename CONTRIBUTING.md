@@ -2,7 +2,7 @@
 
 Thanks for considering contributing to this extension!
 
-For development, we use [DDEV](https://ddev.readthedocs.io/en/stable/). Set it up before continuing. The setup creates a database and installs TYPO3. This way you can start developing immediately.
+For development, we use [DDEV](https://ddev.readthedocs.io/en/stable/). Set it up before continuing.
 
 ## Preparation
 
@@ -21,28 +21,26 @@ ddev npm i
 # Setup TYPO3 with a prefilled database
 ddev init-typo3
 
-# Watch assets during development
+# Compile and watch assets during development
 ddev npm start
 ```
 
-You can access the DDEV site at <https://bw-focuspoint-images.ddev.site/typo3/>.
-To login you can use the username `admin` and password `Passw0rd!`.
+You can access the TYPO3 backend at <https://bw-focuspoint-images.ddev.site/typo3/>.
+To login, you can use the username `admin` and password `Passw0rd!`.
 
 ## Code analysis and linters
 
 ```bash
-# All static code analyzers
+# Run all static code analyzers + fixers
 ddev composer sca
 
-# Specific linters
+# Run only a specific linter
 ddev composer editorconfig:lint
 ddev composer php:lint
 ddev composer typoscript:lint
 ddev composer xml:lint
 ddev composer yaml:lint
 ddev composer php:stan
-
-# Fix specific issues
 ddev composer php:fixer
 ddev composer composer:normalize
 ```
