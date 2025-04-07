@@ -18,6 +18,9 @@
 			<trans-unit id="wizard.button.save">
 				<source>Save</source>
 			</trans-unit>
+			<trans-unit id="wizard.button.settings">
+				<source>Settings</source>
+			</trans-unit>
 			<trans-unit id="wizard.focuspoints.title">
 				<source>Focus Points</source>
 			</trans-unit>
@@ -51,6 +54,12 @@
 			<trans-unit id="wizard.fields.link">
 				<source>Link</source>
 			</trans-unit>
+			<trans-unit id="wizard.fields.hasLink">
+				<source>Is linked</source>
+			</trans-unit>
+			<trans-unit id="wizard.fields.hasLink.yes">
+				<source>Yes</source>
+			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source>Page</source>
 			</trans-unit>
@@ -80,6 +89,27 @@
 			</trans-unit>
 			<trans-unit id="tca.no-image-dimensions">
 				<source>No image dimensions could be determined.</source>
+			</trans-unit>
+			<trans-unit id="tca.no-image-dimensions-message">
+				<source>Unable to provide image manipulation, because original dimensions of the image are unknown.</source>
+			</trans-unit>
+			<trans-unit id="wizard.settings.copied">
+				<source>Copied</source>
+			</trans-unit>
+			<trans-unit id="wizard.settings.copied.message">
+				<source>The current focuspoint configuration has been copied to the clipboard</source>
+			</trans-unit>
+			<trans-unit id="wizard.button.copy">
+				<source>Copy</source>
+			</trans-unit>
+			<trans-unit id="wizard.button.paste">
+				<source>Paste</source>
+			</trans-unit>
+			<trans-unit id="wizard.button.undo">
+				<source>Undo</source>
+			</trans-unit>
+			<trans-unit id="wizard.button.accept">
+				<source>Accept</source>
 			</trans-unit>
 		</body>
 	</file>
