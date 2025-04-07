@@ -47,6 +47,10 @@ class HelperUtility
     public function getConfigForWizardAction(int $pid, string $type = ''): array
     {
         $pageTs = $this->getPagesTSconfig($pid)['mod']['tx_bwfocuspointimages']['settings'] ?? [];
+        if (empty($pageTs['fields'])) {
+            return [];
+        }
+
         $pageTs['pid'] = $pid;
 
         if ($type !== '') {

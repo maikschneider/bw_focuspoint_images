@@ -121,6 +121,10 @@
 				<source>Unable to provide image manipulation, because original dimensions of the image are unknown.</source>
 				<target>Der Focuspoint Editor ist nicht verfügbar, weil die originalen Abmaße des Bildes unbekannt sind.</target>
 			</trans-unit>
+			<trans-unit id="tca.no-wizard-config">
+				<source>No wizard configuration found! Please refer to the documentation for instructions on adding a field configuration.</source>
+				<target>Keine Wizard-Konfiguration gefunden! Bitte lesen Sie die Dokumentation für Hinweise zum Hinzufügen einer Feldkonfiguration.</target>
+			</trans-unit>
 			<trans-unit id="wizard.settings.copied">
 				<source>Copied</source>
 				<target>Kopiert</target>

@@ -26,9 +26,7 @@ class InputFocuspointElement extends AbstractFormElement
     public function render(): array
     {
         $version = VersionNumberUtility::convertVersionStringToArray(VersionNumberUtility::getNumericTypo3Version());
-        $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
         $resultArray = $this->initializeResultArray();
-        $parameterArray = $this->data['parameterArray'];
 
         $file = $this->getFile($this->data['databaseRow'], 'uid_local');
         if (!$file instanceof File) {
@@ -47,6 +45,14 @@ class InputFocuspointElement extends AbstractFormElement
             return $this->createErrorMessage($resultArray, 'tca.no-image-dimensions');
         }
 
+        $elementType = $this->getElementType() ?? '';
+        $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
+        $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid'], $elementType);
+
+        if (empty($wizardConfig)) {
+            return $this->createErrorMessage($resultArray, 'tca.no-wizard-config');
+        }
+
         $fieldInformationResult = $this->renderFieldInformation();
         $fieldInformationHtml = $fieldInformationResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
@@ -59,8 +65,6 @@ class InputFocuspointElement extends AbstractFormElement
         $fieldWizardHtml = $fieldWizardResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
-        $elementType = $this->getElementType() ?? '';
-        $wizardConfig = $helperUtility->getConfigForWizardAction($this->data['effectivePid'], $elementType);
         foreach ($wizardConfig['fields'] ?? [] as $fieldName => $fieldConfig) {
             $wizardConfig['fields'][$fieldName]['title'] = $this->getLanguageService()->sL($fieldConfig['title']);
             if (isset($fieldConfig['options'])) {
@@ -69,6 +73,7 @@ class InputFocuspointElement extends AbstractFormElement
                 }
             }
         }
+        $parameterArray = $this->data['parameterArray'];
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
         $wizardConfig['typo3Version'] = $version['version_main'];
 

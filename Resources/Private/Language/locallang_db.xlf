@@ -93,6 +93,9 @@
 			<trans-unit id="tca.no-image-dimensions-message">
 				<source>Unable to provide image manipulation, because original dimensions of the image are unknown.</source>
 			</trans-unit>
+			<trans-unit id="tca.no-wizard-config">
+				<source>No wizard configuration found! Please refer to the documentation for instructions on adding a field configuration.</source>
+			</trans-unit>
 			<trans-unit id="wizard.settings.copied">
 				<source>Copied</source>
 			</trans-unit>
