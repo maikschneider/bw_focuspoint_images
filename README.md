@@ -211,4 +211,6 @@ Contribute
 
 This extension was made by Maik Schneider: Feel free to contribute!
 
+Please have a look at [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 Thanks to [blueways](https://www.blueways.de/) and [XIMA](https://www.xima.de/)!
