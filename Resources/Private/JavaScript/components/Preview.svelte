@@ -1,5 +1,18 @@
 <script>
+    import {onMount} from "svelte";
+
     let {image, points, itemFormElName} = $props()
+    let previewPoints = $state(points)
+
+    onMount(() => {
+        bindInputEventListener()
+    })
+
+    function bindInputEventListener() {
+        window.addEventListener(`${itemFormElName}-save`, e => {
+            previewPoints = JSON.parse(e.detail.value)
+        })
+    }
 
     function percentage(number) {
         return number * 100 + '%'
@@ -41,13 +54,13 @@
         <svg viewBox="0 0 200 200" preserveAspectRatio="none" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask{itemFormElName}">
                 <rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />
-                {#each points as point}
+                {#each previewPoints as point}
                     <rect
                         x={percentage(point.x)} y={percentage(point.y)} width={size(point.width)} height={size(point.height)} fill="#000" />
                 {/each}
             </mask>
             <rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask{itemFormElName})" />
-            {#each points as point}
+            {#each previewPoints as point}
                 <rect
                     x={percentage(point.x)}
                     y={percentage(point.y)}

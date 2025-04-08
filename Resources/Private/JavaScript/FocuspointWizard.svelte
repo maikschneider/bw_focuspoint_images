@@ -78,7 +78,17 @@
 
     const handleSave = () => {
         const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName}"]`)
+        dispatchSaveEvent()
         hiddenInput.value = JSON.stringify($focuspoints)
+    }
+
+    const dispatchSaveEvent = () => {
+        window.parent.frames.list_frame.dispatchEvent(new CustomEvent(`${itemFormElName}-save`, {
+            detail: {
+                name: itemFormElName,
+                value: JSON.stringify($focuspoints)
+            }
+        }))
     }
 </script>
 
