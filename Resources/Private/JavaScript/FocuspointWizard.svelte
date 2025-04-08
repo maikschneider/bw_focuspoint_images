@@ -49,7 +49,7 @@
 
     onMount(() => {
         initStores(hiddenInput, wizardConfig)
-        window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-save`, handleSave)
+        window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-modal-save`, onModalSave)
         window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-settings`, handleSettings)
 
         // Restore saved sidebar width if available
@@ -74,15 +74,14 @@
     });
 
     onDestroy(() => {
-        window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-save`, handleSave)
+        window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-modal-save`, onModalSave)
         window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-settings`, handleSettings)
         $focuspoints = []
         interact('.resize-handle').unset()
     });
 
-    const handleSave = () => {
-        const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName}"]`)
-        hiddenInput.value = JSON.stringify($focuspoints)
+    const onModalSave = () => {
+        window.parent.frames.list_frame.document.dispatchEvent(new CustomEvent(`${itemFormElName}-wizard-update`, {detail: {focuspoints: $focuspoints}}))
     }
 
     const handleSettings = () => {
