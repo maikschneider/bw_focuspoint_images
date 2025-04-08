@@ -127,6 +127,7 @@
         justify-content: center;
         align-items: center;
         transition: opacity 0.15s ease;
+        user-select: none;
     }
 
     .style1 {
