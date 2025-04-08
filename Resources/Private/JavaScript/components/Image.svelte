@@ -76,7 +76,7 @@
             img.addEventListener('load', setCanvasSizes)
         }
 
-        window.addEventListener('resize', updateCanvasSizes, {once: true})
+        window.addEventListener('resize', updateCanvasSizes)
 
         const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
         const theme = document.querySelector('html').getAttribute('data-theme');
