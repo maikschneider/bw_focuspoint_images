@@ -8,6 +8,7 @@
     let canvasWidth = $state(0)
     let focuspointName = $derived((focuspoint, index) => focusPointName(index))
     let img
+    let initialized = $state(false)
     let isDarkMode = $state(false)
 
     interact('.draggable')
@@ -98,6 +99,7 @@
     export function updateCanvasSizes() {
         canvasHeight = img.parentElement.getBoundingClientRect().height
         canvasWidth = img.parentElement.getBoundingClientRect().width
+        initialized = true
     }
 
     const getPositionX = $derived((index) => {
@@ -124,6 +126,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        transition: opacity 0.15s ease;
+        user-select: none;
     }
 
     .style1 {
@@ -195,6 +199,7 @@
             <div
                 onclick={() => activateFocuspoint(index)}
                 class:active={focuspoint.active}
+                class:opacity-0={!initialized}
                 data-index={index}
                 class="draggable style1 resizable"
                 style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
