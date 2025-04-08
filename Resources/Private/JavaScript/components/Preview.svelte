@@ -4,10 +4,6 @@
     function percentage(number) {
         return number * 100 + '%'
     }
-
-    function size(number) {
-        return number * 100
-    }
 </script>
 
 <style>
@@ -43,7 +39,11 @@
                 <rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />
                 {#each points as point}
                     <rect
-                        x={percentage(point.x)} y={percentage(point.y)} width={size(point.width)} height={size(point.height)} fill="#000" />
+                        x={percentage(point.x)}
+                        y={percentage(point.y)}
+                        width={percentage(point.width)}
+                        height={percentage(point.height)}
+                        fill="#000" />
                 {/each}
             </mask>
             <rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask{itemFormElName})" />
@@ -51,8 +51,8 @@
                 <rect
                     x={percentage(point.x)}
                     y={percentage(point.y)}
-                    width={size(point.width)}
-                    height={size(point.height)}
+                    width={percentage(point.width)}
+                    height={percentage(point.height)}
                     stroke="#ff8700"
                     stroke-width="1.5px"
                     fill="none" />

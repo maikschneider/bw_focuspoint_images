@@ -1,7 +1,7 @@
 <svelte:options customElement={{tag: 'focuspoint-element', shadow: 'none'}} />
 
 <script>
-    import {onMount} from "svelte"
+    import {onDestroy, onMount} from "svelte"
     import Modal from '@typo3/backend/modal.js'
     import Icons from '@typo3/backend/icons.js'
     import {html} from "lit"
@@ -9,12 +9,17 @@
 
     let {itemFormElName, itemFormElValue, wizardConfig, image} = $props()
     let icon = $state('')
-    let previewPoints = JSON.parse(itemFormElValue ? itemFormElValue : '[]')
+    let previewPoints = $derived(itemFormElValue ? JSON.parse(itemFormElValue) : [])
 
     onMount(() => {
         Icons.getIcon('content-target', Icons.sizes.small).then((html) => {
             icon = html
         })
+        window.document.addEventListener(`${itemFormElName}-wizard-update`, onWizardUpdate)
+    })
+
+    onDestroy(() => {
+        window.document.removeEventListener(`${itemFormElName}-wizard-update`, onWizardUpdate)
     })
 
     function onButtonClick(e) {
@@ -61,12 +66,16 @@
     }
 
     function onModalSave() {
-        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-save`, {}))
+        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-modal-save`, {}))
         window.parent.TYPO3.Modal.dismiss();
     }
 
     function onModalSettings() {
         document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
+    }
+
+    function onWizardUpdate(e) {
+        itemFormElValue = JSON.stringify(e.detail.focuspoints)
     }
 
     function onLinkSelection(e) {
