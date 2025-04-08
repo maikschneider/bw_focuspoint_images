@@ -286,6 +286,122 @@ https://svelte.dev/e/state_unsafe_mutation`);
 var legacy_mode_flag = false;
 var tracing_mode_flag = false;
 
+// node_modules/svelte/src/internal/shared/warnings.js
+var bold = "font-weight: bold";
+var normal = "font-weight: normal";
+function state_snapshot_uncloneable(properties) {
+  if (dev_fallback_default) {
+    console.warn(`%c[svelte] state_snapshot_uncloneable
+%c${properties ? `The following properties cannot be cloned with \`$state.snapshot\` \u2014 the return value contains the originals:
+
+${properties}` : "Value cannot be cloned with `$state.snapshot` \u2014 the original value was returned"}
+https://svelte.dev/e/state_snapshot_uncloneable`, bold, normal);
+  } else {
+    console.warn(`https://svelte.dev/e/state_snapshot_uncloneable`);
+  }
+}
+
+// node_modules/svelte/src/internal/shared/clone.js
+var empty = [];
+function snapshot(value, skip_warning = false) {
+  if (dev_fallback_default && !skip_warning) {
+    const paths = [];
+    const copy = clone(value, /* @__PURE__ */ new Map(), "", paths);
+    if (paths.length === 1 && paths[0] === "") {
+      state_snapshot_uncloneable();
+    } else if (paths.length > 0) {
+      const slice = paths.length > 10 ? paths.slice(0, 7) : paths.slice(0, 10);
+      const excess = paths.length - slice.length;
+      let uncloned = slice.map((path) => `- <value>${path}`).join("\n");
+      if (excess > 0) uncloned += `
+- ...and ${excess} more`;
+      state_snapshot_uncloneable(uncloned);
+    }
+    return copy;
+  }
+  return clone(value, /* @__PURE__ */ new Map(), "", empty);
+}
+function clone(value, cloned, path, paths, original = null) {
+  if (typeof value === "object" && value !== null) {
+    var unwrapped = cloned.get(value);
+    if (unwrapped !== void 0) return unwrapped;
+    if (value instanceof Map) return (
+      /** @type {Snapshot<T>} */
+      new Map(value)
+    );
+    if (value instanceof Set) return (
+      /** @type {Snapshot<T>} */
+      new Set(value)
+    );
+    if (is_array(value)) {
+      var copy = (
+        /** @type {Snapshot<any>} */
+        Array(value.length)
+      );
+      cloned.set(value, copy);
+      if (original !== null) {
+        cloned.set(original, copy);
+      }
+      for (var i5 = 0; i5 < value.length; i5 += 1) {
+        var element2 = value[i5];
+        if (i5 in value) {
+          copy[i5] = clone(element2, cloned, dev_fallback_default ? `${path}[${i5}]` : path, paths);
+        }
+      }
+      return copy;
+    }
+    if (get_prototype_of(value) === object_prototype) {
+      copy = {};
+      cloned.set(value, copy);
+      if (original !== null) {
+        cloned.set(original, copy);
+      }
+      for (var key in value) {
+        copy[key] = clone(value[key], cloned, dev_fallback_default ? `${path}.${key}` : path, paths);
+      }
+      return copy;
+    }
+    if (value instanceof Date) {
+      return (
+        /** @type {Snapshot<T>} */
+        structuredClone(value)
+      );
+    }
+    if (typeof /** @type {T & { toJSON?: any } } */
+    value.toJSON === "function") {
+      return clone(
+        /** @type {T & { toJSON(): any } } */
+        value.toJSON(),
+        cloned,
+        dev_fallback_default ? `${path}.toJSON()` : path,
+        paths,
+        // Associate the instance with the toJSON clone
+        value
+      );
+    }
+  }
+  if (value instanceof EventTarget) {
+    return (
+      /** @type {Snapshot<T>} */
+      value
+    );
+  }
+  try {
+    return (
+      /** @type {Snapshot<T>} */
+      structuredClone(value)
+    );
+  } catch (e4) {
+    if (dev_fallback_default) {
+      paths.push(path);
+    }
+    return (
+      /** @type {Snapshot<T>} */
+      value
+    );
+  }
+}
+
 // node_modules/svelte/src/internal/client/dev/tracing.js
 var tracing_expressions = null;
 function get_stack(label) {
@@ -793,13 +909,22 @@ function update_derived(derived2) {
 }
 
 // node_modules/svelte/src/internal/client/warnings.js
-var bold = "font-weight: bold";
-var normal = "font-weight: normal";
+var bold2 = "font-weight: bold";
+var normal2 = "font-weight: normal";
+function console_log_state(method) {
+  if (dev_fallback_default) {
+    console.warn(`%c[svelte] console_log_state
+%cYour \`console.${method}\` contained \`$state\` proxies. Consider using \`$inspect(...)\` or \`$state.snapshot(...)\` instead
+https://svelte.dev/e/console_log_state`, bold2, normal2);
+  } else {
+    console.warn(`https://svelte.dev/e/console_log_state`);
+  }
+}
 function hydration_attribute_changed(attribute, html2, value) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_attribute_changed
 %cThe \`${attribute}\` attribute on \`${html2}\` changed its value between server and client renders. The client value, \`${value}\`, will be ignored in favour of the server value
-https://svelte.dev/e/hydration_attribute_changed`, bold, normal);
+https://svelte.dev/e/hydration_attribute_changed`, bold2, normal2);
   } else {
     console.warn(`https://svelte.dev/e/hydration_attribute_changed`);
   }
@@ -808,7 +933,7 @@ function hydration_html_changed(location) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_html_changed
 %c${location ? `The value of an \`{@html ...}\` block ${location} changed between server and client renders. The client value will be ignored in favour of the server value` : "The value of an `{@html ...}` block changed between server and client renders. The client value will be ignored in favour of the server value"}
-https://svelte.dev/e/hydration_html_changed`, bold, normal);
+https://svelte.dev/e/hydration_html_changed`, bold2, normal2);
   } else {
     console.warn(`https://svelte.dev/e/hydration_html_changed`);
   }
@@ -817,7 +942,7 @@ function hydration_mismatch(location) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_mismatch
 %c${location ? `Hydration failed because the initial UI does not match what was rendered on the server. The error occurred near ${location}` : "Hydration failed because the initial UI does not match what was rendered on the server"}
-https://svelte.dev/e/hydration_mismatch`, bold, normal);
+https://svelte.dev/e/hydration_mismatch`, bold2, normal2);
   } else {
     console.warn(`https://svelte.dev/e/hydration_mismatch`);
   }
@@ -826,7 +951,7 @@ function lifecycle_double_unmount() {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] lifecycle_double_unmount
 %cTried to unmount a component that was not mounted
-https://svelte.dev/e/lifecycle_double_unmount`, bold, normal);
+https://svelte.dev/e/lifecycle_double_unmount`, bold2, normal2);
   } else {
     console.warn(`https://svelte.dev/e/lifecycle_double_unmount`);
   }
@@ -835,7 +960,7 @@ function ownership_invalid_mutation(component2, owner) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] ownership_invalid_mutation
 %c${component2 ? `${component2} mutated a value owned by ${owner}. This is strongly discouraged. Consider passing values to child components with \`bind:\`, or use a callback instead` : "Mutating a value outside the component that created it is strongly discouraged. Consider passing values to child components with `bind:`, or use a callback instead"}
-https://svelte.dev/e/ownership_invalid_mutation`, bold, normal);
+https://svelte.dev/e/ownership_invalid_mutation`, bold2, normal2);
   } else {
     console.warn(`https://svelte.dev/e/ownership_invalid_mutation`);
   }
@@ -844,7 +969,7 @@ function state_proxy_equality_mismatch(operator) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] state_proxy_equality_mismatch
 %cReactive \`$state(...)\` proxies and the values they proxy have different identities. Because of this, comparisons with \`${operator}\` will produce unexpected results
-https://svelte.dev/e/state_proxy_equality_mismatch`, bold, normal);
+https://svelte.dev/e/state_proxy_equality_mismatch`, bold2, normal2);
   } else {
     console.warn(`https://svelte.dev/e/state_proxy_equality_mismatch`);
   }
@@ -2459,24 +2584,24 @@ function template(content, flags) {
       if (!is_fragment) node = /** @type {Node} */
       get_first_child(node);
     }
-    var clone = (
+    var clone2 = (
       /** @type {TemplateNode} */
       use_import_node || is_firefox ? document.importNode(node, true) : node.cloneNode(true)
     );
     if (is_fragment) {
       var start = (
         /** @type {TemplateNode} */
-        get_first_child(clone)
+        get_first_child(clone2)
       );
       var end = (
         /** @type {TemplateNode} */
-        clone.lastChild
+        clone2.lastChild
       );
       assign_nodes(start, end);
     } else {
-      assign_nodes(clone, clone);
+      assign_nodes(clone2, clone2);
     }
-    return clone;
+    return clone2;
   };
 }
 // @__NO_SIDE_EFFECTS__
@@ -2512,24 +2637,24 @@ function ns_template(content, flags, ns = "svg") {
         get_first_child(root3);
       }
     }
-    var clone = (
+    var clone2 = (
       /** @type {TemplateNode} */
       node.cloneNode(true)
     );
     if (is_fragment) {
       var start = (
         /** @type {TemplateNode} */
-        get_first_child(clone)
+        get_first_child(clone2)
       );
       var end = (
         /** @type {TemplateNode} */
-        clone.lastChild
+        clone2.lastChild
       );
       assign_nodes(start, end);
     } else {
-      assign_nodes(clone, clone);
+      assign_nodes(clone2, clone2);
     }
-    return clone;
+    return clone2;
   };
 }
 function append(anchor, dom) {
@@ -3410,6 +3535,12 @@ function onMount(fn) {
     });
   }
 }
+function onDestroy(fn) {
+  if (component_context === null) {
+    lifecycle_outside_component("onDestroy");
+  }
+  onMount(() => () => untrack(fn));
+}
 function init_update_callbacks(context) {
   var l3 = (
     /** @type {ComponentContextLegacy} */
@@ -3930,6 +4061,30 @@ function create_custom_element(Component, props_definition, slots, exports, use_
   Component.element = /** @type {any} */
   Class;
   return Class;
+}
+
+// node_modules/svelte/src/internal/client/dev/console-log.js
+function log_if_contains_state(method, ...objects) {
+  untrack(() => {
+    try {
+      let has_state = false;
+      const transformed = [];
+      for (const obj of objects) {
+        if (obj && typeof obj === "object" && STATE_SYMBOL in obj) {
+          transformed.push(snapshot(obj, true));
+          has_state = true;
+        } else {
+          transformed.push(obj);
+        }
+      }
+      if (has_state) {
+        console_log_state(method);
+        console.log("%c[snapshot]", "color: grey", ...transformed);
+      }
+    } catch {
+    }
+  });
+  return objects;
 }
 
 // Resources/Private/JavaScript/FocuspointElement.svelte
@@ -4475,24 +4630,24 @@ i4?.({ LitElement: r4 });
 // Resources/Private/JavaScript/components/Preview.svelte
 mark_module_start();
 Preview[FILENAME] = "Resources/Private/JavaScript/components/Preview.svelte";
-var root_1 = add_locations(ns_template(`<rect fill="#000"></rect>`), Preview[FILENAME], [[58, 20]]);
-var root_2 = add_locations(ns_template(`<rect stroke="#ff8700" stroke-width="1.5px" fill="none"></rect>`), Preview[FILENAME], [[64, 16]]);
-var root = add_locations(template(`<div class="wrapper svelte-bwhiq6"><div class="preview svelte-bwhiq6"><img alt="Preview" class="svelte-bwhiq6"> <svg viewBox="0 0 200 200" preserveAspectRatio="none" class="focuspoint__svg svelte-bwhiq6" xmlns="http://www.w3.org/2000/svg"><mask><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5"></rect><!></mask><rect x="0" y="0" width="200" height="200" fill="#000"></rect><!></svg></div></div>`), Preview[FILENAME], [
+var root_1 = add_locations(ns_template(`<rect fill="#000"></rect>`), Preview[FILENAME], [[68, 20]]);
+var root_2 = add_locations(ns_template(`<rect stroke="#ff8700" stroke-width="1.5px" fill="none"></rect>`), Preview[FILENAME], [[74, 16]]);
+var root = add_locations(template(`<div class="wrapper svelte-bwhiq6"><div class="preview svelte-bwhiq6"><img alt="Preview" class="svelte-bwhiq6"> <svg class="focuspoint__svg svelte-bwhiq6" preserveAspectRatio="none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><mask><rect fill="#FFF" fill-opacity="0.5" height="200" width="200" x="0" y="0"></rect><!></mask><rect fill="#000" height="200" width="200" x="0" y="0"></rect><!></svg></div></div>`), Preview[FILENAME], [
   [
-    51,
+    61,
     0,
     [
       [
-        52,
+        62,
         4,
         [
-          [53, 8],
+          [63, 8],
           [
-            54,
+            64,
             8,
             [
-              [55, 12, [[56, 16]]],
-              [62, 12]
+              [65, 12, [[66, 16]]],
+              [72, 12]
             ]
           ]
         ]
@@ -4513,10 +4668,18 @@ function Preview($$anchor, $$props) {
   onMount(() => {
     bindInputEventListener();
   });
-  function bindInputEventListener() {
-    window.addEventListener(`${itemFormElName()}-save`, (e4) => {
+  onDestroy(() => {
+    window.removeEventListener(`${itemFormElName()}-save`, handleInputEvent);
+  });
+  function handleInputEvent(e4) {
+    try {
       set(previewPoints, JSON.parse(e4.detail.value), true);
-    });
+    } catch (error) {
+      console.error(...log_if_contains_state("error", "Failed to parse focus points:", error));
+    }
+  }
+  function bindInputEventListener() {
+    window.addEventListener(`${itemFormElName()}-save`, handleInputEvent);
   }
   function percentage(number) {
     return number * 100 + "%";

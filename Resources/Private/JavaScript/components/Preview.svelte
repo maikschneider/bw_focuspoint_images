@@ -1,5 +1,5 @@
 <script>
-    import {onMount} from "svelte";
+    import {onMount, onDestroy} from "svelte";
 
     let {image, points, itemFormElName} = $props()
     let previewPoints = $state(points)
@@ -8,10 +8,20 @@
         bindInputEventListener()
     })
 
-    function bindInputEventListener() {
-        window.addEventListener(`${itemFormElName}-save`, e => {
+    onDestroy(() => {
+        window.removeEventListener(`${itemFormElName}-save`, handleInputEvent)
+    })
+
+    function handleInputEvent(e) {
+        try {
             previewPoints = JSON.parse(e.detail.value)
-        })
+        } catch (error) {
+            console.error('Failed to parse focus points:', error)
+        }
+    }
+
+    function bindInputEventListener() {
+        window.addEventListener(`${itemFormElName}-save`, handleInputEvent)
     }
 
     function percentage(number) {
@@ -50,16 +60,16 @@
 
 <div class="wrapper">
     <div class="preview">
-        <img src={image} alt="Preview" />
-        <svg viewBox="0 0 200 200" preserveAspectRatio="none" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
+        <img alt="Preview" src={image} />
+        <svg class="focuspoint__svg" preserveAspectRatio="none" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask{itemFormElName}">
-                <rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />
+                <rect fill="#FFF" fill-opacity="0.5" height="200" width="200" x="0" y="0" />
                 {#each previewPoints as point}
                     <rect
                         x={percentage(point.x)} y={percentage(point.y)} width={size(point.width)} height={size(point.height)} fill="#000" />
                 {/each}
             </mask>
-            <rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask{itemFormElName})" />
+            <rect fill="#000" height="200" mask="url(#mask{itemFormElName})" width="200" x="0" y="0" />
             {#each previewPoints as point}
                 <rect
                     x={percentage(point.x)}
