@@ -41,6 +41,7 @@ class FocusPointWizard
                 'params' => $linkBrowserArguments,
                 'table' => 'sys_file_reference',
                 'uid' => '',
+                'formName' => 'editform',
                 'field' => $inputName,
                 'itemName' => $inputName,
             ],
