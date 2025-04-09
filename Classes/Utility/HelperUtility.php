@@ -64,6 +64,10 @@ class HelperUtility
                 if (filter_var($pageTs['fields'][$fieldName]['disabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
                     unset($pageTs['fields'][$fieldName]);
                 }
+
+                if (!isset($pageTs['fields'][$fieldName]['title'])) {
+                    unset($pageTs['fields'][$fieldName]);
+                }
             }
         }
 
