@@ -115,6 +115,28 @@ mod.tx_bwfocuspointimages.settings.fields {
 }
 ```
 
+#### Field Overrides
+
+You can override the default configuration of the fields on a per-element basis, similar to the TYPO3 TCEFORM configuration: `mod.tx_bwfocuspointimages.settings.fields.[fieldName].types.[typeName].[propertyName]`.
+
+```
+mod.tx_bwfocuspointimages.settings.fields {
+    description {
+        title = Description
+        type = textarea
+        types.my_custom_ctype.disabled = 1
+    }
+
+    title {
+        title = Default Title
+        types.tx_myextension_domain_model_mytype.title {
+            title = Custom Title
+            default = Custom Default
+        }
+    }
+}
+```
+
 ##### Adjusting the link wizard
 
 You can customize the display of the link wizard. Use the additional ```linkPopup``` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for [link inputs](https://docs.typo3.org/m/typo3/reference-tca/11.5/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html#linkpopup).

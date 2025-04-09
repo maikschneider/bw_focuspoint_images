@@ -44,36 +44,34 @@ class HelperUtility
         return $this->typoScriptService->convertTypoScriptArrayToPlainArray($pageTS);
     }
 
-    public function getConfigForWizardAction(int $pid): array
+    public function getConfigForWizardAction(int $pid, string $type = ''): array
     {
         $pageTs = $this->getPagesTSconfig($pid)['mod']['tx_bwfocuspointimages']['settings'] ?? [];
+        if (empty($pageTs['fields'])) {
+            return [];
+        }
+
         $pageTs['pid'] = $pid;
+
+        foreach ($pageTs['fields'] as $fieldName => $fieldConfig) {
+            $typesOverride = $fieldConfig['types'][$type] ?? [];
+
+            foreach ($typesOverride as $property => $value) {
+                $pageTs['fields'][$fieldName][$property] = $value;
+            }
+
+            if (filter_var($pageTs['fields'][$fieldName]['disabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                unset($pageTs['fields'][$fieldName]);
+            }
+
+            if (!isset($pageTs['fields'][$fieldName]['title'])) {
+                unset($pageTs['fields'][$fieldName]);
+            }
+
+            unset($pageTs['fields'][$fieldName]['types']);
+        }
+
         return $pageTs;
-    }
-
-    public function getConfigForFormElement(int $pid, array $formElementConfig): array
-    {
-        $defaultConfig = [
-            'file_field' => 'uid_local',
-            'focusPoints' => [
-                'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.focuspoints.title',
-                'singlePoint' => [
-                    'title' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.single_point.title',
-                ],
-            ],
-            'missingPageTSWarning' => false,
-        ];
-
-        // override default config from TCA config
-        $config = array_replace_recursive($defaultConfig, $formElementConfig);
-
-        // read pageTS
-        $tsSettings = $this->getConfigForWizardAction($pid);
-
-        // override single point settings from pageTS
-        $config['focusPoints']['singlePoint'] = array_replace_recursive($config['focusPoints']['singlePoint'], $tsSettings);
-
-        return $config;
     }
 
     public function getLinkExplanation(string $itemValue): array
