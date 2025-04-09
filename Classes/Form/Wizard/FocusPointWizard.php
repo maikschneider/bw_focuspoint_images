@@ -58,75 +58,18 @@ class FocusPointWizard
                 'params' => $linkBrowserArguments,
                 'table' => 'sys_file_reference',
                 'uid' => '',
-                'pid' => $pid,
                 'field' => $inputName,
-                'formName' => 'editform',
                 'itemName' => $inputName,
-                'hmac' => GeneralUtility::hmac('focusPointForm' . $inputName, 'wizard_js'),
             ],
         ];
+        $url = (string)$this->uriBuilder->buildUriFromRoute('wizard_link', $urlParameters);
 
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $url = (string)$uriBuilder->buildUriFromRoute('wizard_link', $urlParameters);
-
-        $preview = [];
-        if ($inputValue) {
-            $preview = $helperUtility->getLinkExplanation($queryParams['inputValue']);
-        }
+        $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
+        $preview = $inputValue ? $helperUtility->getLinkExplanation($inputValue) : [];
 
         return new JsonResponse([
             'url' => $url,
             'preview' => $preview,
         ]);
-    }
-
-    public function getWizardAction(ServerRequestInterface $request): Response
-    {
-        $response = new Response();
-
-        if (!$this->isSignatureValid($request)) {
-            return $response->withStatus(403);
-        }
-
-        $typoScript = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
-        $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $templateView->setLayoutRootPaths($typoScript['plugin.']['tx_bwfocuspointimages.']['view.']['layoutRootPaths.']);
-        $templateView->setPartialRootPaths($typoScript['plugin.']['tx_bwfocuspointimages.']['view.']['partialRootPaths.']);
-        $templateView->setTemplateRootPaths($typoScript['plugin.']['tx_bwfocuspointimages.']['view.']['templateRootPaths.']);
-        $templateView->setTemplate('FocuspointWizard');
-
-        $queryParams = json_decode((string)$request->getQueryParams()['arguments'], true);
-        $fileUid = $queryParams['image'];
-        $image = null;
-        if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
-            try {
-                /** @var ResourceFactory $resourceFactory */
-                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
-                $image = $resourceFactory->getFileObject($fileUid);
-            } catch (FileDoesNotExistException $e) {
-                return $response->withStatus(404);
-            }
-        }
-
-        $viewData = [
-            'image' => $image,
-            'focusPoints' => $queryParams['focusPoints'],
-        ];
-        $templateView->assignMultiple($viewData);
-        $content = $templateView->render();
-        $response->getBody()->write($content);
-
-        return $response;
-    }
-
-    /**
-     * Check if hmac signature is correct
-     *
-     * @param ServerRequestInterface $request the request with the GET parameters
-     */
-    protected function isSignatureValid(ServerRequestInterface $request): bool
-    {
-        $token = GeneralUtility::hmac($request->getQueryParams()['arguments'], 'ajax_wizard_focuspoint');
-        return $token === $request->getQueryParams()['signature'];
     }
 }
