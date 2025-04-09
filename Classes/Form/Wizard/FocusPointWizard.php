@@ -21,7 +21,11 @@ class FocusPointWizard
         $queryParams = $request->getQueryParams();
         $inputName = $queryParams['inputName'] ?? '';
         $inputValue = $queryParams['inputValue'] ?? '';
-        $config = json_decode($queryParams['config'] ?? '{}', true);
+        $configJson = $queryParams['config'] ?? '{}';
+        $config = json_decode($configJson, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $config = [];
+        }
 
         $linkBrowserArguments = [];
         if (isset($config['linkPopup']['blindLinkOptions'])) {
