@@ -24,10 +24,9 @@
 
     async function updateLinkBrowserInfo() {
         let url = TYPO3.settings.ajaxUrls['wizard_focuspoint_linkbrowserurl'];
-        url += '&pid=' + $wizardConfigStore.pid;
-        url += '&fieldName=' + name;
         url += `&inputName=${$wizardConfigStore.itemFormElName}-hidden-link-field`;
         url += '&inputValue=' + $focuspoints[index][name] || '';
+        url += '&config=' + JSON.stringify(config ||'{}');
 
         return (new AjaxRequest(url)).get().then(async (response) => {
             linkBrowserData = await response.resolve();
