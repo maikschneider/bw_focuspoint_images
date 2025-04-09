@@ -66,8 +66,16 @@
         width: 100%;
     }
 
+    .v12 .input-group-text {
+        min-width: 42px;
+    }
+
     .v12 .btn-default {
         height: 32px;
+    }
+
+    .v12 .form-control {
+        border-radius: 0;
     }
 </style>
 

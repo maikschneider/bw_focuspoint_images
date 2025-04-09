@@ -1,3 +1,4 @@
 .btn--left {
     margin-right: auto;
+    margin-inline-end: auto !important;
 }
