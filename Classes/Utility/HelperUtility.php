@@ -53,22 +53,22 @@ class HelperUtility
 
         $pageTs['pid'] = $pid;
 
-        if ($type !== '') {
-            foreach ($pageTs['fields'] as $fieldName => $fieldConfig) {
-                $typesOverride = $fieldConfig['types'][$type] ?? [];
+        foreach ($pageTs['fields'] as $fieldName => $fieldConfig) {
+            $typesOverride = $fieldConfig['types'][$type] ?? [];
 
-                foreach ($typesOverride as $property => $value) {
-                    $pageTs['fields'][$fieldName][$property] = $value;
-                }
-
-                if (filter_var($pageTs['fields'][$fieldName]['disabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
-                    unset($pageTs['fields'][$fieldName]);
-                }
-
-                if (!isset($pageTs['fields'][$fieldName]['title'])) {
-                    unset($pageTs['fields'][$fieldName]);
-                }
+            foreach ($typesOverride as $property => $value) {
+                $pageTs['fields'][$fieldName][$property] = $value;
             }
+
+            if (filter_var($pageTs['fields'][$fieldName]['disabled'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                unset($pageTs['fields'][$fieldName]);
+            }
+
+            if (!isset($pageTs['fields'][$fieldName]['title'])) {
+                unset($pageTs['fields'][$fieldName]);
+            }
+
+            unset($pageTs['fields'][$fieldName]['types']);
         }
 
         return $pageTs;
