@@ -41,9 +41,6 @@ class FocuspointProcessor extends FilesProcessor
                 $point->y *= 100;
                 $point->height *= 100;
                 $point->width *= 100;
-                // calculate center of each point for text positioning
-                $point->textX = $point->x + ($point->width / 2);
-                $point->textY = $point->y + ($point->height / 2);
 
                 foreach ($point as $fieldName => &$fieldValue) {
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
