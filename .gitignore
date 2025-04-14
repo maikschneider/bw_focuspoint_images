@@ -11,4 +11,4 @@ tscommand-*.tmp.txt
 config/
 .tscache
 package-lock.json
-Resources/Public/JavaScript/*.js.map
+Resources/Public/JavaScript
