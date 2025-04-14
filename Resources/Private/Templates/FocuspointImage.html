@@ -14,39 +14,16 @@
 
             <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
                 <f:for each="{points.{key}}" as="point" iteration="i">
-                    <f:if condition="{point.link}">
-                        <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
-                    </f:if>
-                    <rect
-                        x="{point.x}%"
-                        y="{point.y}%"
-                        id="focuspoint-{image.uid}-{i.cycle}"
-                        stroke="{point.color}"
-                        stroke-width="2px"
-                        class="focuspoint__svg__rect"
-                        width="{point.width}%"
-                        height="{point.height}%"
-                        opacity="0.7"
-                        fill="{point.color}" />
-                    <f:if condition="{point.link}">
-                        </a>
-                    </f:if>
-                    <text x="{point.textX}%" fill="#FFF" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
-                        {point.name}
-                    </text>
+                    <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
+                        <rect
+                            x="{point.x}%"
+                            y="{point.y}%"
+                            class="focuspoint__svg__rect"
+                            width="{point.width}%"
+                            height="{point.height}%" />
+                    </a>
                 </f:for>
             </svg>
-
-            <f:for each="{points.{key}}" as="point" iteration="i">
-                <div class="focuspoint__description" id="focuspoint-{image.uid}-{i.cycle}-description">
-                    <h3>{point.name}</h3>
-                    <p>
-                        <f:format.nl2br>{point.description}</f:format.nl2br>
-                    </p>
-                </div>
-            </f:for>
-
         </div>
     </f:for>
-
 </f:section>

@@ -44,39 +44,6 @@
 				<source>Add new Focus Point</source>
 				<target>Neuen Punkt hinzufügen</target>
 			</trans-unit>
-
-			<trans-unit id="wizard.fields.name">
-				<source>Name</source>
-				<target>Name</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.description">
-				<source>Description</source>
-				<target>Beschreibung</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color">
-				<source>Color</source>
-				<target>Farbe</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color.green">
-				<source>Green</source>
-				<target>Grün</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color.blue">
-				<source>Blue</source>
-				<target>Blau</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color.red">
-				<source>Red</source>
-				<target>Rot</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.hasLink">
-				<source>Is linked</source>
-				<target>Hat Link</target>
-			</trans-unit>
-			<trans-unit id="wizard.fields.hasLink.yes">
-				<source>Yes</source>
-				<target>Ja</target>
-			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source />
 				<target>Seite</target>

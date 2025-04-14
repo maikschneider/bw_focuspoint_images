@@ -25,20 +25,3 @@
     fill: transparent;
     stroke-dasharray: 2px;
 }
-
-.focuspoint__svg rect:hover + text {
-    display: none;
-}
-
-.focuspoint__description {
-    grid-column: 1 / 2;
-    grid-row: 2 / 3;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    padding: 1rem;
-    display: none;
-}
-
-.focuspoint__description p {
-    margin: 0;
-}

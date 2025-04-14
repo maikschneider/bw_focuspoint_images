@@ -63,41 +63,10 @@ This example configuration is used to generate the output shown in Example 1
 ```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
 
-    name {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
-        type = text
-        useAsName = 1
-    }
-
-    description {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.description
-        type = textarea
-    }
-
-    color {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color
-        type = select
-        options {
-            red = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.red
-            green = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.green
-            blue = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.blue
-        }
-        default = red
-    }
-
-    hasLink {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink
-        type = checkbox
-        label = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink.yes
-        default = true
-    }
-
     link {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
-        displayCond = FIELD:hasLink:REQ:true
     }
-
 }
 ```
 

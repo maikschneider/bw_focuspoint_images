@@ -33,32 +33,8 @@
 			<trans-unit id="wizard.single_point.button.addnew">
 				<source>Add new Focus Point</source>
 			</trans-unit>
-			<trans-unit id="wizard.fields.name">
-				<source>Name</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.description">
-				<source>Description</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color">
-				<source>Color</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color.green">
-				<source>Green</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color.blue">
-				<source>Blue</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.color.red">
-				<source>Red</source>
-			</trans-unit>
 			<trans-unit id="wizard.fields.link">
 				<source>Link</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.hasLink">
-				<source>Is linked</source>
-			</trans-unit>
-			<trans-unit id="wizard.fields.hasLink.yes">
-				<source>Yes</source>
 			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source>Page</source>
