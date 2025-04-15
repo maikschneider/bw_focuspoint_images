@@ -118,7 +118,7 @@ export const getIcon = async (iconName) => {
 export const activateFocuspoint = (index) => {
     focuspoints.update((store) => {
         store.forEach((focuspoint, i) => {
-            focuspoint.active = i === index ? !focuspoint.active : false;
+            focuspoint.active = i === index;
         });
         return store;
     })

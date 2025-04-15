@@ -15,32 +15,24 @@
         autoScroll: true,
         listeners: {
             // call this function on every dragmove event
+            start: onDraggableEnd,
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 $focuspoints[index].points = $focuspoints[index].points.map(([x, y]) => [x + event.dx, y + event.dy]);
             },
-            end(event) {
-                const index = parseInt(event.target.getAttribute('data-index'))
-                if ($focuspoints[index].active) {
-                    activateFocuspoint(index)
-                }
-            }
+            end: onDraggableEnd
         }
     });
     interact("circle").draggable({
         listeners: {
+            start: onDraggableEnd,
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
                 const [x, y] = $focuspoints[index].points[pointIndex];
                 $focuspoints[index].points[pointIndex] = [x + event.dx, y + event.dy];
             },
-            end(event) {
-                const index = parseInt(event.target.getAttribute('data-index'))
-                if ($focuspoints[index].active) {
-                    activateFocuspoint(index)
-                }
-            }
+            end: onDraggableEnd
         }
     });
 
@@ -59,11 +51,16 @@
         if (colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light')) {
             isDarkMode = true
         }
-    })
+    });
 
     onDestroy(() => {
         window.removeEventListener('resize', updateCanvasSizes)
-    })
+    });
+
+    function onDraggableEnd(event) {
+        const index = parseInt(event.target.getAttribute('data-index'));
+        activateFocuspoint(index);
+    }
 
     function setCanvasSizes() {
         setTimeout(() => {
@@ -133,9 +130,15 @@
 
     polygon {
         stroke-width: 2px;
-        stroke: red;
         fill: rgba(0, 0, 0, .5);
         cursor: move;
+        stroke: yellow;
+        stroke-dasharray: 5;
+    }
+
+    polygon.active {
+        stroke: red;
+        stroke-dasharray: none;
     }
 
     circle {
