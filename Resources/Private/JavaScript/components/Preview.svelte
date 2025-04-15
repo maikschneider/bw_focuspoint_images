@@ -1,8 +1,12 @@
 <script>
-    let {image, points, itemFormElName} = $props()
+    let {image, points, itemFormElName} = $props();
 
-    function percentage(number) {
-        return number * 100 + '%'
+    let width = $state(0);
+    let height = $state(0);
+
+    function onload(e) {
+        width = e.target.naturalWidth;
+        height = e.target.naturalHeight;
     }
 </script>
 
@@ -33,30 +37,15 @@
 
 <div class="wrapper">
     <div class="preview">
-        <img src={image} alt="Preview" />
-        <svg viewBox="0 0 200 200" preserveAspectRatio="none" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-            <mask id="mask{itemFormElName}">
-                <rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />
+        <img src={image} alt="Preview" {onload} />
+        <svg viewBox="0 0 {width} {height}">
+            <mask id="mask-{itemFormElName}">
+                <rect x="0" y="0" width={width} height={height} fill="white" />
                 {#each points as point}
-                    <rect
-                        x={percentage(point.x)}
-                        y={percentage(point.y)}
-                        width={percentage(point.width)}
-                        height={percentage(point.height)}
-                        fill="#000" />
+                    <polygon points={point.points.map(xy => xy.join(",")).join(" ")} fill="black" />
                 {/each}
             </mask>
-            <rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask{itemFormElName})" />
-            {#each points as point}
-                <rect
-                    x={percentage(point.x)}
-                    y={percentage(point.y)}
-                    width={percentage(point.width)}
-                    height={percentage(point.height)}
-                    stroke="#ff8700"
-                    stroke-width="1.5px"
-                    fill="none" />
-            {/each}
+            <rect x="0" y="0" width={width} height={height} fill="rgba(0, 0, 0, .7)" mask="url(#mask-{itemFormElName})" />
         </svg>
     </div>
 </div>

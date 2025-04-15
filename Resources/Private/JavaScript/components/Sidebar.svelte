@@ -73,20 +73,19 @@
 
 <div class="modal-panel-sidebar" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
     <div class="panel-group" role="tablist" aria-multiselectable="false">
-    {#each $focuspoints as focuspoint, index}
-
+        {#each $focuspoints as focuspoint, index}
             <div class="panel panel-default" data-crop-variant-container="default">
                 <div class="panel-heading" role="tab">
                     <h4 class="panel-title" id="cropper-accordion-heading-{index}">
                         <button
-                                on:click={() => activateFocuspoint(index)}
-                                data-bs-toggle="collapse"
-                                aria-expanded={focuspoint.active}
-                                aria-controls="cropper-collapse-1"
-                                class:collapsed={!focuspoint.active}
-                                class="panel-button"
-                                data-crop-variant-id="default"
-                                data-crop-variant="">
+                            on:click={() => activateFocuspoint(index)}
+                            data-bs-toggle="collapse"
+                            aria-expanded={focuspoint.active}
+                            aria-controls="cropper-collapse-1"
+                            class:collapsed={!focuspoint.active}
+                            class="panel-button"
+                            data-crop-variant-id="default"
+                            data-crop-variant="">
                             <span class="caret"></span>
                             <span class="panel-title">
                                 {focuspointName(focuspoint, index)}
@@ -95,12 +94,12 @@
                     </h4>
                 </div>
                 <div
-                        id="cropper-collapse-{index}"
-                        class="panel-collapse"
-                        class:collapse={!focuspoint.active}
-                        class:show={focuspoint.active}
-                        role="tabpanel"
-                        aria-labelledby="cropper-accordion-heading-{index}">
+                    id="cropper-collapse-{index}"
+                    class="panel-collapse"
+                    class:collapse={!focuspoint.active}
+                    class:show={focuspoint.active}
+                    role="tabpanel"
+                    aria-labelledby="cropper-accordion-heading-{index}">
                     <div class="panel-body">
                         {#each Object.entries($wizardConfigStore.fields) as [key, field]}
                             {#if fieldMeetsCondition(key, focuspoint)}
@@ -108,17 +107,14 @@
                             {/if}
                         {/each}
 
-                        <button
-                                class="btn btn-danger" name="reset" title="Reset" on:click|preventDefault={() => deleteFocuspoint(index)}>
+                        <button class="btn btn-danger" name="reset" title="Reset" on:click|preventDefault={() => deleteFocuspoint(index)}>
                             {@html $iconStore['actions-delete']}
                             {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.delete']}
                         </button>
                     </div>
                 </div>
             </div>
-
-
-    {/each}
+        {/each}
     </div>
 
     <div class="pt-3">
