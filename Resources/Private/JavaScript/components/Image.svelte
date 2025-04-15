@@ -1,6 +1,6 @@
 <script>
     import interact from 'interactjs';
-    import {activateFocuspoint, focuspoints} from "../store.svelte";
+    import {activateFocuspoint, focuspoints, activeIndex} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
 
     let {image} = $props()
@@ -19,6 +19,7 @@
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 $focuspoints[index].points = $focuspoints[index].points.map(([x, y]) => [x + event.dx, y + event.dy]);
+                console.log($activeIndex);
             },
             end: onDraggableEnd
         }
@@ -71,6 +72,15 @@
     function onload() {
         viewBox = `0 0 ${img.naturalWidth} ${img.naturalHeight}`;
         $focuspoints.viewBox = viewBox;
+    }
+
+    function onSvgClick(event) {
+        if (!$focuspoints[$activeIndex] || !(event.target instanceof SVGSVGElement))
+            return;
+        const rect = event.target.getBoundingClientRect();
+        const viewBox = event.target.viewBox.baseVal;
+        const ratio = viewBox.width / rect.width;
+        $focuspoints[$activeIndex].points = [...$focuspoints[$activeIndex].points, [event.layerX * ratio, event.layerY * ratio]];
     }
 
     export function updateCanvasSizes() {
@@ -151,7 +161,7 @@
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div class="wrapper">
-        <svg {viewBox}>
+        <svg {viewBox} onclick={onSvgClick}>
             {#each $focuspoints as focuspoint, index}
                 <g>
                     <polygon

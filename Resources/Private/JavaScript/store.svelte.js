@@ -5,6 +5,8 @@ export const wizardConfigStore = writable(null);
 
 export const focuspoints = writable([]);
 
+export const activeIndex = writable(0);
+
 export const initStores = (hiddenInput, wizardConfig, hiddenElement) => {
     wizardConfigStore.set(JSON.parse(wizardConfig));
     focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : '[]'));
@@ -121,7 +123,8 @@ export const activateFocuspoint = (index) => {
             focuspoint.active = i === index;
         });
         return store;
-    })
+    });
+    activeIndex.set(index);
 }
 
 export const focusPointName = (index) => {
