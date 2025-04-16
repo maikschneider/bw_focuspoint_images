@@ -14,9 +14,11 @@
     width: 100%;
     height: 100%;
 
-    rect:hover {
-        opacity: 1;
-        fill: transparent;
-        stroke-dasharray: 2px;
+    polygon {
+        opacity: .3;
+    }
+
+    polygon:hover {
+        opacity: .5;
     }
 }
