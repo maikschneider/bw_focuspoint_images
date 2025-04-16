@@ -44,6 +44,9 @@
 				<source>Add new Focus Point</source>
 				<target>Neuen Punkt hinzufügen</target>
 			</trans-unit>
+			<trans-unit id="wizard.fields.title">
+				<target>Titel</target>
+			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source />
 				<target>Seite</target>

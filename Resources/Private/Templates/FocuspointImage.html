@@ -9,6 +9,9 @@
             <svg viewBox="0 0 {points.{key}.width} {points.{key}.height}" class="focuspoint__svg">
                 <f:for each="{points.{key}.areas}" as="area" iteration="i">
                     <a href="{f:uri.typolink(parameter: area.link)}" target="{area.linkTarget}">
+                        <f:if condition="{area.title}">
+                            <title>{area.title}</title>
+                        </f:if>
                         <polygon points="{area.path}" fill="black" />
                     </a>
                 </f:for>
