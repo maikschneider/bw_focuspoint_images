@@ -1,26 +1,15 @@
 <f:layout name="Default" />
 
 <f:section name="Main">
+    <f:asset.css identifier="tx_bwfocuspointimages_focuspoint" href="EXT:bw_focuspoint_images/Resources/Public/Css/FocuspointImage.css" />
 
     <f:for each="{images}" as="image" key="key">
-
-        <f:asset.css
-            identifier="tx_bwfocuspointimages_focuspoint"
-            href="EXT:bw_focuspoint_images/Resources/Public/Css/FocuspointImage.css" />
-
         <div class="focuspoint">
-
-            <f:image image="{image}" maxWidth="1600" maxHeight="1200" />
-
-            <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-                <f:for each="{points.{key}}" as="point" iteration="i">
-                    <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
-                        <rect
-                            x="{point.x}%"
-                            y="{point.y}%"
-                            class="focuspoint__svg__rect"
-                            width="{point.width}%"
-                            height="{point.height}%" />
+            <f:image image="{image}"/>
+            <svg viewBox="0 0 {points.{key}.width} {points.{key}.height}" class="focuspoint__svg">
+                <f:for each="{points.{key}.areas}" as="area" iteration="i">
+                    <a href="{f:uri.typolink(parameter: area.link)}" target="{area.linkTarget}">
+                        <polygon points="{area.path}" />
                     </a>
                 </f:for>
             </svg>

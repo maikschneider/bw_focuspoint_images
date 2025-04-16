@@ -83,32 +83,32 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
             return '';
         }
 
-		$width = $fileReference->getProperty('width');
-		$height = $fileReference->getProperty('height');
-		$uid = $fileReference->getUid();
-		$viewBox = "0 0 {$width} {$height}";
-		$polygons = join(
-			'',
-			array_map(
-				fn (array $point): string => '<polygon points="' . join(
-					' ',
-					array_map(
-					   fn (array $xy): string => join(',', $xy),
-					   $point['points'],
-				   ),
-				) . '" fill="black" />',
-				$focuspoints
-			)
-		);
+        $width = $fileReference->getProperty('width');
+        $height = $fileReference->getProperty('height');
+        $uid = $fileReference->getUid();
+        $viewBox = "0 0 {$width} {$height}";
+        $polygons = join(
+            '',
+            array_map(
+                fn (array $point): string => '<polygon points="' . join(
+                    ' ',
+                    array_map(
+                       fn (array $xy): string => join(',', $xy),
+                       $point['points'],
+                   ),
+                ) . '" fill="black" />',
+                $focuspoints
+            )
+        );
 
-		return <<<HTML
-		<svg viewBox="{$viewBox}">
-			<mask id="mask-{$uid}">
-				<rect x="0" y="0" width="{$width}" height="{$height}" fill="white" />
-				{$polygons}
-			</mask>
-			<rect x="0" y="0" width="{$width}" height="{$height}" fill="rgba(0, 0, 0, .7)" mask="url(#mask-{$uid})" />
-		</svg>
-		HTML;
+        return <<<HTML
+        <svg viewBox="{$viewBox}">
+            <mask id="mask-{$uid}">
+                <rect x="0" y="0" width="{$width}" height="{$height}" fill="white" />
+                {$polygons}
+            </mask>
+            <rect x="0" y="0" width="{$width}" height="{$height}" fill="rgba(0, 0, 0, .7)" mask="url(#mask-{$uid})" />
+        </svg>
+        HTML;
     }
 }
