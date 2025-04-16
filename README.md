@@ -1,29 +1,18 @@
-Overview
-========
+# Overview
 
 With this TYPO3 extension you can create responsive image maps in the
 backend. This extension ships an image editor that can be used to add
-areas and information to an image.
+interactive clickable areas and information to an image.
 
-![Backend Editor](Documentation/Images/example_backend.png)
+![Backend Editor](/Documentation/Images/example_backend.png)
 
-Examples
-========
-
-Example 1: Default output
--------------------------
+## Example
 
 Frontend output with configuration of example PageTS
 
-![Example 1](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_frontend.jpg)
+![Example](/Documentation/Images/example_frontend.png)
 
-Example 2: SVG Animation
-------------------------
-
-In this example the focus areas are animated via SVG. The additional
-information are displayed next to the image with some delay.
-
-![Example 2](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_animation.gif)
+The image with all defined areas gets rendered. The default behavior of the areas is to redirect the user to the specified link. It can be an external link, a page inside TYPO3 or a link to a specific component on a page.
 
 For administrators
 ==================
@@ -52,20 +41,23 @@ For administrators
 Add the new content element "Image with Focuspoints" to any page, link a new
 image and start adding your focus areas.
 
-![Backend view](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/backend-collage.jpg)
+![](/Documentation/Images/backend_select.png)
 
 ### Configuration
 
 To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select**, **link** and **checkbox** inputs in the wizard.
 
-This example configuration is used to generate the output shown in Example 1
+This example configuration is used to generate the output shown in the example ([`/Tests/Fixtures/example1.tsconfig`](/Tests/Fixtures/example1.tsconfig))
 
 ```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
-
     link {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
+    }
+    title {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.title
+        type = text
     }
 }
 ```
