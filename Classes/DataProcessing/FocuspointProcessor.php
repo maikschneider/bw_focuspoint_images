@@ -49,22 +49,25 @@ class FocuspointProcessor extends FilesProcessor
                     }
 
                     // in case of typolinks with target, add a new field {$fieldName}Target='_blank'
-                    if (!is_string($fieldValue) || strpos($fieldValue, 't3://') !== 0)
+                    if (!is_string($fieldValue) || strpos($fieldValue, 't3://') !== 0) {
                         continue;
+                    }
                     $linkValues = $typoLinkCodecService->decode($fieldValue);
-                    if (!$linkValues['target'])
+                    if (!$linkValues['target']) {
                         continue;
+                    }
                     $attributeName = $fieldName . 'Target';
                     $point[$attributeName] = $linkValues['target'];
                 }
-                if ($point['points'])
-                    $point['path'] = join(' ', array_map(fn (array $xy): string => join(',', $xy), $point['points']));
+                if ($point['points']) {
+                    $point['path'] = implode(' ', array_map(fn (array $xy): string => implode(',', $xy), $point['points']));
+                }
             }
 
             $processedData['points'][$key] = [
                 'width' => $file->getProperty('width'),
                 'height' => $file->getProperty('height'),
-                'areas' => $points
+                'areas' => $points,
             ];
         }
 

@@ -87,15 +87,15 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $height = $fileReference->getProperty('height');
         $uid = $fileReference->getUid();
         $viewBox = "0 0 {$width} {$height}";
-        $polygons = join(
+        $polygons = implode(
             '',
             array_map(
-                fn (array $point): string => '<polygon points="' . join(
+                fn (array $point): string => '<polygon points="' . implode(
                     ' ',
                     array_map(
-                       fn (array $xy): string => join(',', $xy),
-                       $point['points'],
-                   ),
+                        fn (array $xy): string => implode(',', $xy),
+                        $point['points'],
+                    ),
                 ) . '" fill="black" />',
                 $focuspoints
             )
