@@ -41,7 +41,6 @@
 
     let {itemFormElName, wizardConfig, image} = $props()
     let isSettingsOpen = $state(false)
-    let imageComponent
     let sidebarWidth = $state(300)
     const minSidebarWidth = 200
 
@@ -66,7 +65,6 @@
                     if (newWidth >= minSidebarWidth) {
                         sidebarWidth = newWidth
                         localStorage.setItem('focuspoint-sidebar-width', sidebarWidth.toString())
-                        imageComponent?.updateCanvasSizes()
                     }
                 }
             }
@@ -93,7 +91,7 @@
     {#if isSettingsOpen}
         <Settings itemFormElName={itemFormElName} bind:isSettingsOpenValue={isSettingsOpen} />
     {:else}
-        <Image bind:this={imageComponent} image={image} />
+        <Image image={image} />
         <div class="resize-handle" aria-label="Resize sidebar"></div>
         <Sidebar />
     {/if}

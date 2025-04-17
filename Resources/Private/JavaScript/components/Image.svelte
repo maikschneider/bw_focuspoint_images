@@ -1,13 +1,9 @@
 <script>
     import interact from 'interactjs';
     import {activateFocuspoint, focuspoints, activeIndex} from "../store.svelte";
-    import {onDestroy, onMount} from "svelte";
-
-    let {image} = $props()
-    let canvasHeight = $state(0)
-    let canvasWidth = $state(0)
-    let img
-    let initialized = $state(false)
+    import {onMount} from "svelte";
+    let {image} = $props();
+    let img;
     let isDarkMode = $state(false);
     let viewBox = $state("");
 
@@ -37,35 +33,15 @@
     });
 
     onMount(() => {
-        if (img.complete) {
-            setCanvasSizes()
-        } else {
-            img.addEventListener('load', setCanvasSizes)
-        }
-
-        window.addEventListener('resize', updateCanvasSizes)
-
         const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
         const theme = document.querySelector('html').getAttribute('data-theme');
         const darkModePrefer = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light')) {
-            isDarkMode = true
-        }
-    });
-
-    onDestroy(() => {
-        window.removeEventListener('resize', updateCanvasSizes)
+        isDarkMode = colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light');
     });
 
     function setActiveFocuspoint(event) {
         const index = parseInt(event.target.getAttribute('data-index'));
         activateFocuspoint(index);
-    }
-
-    function setCanvasSizes() {
-        setTimeout(() => {
-            updateCanvasSizes()
-        }, 300)
     }
 
     function onload() {
@@ -116,24 +92,9 @@
     function distance([x1, y1], [x2, y2]) {
         return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
     }
-
-    export function updateCanvasSizes() {
-        canvasHeight = img.parentElement.getBoundingClientRect().height
-        canvasWidth = img.parentElement.getBoundingClientRect().width
-        initialized = true
-    }
 </script>
 
 <style>
-    .draggable {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.15s ease;
-        user-select: none;
-    }
-
     img {
         pointer-events: none;
         -moz-user-select: none;
