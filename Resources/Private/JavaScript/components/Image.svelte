@@ -15,24 +15,24 @@
         autoScroll: true,
         listeners: {
             // call this function on every dragmove event
-            start: onDraggableEnd,
+            start: setActiveFocuspoint,
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 $focuspoints[index].points = $focuspoints[index].points.map(([x, y]) => [x + event.dx, y + event.dy]);
             },
-            end: onDraggableEnd
+            end: setActiveFocuspoint
         }
     });
     interact("circle").draggable({
         listeners: {
-            start: onDraggableEnd,
+            start: setActiveFocuspoint,
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
                 const [x, y] = $focuspoints[index].points[pointIndex];
                 $focuspoints[index].points[pointIndex] = [x + event.dx, y + event.dy];
             },
-            end: onDraggableEnd
+            end: setActiveFocuspoint
         }
     });
 
@@ -57,7 +57,7 @@
         window.removeEventListener('resize', updateCanvasSizes)
     });
 
-    function onDraggableEnd(event) {
+    function setActiveFocuspoint(event) {
         const index = parseInt(event.target.getAttribute('data-index'));
         activateFocuspoint(index);
     }
