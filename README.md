@@ -43,6 +43,11 @@ image and start adding your focus areas.
 
 ![](/Documentation/Images/backend_select.png)
 
+The next actions are available in the editor:
+- Moving areas around with the mouse
+- Double-click outside any area to create a new point for an active area
+- Double-click on any point to delete the point
+
 ### Configuration
 
 To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select**, **link** and **checkbox** inputs in the wizard.

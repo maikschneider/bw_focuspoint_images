@@ -56,6 +56,12 @@ image and start adding your focus areas.
    :alt: Backend view
    :class: with-shadow
 
+The next actions are available in the editor:
+
+* Moving areas around with the mouse
+* Double-click outside any area to create a new point for an active area
+* Double-click on any point to delete the point
+
 Configuration
 -------------
 
