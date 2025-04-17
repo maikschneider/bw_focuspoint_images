@@ -45,6 +45,7 @@
 				<target>Neuen Punkt hinzufügen</target>
 			</trans-unit>
 			<trans-unit id="wizard.fields.title">
+				<source />
 				<target>Titel</target>
 			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
