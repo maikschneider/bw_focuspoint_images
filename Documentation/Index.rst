@@ -190,17 +190,15 @@ To decode the json format and use relative points in your fluid template, use th
 Upgrade
 =======
 
-To version 5.x
+To version 6.x
 ---------------
 The rectangular shapes were replaced with custom polygon areas.
 
 The JSON schema for the column `focus_points` was changed. Objects do not have the properties `x`, `y`, `width` and `height`. Instead, they must be replaced with a property `points` that contains an array of two-dimensional points.
 
-Default fields like `name`, `description`, `color`, `hasLink` were deleted but they can be created per project anyways,
+Default fields like `name`, `description`, `color`, `hasLink` were deleted but they can be created per project anyways. The default Fluid template renders only polygons and links. You must override them if you need extra fields to be rendered.
 
-The default Fluid template renders only polygons and links. You must override them if you need extra fields to be rendered.
-
-Fixed a visual bug, when the `<svg>` element couldn't fully overlap the `<img>` when the image's width is not 100%. All images by default habe the width of 100%.
+Fixed a visual bug, when the `<svg>` element couldn't fully overlap the `<img>` when the image's width is not 100%. All images by default have the width of 100%.
 
 To version 4.x
 ---------------
@@ -244,5 +242,5 @@ Feel free to contribute!
 .. versionadded:: 4.0.0
     TYPO3 v12 support
 
-.. versionadded:: 5.0.0
+.. versionadded:: 6.0.0
     Replace rectangular areas with custom polygon forms
