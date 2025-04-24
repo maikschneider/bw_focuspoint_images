@@ -93,7 +93,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
                 fn (array $point): string => '<rect x="' . ($point['x'] * 100) . '%" y="' . ($point['y'] * 100) . '%" width="' . ($point['width'] * 100) . '%" height="' . ($point['height'] * 100) . '%" fill="black" />',
                 array_filter(
                     $focuspoints,
-                    fn ($point) => !$point['points']
+                    fn ($point) => !isset($point['points'])
                 )
             )
         );
@@ -109,7 +109,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
                 ) . '" fill="black" />',
                 array_filter(
                     $focuspoints,
-                    fn ($point) => !!$point['points']
+                    fn ($point) => isset($point['points'])
                 )
             )
         );
