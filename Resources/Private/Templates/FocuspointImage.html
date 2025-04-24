@@ -12,7 +12,14 @@
                         <f:if condition="{area.title}">
                             <title>{area.title}</title>
                         </f:if>
-                        <polygon points="{area.path}" fill="black" />
+                        <f:if condition="{area.path}">
+                            <f:then>
+                                <polygon points="{area.path}" fill="black" />
+                            </f:then>
+                            <f:else>
+                                <rect x="{area.x}%" y="{area.y}%" width="{area.width}%" height="{area.height}%" />
+                            </f:else>
+                        </f:if>
                     </a>
                 </f:for>
             </svg>

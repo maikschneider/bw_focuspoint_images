@@ -14,11 +14,11 @@
     width: 100%;
     height: 100%;
 
-    polygon {
+    polygon, rect {
         opacity: .3;
     }
 
-    polygon:hover {
+    polygon:hover, rect:hover {
         opacity: .5;
     }
 }

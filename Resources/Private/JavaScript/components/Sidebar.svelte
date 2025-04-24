@@ -118,9 +118,13 @@
     </div>
 
     <div class="pt-3">
-        <button class="btn btn-success w-100 " on:click|preventDefault={createNewFocuspoint}>
+        <button class="btn btn-success w-100 " on:click|preventDefault={() => createNewFocuspoint(false)}>
             {@html $iconStore['actions-add']}
             {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.addnew']}
+        </button>
+        <button class="btn btn-success w-100 " on:click|preventDefault={() => createNewFocuspoint(true)}>
+            {@html $iconStore['actions-add']}
+            Add rect
         </button>
     </div>
 

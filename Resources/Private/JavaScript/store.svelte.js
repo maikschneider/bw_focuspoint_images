@@ -85,7 +85,7 @@ export const fieldMeetsCondition = (fieldName, point) => {
     }
 }
 
-export const createNewFocuspoint = () => {
+export const createNewFocuspoint = (isRect) => {
     const config = get(wizardConfigStore);
 
     // create a new focuspoint with default fields
@@ -94,7 +94,15 @@ export const createNewFocuspoint = () => {
       return acc;
     }, {});
 
-    newFocuspoint.points = [[10, 10], [50, 10], [50, 50], [10, 50]];
+    if (isRect) {
+      // set default values
+      newFocuspoint.x = 0.333;
+      newFocuspoint.y =  0.333;
+      newFocuspoint.width = parseFloat(config.defaultWidth);
+      newFocuspoint.height = parseFloat(config.defaultHeight);
+    } else {
+      newFocuspoint.points = [[10, 10], [50, 10], [50, 50], [10, 50]];
+    }
 
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);

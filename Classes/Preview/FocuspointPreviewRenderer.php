@@ -87,6 +87,16 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $height = $fileReference->getProperty('height');
         $uid = $fileReference->getUid();
         $viewBox = "0 0 {$width} {$height}";
+        $rects = implode(
+            '',
+            array_map(
+                fn (array $point): string => '<rect x="' . ($point['x'] * 100) . '%" y="' . ($point['y'] * 100) . '%" width="' . ($point['width'] * 100) . '%" height="' . ($point['height'] * 100) . '%" fill="black" />',
+                array_filter(
+                    $focuspoints,
+                    fn ($point) => !$point['points']
+                )
+            )
+        );
         $polygons = implode(
             '',
             array_map(
@@ -97,7 +107,10 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
                         $point['points'],
                     ),
                 ) . '" fill="black" />',
-                $focuspoints
+                array_filter(
+                    $focuspoints,
+                    fn ($point) => !!$point['points']
+                )
             )
         );
 
@@ -106,6 +119,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
             <mask id="mask-{$uid}">
                 <rect x="0" y="0" width="{$width}" height="{$height}" fill="white" />
                 {$polygons}
+                {$rects}
             </mask>
             <rect x="0" y="0" width="{$width}" height="{$height}" fill="rgba(0, 0, 0, .7)" mask="url(#mask-{$uid})" />
         </svg>

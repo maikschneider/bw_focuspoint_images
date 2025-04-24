@@ -37,6 +37,14 @@ class FocuspointProcessor extends FilesProcessor
             $points = json_decode((string)$points, true) ?: [];
 
             foreach ($points as &$point) {
+
+                if (isset($point['x'])) {
+                    $point['x'] *= 100;
+                    $point['y'] *= 100;
+                    $point['height'] *= 100;
+                    $point['width'] *= 100;
+                }
+
                 foreach ($point as $fieldName => &$fieldValue) {
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
                     if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
