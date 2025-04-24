@@ -1,6 +1,5 @@
 .ddev/                        export-ignore
 .github/                      export-ignore
-.vscode/                      export-ignore
 Resources/Private/JavaScript/ export-ignore
 Tests/                        export-ignore
 .editorconfig                 export-ignore
