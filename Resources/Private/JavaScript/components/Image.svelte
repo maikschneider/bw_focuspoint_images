@@ -277,15 +277,15 @@
     }
 
     polygon {
-        stroke-width: 2px;
-        fill: rgba(0, 0, 0, .5);
+        stroke-width: 1px;
+        fill: rgba(0, 0, 0, .6);
         cursor: move;
-        stroke: yellow;
-        stroke-dasharray: 5;
+        stroke: rgba(255, 255, 255, .8);
+        stroke-dasharray: 2;
     }
 
     polygon.active {
-        stroke: red;
+        stroke: #ff8700;
         stroke-dasharray: none;
     }
 
@@ -293,7 +293,7 @@
         cursor: pointer;
         stroke-width: 5px;
         stroke: transparent;
-        fill: red;
+        fill: #ff8700;
     }
 </style>
 
@@ -309,7 +309,7 @@
                             points={focuspoint.points.map(point => point.join(",")).join(" ")}
                             data-index={index} />
                         {#each focuspoint.points as [x, y], pointIndex}
-                            <circle cx={x} cy={y} r="5" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} />
+                            <circle cx={x} cy={y} r="3" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} />
                         {/each}
                     </g>
                 {/if}

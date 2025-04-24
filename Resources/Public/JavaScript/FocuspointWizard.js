@@ -4666,9 +4666,9 @@ var focusPointName = (index2) => {
 
 // Resources/Private/JavaScript/components/Image.svelte
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_3 = add_locations(ns_template(`<circle r="5" class="svelte-9kiuii"></circle>`), Image[FILENAME], [[312, 28]]);
+var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[312, 28]]);
 var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[305, 20, [[306, 24]]]]);
-var root_5 = add_locations(template(`<div><span class="text-break"> </span> <span class="ui-resizable-handle ui-resizable-nw svelte-9kiuii"></span> <span class="ui-resizable-handle ui-resizable-ne svelte-9kiuii"></span> <span class="ui-resizable-handle ui-resizable-sw svelte-9kiuii"></span> <span class="ui-resizable-handle ui-resizable-se svelte-9kiuii"></span></div>`), Image[FILENAME], [
+var root_5 = add_locations(template(`<div><span class="text-break"> </span> <span class="ui-resizable-handle ui-resizable-nw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-ne svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-sw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-se svelte-1ppkfk4"></span></div>`), Image[FILENAME], [
   [
     320,
     16,
@@ -4681,7 +4681,7 @@ var root_5 = add_locations(template(`<div><span class="text-break"> </span> <spa
     ]
   ]
 ]);
-var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-9kiuii"><svg class="svelte-9kiuii"></svg> <!> <img alt="Selected" unselectable="on" class="svelte-9kiuii"></div></div>`), Image[FILENAME], [
+var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1ppkfk4"><svg class="svelte-1ppkfk4"></svg> <!> <img alt="Selected" unselectable="on" class="svelte-1ppkfk4"></div></div>`), Image[FILENAME], [
   [
     300,
     0,
@@ -4689,8 +4689,8 @@ var root = add_locations(template(`<div touch-action="none"><div class="wrapper 
   ]
 ]);
 var $$css = {
-  hash: "svelte-9kiuii",
-  code: "\n    .draggable.svelte-9kiuii {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        transition: opacity 0.15s ease;\n        user-select: none;\n    }\n\n    .style1.svelte-9kiuii {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n        --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);\n    }\n\n\n    .style1.active.svelte-9kiuii {\n        border-color: #ff8700;\n        --typo3-state-primary-bg: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n    img.svelte-9kiuii {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: calc(100vh - 200px);\n    }\n\n    .cropper-bg.svelte-9kiuii {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0;\n    }\n\n    .cropper-bg--dark.svelte-9kiuii {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n\n    .wrapper.svelte-9kiuii {\n        position: relative;\n        align-self: center;\n    }\n\n    .ui-resizable-handle.ui-resizable-nw.svelte-9kiuii, .ui-resizable-handle.ui-resizable-ne.svelte-9kiuii {\n        top: -3px;\n    }\n\n    .ui-resizable-handle.ui-resizable-sw.svelte-9kiuii, .ui-resizable-handle.ui-resizable-se.svelte-9kiuii {\n        bottom: -3px;\n    }\n\n    .ui-resizable-handle.ui-resizable-ne.svelte-9kiuii, .ui-resizable-handle.ui-resizable-se.svelte-9kiuii {\n        right: -3px;\n    }\n\n    .ui-resizable-handle.ui-resizable-nw.svelte-9kiuii, .ui-resizable-handle.ui-resizable-sw.svelte-9kiuii {\n        left: -3px;\n    }\n\n    svg.svelte-9kiuii {\n        position: absolute;\n        left: 0;\n        top: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    polygon.svelte-9kiuii {\n        stroke-width: 2px;\n        fill: rgba(0, 0, 0, .5);\n        cursor: move;\n        stroke: yellow;\n        stroke-dasharray: 5;\n    }\n\n    polygon.active.svelte-9kiuii {\n        stroke: red;\n        stroke-dasharray: none;\n    }\n\n    circle.svelte-9kiuii {\n        cursor: pointer;\n        stroke-width: 5px;\n        stroke: transparent;\n        fill: red;\n    }\n"
+  hash: "svelte-1ppkfk4",
+  code: "\n    .draggable.svelte-1ppkfk4 {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        transition: opacity 0.15s ease;\n        user-select: none;\n    }\n\n    .style1.svelte-1ppkfk4 {\n        display: inline-grid;\n        background-color: rgba(0, 0, 0, 0.6);\n        border: 1px dashed rgba(255, 255, 255, 0.8);\n        color: white;\n        padding: 10px;\n        --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);\n    }\n\n\n    .style1.active.svelte-1ppkfk4 {\n        border-color: #ff8700;\n        --typo3-state-primary-bg: #ff8700;\n        border-style: solid;\n        background-color: rgba(0, 0, 0, 0.8);\n    }\n    img.svelte-1ppkfk4 {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: calc(100vh - 200px);\n    }\n\n    .cropper-bg.svelte-1ppkfk4 {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0;\n    }\n\n    .cropper-bg--dark.svelte-1ppkfk4 {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n\n    .wrapper.svelte-1ppkfk4 {\n        position: relative;\n        align-self: center;\n    }\n\n    .ui-resizable-handle.ui-resizable-nw.svelte-1ppkfk4, .ui-resizable-handle.ui-resizable-ne.svelte-1ppkfk4 {\n        top: -3px;\n    }\n\n    .ui-resizable-handle.ui-resizable-sw.svelte-1ppkfk4, .ui-resizable-handle.ui-resizable-se.svelte-1ppkfk4 {\n        bottom: -3px;\n    }\n\n    .ui-resizable-handle.ui-resizable-ne.svelte-1ppkfk4, .ui-resizable-handle.ui-resizable-se.svelte-1ppkfk4 {\n        right: -3px;\n    }\n\n    .ui-resizable-handle.ui-resizable-nw.svelte-1ppkfk4, .ui-resizable-handle.ui-resizable-sw.svelte-1ppkfk4 {\n        left: -3px;\n    }\n\n    svg.svelte-1ppkfk4 {\n        position: absolute;\n        left: 0;\n        top: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    polygon.svelte-1ppkfk4 {\n        stroke-width: 1px;\n        fill: rgba(0, 0, 0, .6);\n        cursor: move;\n        stroke: rgba(255, 255, 255, .8);\n        stroke-dasharray: 2;\n    }\n\n    polygon.active.svelte-1ppkfk4 {\n        stroke: #ff8700;\n        stroke-dasharray: none;\n    }\n\n    circle.svelte-1ppkfk4 {\n        cursor: pointer;\n        stroke-width: 5px;\n        stroke: transparent;\n        fill: #ff8700;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -4896,7 +4896,7 @@ function Image($$anchor, $$props) {
         reset(g);
         template_effect(
           ($0) => {
-            set_class(polygon, 0, clsx2({ active: get(focuspoint).active }), "svelte-9kiuii");
+            set_class(polygon, 0, clsx2({ active: get(focuspoint).active }), "svelte-1ppkfk4");
             set_attribute(polygon, "points", $0);
           },
           [
@@ -4929,7 +4929,7 @@ function Image($$anchor, $$props) {
         reset(div_2);
         template_effect(
           ($0, $1, $2, $3, $4, $5, $6, $7) => {
-            classes_1 = set_class(div_2, 1, "draggable style1 resizable svelte-9kiuii", null, classes_1, $0);
+            classes_1 = set_class(div_2, 1, "draggable style1 resizable svelte-1ppkfk4", null, classes_1, $0);
             set_style(div_2, `transform:translate3d(${$1 ?? ""}px, ${$2 ?? ""}px, 0); width: ${$3 ?? ""}px; height: ${$4 ?? ""}px;`);
             set_attribute(div_2, "data-x", $5);
             set_attribute(div_2, "data-y", $6);
@@ -4963,7 +4963,7 @@ function Image($$anchor, $$props) {
   reset(div);
   template_effect(
     ($0) => {
-      classes = set_class(div, 1, "cropper-bg svelte-9kiuii", null, classes, $0);
+      classes = set_class(div, 1, "cropper-bg svelte-1ppkfk4", null, classes, $0);
       set_attribute(svg, "viewBox", get(viewBox));
       set_attribute(img_1, "src", image());
     },
