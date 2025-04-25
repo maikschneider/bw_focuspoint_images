@@ -647,6 +647,15 @@ function init_array_prototype_warnings() {
     array_prototype2.includes = includes;
   };
 }
+function strict_equals(a3, b3, equal = true) {
+  try {
+    if (a3 === b3 !== (get_proxied_value(a3) === get_proxied_value(b3))) {
+      state_proxy_equality_mismatch(equal ? "===" : "!==");
+    }
+  } catch {
+  }
+  return a3 === b3 === equal;
+}
 
 // node_modules/svelte/src/internal/client/dom/operations.js
 var $window;
@@ -4504,24 +4513,24 @@ o4?.({ LitElement: i4 });
 
 // Resources/Private/JavaScript/components/Preview.svelte
 Preview[FILENAME] = "Resources/Private/JavaScript/components/Preview.svelte";
-var root_2 = add_locations(ns_template(`<polygon fill="black"></polygon>`), Preview[FILENAME], [[50, 24]]);
-var root_3 = add_locations(ns_template(`<rect></rect>`), Preview[FILENAME], [[52, 24]]);
+var root_2 = add_locations(ns_template(`<polygon fill="black"></polygon>`), Preview[FILENAME], [[46, 24]]);
+var root_4 = add_locations(ns_template(`<rect></rect>`), Preview[FILENAME], [[48, 24]]);
 var root = add_locations(template(`<div class="wrapper svelte-bwhiq6"><div class="preview svelte-bwhiq6"><img alt="Preview" class="svelte-bwhiq6"> <svg class="svelte-bwhiq6"><mask><rect x="0" y="0" fill="white"></rect><!></mask><rect x="0" y="0" fill="rgba(0, 0, 0, .7)"></rect></svg></div></div>`), Preview[FILENAME], [
   [
-    42,
+    38,
     0,
     [
       [
-        43,
+        39,
         4,
         [
-          [44, 8],
+          [40, 8],
           [
-            45,
+            41,
             8,
             [
-              [46, 12, [[47, 16]]],
-              [56, 12]
+              [42, 12, [[43, 16]]],
+              [52, 12]
             ]
           ]
         ]
@@ -4538,9 +4547,6 @@ function Preview($$anchor, $$props) {
   push($$props, true, Preview);
   append_styles($$anchor, $$css);
   let image = prop($$props, "image", 7), points = prop($$props, "points", 7), itemFormElName = prop($$props, "itemFormElName", 7);
-  function percentage(number) {
-    return number * 100 + "%";
-  }
   let width = state(0);
   let height = state(0);
   function onload(e4) {
@@ -4561,30 +4567,33 @@ function Preview($$anchor, $$props) {
       var consequent = ($$anchor3) => {
         var polygon = root_2();
         template_effect(($0) => set_attribute(polygon, "points", $0), [
-          () => get(point).points.map((xy) => xy.join(",")).join(" ")
+          () => get(point).__data.points.map((xy) => xy.join(",")).join(" ")
         ]);
         append($$anchor3, polygon);
       };
-      var alternate = ($$anchor3) => {
-        var rect_1 = root_3();
-        template_effect(
-          ($0, $1, $2, $3) => {
-            set_attribute(rect_1, "x", $0);
-            set_attribute(rect_1, "y", $1);
-            set_attribute(rect_1, "width", $2);
-            set_attribute(rect_1, "height", $3);
-          },
-          [
-            () => percentage(get(point).x),
-            () => percentage(get(point).y),
-            () => percentage(get(point).width),
-            () => percentage(get(point).height)
-          ]
-        );
-        append($$anchor3, rect_1);
+      var alternate = ($$anchor3, $$elseif) => {
+        {
+          var consequent_1 = ($$anchor4) => {
+            var rect_1 = root_4();
+            template_effect(() => {
+              set_attribute(rect_1, "x", get(point).__data.x);
+              set_attribute(rect_1, "y", get(point).__data.y);
+              set_attribute(rect_1, "width", get(point).__data.width);
+              set_attribute(rect_1, "height", get(point).__data.height);
+            });
+            append($$anchor4, rect_1);
+          };
+          if_block(
+            $$anchor3,
+            ($$render) => {
+              if (strict_equals(get(point).__shape, "rect")) $$render(consequent_1);
+            },
+            $$elseif
+          );
+        }
       };
       if_block(node_1, ($$render) => {
-        if (get(point).points) $$render(consequent);
+        if (strict_equals(get(point).__shape, "polygon")) $$render(consequent);
         else $$render(alternate, false);
       });
     }

@@ -90,10 +90,10 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $rects = implode(
             '',
             array_map(
-                fn (array $point): string => '<rect x="' . ($point['x'] * 100) . '%" y="' . ($point['y'] * 100) . '%" width="' . ($point['width'] * 100) . '%" height="' . ($point['height'] * 100) . '%" fill="black" />',
+                fn (array $point): string => '<rect x="' . ($point['__data']['x']) . '" y="' . ($point['__data']['y']) . '" width="' . ($point['__data']['width']) . '" height="' . ($point['__data']['height']) . '" fill="black" />',
                 array_filter(
                     $focuspoints,
-                    fn ($point) => !isset($point['points'])
+                    fn ($point) => $point['__shape'] === 'rect'
                 )
             )
         );
@@ -104,12 +104,12 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
                     ' ',
                     array_map(
                         fn (array $xy): string => implode(',', $xy),
-                        $point['points'],
+                        $point['__data']['points'],
                     ),
                 ) . '" fill="black" />',
                 array_filter(
                     $focuspoints,
-                    fn ($point) => isset($point['points'])
+                    fn ($point) => $point['__shape'] === 'polygon'
                 )
             )
         );

@@ -1,10 +1,6 @@
 <script>
     let {image, points, itemFormElName} = $props();
 
-    function percentage(number) {
-        return number * 100 + '%'
-    }
-
     let width = $state(0);
     let height = $state(0);
 
@@ -46,10 +42,10 @@
             <mask id="mask-{itemFormElName}">
                 <rect x="0" y="0" width={width} height={height} fill="white" />
                 {#each points as point}
-                    {#if point.points}
-                        <polygon points={point.points.map(xy => xy.join(",")).join(" ")} fill="black" />
-                    {:else}
-                        <rect x={percentage(point.x)} y={percentage(point.y)} width={percentage(point.width)} height={percentage(point.height)} />
+                    {#if point.__shape === "polygon"}
+                        <polygon points={point.__data.points.map(xy => xy.join(",")).join(" ")} fill="black" />
+                    {:else if point.__shape === "rect"}
+                        <rect x={point.__data.x} y={point.__data.y} width={point.__data.width} height={point.__data.height} />
                     {/if}
                 {/each}
             </mask>

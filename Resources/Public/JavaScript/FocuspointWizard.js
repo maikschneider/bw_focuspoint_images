@@ -4604,12 +4604,16 @@ var createNewFocuspoint = (isRect) => {
     {}
   );
   if (isRect) {
-    newFocuspoint.x = 0.333;
-    newFocuspoint.y = 0.333;
-    newFocuspoint.width = parseFloat(config.defaultWidth);
-    newFocuspoint.height = parseFloat(config.defaultHeight);
+    newFocuspoint.__shape = "rect";
+    newFocuspoint.__data = {
+      x: 0.333,
+      y: 0.333,
+      width: parseFloat(config.defaultWidth),
+      height: parseFloat(config.defaultHeight)
+    };
   } else {
-    newFocuspoint.points = [
+    newFocuspoint.__shape = "polygon";
+    newFocuspoint.__data.points = [
       [10, 10],
       [50, 10],
       [50, 50],
@@ -4666,26 +4670,37 @@ var focusPointName = (index2) => {
 
 // Resources/Private/JavaScript/components/Image.svelte
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[312, 28]]);
-var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[305, 20, [[306, 24]]]]);
+function onSvgDblClick(event2, $focuspoints, $activeIndex, findClosestMiddlePointIndex) {
+  if (!$focuspoints()[$activeIndex()] || !(event2.target instanceof SVGSVGElement)) return;
+  const rect = event2.target.getBoundingClientRect();
+  const viewBox = event2.target.viewBox.baseVal;
+  const ratio = viewBox.width / rect.width;
+  const point = [event2.layerX * ratio, event2.layerY * ratio];
+  const index2 = findClosestMiddlePointIndex(point);
+  const points = $focuspoints()[$activeIndex()].__data.points.slice();
+  points.splice(index2 + 1, 0, point);
+  store_mutate(focuspoints, untrack($focuspoints)[$activeIndex()]._data.points = points, untrack($focuspoints));
+}
+var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[289, 28]]);
+var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[282, 20, [[283, 24]]]]);
 var root_5 = add_locations(template(`<div><span class="text-break"> </span> <span class="ui-resizable-handle ui-resizable-nw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-ne svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-sw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-se svelte-1ppkfk4"></span></div>`), Image[FILENAME], [
   [
-    320,
+    297,
     16,
     [
-      [329, 20],
-      [330, 20],
-      [331, 20],
-      [332, 20],
-      [333, 20]
+      [305, 20],
+      [306, 20],
+      [307, 20],
+      [308, 20],
+      [309, 20]
     ]
   ]
 ]);
 var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1ppkfk4"><svg class="svelte-1ppkfk4"></svg> <!> <img alt="Selected" unselectable="on" class="svelte-1ppkfk4"></div></div>`), Image[FILENAME], [
   [
-    300,
+    277,
     0,
-    [[301, 4, [[302, 8], [337, 8]]]]
+    [[278, 4, [[279, 8], [313, 8]]]]
   ]
 ]);
 var $$css = {
@@ -4706,7 +4721,8 @@ function Image($$anchor, $$props) {
   let img;
   let initialized = state(false);
   let isDarkMode = state(false);
-  let viewBox = state("");
+  let width = state(0);
+  let height = state(0);
   interact(".draggable").resizable({
     edges: {
       left: true,
@@ -4720,12 +4736,10 @@ function Image($$anchor, $$props) {
     listeners: {
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].width = event2.rect.width / get(canvasWidth), untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].height = event2.rect.height / get(canvasHeight), untrack($focuspoints));
-        const x = $focuspoints()[index2].x * get(canvasWidth) + event2.deltaRect.left;
-        const y = $focuspoints()[index2].y * get(canvasHeight) + event2.deltaRect.top;
-        store_mutate(focuspoints, untrack($focuspoints)[index2].x = x / get(canvasWidth), untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].y = y / get(canvasHeight), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x / get(width) * get(canvasWidth) + event2.deltaRect.left, untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y / get(height) * get(canvasHeight) + event2.deltaRect.top, untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.width = event2.rect.width / get(canvasWidth) * get(width), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.height = event2.rect.height / get(canvasHeight) * get(height), untrack($focuspoints));
       },
       end(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
@@ -4742,10 +4756,8 @@ function Image($$anchor, $$props) {
     listeners: {
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
-        const x = $focuspoints()[index2].x * get(canvasWidth) + event2.dx;
-        const y = $focuspoints()[index2].y * get(canvasHeight) + event2.dy;
-        store_mutate(focuspoints, untrack($focuspoints)[index2].x = x / get(canvasWidth), untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].y = y / get(canvasHeight), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x + event2.dx / get(canvasWidth) * get(width), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y + event2.dy / get(canvasHeight) * get(height), untrack($focuspoints));
       },
       end(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
@@ -4762,7 +4774,7 @@ function Image($$anchor, $$props) {
       start: setActiveFocuspoint,
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].points = $focuspoints()[index2].points.map(([x, y]) => [x + event2.dx, y + event2.dy]), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.points = $focuspoints()[index2].__data.points.map(([x, y]) => [x + event2.dx, y + event2.dy]), untrack($focuspoints));
       },
       end: setActiveFocuspoint
     }
@@ -4773,8 +4785,8 @@ function Image($$anchor, $$props) {
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
         const pointIndex = parseInt(event2.target.getAttribute("data-point-index"));
-        const [x, y] = $focuspoints()[index2].points[pointIndex];
-        store_mutate(focuspoints, untrack($focuspoints)[index2].points[pointIndex] = [x + event2.dx, y + event2.dy], untrack($focuspoints));
+        const [x, y] = $focuspoints()[index2].__data.points[pointIndex];
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.points[pointIndex] = [x + event2.dx, y + event2.dy], untrack($focuspoints));
       },
       end: setActiveFocuspoint
     }
@@ -4796,27 +4808,16 @@ function Image($$anchor, $$props) {
     activateFocuspoint(index2);
   }
   function onload() {
-    set(viewBox, `0 0 ${img.naturalWidth} ${img.naturalHeight}`);
-    store_mutate(focuspoints, untrack($focuspoints).viewBox = get(viewBox), untrack($focuspoints));
-  }
-  function onSvgDblClick(event2) {
-    if (!$focuspoints()[$activeIndex()] || !(event2.target instanceof SVGSVGElement)) return;
-    const rect = event2.target.getBoundingClientRect();
-    const viewBox2 = event2.target.viewBox.baseVal;
-    const ratio = viewBox2.width / rect.width;
-    const point = [event2.layerX * ratio, event2.layerY * ratio];
-    const index2 = findClosestMiddlePointIndex(point);
-    const points = $focuspoints()[$activeIndex()].points.slice();
-    points.splice(index2 + 1, 0, point);
-    store_mutate(focuspoints, untrack($focuspoints)[$activeIndex()].points = points, untrack($focuspoints));
+    set(width, img.naturalWidth, true);
+    set(height, img.naturalHeight, true);
   }
   function onCircleDblClick(event2) {
     const index2 = parseInt(event2.target.getAttribute("data-index"));
     const pointIndex = parseInt(event2.target.getAttribute("data-point-index"));
-    store_mutate(focuspoints, untrack($focuspoints)[index2].points = $focuspoints()[index2].points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
+    store_mutate(focuspoints, untrack($focuspoints)[index2].__data.points = $focuspoints()[index2].__data.points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
   }
   function findClosestMiddlePointIndex(point) {
-    const points = $focuspoints()[$activeIndex()].points;
+    const points = $focuspoints()[$activeIndex()].__data.points;
     const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map((segment) => {
       const [[x1, y1], [x2, y2]] = segment;
       return [x1 + (x2 - x1) / 2, y1 + (y2 - y1) / 2];
@@ -4851,24 +4852,17 @@ function Image($$anchor, $$props) {
     set(canvasWidth, img.parentElement.getBoundingClientRect().width, true);
     set(initialized, true);
   }
-  const getPositionX = user_derived(() => (index2) => {
-    return $focuspoints()[index2].x * get(canvasWidth);
-  });
-  const getPositionY = user_derived(() => (index2) => {
-    return $focuspoints()[index2].y * get(canvasHeight);
-  });
-  const getFocuspointWidth = user_derived(() => (index2) => {
-    return $focuspoints()[index2].width * get(canvasWidth);
-  });
-  const getFocuspointHeight = user_derived(() => (index2) => {
-    return $focuspoints()[index2].height * get(canvasHeight);
-  });
   var div = root();
   let classes;
   var div_1 = child(div);
   var svg = child(div_1);
-  svg.__dblclick = onSvgDblClick;
-  each(svg, 5, () => $focuspoints().filter((point) => point.points), index, ($$anchor2, focuspoint, index2) => {
+  svg.__dblclick = [
+    onSvgDblClick,
+    $focuspoints,
+    $activeIndex,
+    findClosestMiddlePointIndex
+  ];
+  each(svg, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
     var fragment = comment();
     var node = first_child(fragment);
     {
@@ -4878,7 +4872,7 @@ function Image($$anchor, $$props) {
         polygon.__click = () => activateFocuspoint(index2);
         set_attribute(polygon, "data-index", index2);
         var node_1 = sibling(polygon);
-        each(node_1, 17, () => get(focuspoint).points, index, ($$anchor4, $$item, pointIndex) => {
+        each(node_1, 17, () => get(focuspoint).__data.points, index, ($$anchor4, $$item, pointIndex) => {
           let x = () => get($$item)[0];
           x();
           let y = () => get($$item)[1];
@@ -4900,13 +4894,13 @@ function Image($$anchor, $$props) {
             set_attribute(polygon, "points", $0);
           },
           [
-            () => get(focuspoint).points.map((point) => point.join(",")).join(" ")
+            () => get(focuspoint).__data.points.map((point) => point.join(",")).join(" ")
           ]
         );
         append($$anchor3, g);
       };
       if_block(node, ($$render) => {
-        if (get(focuspoint).points) $$render(consequent);
+        if (strict_equals(get(focuspoint).__shape, "polygon")) $$render(consequent);
       });
     }
     append($$anchor2, fragment);
@@ -4928,31 +4922,23 @@ function Image($$anchor, $$props) {
         next(8);
         reset(div_2);
         template_effect(
-          ($0, $1, $2, $3, $4, $5, $6, $7) => {
+          ($0, $1) => {
             classes_1 = set_class(div_2, 1, "draggable style1 resizable svelte-1ppkfk4", null, classes_1, $0);
-            set_style(div_2, `transform:translate3d(${$1 ?? ""}px, ${$2 ?? ""}px, 0); width: ${$3 ?? ""}px; height: ${$4 ?? ""}px;`);
-            set_attribute(div_2, "data-x", $5);
-            set_attribute(div_2, "data-y", $6);
-            set_text(text2, $7);
+            set_style(div_2, `left:${get(focuspoint).__data.x / get(canvasWidth) * 100}%;top:${get(focuspoint).__data.y / get(canvasHeight) * 100}%;width:${get(focuspoint).__data.width / get(width) * 100}%;height:${get(focuspoint).__data.height / get(height) * 100}%;`);
+            set_text(text2, $1);
           },
           [
             () => ({
               active: get(focuspoint).active,
               "opacity-0": !get(initialized)
             }),
-            () => get(getPositionX)(index2),
-            () => get(getPositionY)(index2),
-            () => get(getFocuspointWidth)(index2),
-            () => get(getFocuspointHeight)(index2),
-            () => get(getPositionX)(index2),
-            () => get(getPositionY)(index2),
             () => get(focuspointName)(get(focuspoint), index2)
           ]
         );
         append($$anchor3, div_2);
       };
       if_block(node_3, ($$render) => {
-        if (!get(focuspoint).points) $$render(consequent_1);
+        if (strict_equals(get(focuspoint).__shape, "rect")) $$render(consequent_1);
       });
     }
     append($$anchor2, fragment_1);
@@ -4964,7 +4950,7 @@ function Image($$anchor, $$props) {
   template_effect(
     ($0) => {
       classes = set_class(div, 1, "cropper-bg svelte-1ppkfk4", null, classes, $0);
-      set_attribute(svg, "viewBox", get(viewBox));
+      set_attribute(svg, "viewBox", `0 0 ${get(width) ?? ""} ${get(height) ?? ""}`);
       set_attribute(img_1, "src", image());
     },
     [

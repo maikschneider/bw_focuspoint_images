@@ -10,7 +10,8 @@
     let initialized = $state(false)
 
     let isDarkMode = $state(false);
-    let viewBox = $state("");
+    let width = $state(0);
+    let height = $state(0);
 
     interact('.draggable')
         .resizable({
@@ -23,16 +24,11 @@
             ],
             listeners: {
                 move(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-
-                    $focuspoints[index].width = event.rect.width / canvasWidth
-                    $focuspoints[index].height = event.rect.height / canvasHeight
-
-                    const x = ($focuspoints[index].x * canvasWidth) + event.deltaRect.left
-                    const y = ($focuspoints[index].y * canvasHeight) + event.deltaRect.top
-
-                    $focuspoints[index].x = (x / canvasWidth)
-                    $focuspoints[index].y = (y / canvasHeight)
+                    const index = parseInt(event.target.getAttribute('data-index'));
+                    $focuspoints[index].__data.x = ($focuspoints[index].__data.x / width * canvasWidth + event.deltaRect.left);
+                    $focuspoints[index].__data.y = ($focuspoints[index].__data.y / height * canvasHeight + event.deltaRect.top);
+                    $focuspoints[index].__data.width = event.rect.width / canvasWidth * width;
+                    $focuspoints[index].__data.height = event.rect.height / canvasHeight * height;
                 },
                 end(event) {
                     const index = parseInt(event.target.getAttribute('data-index'))
@@ -53,13 +49,9 @@
             listeners: {
                 // call this function on every dragmove event
                 move(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-
-                    const x = ($focuspoints[index].x * canvasWidth) + event.dx;
-                    const y = ($focuspoints[index].y * canvasHeight) + event.dy;
-
-                    $focuspoints[index].x = (x / canvasWidth)
-                    $focuspoints[index].y = (y / canvasHeight)
+                    const index = parseInt(event.target.getAttribute('data-index'));
+                    $focuspoints[index].__data.x = $focuspoints[index].__data.x + event.dx / canvasWidth * width;
+                    $focuspoints[index].__data.y = $focuspoints[index].__data.y + event.dy / canvasHeight * height;
                 },
                 end(event) {
                     const index = parseInt(event.target.getAttribute('data-index'))
@@ -77,7 +69,7 @@
             start: setActiveFocuspoint,
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
-                $focuspoints[index].points = $focuspoints[index].points.map(([x, y]) => [x + event.dx, y + event.dy]);
+                $focuspoints[index].__data.points = $focuspoints[index].__data.points.map(([x, y]) => [x + event.dx, y + event.dy]);
             },
             end: setActiveFocuspoint
         }
@@ -88,8 +80,8 @@
             move(event) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
-                const [x, y] = $focuspoints[index].points[pointIndex];
-                $focuspoints[index].points[pointIndex] = [x + event.dx, y + event.dy];
+                const [x, y] = $focuspoints[index].__data.points[pointIndex];
+                $focuspoints[index].__data.points[pointIndex] = [x + event.dx, y + event.dy];
             },
             end: setActiveFocuspoint
         }
@@ -115,8 +107,8 @@
     }
 
     function onload() {
-        viewBox = `0 0 ${img.naturalWidth} ${img.naturalHeight}`;
-        $focuspoints.viewBox = viewBox;
+        width = img.naturalWidth;
+        height = img.naturalHeight;
     }
 
     function onSvgDblClick(event) {
@@ -127,19 +119,19 @@
         const ratio = viewBox.width / rect.width;
         const point = [event.layerX * ratio, event.layerY * ratio];
         const index = findClosestMiddlePointIndex(point);
-        const points = $focuspoints[$activeIndex].points.slice();
+        const points = $focuspoints[$activeIndex].__data.points.slice();
         points.splice(index + 1, 0, point);
-        $focuspoints[$activeIndex].points = points;
+        $focuspoints[$activeIndex]._data.points = points;
     }
 
     function onCircleDblClick(event) {
         const index = parseInt(event.target.getAttribute('data-index'));
         const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
-        $focuspoints[index].points = $focuspoints[index].points.filter((point, i) => i !== pointIndex);
+        $focuspoints[index].__data.points = $focuspoints[index].__data.points.filter((point, i) => i !== pointIndex);
     }
 
     function findClosestMiddlePointIndex(point) {
-        const points = $focuspoints[$activeIndex].points;
+        const points = $focuspoints[$activeIndex].__data.points;
         const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map(segment => {
             const [[x1, y1], [x2, y2]] = segment;
             return [
@@ -179,21 +171,6 @@
         initialized = true
     }
 
-    const getPositionX = $derived((index) => {
-        return $focuspoints[index].x * canvasWidth
-    })
-
-    const getPositionY = $derived((index) => {
-        return $focuspoints[index].y * canvasHeight
-    })
-
-    const getFocuspointWidth = $derived((index) => {
-        return $focuspoints[index].width * canvasWidth
-    })
-
-    const getFocuspointHeight = $derived((index) => {
-        return $focuspoints[index].height * canvasHeight
-    })
 </script>
 
 <style>
@@ -299,16 +276,16 @@
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div class="wrapper">
-        <svg {viewBox} ondblclick={onSvgDblClick}>
-            {#each $focuspoints.filter(point => point.points) as focuspoint, index}
-                {#if focuspoint.points}
+        <svg viewBox="0 0 {width} {height}" ondblclick={onSvgDblClick}>
+            {#each $focuspoints as focuspoint, index}
+                {#if focuspoint.__shape === "polygon"}
                     <g>
                         <polygon
                             onclick={() => activateFocuspoint(index)}
                             class={{ active: focuspoint.active }}
-                            points={focuspoint.points.map(point => point.join(",")).join(" ")}
+                            points={focuspoint.__data.points.map(point => point.join(",")).join(" ")}
                             data-index={index} />
-                        {#each focuspoint.points as [x, y], pointIndex}
+                        {#each focuspoint.__data.points as [x, y], pointIndex}
                             <circle cx={x} cy={y} r="3" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} />
                         {/each}
                     </g>
@@ -316,16 +293,15 @@
             {/each}
         </svg>
         {#each $focuspoints as focuspoint, index}
-            {#if !focuspoint.points}
+            {#if focuspoint.__shape === "rect"}
                 <div
                     onclick={() => activateFocuspoint(index)}
                     class:active={focuspoint.active}
                     class:opacity-0={!initialized}
                     data-index={index}
                     class="draggable style1 resizable"
-                    style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
-                    data-x="{getPositionX(index)}"
-                    data-y="{getPositionY(index)}">
+                    style="left:{focuspoint.__data.x / canvasWidth * 100}%;top:{focuspoint.__data.y / canvasHeight * 100}%;width:{focuspoint.__data.width / width * 100}%;height:{focuspoint.__data.height / height * 100}%;"
+                    >
                     <span class="text-break">{focuspointName(focuspoint, index)}</span>
                     <span class="ui-resizable-handle ui-resizable-nw"></span>
                     <span class="ui-resizable-handle ui-resizable-ne"></span>

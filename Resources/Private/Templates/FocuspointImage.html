@@ -12,14 +12,14 @@
                         <f:if condition="{area.title}">
                             <title>{area.title}</title>
                         </f:if>
-                        <f:if condition="{area.path}">
-                            <f:then>
+                        <f:switch expression="{area.__shape}">
+                            <f:case value="polygon">
                                 <polygon points="{area.path}" fill="black" />
-                            </f:then>
-                            <f:else>
-                                <rect x="{area.x}%" y="{area.y}%" width="{area.width}%" height="{area.height}%" />
-                            </f:else>
-                        </f:if>
+                            </f:case>
+                            <f:case value="rect">
+                                <rect x="{area.__data.x}" y="{area.__data.y}" width="{area.__data.width}" height="{area.__data.height}" />
+                            </f:case>
+                        </f:switch>
                     </a>
                 </f:for>
             </svg>

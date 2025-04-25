@@ -95,13 +95,16 @@ export const createNewFocuspoint = (isRect) => {
     }, {});
 
     if (isRect) {
-      // set default values
-      newFocuspoint.x = 0.333;
-      newFocuspoint.y =  0.333;
-      newFocuspoint.width = parseFloat(config.defaultWidth);
-      newFocuspoint.height = parseFloat(config.defaultHeight);
+      newFocuspoint.__shape = "rect";
+      newFocuspoint.__data = {
+        x: 0.333,
+        y:  0.333,
+        width: parseFloat(config.defaultWidth),
+        height: parseFloat(config.defaultHeight),
+      };
     } else {
-      newFocuspoint.points = [[10, 10], [50, 10], [50, 50], [10, 50]];
+      newFocuspoint.__shape = "polygon";
+      newFocuspoint.__data.points = [[10, 10], [50, 10], [50, 50], [10, 50]];
     }
 
     // add the new focuspoint to the store and activate it
