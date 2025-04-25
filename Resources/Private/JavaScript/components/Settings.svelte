@@ -5,7 +5,7 @@
 
     let {itemFormElName, isSettingsOpenValue = $bindable()} = $props()
     let focuspointArea;
-    let jsonPoints = $state(JSON.stringify($focuspoints));
+    let jsonPoints = $state(JSON.stringify($focuspoints, null, "\t"));
     let hasError = $state(false)
     let hasChange = $state(false)
 

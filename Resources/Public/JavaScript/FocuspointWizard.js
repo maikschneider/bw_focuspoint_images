@@ -4675,28 +4675,29 @@ function onSvgDblClick(event2, $focuspoints, $activeIndex, findClosestMiddlePoin
   const point = [event2.layerX * ratio, event2.layerY * ratio];
   const index2 = findClosestMiddlePointIndex(point);
   const points = $focuspoints()[$activeIndex()].__data.points.slice();
+  points.splice(index2 + 1, 0, point);
   store_mutate(focuspoints, untrack($focuspoints)[$activeIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[288, 28]]);
-var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[281, 20, [[282, 24]]]]);
+var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[280, 28]]);
+var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[273, 20, [[274, 24]]]]);
 var root_5 = add_locations(template(`<div><span class="text-break"> </span> <span class="ui-resizable-handle ui-resizable-nw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-ne svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-sw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-se svelte-1ppkfk4"></span></div>`), Image[FILENAME], [
   [
-    296,
+    288,
     16,
     [
-      [304, 20],
-      [305, 20],
-      [306, 20],
-      [307, 20],
-      [308, 20]
+      [296, 20],
+      [297, 20],
+      [298, 20],
+      [299, 20],
+      [300, 20]
     ]
   ]
 ]);
 var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1ppkfk4"><svg class="svelte-1ppkfk4"></svg> <!> <img alt="Selected" unselectable="on" class="svelte-1ppkfk4"></div></div>`), Image[FILENAME], [
   [
-    276,
+    268,
     0,
-    [[277, 4, [[278, 8], [312, 8]]]]
+    [[269, 4, [[270, 8], [304, 8]]]]
   ]
 ]);
 var $$css = {
@@ -4730,6 +4731,7 @@ function Image($$anchor, $$props) {
       interact.modifiers.restrictEdges({ outer: "parent", endOnly: true })
     ],
     listeners: {
+      start: setActiveFocuspoint,
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
         store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x / get(width) * get(canvasWidth) + event2.deltaRect.left, untrack($focuspoints));
@@ -4737,12 +4739,7 @@ function Image($$anchor, $$props) {
         store_mutate(focuspoints, untrack($focuspoints)[index2].__data.width = event2.rect.width / get(canvasWidth) * get(width), untrack($focuspoints));
         store_mutate(focuspoints, untrack($focuspoints)[index2].__data.height = event2.rect.height / get(canvasHeight) * get(height), untrack($focuspoints));
       },
-      end(event2) {
-        const index2 = parseInt(event2.target.getAttribute("data-index"));
-        if ($focuspoints()[index2].active) {
-          activateFocuspoint(index2);
-        }
-      }
+      end: setActiveFocuspoint
     }
   }).draggable({
     modifiers: [
@@ -4750,17 +4747,13 @@ function Image($$anchor, $$props) {
     ],
     autoScroll: true,
     listeners: {
+      start: setActiveFocuspoint,
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
         store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x + event2.dx / get(canvasWidth) * get(width), untrack($focuspoints));
         store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y + event2.dy / get(canvasHeight) * get(height), untrack($focuspoints));
       },
-      end(event2) {
-        const index2 = parseInt(event2.target.getAttribute("data-index"));
-        if ($focuspoints()[index2].active) {
-          activateFocuspoint(index2);
-        }
-      }
+      end: setActiveFocuspoint
     }
   });
   interact("polygon").draggable({
@@ -5701,7 +5694,7 @@ function Settings($$anchor, $$props) {
   const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   let itemFormElName = prop($$props, "itemFormElName", 7), isSettingsOpenValue = prop($$props, "isSettingsOpenValue", 15);
   let focuspointArea;
-  let jsonPoints = state(proxy(JSON.stringify($focuspoints())));
+  let jsonPoints = state(proxy(JSON.stringify($focuspoints(), null, "	")));
   let hasError = state(false);
   let hasChange = state(false);
   user_effect(() => {
