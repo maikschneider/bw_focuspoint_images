@@ -1,6 +1,6 @@
 <?php
 
-namespace Blueways\BwFocuspointImages\Shape;
+namespace Blueways\BwFocuspointImages\Renderer;
 
 final class ShapeRendererFactory
 {

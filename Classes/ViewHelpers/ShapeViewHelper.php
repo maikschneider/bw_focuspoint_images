@@ -2,7 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\ViewHelpers;
 
-use Blueways\BwFocuspointImages\Shape\ShapeRendererFactory;
+use Blueways\BwFocuspointImages\Renderer\ShapeRendererFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 

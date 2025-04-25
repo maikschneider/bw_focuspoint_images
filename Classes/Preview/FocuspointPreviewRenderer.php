@@ -2,7 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\Preview;
 
-use Blueways\BwFocuspointImages\Shape\ShapeRendererFactory;
+use Blueways\BwFocuspointImages\Renderer\ShapeRendererFactory;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
