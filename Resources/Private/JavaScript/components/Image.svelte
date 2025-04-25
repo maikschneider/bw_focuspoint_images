@@ -120,8 +120,7 @@
         const point = [event.layerX * ratio, event.layerY * ratio];
         const index = findClosestMiddlePointIndex(point);
         const points = $focuspoints[$activeIndex].__data.points.slice();
-        points.splice(index + 1, 0, point);
-        $focuspoints[$activeIndex]._data.points = points;
+        $focuspoints[$activeIndex].__data.points = points;
     }
 
     function onCircleDblClick(event) {

@@ -104,7 +104,9 @@ export const createNewFocuspoint = (isRect) => {
       };
     } else {
       newFocuspoint.__shape = "polygon";
-      newFocuspoint.__data.points = [[10, 10], [50, 10], [50, 50], [10, 50]];
+      newFocuspoint.__data = {
+        points: [[10, 10], [50, 10], [50, 50], [10, 50]]
+      };
     }
 
     // add the new focuspoint to the store and activate it

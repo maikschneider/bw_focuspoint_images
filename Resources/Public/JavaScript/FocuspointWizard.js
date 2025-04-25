@@ -468,7 +468,6 @@ function proxy(value) {
               prop2,
               with_parent(() => state(UNINITIALIZED, stack2))
             );
-            update_version(version);
           }
         } else {
           if (is_proxied_array && typeof prop2 === "string") {
@@ -1109,11 +1108,16 @@ function destroy_block_effect_children(signal) {
 function destroy_effect(effect2, remove_dom = true) {
   var removed = false;
   if ((remove_dom || (effect2.f & HEAD_EFFECT) !== 0) && effect2.nodes_start !== null) {
-    remove_effect_dom(
-      effect2.nodes_start,
-      /** @type {TemplateNode} */
-      effect2.nodes_end
-    );
+    var node = effect2.nodes_start;
+    var end = effect2.nodes_end;
+    while (node !== null) {
+      var next2 = node === end ? null : (
+        /** @type {TemplateNode} */
+        get_next_sibling(node)
+      );
+      node.remove();
+      node = next2;
+    }
     removed = true;
   }
   destroy_effect_children(effect2, remove_dom && !removed);
@@ -1134,16 +1138,6 @@ function destroy_effect(effect2, remove_dom = true) {
     effect2.component_function = null;
   }
   effect2.next = effect2.prev = effect2.teardown = effect2.ctx = effect2.deps = effect2.fn = effect2.nodes_start = effect2.nodes_end = null;
-}
-function remove_effect_dom(node, end) {
-  while (node !== null) {
-    var next2 = node === end ? null : (
-      /** @type {TemplateNode} */
-      get_next_sibling(node)
-    );
-    node.remove();
-    node = next2;
-  }
 }
 function unlink_effect(effect2) {
   var parent = effect2.parent;
@@ -1388,47 +1382,51 @@ function handle_error(error, effect2, previous_effect, component_context2) {
   if (previous_effect !== null) {
     is_throwing_error = true;
   }
-  if (dev_fallback_default && component_context2 !== null && error instanceof Error && !handled_errors.has(error)) {
-    handled_errors.add(error);
-    const component_stack = [];
-    const effect_name = effect2.fn?.name;
-    if (effect_name) {
-      component_stack.push(effect_name);
-    }
-    let current_context = component_context2;
-    while (current_context !== null) {
+  if (!dev_fallback_default || component_context2 === null || !(error instanceof Error) || handled_errors.has(error)) {
+    propagate_error(error, effect2);
+    return;
+  }
+  handled_errors.add(error);
+  const component_stack = [];
+  const effect_name = effect2.fn?.name;
+  if (effect_name) {
+    component_stack.push(effect_name);
+  }
+  let current_context = component_context2;
+  while (current_context !== null) {
+    if (dev_fallback_default) {
       var filename = current_context.function?.[FILENAME];
       if (filename) {
         const file = filename.split("/").pop();
         component_stack.push(file);
       }
-      current_context = current_context.p;
     }
-    const indent = is_firefox ? "  " : "	";
-    define_property(error, "message", {
-      value: error.message + `
+    current_context = current_context.p;
+  }
+  const indent = is_firefox ? "  " : "	";
+  define_property(error, "message", {
+    value: error.message + `
 ${component_stack.map((name) => `
 ${indent}in ${name}`).join("")}
 `
-    });
-    define_property(error, "component_stack", {
-      value: component_stack
-    });
-    const stack2 = error.stack;
-    if (stack2) {
-      const lines = stack2.split("\n");
-      const new_lines = [];
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.includes("svelte/src/internal")) {
-          continue;
-        }
-        new_lines.push(line);
+  });
+  define_property(error, "component_stack", {
+    value: component_stack
+  });
+  const stack2 = error.stack;
+  if (stack2) {
+    const lines = stack2.split("\n");
+    const new_lines = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.includes("svelte/src/internal")) {
+        continue;
       }
-      define_property(error, "stack", {
-        value: new_lines.join("\n")
-      });
+      new_lines.push(line);
     }
+    define_property(error, "stack", {
+      value: new_lines.join("\n")
+    });
   }
   propagate_error(error, effect2);
   if (should_rethrow_error(effect2)) {
@@ -1518,7 +1516,7 @@ function update_reaction(reaction) {
         );
       }
     }
-    if (previous_reaction !== null && previous_reaction !== reaction) {
+    if (previous_reaction !== reaction) {
       read_version++;
       if (untracked_writes !== null) {
         if (previous_untracked_writes === null) {
@@ -3168,88 +3166,78 @@ function check_hash(element2, server_hash, value) {
   }
   hydration_html_changed(sanitize_location(location));
 }
-function html(node, get_value, svg = false, mathml = false, skip_warning = false) {
+function html(node, get_value, svg, mathml, skip_warning) {
   var anchor = node;
   var value = "";
-  template_effect(() => {
-    var effect2 = (
-      /** @type {Effect} */
-      active_effect
-    );
+  var effect2;
+  block(() => {
     if (value === (value = get_value() ?? "")) {
-      if (hydrating) hydrate_next();
+      if (hydrating) {
+        hydrate_next();
+      }
       return;
     }
-    if (effect2.nodes_start !== null) {
-      remove_effect_dom(
-        effect2.nodes_start,
-        /** @type {TemplateNode} */
-        effect2.nodes_end
-      );
-      effect2.nodes_start = effect2.nodes_end = null;
+    if (effect2 !== void 0) {
+      destroy_effect(effect2);
+      effect2 = void 0;
     }
     if (value === "") return;
-    if (hydrating) {
-      var hash2 = (
-        /** @type {Comment} */
-        hydrate_node.data
+    effect2 = branch(() => {
+      if (hydrating) {
+        var hash2 = (
+          /** @type {Comment} */
+          hydrate_node.data
+        );
+        var next2 = hydrate_next();
+        var last = next2;
+        while (next2 !== null && (next2.nodeType !== 8 || /** @type {Comment} */
+        next2.data !== "")) {
+          last = next2;
+          next2 = /** @type {TemplateNode} */
+          get_next_sibling(next2);
+        }
+        if (next2 === null) {
+          hydration_mismatch();
+          throw HYDRATION_ERROR;
+        }
+        if (dev_fallback_default && !skip_warning) {
+          check_hash(
+            /** @type {Element} */
+            next2.parentNode,
+            hash2,
+            value
+          );
+        }
+        assign_nodes(hydrate_node, last);
+        anchor = set_hydrate_node(next2);
+        return;
+      }
+      var html2 = value + "";
+      if (svg) html2 = `<svg>${html2}</svg>`;
+      else if (mathml) html2 = `<math>${html2}</math>`;
+      var node2 = create_fragment_from_html(html2);
+      if (svg || mathml) {
+        node2 = /** @type {Element} */
+        get_first_child(node2);
+      }
+      assign_nodes(
+        /** @type {TemplateNode} */
+        get_first_child(node2),
+        /** @type {TemplateNode} */
+        node2.lastChild
       );
-      var next2 = hydrate_next();
-      var last = next2;
-      while (next2 !== null && (next2.nodeType !== 8 || /** @type {Comment} */
-      next2.data !== "")) {
-        last = next2;
-        next2 = /** @type {TemplateNode} */
-        get_next_sibling(next2);
+      if (svg || mathml) {
+        while (get_first_child(node2)) {
+          anchor.before(
+            /** @type {Node} */
+            get_first_child(node2)
+          );
+        }
+      } else {
+        anchor.before(node2);
       }
-      if (next2 === null) {
-        hydration_mismatch();
-        throw HYDRATION_ERROR;
-      }
-      if (dev_fallback_default && !skip_warning) {
-        check_hash(
-          /** @type {Element} */
-          next2.parentNode,
-          hash2,
-          value
-        );
-      }
-      assign_nodes(hydrate_node, last);
-      anchor = set_hydrate_node(next2);
-      return;
-    }
-    var html2 = value + "";
-    if (svg) html2 = `<svg>${html2}</svg>`;
-    else if (mathml) html2 = `<math>${html2}</math>`;
-    var node2 = create_fragment_from_html(html2);
-    if (svg || mathml) {
-      node2 = /** @type {Element} */
-      get_first_child(node2);
-    }
-    assign_nodes(
-      /** @type {TemplateNode} */
-      get_first_child(node2),
-      /** @type {TemplateNode} */
-      node2.lastChild
-    );
-    if (svg || mathml) {
-      while (get_first_child(node2)) {
-        anchor.before(
-          /** @type {Node} */
-          get_first_child(node2)
-        );
-      }
-    } else {
-      anchor.before(node2);
-    }
+    });
   });
-}
-
-// node_modules/svelte/src/internal/shared/validate.js
-function validate_store(store, name) {
-  if (store != null && typeof store.subscribe !== "function") {
-    store_invalid_shape(name);
-  }
 }
 
 // node_modules/svelte/src/internal/client/dom/blocks/svelte-component.js
@@ -4520,6 +4508,13 @@ function create_custom_element(Component, props_definition, slots, exports, use_
   return Class;
 }
 
+// node_modules/svelte/src/internal/shared/validate.js
+function validate_store(store, name) {
+  if (store != null && typeof store.subscribe !== "function") {
+    store_invalid_shape(name);
+  }
+}
+
 // Resources/Private/JavaScript/components/Image.svelte
 import interact from "interactjs";
 
@@ -4613,12 +4608,14 @@ var createNewFocuspoint = (isRect) => {
     };
   } else {
     newFocuspoint.__shape = "polygon";
-    newFocuspoint.__data.points = [
-      [10, 10],
-      [50, 10],
-      [50, 50],
-      [10, 50]
-    ];
+    newFocuspoint.__data = {
+      points: [
+        [10, 10],
+        [50, 10],
+        [50, 50],
+        [10, 50]
+      ]
+    };
   }
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
   activateFocuspoint(get2(focuspoints).length - 1);
@@ -4678,29 +4675,28 @@ function onSvgDblClick(event2, $focuspoints, $activeIndex, findClosestMiddlePoin
   const point = [event2.layerX * ratio, event2.layerY * ratio];
   const index2 = findClosestMiddlePointIndex(point);
   const points = $focuspoints()[$activeIndex()].__data.points.slice();
-  points.splice(index2 + 1, 0, point);
-  store_mutate(focuspoints, untrack($focuspoints)[$activeIndex()]._data.points = points, untrack($focuspoints));
+  store_mutate(focuspoints, untrack($focuspoints)[$activeIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[289, 28]]);
-var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[282, 20, [[283, 24]]]]);
+var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[288, 28]]);
+var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[281, 20, [[282, 24]]]]);
 var root_5 = add_locations(template(`<div><span class="text-break"> </span> <span class="ui-resizable-handle ui-resizable-nw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-ne svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-sw svelte-1ppkfk4"></span> <span class="ui-resizable-handle ui-resizable-se svelte-1ppkfk4"></span></div>`), Image[FILENAME], [
   [
-    297,
+    296,
     16,
     [
+      [304, 20],
       [305, 20],
       [306, 20],
       [307, 20],
-      [308, 20],
-      [309, 20]
+      [308, 20]
     ]
   ]
 ]);
 var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1ppkfk4"><svg class="svelte-1ppkfk4"></svg> <!> <img alt="Selected" unselectable="on" class="svelte-1ppkfk4"></div></div>`), Image[FILENAME], [
   [
-    277,
+    276,
     0,
-    [[278, 4, [[279, 8], [313, 8]]]]
+    [[277, 4, [[278, 8], [312, 8]]]]
   ]
 ]);
 var $$css = {
@@ -5259,7 +5255,7 @@ function Link($$anchor, $$props) {
   var div_3 = child(div_2);
   var span = child(div_3);
   var node = child(span);
-  html(node, () => get(previewIcon));
+  html(node, () => get(previewIcon), false, false);
   reset(span);
   var input = sibling(span, 2);
   var div_4 = sibling(input, 2);
@@ -5272,12 +5268,12 @@ function Link($$anchor, $$props) {
   var button = sibling(input_2, 2);
   let classes_3;
   var node_1 = child(button);
-  html(node_1, () => $iconStore()["actions-close"]);
+  html(node_1, () => $iconStore()["actions-close"], false, false);
   reset(button);
   reset(div_4);
   var button_1 = sibling(div_4, 2);
   var node_2 = child(button_1);
-  html(node_2, () => $iconStore()["actions-version-workspaces-preview-link"]);
+  html(node_2, () => $iconStore()["actions-version-workspaces-preview-link"], false, false);
   reset(button_1);
   reset(div_3);
   reset(div_2);
@@ -5285,7 +5281,7 @@ function Link($$anchor, $$props) {
   var div_6 = child(div_5);
   var button_2 = child(div_6);
   var node_3 = child(button_2);
-  html(node_3, () => $iconStore()["actions-wizard-link"]);
+  html(node_3, () => $iconStore()["actions-wizard-link"], false, false);
   reset(button_2);
   reset(div_6);
   reset(div_5);
@@ -5392,11 +5388,11 @@ function Checkbox($$anchor, $$props) {
       var span = root_12();
       var span_1 = child(span);
       var node_1 = child(span_1);
-      html(node_1, () => $iconStore()["actions-check"]);
+      html(node_1, () => $iconStore()["actions-check"], false, false);
       reset(span_1);
       var span_2 = sibling(span_1, 2);
       var node_2 = child(span_2);
-      html(node_2, () => $iconStore()["empty-empty"]);
+      html(node_2, () => $iconStore()["empty-empty"], false, false);
       reset(span_2);
       reset(span);
       append($$anchor2, span);
@@ -5520,7 +5516,7 @@ function Sidebar($$anchor, $$props) {
     var div_2 = root_13();
     var div_3 = child(div_2);
     var h4 = child(div_3);
-    set_attribute(h4, "id", `cropper-accordion-heading-${index2}`);
+    set_attribute(h4, "id", `cropper-accordion-heading-${index2 ?? ""}`);
     var button = child(h4);
     let classes_1;
     var span = sibling(child(button), 2);
@@ -5530,9 +5526,9 @@ function Sidebar($$anchor, $$props) {
     reset(h4);
     reset(div_3);
     var div_4 = sibling(div_3, 2);
-    set_attribute(div_4, "id", `cropper-collapse-${index2}`);
+    set_attribute(div_4, "id", `cropper-collapse-${index2 ?? ""}`);
     let classes_2;
-    set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2}`);
+    set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2 ?? ""}`);
     var div_5 = child(div_4);
     var node = child(div_5);
     each(node, 1, () => Object.entries($wizardConfigStore().fields), index, ($$anchor3, $$item) => {
@@ -5568,7 +5564,7 @@ function Sidebar($$anchor, $$props) {
     });
     var button_1 = sibling(node, 2);
     var node_3 = child(button_1);
-    html(node_3, () => $iconStore()["actions-delete"]);
+    html(node_3, () => $iconStore()["actions-delete"], false, false);
     var text_1 = sibling(node_3);
     text_1.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.delete"] ?? ""}`;
     reset(button_1);
@@ -5599,13 +5595,13 @@ function Sidebar($$anchor, $$props) {
   var div_6 = sibling(div_1, 2);
   var button_2 = child(div_6);
   var node_4 = child(button_2);
-  html(node_4, () => $iconStore()["actions-add"]);
+  html(node_4, () => $iconStore()["actions-add"], false, false);
   var text_2 = sibling(node_4);
   text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.addnew"] ?? ""}`;
   reset(button_2);
   var button_3 = sibling(button_2, 2);
   var node_5 = child(button_3);
-  html(node_5, () => $iconStore()["actions-add"]);
+  html(node_5, () => $iconStore()["actions-add"], false, false);
   next();
   reset(button_3);
   reset(div_6);
@@ -5736,7 +5732,7 @@ function Settings($$anchor, $$props) {
   var button = sibling(h3, 2);
   button.__click = [on_click, isSettingsOpenValue];
   var node = child(button);
-  html(node, () => $iconStore()["actions-close"]);
+  html(node, () => $iconStore()["actions-close"], false, false);
   var span = sibling(node, 2);
   span.textContent = window.parent.frames.list_frame.TYPO3.lang["wizard.button.cancel"];
   reset(button);
@@ -5754,14 +5750,14 @@ function Settings($$anchor, $$props) {
   var button_1 = child(div_5);
   button_1.__click = onCopyButtonClick;
   var node_1 = child(button_1);
-  html(node_1, () => $iconStore()["actions-clipboard"]);
+  html(node_1, () => $iconStore()["actions-clipboard"], false, false);
   var text_1 = sibling(node_1);
   text_1.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.copy"] ?? ""}`;
   reset(button_1);
   var button_2 = sibling(button_1, 2);
   button_2.__click = [onPasteButtonClick, jsonPoints];
   var node_2 = child(button_2);
-  html(node_2, () => $iconStore()["actions-clipboard-paste"]);
+  html(node_2, () => $iconStore()["actions-clipboard-paste"], false, false);
   var text_2 = sibling(node_2);
   text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.paste"] ?? ""}`;
   reset(button_2);
@@ -5770,7 +5766,7 @@ function Settings($$anchor, $$props) {
   var button_3 = child(div_6);
   button_3.__click = [onUndoButtonClick, jsonPoints, $focuspoints];
   var node_3 = child(button_3);
-  html(node_3, () => $iconStore()["actions-undo"]);
+  html(node_3, () => $iconStore()["actions-undo"], false, false);
   var text_3 = sibling(node_3);
   text_3.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.undo"] ?? ""}`;
   reset(button_3);
@@ -5782,7 +5778,7 @@ function Settings($$anchor, $$props) {
     itemFormElName
   ];
   var node_4 = child(button_4);
-  html(node_4, () => $iconStore()["actions-check"]);
+  html(node_4, () => $iconStore()["actions-check"], false, false);
   var text_4 = sibling(node_4);
   text_4.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.accept"] ?? ""}`;
   reset(button_4);
