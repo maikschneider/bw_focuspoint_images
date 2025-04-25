@@ -23,6 +23,7 @@
                 }),
             ],
             listeners: {
+                start: setActiveFocuspoint,
                 move(event) {
                     const index = parseInt(event.target.getAttribute('data-index'));
                     $focuspoints[index].__data.x = ($focuspoints[index].__data.x / width * canvasWidth + event.deltaRect.left);
@@ -30,12 +31,7 @@
                     $focuspoints[index].__data.width = event.rect.width / canvasWidth * width;
                     $focuspoints[index].__data.height = event.rect.height / canvasHeight * height;
                 },
-                end(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-                    if ($focuspoints[index].active) {
-                        activateFocuspoint(index)
-                    }
-                }
+                end: setActiveFocuspoint
             }
         })
         .draggable({
@@ -47,18 +43,13 @@
             ],
             autoScroll: true,
             listeners: {
-                // call this function on every dragmove event
+                start: setActiveFocuspoint,
                 move(event) {
                     const index = parseInt(event.target.getAttribute('data-index'));
                     $focuspoints[index].__data.x = $focuspoints[index].__data.x + event.dx / canvasWidth * width;
                     $focuspoints[index].__data.y = $focuspoints[index].__data.y + event.dy / canvasHeight * height;
                 },
-                end(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-                    if ($focuspoints[index].active) {
-                        activateFocuspoint(index)
-                    }
-                }
+                end: setActiveFocuspoint
             }
         })
 
