@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 
 #[AsCommand('focuspoint:schema:repair', 'Repair the sys_file_reference.focus_points column')]
-final class FocuspointSchemaRepair extends Command
+final class FocuspointSchemaRepairCommand extends Command
 {
     private const RECT_PROPS = ['x', 'y', 'width', 'height'];
 
