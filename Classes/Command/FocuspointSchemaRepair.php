@@ -66,7 +66,7 @@ final class FocuspointSchemaRepair extends Command
         $builder = $this->connection->getQueryBuilderForTable('sys_file_reference');
         $builder
             ->update('sys_file_reference')
-            ->set('focus_points', json_encode($imageMetadata))
+            ->set('focus_points', json_encode($imageMetadata['focus_points']))
             ->where(
                 $builder->expr()->eq(
                     'uid_local',
