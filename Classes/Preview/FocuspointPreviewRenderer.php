@@ -2,6 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\Preview;
 
+use Blueways\BwFocuspointImages\Shape\ShapeRendererFactory;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
@@ -12,6 +13,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
+    private readonly ShapeRendererFactory $shapeRendererFactory;
+
+    public function __construct()
+    {
+        $this->shapeRendererFactory = GeneralUtility::makeInstance(ShapeRendererFactory::class);
+    }
+
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
         $content = '';
@@ -87,39 +95,19 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $height = $fileReference->getProperty('height');
         $uid = $fileReference->getUid();
         $viewBox = "0 0 {$width} {$height}";
-        $rects = implode(
+        $shapes = join(
             '',
             array_map(
-                fn (array $point): string => '<rect x="' . ($point['__data']['x']) . '" y="' . ($point['__data']['y']) . '" width="' . ($point['__data']['width']) . '" height="' . ($point['__data']['height']) . '" fill="black" />',
-                array_filter(
-                    $focuspoints,
-                    fn ($point) => $point['__shape'] === 'rect'
-                )
-            )
-        );
-        $polygons = implode(
-            '',
-            array_map(
-                fn (array $point): string => '<polygon points="' . implode(
-                    ' ',
-                    array_map(
-                        fn (array $xy): string => implode(',', $xy),
-                        $point['__data']['points'],
-                    ),
-                ) . '" fill="black" />',
-                array_filter(
-                    $focuspoints,
-                    fn ($point) => $point['__shape'] === 'polygon'
-                )
+                fn (array $focuspoint): string => $this->shapeRendererFactory->getRenderer(@$focuspoint['__shape'] ?? '')?->render($focuspoint['__data']),
+                $focuspoints
             )
         );
 
         return <<<HTML
         <svg viewBox="{$viewBox}">
             <mask id="mask-{$uid}">
-                <rect x="0" y="0" width="{$width}" height="{$height}" fill="white" />
-                {$polygons}
-                {$rects}
+                <rect x="0" y="0" width="{$width}" height="{$height}" style="fill:white" />
+                {$shapes}
             </mask>
             <rect x="0" y="0" width="{$width}" height="{$height}" fill="rgba(0, 0, 0, .7)" mask="url(#mask-{$uid})" />
         </svg>

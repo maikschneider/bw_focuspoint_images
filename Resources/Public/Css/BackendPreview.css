@@ -9,3 +9,7 @@
     top: 0;
     left: 0;
 }
+
+.preview-thumbnails-element-image mask * {
+    fill: black;
+}
