@@ -5,8 +5,11 @@
         wizardConfigStore,
         getIcon,
         iconStore,
-        activateFocuspoint,
-        focusPointName, fieldMeetsCondition
+        setActiveIndex,
+        focusPointName, fieldMeetsCondition,
+
+        getActiveIndex
+
     } from '../store.svelte'
     import {onMount} from "svelte";
     import Select from "./Fields/Select.svelte";
@@ -78,11 +81,11 @@
                 <div class="panel-heading" role="tab">
                     <h4 class="panel-title" id="cropper-accordion-heading-{index}">
                         <button
-                            on:click={() => activateFocuspoint(index)}
+                            on:click={() => setActiveIndex(index)}
                             data-bs-toggle="collapse"
-                            aria-expanded={focuspoint.active}
+                            aria-expanded={index === getActiveIndex()}
                             aria-controls="cropper-collapse-1"
-                            class:collapsed={!focuspoint.active}
+                            class:collapsed={index !== getActiveIndex()}
                             class="panel-button"
                             data-crop-variant-id="default"
                             data-crop-variant="">
@@ -96,8 +99,8 @@
                 <div
                     id="cropper-collapse-{index}"
                     class="panel-collapse"
-                    class:collapse={!focuspoint.active}
-                    class:show={focuspoint.active}
+                    class:collapse={index !== getActiveIndex()}
+                    class:show={index === getActiveIndex()}
                     role="tabpanel"
                     aria-labelledby="cropper-accordion-heading-{index}">
                     <div class="panel-body">

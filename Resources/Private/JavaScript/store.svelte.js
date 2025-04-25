@@ -130,16 +130,6 @@ export const getIcon = async (iconName) => {
     })
 }
 
-export const activateFocuspoint = (index) => {
-    focuspoints.update((store) => {
-        store.forEach((focuspoint, i) => {
-            focuspoint.active = i === index;
-        });
-        return store;
-    });
-    setActiveIndex(index);
-}
-
 export const setActiveIndex = index => {
   activeIndex = index;
 }

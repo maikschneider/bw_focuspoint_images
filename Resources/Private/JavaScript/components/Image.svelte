@@ -1,6 +1,6 @@
 <script>
     import interact from 'interactjs';
-    import {activateFocuspoint, focuspoints, focusPointName, getActiveIndex, setActiveIndex} from "../store.svelte";
+    import {focuspoints, focusPointName, getActiveIndex, setActiveIndex} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     let {image} = $props();
     let canvasHeight = $state(0)
@@ -94,7 +94,7 @@
 
     function setActiveFocuspoint(event) {
         const index = parseInt(event.target.getAttribute('data-index'));
-        activateFocuspoint(index);
+        setActiveIndex(index);
     }
 
     function onload() {
@@ -272,8 +272,8 @@
                 {#if focuspoint.__shape === "polygon"}
                     <g>
                         <polygon
-                            onclick={() => activateFocuspoint(index)}
-                            class={{ active: focuspoint.active }}
+                            onclick={setActiveFocuspoint}
+                            class={{ active: index === getActiveIndex() }}
                             points={focuspoint.__data.points.map(point => point.join(",")).join(" ")}
                             data-index={index} />
                         {#each focuspoint.__data.points as [x, y], pointIndex}
@@ -286,8 +286,8 @@
         {#each $focuspoints as focuspoint, index}
             {#if focuspoint.__shape === "rect"}
                 <div
-                    onclick={() => activateFocuspoint(index)}
-                    class:active={focuspoint.active}
+                    onclick={setActiveFocuspoint}
+                    class:active={index === getActiveIndex()}
                     class:opacity-0={!initialized}
                     data-index={index}
                     class="draggable style1 resizable"

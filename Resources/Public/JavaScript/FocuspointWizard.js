@@ -4633,15 +4633,6 @@ var getIcon = async (iconName) => {
     });
   });
 };
-var activateFocuspoint = (index2) => {
-  focuspoints.update((store) => {
-    store.forEach((focuspoint, i) => {
-      focuspoint.active = i === index2;
-    });
-    return store;
-  });
-  setActiveIndex(index2);
-};
 var setActiveIndex = (index2) => {
   set(activeIndex, index2, true);
 };
@@ -4799,7 +4790,7 @@ function Image($$anchor, $$props) {
   });
   function setActiveFocuspoint(event2) {
     const index2 = parseInt(event2.target.getAttribute("data-index"));
-    activateFocuspoint(index2);
+    setActiveIndex(index2);
   }
   function onload() {
     set(width, img.naturalWidth, true);
@@ -4862,7 +4853,7 @@ function Image($$anchor, $$props) {
       var consequent = ($$anchor3) => {
         var g = root_2();
         var polygon = child(g);
-        polygon.__click = () => activateFocuspoint(index2);
+        polygon.__click = setActiveFocuspoint;
         set_attribute(polygon, "data-index", index2);
         var node_1 = sibling(polygon);
         each(node_1, 17, () => get(focuspoint).__data.points, index, ($$anchor4, $$item, pointIndex) => {
@@ -4882,11 +4873,14 @@ function Image($$anchor, $$props) {
         });
         reset(g);
         template_effect(
-          ($0) => {
-            set_class(polygon, 0, clsx2({ active: get(focuspoint).active }), "svelte-1ppkfk4");
-            set_attribute(polygon, "points", $0);
+          ($0, $1) => {
+            set_class(polygon, 0, $0, "svelte-1ppkfk4");
+            set_attribute(polygon, "points", $1);
           },
           [
+            () => clsx2({
+              active: strict_equals(index2, getActiveIndex())
+            }),
             () => get(focuspoint).__data.points.map((point) => point.join(",")).join(" ")
           ]
         );
@@ -4906,7 +4900,7 @@ function Image($$anchor, $$props) {
     {
       var consequent_1 = ($$anchor3) => {
         var div_2 = root_5();
-        div_2.__click = () => activateFocuspoint(index2);
+        div_2.__click = setActiveFocuspoint;
         set_attribute(div_2, "data-index", index2);
         let classes_1;
         var span = child(div_2);
@@ -4922,7 +4916,7 @@ function Image($$anchor, $$props) {
           },
           [
             () => ({
-              active: get(focuspoint).active,
+              active: strict_equals(index2, getActiveIndex()),
               "opacity-0": !get(initialized)
             }),
             () => get(focuspointName)(get(focuspoint), index2)
@@ -5446,35 +5440,35 @@ create_custom_element(Checkbox, { config: {}, index: {}, name: {} }, [], [], tru
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
 var root_13 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
-    77,
+    80,
     12,
     [
       [
-        78,
+        81,
         16,
         [
           [
-            79,
+            82,
             20,
-            [[80, 24, [[89, 28], [90, 28]]]]
+            [[83, 24, [[92, 28], [93, 28]]]]
           ]
         ]
       ],
       [
-        96,
+        99,
         16,
-        [[103, 20, [[110, 24]]]]
+        [[106, 20, [[113, 24]]]]
       ]
     ]
   ]
 ]);
 var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button> <button class="btn btn-success w-100 "><!> Add rect</button></div></div>`), Sidebar[FILENAME], [
   [
-    74,
+    77,
     0,
     [
-      [75, 4],
-      [120, 4, [[121, 8], [125, 8]]]
+      [78, 4],
+      [123, 4, [[124, 8], [128, 8]]]
     ]
   ]
 ]);
@@ -5569,22 +5563,25 @@ function Sidebar($$anchor, $$props) {
     reset(div_4);
     reset(div_2);
     template_effect(
-      ($0, $1, $2) => {
-        set_attribute(button, "aria-expanded", get(focuspoint).active);
-        classes_1 = set_class(button, 1, "panel-button svelte-1o07nn1", null, classes_1, $0);
-        set_text(text2, $1);
-        classes_2 = set_class(div_4, 1, "panel-collapse", null, classes_2, $2);
+      ($0, $1, $2, $3) => {
+        set_attribute(button, "aria-expanded", $0);
+        classes_1 = set_class(button, 1, "panel-button svelte-1o07nn1", null, classes_1, $1);
+        set_text(text2, $2);
+        classes_2 = set_class(div_4, 1, "panel-collapse", null, classes_2, $3);
       },
       [
-        () => ({ collapsed: !get(focuspoint).active }),
+        () => strict_equals(index2, getActiveIndex()),
+        () => ({
+          collapsed: strict_equals(index2, getActiveIndex(), false)
+        }),
         () => get(focuspointName)(get(focuspoint), index2),
         () => ({
-          collapse: !get(focuspoint).active,
-          show: get(focuspoint).active
+          collapse: strict_equals(index2, getActiveIndex(), false),
+          show: strict_equals(index2, getActiveIndex())
         })
       ]
     );
-    event("click", button, () => activateFocuspoint(index2));
+    event("click", button, () => setActiveIndex(index2));
     event("click", button_1, preventDefault(() => deleteFocuspoint(index2)));
     append($$anchor2, div_2);
   });
