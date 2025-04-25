@@ -59,9 +59,6 @@ class FocuspointProcessor extends FilesProcessor
                     $attributeName = $fieldName . 'Target';
                     $point[$attributeName] = $linkValues['target'];
                 }
-                if ($point['__shape'] === 'polygon') {
-                    $point['path'] = implode(' ', array_map(fn (array $xy): string => implode(',', $xy), $point['__data']['points']));
-                }
             }
 
             $processedData['points'][$key] = [

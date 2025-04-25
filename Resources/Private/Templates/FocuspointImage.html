@@ -1,3 +1,5 @@
+{namespace focuspoint = Blueways\BwFocuspointImages\ViewHelpers}
+
 <f:layout name="Default" />
 
 <f:section name="Main">
@@ -12,14 +14,7 @@
                         <f:if condition="{area.title}">
                             <title>{area.title}</title>
                         </f:if>
-                        <f:switch expression="{area.__shape}">
-                            <f:case value="polygon">
-                                <polygon points="{area.path}" fill="black" />
-                            </f:case>
-                            <f:case value="rect">
-                                <rect x="{area.__data.x}" y="{area.__data.y}" width="{area.__data.width}" height="{area.__data.height}" />
-                            </f:case>
-                        </f:switch>
+                        <focuspoint:shape type="{area.__shape}" data="{area.__data}" />
                     </a>
                 </f:for>
             </svg>
