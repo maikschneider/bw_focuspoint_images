@@ -41,13 +41,16 @@ final class FocuspointSchemaRepairCommand extends Command
         $imagesArray = $this->getImages();
 
         if ($input->getOption('dry-run')) {
-            $output->writeln('The next records with the corresponding value of sys_file_reference.uid_local will be updated: ' . join(
-                ', ',
-                array_map(
-                    fn (array $imageMetadata): int => $imageMetadata['uid_local'],
-                    $imagesArray
-                )
-            ));
+            if ($imagesArray)
+                $output->writeln('The next records with the corresponding value of sys_file_reference.uid_local will be updated: ' . join(
+                    ', ',
+                    array_map(
+                        fn (array $imageMetadata): int => $imageMetadata['uid_local'],
+                        $imagesArray
+                    )
+                ));
+            else
+                $output->writeln('All records are up to date');
             return 0;
         }
 
