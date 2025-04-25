@@ -1,6 +1,6 @@
 <script>
     import interact from 'interactjs';
-    import {activateFocuspoint, focuspoints, focusPointName, activeIndex} from "../store.svelte";
+    import {activateFocuspoint, focuspoints, focusPointName, getActiveIndex, setActiveIndex} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     let {image} = $props();
     let canvasHeight = $state(0)
@@ -103,16 +103,16 @@
     }
 
     function onSvgDblClick(event) {
-        if (!$focuspoints[$activeIndex] || !(event.target instanceof SVGSVGElement))
+        if (!$focuspoints[getActiveIndex()] || !(event.target instanceof SVGSVGElement))
             return;
         const rect = event.target.getBoundingClientRect();
         const viewBox = event.target.viewBox.baseVal;
         const ratio = viewBox.width / rect.width;
         const point = [event.layerX * ratio, event.layerY * ratio];
         const index = findClosestMiddlePointIndex(point);
-        const points = $focuspoints[$activeIndex].__data.points.slice();
+        const points = $focuspoints[getActiveIndex()].__data.points.slice();
         points.splice(index + 1, 0, point);
-        $focuspoints[$activeIndex].__data.points = points;
+        $focuspoints[getActiveIndex()].__data.points = points;
     }
 
     function onCircleDblClick(event) {
@@ -122,7 +122,7 @@
     }
 
     function findClosestMiddlePointIndex(point) {
-        const points = $focuspoints[$activeIndex].__data.points;
+        const points = $focuspoints[getActiveIndex()].__data.points;
         const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map(segment => {
             const [[x1, y1], [x2, y2]] = segment;
             return [

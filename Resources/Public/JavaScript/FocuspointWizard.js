@@ -4522,7 +4522,7 @@ import interact from "interactjs";
 import Icons from "@typo3/backend/icons.js";
 var wizardConfigStore = writable(null);
 var focuspoints = writable([]);
-var activeIndex = writable(0);
+var activeIndex = state(0);
 var initStores = (hiddenInput, wizardConfig) => {
   wizardConfigStore.set(JSON.parse(wizardConfig));
   focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : "[]"));
@@ -4640,7 +4640,13 @@ var activateFocuspoint = (index2) => {
     });
     return store;
   });
-  activeIndex.set(index2);
+  setActiveIndex(index2);
+};
+var setActiveIndex = (index2) => {
+  set(activeIndex, index2, true);
+};
+var getActiveIndex = () => {
+  return get(activeIndex);
 };
 var focusPointName = (index2) => {
   const config = get2(wizardConfigStore);
@@ -4667,16 +4673,16 @@ var focusPointName = (index2) => {
 
 // Resources/Private/JavaScript/components/Image.svelte
 Image[FILENAME] = "Resources/Private/JavaScript/components/Image.svelte";
-function onSvgDblClick(event2, $focuspoints, $activeIndex, findClosestMiddlePointIndex) {
-  if (!$focuspoints()[$activeIndex()] || !(event2.target instanceof SVGSVGElement)) return;
+function onSvgDblClick(event2, $focuspoints, findClosestMiddlePointIndex) {
+  if (!$focuspoints()[getActiveIndex()] || !(event2.target instanceof SVGSVGElement)) return;
   const rect = event2.target.getBoundingClientRect();
   const viewBox = event2.target.viewBox.baseVal;
   const ratio = viewBox.width / rect.width;
   const point = [event2.layerX * ratio, event2.layerY * ratio];
   const index2 = findClosestMiddlePointIndex(point);
-  const points = $focuspoints()[$activeIndex()].__data.points.slice();
+  const points = $focuspoints()[getActiveIndex()].__data.points.slice();
   points.splice(index2 + 1, 0, point);
-  store_mutate(focuspoints, untrack($focuspoints)[$activeIndex()].__data.points = points, untrack($focuspoints));
+  store_mutate(focuspoints, untrack($focuspoints)[getActiveIndex()].__data.points = points, untrack($focuspoints));
 }
 var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-1ppkfk4"></circle>`), Image[FILENAME], [[280, 28]]);
 var root_2 = add_locations(ns_template(`<g><polygon></polygon><!></g>`), Image[FILENAME], [[273, 20, [[274, 24]]]]);
@@ -4710,7 +4716,6 @@ function Image($$anchor, $$props) {
   append_styles($$anchor, $$css);
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  const $activeIndex = () => (validate_store(activeIndex, "activeIndex"), store_get(activeIndex, "$activeIndex", $$stores));
   let image = prop($$props, "image", 7);
   let canvasHeight = state(0);
   let canvasWidth = state(0);
@@ -4806,7 +4811,7 @@ function Image($$anchor, $$props) {
     store_mutate(focuspoints, untrack($focuspoints)[index2].__data.points = $focuspoints()[index2].__data.points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
   }
   function findClosestMiddlePointIndex(point) {
-    const points = $focuspoints()[$activeIndex()].__data.points;
+    const points = $focuspoints()[getActiveIndex()].__data.points;
     const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map((segment) => {
       const [[x1, y1], [x2, y2]] = segment;
       return [x1 + (x2 - x1) / 2, y1 + (y2 - y1) / 2];
@@ -4848,7 +4853,6 @@ function Image($$anchor, $$props) {
   svg.__dblclick = [
     onSvgDblClick,
     $focuspoints,
-    $activeIndex,
     findClosestMiddlePointIndex
   ];
   each(svg, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
