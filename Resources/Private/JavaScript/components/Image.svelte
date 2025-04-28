@@ -65,7 +65,7 @@
             end: setActiveFocuspoint
         }
     });
-    interact("circle").draggable({
+    interact("polygon ~ .shape-handle").draggable({
         listeners: {
             start: setActiveFocuspoint,
             move(event) {
@@ -165,15 +165,6 @@
 </script>
 
 <style>
-    .draggable {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.15s ease;
-        user-select: none;
-    }
-
     img {
         pointer-events: none;
         -moz-user-select: none;
@@ -212,7 +203,7 @@
         height: 100%;
     }
 
-    polygon, rect {
+    .shape {
         stroke-width: 1px;
         fill: rgba(0, 0, 0, .6);
         cursor: move;
@@ -220,12 +211,12 @@
         stroke-dasharray: 2;
     }
 
-    polygon.active, rect.active {
+    .shape.active {
         stroke: #ff8700;
         stroke-dasharray: none;
     }
 
-    circle {
+    .shape-handle {
         cursor: pointer;
         stroke-width: 5px;
         stroke: transparent;
@@ -241,14 +232,18 @@
                     {#if focuspoint.__shape === "polygon"}
                         <polygon
                             onclick={setActiveFocuspoint}
-                            class={{ active: index === getActiveIndex() }}
+                            class={["shape", index === getActiveIndex() && "active"]}
                             points={focuspoint.__data.points.map(point => point.join(",")).join(" ")}
                             data-index={index} />
                         {#each focuspoint.__data.points as [x, y], pointIndex}
-                            <circle cx={x} cy={y} r="3" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} />
+                            <circle cx={x} cy={y} r="3" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} class="shape-handle" />
                         {/each}
                     {:else}
-                        <rect class={["draggable", index === getActiveIndex() && "active"]} x={focuspoint.__data.x} y={focuspoint.__data.y} width={focuspoint.__data.width} height={focuspoint.__data.height} data-index={index} />
+                        <circle cx={focuspoint.__data.x} cy={focuspoint.__data.y} r="3" data-index={index} class="shape-handle" />
+                        <circle cx={focuspoint.__data.x + focuspoint.__data.width} cy={focuspoint.__data.y} r="3" data-index={index} class="shape-handle" />
+                        <circle cx={focuspoint.__data.x + focuspoint.__data.width} cy={focuspoint.__data.y + focuspoint.__data.height} r="3" data-index={index} class="shape-handle" />
+                        <circle cx={focuspoint.__data.x} cy={focuspoint.__data.y + focuspoint.__data.height} r="3" data-index={index} class="shape-handle" />
+                        <rect class={["draggable", "shape", index === getActiveIndex() && "active"]} x={focuspoint.__data.x} y={focuspoint.__data.y} width={focuspoint.__data.width} height={focuspoint.__data.height} data-index={index} />
                     {/if}
                 </g>
             {/each}

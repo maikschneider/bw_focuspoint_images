@@ -4680,20 +4680,26 @@ function onSvgDblClick(event2, $focuspoints, findClosestMiddlePointIndex) {
   points.splice(index2 + 1, 0, point);
   store_mutate(focuspoints, untrack($focuspoints)[getActiveIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_3 = add_locations(ns_template(`<circle r="3" class="svelte-9eqb5k"></circle>`), Image[FILENAME], [[248, 28]]);
-var root_2 = add_locations(ns_template(`<polygon></polygon><!>`, 1), Image[FILENAME], [[242, 24]]);
-var root_4 = add_locations(ns_template(`<rect></rect>`), Image[FILENAME], [[251, 24]]);
-var root_1 = add_locations(ns_template(`<g><!></g>`), Image[FILENAME], [[240, 16]]);
-var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-9eqb5k"><svg class="svelte-9eqb5k"></svg> <img alt="Selected" unselectable="on" class="svelte-9eqb5k"></div></div>`), Image[FILENAME], [
+var root_3 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle>`), Image[FILENAME], [[239, 28]]);
+var root_2 = add_locations(ns_template(`<polygon></polygon><!>`, 1), Image[FILENAME], [[233, 24]]);
+var root_4 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><rect></rect>`, 1), Image[FILENAME], [
+  [242, 24],
+  [243, 24],
+  [244, 24],
+  [245, 24],
+  [246, 24]
+]);
+var root_1 = add_locations(ns_template(`<g><!></g>`), Image[FILENAME], [[231, 16]]);
+var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1lw40df"><svg class="svelte-1lw40df"></svg> <img alt="Selected" unselectable="on" class="svelte-1lw40df"></div></div>`), Image[FILENAME], [
   [
-    236,
+    227,
     0,
-    [[237, 4, [[238, 8], [256, 8]]]]
+    [[228, 4, [[229, 8], [251, 8]]]]
   ]
 ]);
 var $$css = {
-  hash: "svelte-9eqb5k",
-  code: "\n    .draggable.svelte-9eqb5k {\n        position: absolute;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        transition: opacity 0.15s ease;\n        user-select: none;\n    }\n\n    img.svelte-9eqb5k {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: calc(100vh - 200px);\n    }\n\n    .cropper-bg.svelte-9eqb5k {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0;\n    }\n\n    .cropper-bg--dark.svelte-9eqb5k {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n\n    .wrapper.svelte-9eqb5k {\n        position: relative;\n        align-self: center;\n    }\n\n    svg.svelte-9eqb5k {\n        position: absolute;\n        left: 0;\n        top: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    polygon.svelte-9eqb5k, rect.svelte-9eqb5k {\n        stroke-width: 1px;\n        fill: rgba(0, 0, 0, .6);\n        cursor: move;\n        stroke: rgba(255, 255, 255, .8);\n        stroke-dasharray: 2;\n    }\n\n    polygon.active.svelte-9eqb5k, rect.active.svelte-9eqb5k {\n        stroke: #ff8700;\n        stroke-dasharray: none;\n    }\n\n    circle.svelte-9eqb5k {\n        cursor: pointer;\n        stroke-width: 5px;\n        stroke: transparent;\n        fill: #ff8700;\n    }\n"
+  hash: "svelte-1lw40df",
+  code: "\n    img.svelte-1lw40df {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: calc(100vh - 200px);\n    }\n\n    .cropper-bg.svelte-1lw40df {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0;\n    }\n\n    .cropper-bg--dark.svelte-1lw40df {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n\n    .wrapper.svelte-1lw40df {\n        position: relative;\n        align-self: center;\n    }\n\n    svg.svelte-1lw40df {\n        position: absolute;\n        left: 0;\n        top: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    .shape.svelte-1lw40df {\n        stroke-width: 1px;\n        fill: rgba(0, 0, 0, .6);\n        cursor: move;\n        stroke: rgba(255, 255, 255, .8);\n        stroke-dasharray: 2;\n    }\n\n    .shape.active.svelte-1lw40df {\n        stroke: #ff8700;\n        stroke-dasharray: none;\n    }\n\n    .shape-handle.svelte-1lw40df {\n        cursor: pointer;\n        stroke-width: 5px;\n        stroke: transparent;\n        fill: #ff8700;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -4758,7 +4764,7 @@ function Image($$anchor, $$props) {
       end: setActiveFocuspoint
     }
   });
-  interact("circle").draggable({
+  interact("polygon ~ .shape-handle").draggable({
     listeners: {
       start: setActiveFocuspoint,
       move(event2) {
@@ -4867,24 +4873,42 @@ function Image($$anchor, $$props) {
         });
         template_effect(
           ($0, $1) => {
-            set_class(polygon, 0, $0, "svelte-9eqb5k");
+            set_class(polygon, 0, $0, "svelte-1lw40df");
             set_attribute(polygon, "points", $1);
           },
           [
-            () => clsx2({
-              active: strict_equals(index2, getActiveIndex())
-            }),
+            () => clsx2([
+              "shape",
+              strict_equals(index2, getActiveIndex()) && "active"
+            ]),
             () => get(focuspoint).__data.points.map((point) => point.join(",")).join(" ")
           ]
         );
         append($$anchor3, fragment);
       };
       var alternate = ($$anchor3) => {
-        var rect_1 = root_4();
+        var fragment_1 = root_4();
+        var circle_1 = first_child(fragment_1);
+        set_attribute(circle_1, "data-index", index2);
+        var circle_2 = sibling(circle_1);
+        set_attribute(circle_2, "data-index", index2);
+        var circle_3 = sibling(circle_2);
+        set_attribute(circle_3, "data-index", index2);
+        var circle_4 = sibling(circle_3);
+        set_attribute(circle_4, "data-index", index2);
+        var rect_1 = sibling(circle_4);
         set_attribute(rect_1, "data-index", index2);
         template_effect(
           ($0) => {
-            set_class(rect_1, 0, $0, "svelte-9eqb5k");
+            set_attribute(circle_1, "cx", get(focuspoint).__data.x);
+            set_attribute(circle_1, "cy", get(focuspoint).__data.y);
+            set_attribute(circle_2, "cx", get(focuspoint).__data.x + get(focuspoint).__data.width);
+            set_attribute(circle_2, "cy", get(focuspoint).__data.y);
+            set_attribute(circle_3, "cx", get(focuspoint).__data.x + get(focuspoint).__data.width);
+            set_attribute(circle_3, "cy", get(focuspoint).__data.y + get(focuspoint).__data.height);
+            set_attribute(circle_4, "cx", get(focuspoint).__data.x);
+            set_attribute(circle_4, "cy", get(focuspoint).__data.y + get(focuspoint).__data.height);
+            set_class(rect_1, 0, $0, "svelte-1lw40df");
             set_attribute(rect_1, "x", get(focuspoint).__data.x);
             set_attribute(rect_1, "y", get(focuspoint).__data.y);
             set_attribute(rect_1, "width", get(focuspoint).__data.width);
@@ -4893,11 +4917,12 @@ function Image($$anchor, $$props) {
           [
             () => clsx2([
               "draggable",
+              "shape",
               strict_equals(index2, getActiveIndex()) && "active"
             ])
           ]
         );
-        append($$anchor3, rect_1);
+        append($$anchor3, fragment_1);
       };
       if_block(node, ($$render) => {
         if (strict_equals(get(focuspoint).__shape, "polygon")) $$render(consequent);
@@ -4914,7 +4939,7 @@ function Image($$anchor, $$props) {
   reset(div);
   template_effect(
     ($0) => {
-      classes = set_class(div, 1, "cropper-bg svelte-9eqb5k", null, classes, $0);
+      classes = set_class(div, 1, "cropper-bg svelte-1lw40df", null, classes, $0);
       set_attribute(svg, "viewBox", `0 0 ${get(width) ?? ""} ${get(height) ?? ""}`);
       set_attribute(img_1, "src", image());
     },
