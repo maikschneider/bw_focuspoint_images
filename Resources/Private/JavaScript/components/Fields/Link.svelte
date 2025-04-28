@@ -1,21 +1,14 @@
 <script>
-    import {focuspoints, getIcon, wizardConfigStore, iconStore} from '../../store.svelte.js'
+    import {focuspoints, wizardConfigStore} from '../../store.svelte.js'
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
-    import {onMount} from "svelte";
+    import Icon from '../Icon.svelte';
 
     let {config, index, name} = $props()
     let linkBrowserData = $state(null)
     let readOnly = $state(true)
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
-
-    onMount(() => {
-        updateLinkBrowserInfo()
-        getIcon('actions-close')
-        getIcon('actions-wizard-link')
-        getIcon('actions-version-workspaces-preview-link')
-    })
 
     const handleLinkSelection = (event) => {
         $focuspoints[index][name] = event.detail.link
@@ -110,11 +103,11 @@
                             title="Clear input"
                             aria-label="Clear input"
                             class="close text-black">
-                        {@html $iconStore['actions-close']}
+                        <Icon name="actions-close" />
                     </button>
                 </div>
                 <button class="btn btn-default" on:click|preventDefault={() => readOnly = !readOnly}>
-                    {@html $iconStore['actions-version-workspaces-preview-link']}
+                    <Icon name="actions-version-workspaces-preview-link" />
                 </button>
             </div>
         </div>
@@ -122,7 +115,7 @@
             <div class="btn-group">
                 <button
                         on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">
-                    {@html $iconStore['actions-wizard-link']}
+                    <Icon name="actions-wizard-link" />
                 </button>
             </div>
         </div>

@@ -1,5 +1,4 @@
 import {writable, get} from 'svelte/store';
-import Icons from '@typo3/backend/icons.js'
 
 export const wizardConfigStore = writable(null);
 
@@ -112,22 +111,6 @@ export const createNewFocuspoint = (isRect) => {
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
     activeIndex = focuspoints.length - 1;
-}
-
-export const iconStore = writable({});
-
-export const getIcon = async (iconName) => {
-    const store = get(iconStore);
-    if (store[iconName]) {
-        return;
-    }
-
-    Icons.getIcon(iconName, Icons.sizes.small).then((html) => {
-        iconStore.update((store) => {
-            store[iconName] = html;
-            return store
-        });
-    })
 }
 
 export const setActiveIndex = index => {

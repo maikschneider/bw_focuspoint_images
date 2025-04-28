@@ -4524,7 +4524,6 @@ function create_custom_element(Component, props_definition, slots, exports, use_
 import interact from "interactjs";
 
 // Resources/Private/JavaScript/store.svelte.js
-import Icons from "@typo3/backend/icons.js";
 var wizardConfigStore = writable(null);
 var focuspoints = writable([]);
 var activeIndex = state(0);
@@ -4624,19 +4623,6 @@ var createNewFocuspoint = (isRect) => {
   }
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
   set(activeIndex, focuspoints.length - 1);
-};
-var iconStore = writable({});
-var getIcon = async (iconName) => {
-  const store = get2(iconStore);
-  if (store[iconName]) {
-    return;
-  }
-  Icons.getIcon(iconName, Icons.sizes.small).then((html2) => {
-    iconStore.update((store2) => {
-      store2[iconName] = html2;
-      return store2;
-    });
-  });
 };
 var setActiveIndex = (index2) => {
   set(activeIndex, index2, true);
@@ -5146,41 +5132,71 @@ create_custom_element(Textarea, { config: {}, index: {}, name: {} }, [], [], tru
 // Resources/Private/JavaScript/components/Fields/Link.svelte
 import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
 import Modal from "@typo3/backend/modal.js";
+
+// Resources/Private/JavaScript/components/Icon.svelte
+import Icons from "@typo3/backend/icons.js";
+Icon[FILENAME] = "Resources/Private/JavaScript/components/Icon.svelte";
+function Icon($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Icon);
+  const name = prop($$props, "name", 7);
+  let innerHtml = state("");
+  Icons.getIcon(name(), Icons.sizes.small).then((html2) => {
+    set(innerHtml, html2, true);
+  });
+  var fragment = comment();
+  var node = first_child(fragment);
+  html(node, () => get(innerHtml));
+  append($$anchor, fragment);
+  return pop({
+    get name() {
+      return name();
+    },
+    set name($$value) {
+      name($$value);
+      flushSync();
+    },
+    ...legacy_api()
+  });
+}
+create_custom_element(Icon, { name: {} }, [], [], true);
+
+// Resources/Private/JavaScript/components/Fields/Link.svelte
 Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
 var root5 = add_locations(template(`<div><label class="form-label"> </label> <div class="form-wizards-wrap svelte-jil9tm"><div class="form-wizards-element svelte-jil9tm"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text svelte-jil9tm"><!></span> <input class="form-control svelte-jil9tm" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" readonly=""> <input type="text"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input"><!></button></div> <button class="btn btn-default svelte-jil9tm"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default svelte-jil9tm"><!></button></div></div></div></div>`), Link[FILENAME], [
   [
-    82,
+    75,
     0,
     [
-      [83, 4],
+      [76, 4],
       [
-        86,
+        79,
         4,
         [
           [
-            87,
+            80,
             8,
             [
               [
-                88,
+                81,
                 12,
                 [
-                  [89, 16],
-                  [90, 16],
+                  [82, 16],
+                  [83, 16],
                   [
-                    91,
+                    84,
                     16,
-                    [[92, 20], [99, 20], [105, 20]]
+                    [[85, 20], [92, 20], [98, 20]]
                   ],
-                  [116, 16]
+                  [109, 16]
                 ]
               ]
             ]
           ],
           [
-            121,
+            114,
             8,
-            [[122, 12, [[123, 16]]]]
+            [[115, 12, [[116, 16]]]]
           ]
         ]
       ]
@@ -5198,18 +5214,11 @@ function Link($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
-  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   let linkBrowserData = state(null);
   let readOnly = state(true);
   let previewText = user_derived(() => get(linkBrowserData)?.preview?.text ?? "");
   let previewIcon = user_derived(() => get(linkBrowserData)?.preview?.icon ?? "");
-  onMount(() => {
-    updateLinkBrowserInfo();
-    getIcon("actions-close");
-    getIcon("actions-wizard-link");
-    getIcon("actions-version-workspaces-preview-link");
-  });
   const handleLinkSelection = (event2) => {
     store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = event2.detail.link, untrack($focuspoints));
     updateLinkBrowserInfo();
@@ -5261,12 +5270,14 @@ function Link($$anchor, $$props) {
   var button = sibling(input_2, 2);
   let classes_3;
   var node_1 = child(button);
-  html(node_1, () => $iconStore()["actions-close"]);
+  Icon(node_1, { name: "actions-close" });
   reset(button);
   reset(div_4);
   var button_1 = sibling(div_4, 2);
   var node_2 = child(button_1);
-  html(node_2, () => $iconStore()["actions-version-workspaces-preview-link"]);
+  Icon(node_2, {
+    name: "actions-version-workspaces-preview-link"
+  });
   reset(button_1);
   reset(div_3);
   reset(div_2);
@@ -5274,7 +5285,7 @@ function Link($$anchor, $$props) {
   var div_6 = child(div_5);
   var button_2 = child(div_6);
   var node_3 = child(button_2);
-  html(node_3, () => $iconStore()["actions-wizard-link"]);
+  Icon(node_3, { name: "actions-wizard-link" });
   reset(button_2);
   reset(div_6);
   reset(div_5);
@@ -5339,14 +5350,14 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Fields/Checkbox.svelte
 Checkbox[FILENAME] = "Resources/Private/JavaScript/components/Fields/Checkbox.svelte";
-var root_13 = add_locations(template(`<span class="form-check-label-icon"><span class="form-check-label-icon-checked"><!></span> <span class="form-check-label-icon-unchecked"><!></span></span>`), Checkbox[FILENAME], [[30, 16, [[31, 20], [34, 20]]]]);
+var root_13 = add_locations(template(`<span class="form-check-label-icon"><span class="form-check-label-icon-checked"><!></span> <span class="form-check-label-icon-unchecked"><!></span></span>`), Checkbox[FILENAME], [[25, 16, [[26, 20], [29, 20]]]]);
 var root6 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div><input type="checkbox" class="form-check-input me-1"> <label class="form-check-label"><!> </label></div></div>`), Checkbox[FILENAME], [
   [
-    16,
+    11,
     0,
     [
-      [17, 4],
-      [20, 4, [[22, 8], [28, 8]]]
+      [12, 4],
+      [15, 4, [[17, 8], [23, 8]]]
     ]
   ]
 ]);
@@ -5355,14 +5366,9 @@ function Checkbox($$anchor, $$props) {
   push($$props, true, Checkbox);
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
-  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   let isCheckbox = strict_equals(config()?.renderType, "check") || !Object.hasOwn(config(), "renderType");
   let isToggle = strict_equals(config()?.renderType, "checkboxToggle");
-  onMount(() => {
-    getIcon("actions-check");
-    getIcon("empty-empty");
-  });
   var div = root6();
   var label = child(div);
   var text2 = child(label, true);
@@ -5381,11 +5387,11 @@ function Checkbox($$anchor, $$props) {
       var span = root_13();
       var span_1 = child(span);
       var node_1 = child(span_1);
-      html(node_1, () => $iconStore()["actions-check"]);
+      Icon(node_1, { name: "actions-check" });
       reset(span_1);
       var span_2 = sibling(span_1, 2);
       var node_2 = child(span_2);
-      html(node_2, () => $iconStore()["empty-empty"]);
+      Icon(node_2, { name: "empty-empty" });
       reset(span_2);
       reset(span);
       append($$anchor2, span);
@@ -5442,35 +5448,35 @@ create_custom_element(Checkbox, { config: {}, index: {}, name: {} }, [], [], tru
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
 var root_14 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
-    80,
+    70,
     12,
     [
       [
-        81,
+        71,
         16,
         [
           [
-            82,
+            72,
             20,
-            [[83, 24, [[92, 28], [93, 28]]]]
+            [[73, 24, [[82, 28], [83, 28]]]]
           ]
         ]
       ],
       [
-        99,
+        89,
         16,
-        [[106, 20, [[113, 24]]]]
+        [[96, 20, [[103, 24]]]]
       ]
     ]
   ]
 ]);
 var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button> <button class="btn btn-success w-100 "><!> Add rect</button></div></div>`), Sidebar[FILENAME], [
   [
-    77,
+    67,
     0,
     [
-      [78, 4],
-      [123, 4, [[124, 8], [128, 8]]]
+      [68, 4],
+      [113, 4, [[114, 8], [118, 8]]]
     ]
   ]
 ]);
@@ -5485,12 +5491,6 @@ function Sidebar($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
-  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
-  onMount(() => {
-    getIcon("actions-chevron-up");
-    getIcon("actions-delete");
-    getIcon("actions-add");
-  });
   let focuspointName = user_derived(() => (focuspoint, index2) => focusPointName(index2));
   function deleteFocuspoint(index2) {
     store_set(focuspoints, $focuspoints().filter((focuspoint, i) => strict_equals(i, index2, false)));
@@ -5557,7 +5557,7 @@ function Sidebar($$anchor, $$props) {
     });
     var button_1 = sibling(node, 2);
     var node_3 = child(button_1);
-    html(node_3, () => $iconStore()["actions-delete"]);
+    Icon(node_3, { name: "actions-delete" });
     var text_1 = sibling(node_3);
     text_1.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.delete"] ?? ""}`;
     reset(button_1);
@@ -5591,13 +5591,13 @@ function Sidebar($$anchor, $$props) {
   var div_6 = sibling(div_1, 2);
   var button_2 = child(div_6);
   var node_4 = child(button_2);
-  html(node_4, () => $iconStore()["actions-add"]);
+  Icon(node_4, { name: "actions-add" });
   var text_2 = sibling(node_4);
   text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.addnew"] ?? ""}`;
   reset(button_2);
   var button_3 = sibling(button_2, 2);
   var node_5 = child(button_3);
-  html(node_5, () => $iconStore()["actions-add"]);
+  Icon(node_5, { name: "actions-add" });
   next();
   reset(button_3);
   reset(div_6);
@@ -5641,37 +5641,37 @@ function onSaveButtonClick(__2, $focuspoints, jsonPoints, itemFormElName) {
 var on_click = (__3, isSettingsOpenValue) => isSettingsOpenValue(false);
 var root8 = add_locations(template(`<div><fieldset class="form-section svelte-12frn6g"><div class="d-flex justify-content-between"><h3 class="form-section-headline"></h3> <button aria-label="Close settings" class="btn-close svelte-12frn6g"><!> <span class="visually-hidden"></span></button></div> <div class="row"><label for="points">Import / Export</label> <div class="form-group"><textarea id="points" rows="10" cols="50"></textarea> <div class="d-flex justify-content-between"><div><button class="btn btn-default"><!> </button> <button class="btn btn-default"><!> </button></div> <div><button class="btn btn-default"><!> </button> <button class="btn btn-primary"><!> </button></div></div></div></div></fieldset></div>`), Settings[FILENAME], [
   [
-    77,
+    70,
     0,
     [
       [
-        79,
+        72,
         4,
         [
+          [
+            73,
+            8,
+            [
+              [74, 12],
+              [75, 12, [[77, 16]]]
+            ]
+          ],
           [
             80,
             8,
             [
               [81, 12],
-              [82, 12, [[84, 16]]]
-            ]
-          ],
-          [
-            87,
-            8,
-            [
-              [88, 12],
               [
-                89,
+                82,
                 12,
                 [
-                  [90, 20],
+                  [83, 20],
                   [
-                    99,
+                    92,
                     16,
                     [
-                      [100, 20, [[101, 24], [104, 24]]],
-                      [108, 20, [[109, 24], [112, 24]]]
+                      [93, 20, [[94, 24], [97, 24]]],
+                      [101, 20, [[102, 24], [105, 24]]]
                     ]
                   ]
                 ]
@@ -5694,7 +5694,6 @@ function Settings($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const $wizardConfigStore = () => (validate_store(wizardConfigStore, "wizardConfigStore"), store_get(wizardConfigStore, "$wizardConfigStore", $$stores));
-  const $iconStore = () => (validate_store(iconStore, "iconStore"), store_get(iconStore, "$iconStore", $$stores));
   let itemFormElName = prop($$props, "itemFormElName", 7), isSettingsOpenValue = prop($$props, "isSettingsOpenValue", 15);
   let focuspointArea;
   let jsonPoints = state(proxy(JSON.stringify($focuspoints(), null, "	")));
@@ -5709,12 +5708,6 @@ function Settings($$anchor, $$props) {
     }
     set(hasChange, strict_equals(get(jsonPoints), JSON.stringify($focuspoints()), false));
   });
-  onMount(() => {
-    getIcon("actions-clipboard");
-    getIcon("actions-clipboard-paste");
-    getIcon("actions-check");
-    getIcon("actions-undo");
-  });
   function onCopyButtonClick() {
     navigator.clipboard.writeText(focuspointArea.value);
     Notification.success(window.parent.frames.list_frame.TYPO3.lang["wizard.settings.copied"], window.parent.frames.list_frame.TYPO3.lang["wizard.settings.copied.message"], 3);
@@ -5728,7 +5721,7 @@ function Settings($$anchor, $$props) {
   var button = sibling(h3, 2);
   button.__click = [on_click, isSettingsOpenValue];
   var node = child(button);
-  html(node, () => $iconStore()["actions-close"]);
+  Icon(node, { name: "actions-close" });
   var span = sibling(node, 2);
   span.textContent = window.parent.frames.list_frame.TYPO3.lang["wizard.button.cancel"];
   reset(button);
@@ -5746,14 +5739,14 @@ function Settings($$anchor, $$props) {
   var button_1 = child(div_5);
   button_1.__click = onCopyButtonClick;
   var node_1 = child(button_1);
-  html(node_1, () => $iconStore()["actions-clipboard"]);
+  Icon(node_1, { name: "actions-clipboard" });
   var text_1 = sibling(node_1);
   text_1.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.copy"] ?? ""}`;
   reset(button_1);
   var button_2 = sibling(button_1, 2);
   button_2.__click = [onPasteButtonClick, jsonPoints];
   var node_2 = child(button_2);
-  html(node_2, () => $iconStore()["actions-clipboard-paste"]);
+  Icon(node_2, { name: "actions-clipboard-paste" });
   var text_2 = sibling(node_2);
   text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.paste"] ?? ""}`;
   reset(button_2);
@@ -5762,7 +5755,7 @@ function Settings($$anchor, $$props) {
   var button_3 = child(div_6);
   button_3.__click = [onUndoButtonClick, jsonPoints, $focuspoints];
   var node_3 = child(button_3);
-  html(node_3, () => $iconStore()["actions-undo"]);
+  Icon(node_3, { name: "actions-undo" });
   var text_3 = sibling(node_3);
   text_3.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.undo"] ?? ""}`;
   reset(button_3);
@@ -5774,7 +5767,7 @@ function Settings($$anchor, $$props) {
     itemFormElName
   ];
   var node_4 = child(button_4);
-  html(node_4, () => $iconStore()["actions-check"]);
+  Icon(node_4, { name: "actions-check" });
   var text_4 = sibling(node_4);
   text_4.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.button.accept"] ?? ""}`;
   reset(button_4);

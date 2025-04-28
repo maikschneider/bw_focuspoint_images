@@ -1,7 +1,7 @@
 <script>
-    import {focuspoints, getIcon, iconStore, wizardConfigStore} from '../store.svelte';
+    import {focuspoints, wizardConfigStore} from '../store.svelte';
     import Notification from "@typo3/backend/notification.js";
-    import {onMount} from "svelte";
+    import Icon from "./Icon.svelte";
 
     let {itemFormElName, isSettingsOpenValue = $bindable()} = $props()
     let focuspointArea;
@@ -18,13 +18,6 @@
         }
 
         hasChange = jsonPoints !== JSON.stringify($focuspoints)
-    });
-
-    onMount(() => {
-        getIcon('actions-clipboard')
-        getIcon('actions-clipboard-paste')
-        getIcon('actions-check')
-        getIcon('actions-undo')
     });
 
     function onCopyButtonClick() {
@@ -80,7 +73,7 @@
         <div class="d-flex justify-content-between">
             <h3 class="form-section-headline">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.settings']}</h3>
             <button onclick={() => isSettingsOpenValue = false} aria-label="Close settings" class="btn-close">
-                {@html $iconStore['actions-close']}
+                <Icon name="actions-close" />
                 <span class="visually-hidden">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.cancel']}</span>
             </button>
         </div>
@@ -99,18 +92,18 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <button class="btn btn-default" onclick={onCopyButtonClick}>
-                            {@html $iconStore['actions-clipboard']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.copy']}
+                            <Icon name="actions-clipboard" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.copy']}
                         </button>
                         <button class="btn btn-default" onclick={onPasteButtonClick}>
-                            {@html $iconStore['actions-clipboard-paste']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.paste']}
+                            <Icon name="actions-clipboard-paste" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.paste']}
                         </button>
                     </div>
                     <div>
                         <button disabled={!hasChange} class="btn btn-default" onclick={onUndoButtonClick}>
-                            {@html $iconStore['actions-undo']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.undo']}
+                            <Icon name="actions-undo" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.undo']}
                         </button>
                         <button disabled={!hasChange || hasError} class="btn btn-primary" onclick={onSaveButtonClick}>
-                            {@html $iconStore['actions-check']} {window.parent.frames.list_frame.TYPO3.lang['wizard.button.accept']}
+                            <Icon name="actions-check" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.accept']}
                         </button>
                     </div>
                 </div>

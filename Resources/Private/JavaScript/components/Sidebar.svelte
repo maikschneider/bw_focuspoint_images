@@ -3,26 +3,16 @@
         focuspoints,
         createNewFocuspoint,
         wizardConfigStore,
-        getIcon,
-        iconStore,
         setActiveIndex,
         focusPointName, fieldMeetsCondition,
-
         getActiveIndex
-
     } from '../store.svelte'
-    import {onMount} from "svelte";
     import Select from "./Fields/Select.svelte";
     import Text from "./Fields/Text.svelte";
     import Textarea from "./Fields/Textarea.svelte";
     import Link from "./Fields/Link.svelte";
     import Checkbox from "./Fields/Checkbox.svelte";
-
-    onMount(() => {
-        getIcon('actions-chevron-up')
-        getIcon('actions-delete')
-        getIcon('actions-add')
-    })
+    import Icon from './Icon.svelte';
 
     let focuspointName = $derived((focuspoint, index) => focusPointName(index))
 
@@ -111,7 +101,7 @@
                         {/each}
 
                         <button class="btn btn-danger" name="reset" title="Reset" on:click|preventDefault={() => deleteFocuspoint(index)}>
-                            {@html $iconStore['actions-delete']}
+                            <Icon name="actions-delete" />
                             {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.delete']}
                         </button>
                     </div>
@@ -122,11 +112,11 @@
 
     <div class="pt-3">
         <button class="btn btn-success w-100 " on:click|preventDefault={() => createNewFocuspoint(false)}>
-            {@html $iconStore['actions-add']}
+            <Icon name="actions-add" />
             {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.addnew']}
         </button>
         <button class="btn btn-success w-100 " on:click|preventDefault={() => createNewFocuspoint(true)}>
-            {@html $iconStore['actions-add']}
+            <Icon name="actions-add" />
             Add rect
         </button>
     </div>

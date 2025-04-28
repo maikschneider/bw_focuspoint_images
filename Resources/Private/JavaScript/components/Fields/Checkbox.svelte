@@ -1,16 +1,11 @@
 <script>
-    import {onMount} from "svelte";
-    import {focuspoints, getIcon, iconStore} from '../../store.svelte.js'
+    import {focuspoints} from '../../store.svelte.js'
+    import Icon from "../Icon.svelte";
 
     let {config, index, name} = $props()
 
     let isCheckbox = config?.renderType === 'check' || !Object.hasOwn(config, 'renderType')
     let isToggle = config?.renderType === 'checkboxToggle'
-
-    onMount(() => {
-        getIcon('actions-check')
-        getIcon('empty-empty')
-    })
 </script>
 
 <div class="form-group">
@@ -29,10 +24,10 @@
             {#if isCheckbox}
                 <span class="form-check-label-icon">
                     <span class="form-check-label-icon-checked">
-                        {@html $iconStore['actions-check']}
+                        <Icon name="actions-check" />
                     </span>
                     <span class="form-check-label-icon-unchecked">
-                        {@html $iconStore['empty-empty']}
+                        <Icon name="empty-empty" />
                     </span>
                 </span>
             {/if}
