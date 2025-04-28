@@ -174,22 +174,6 @@
         user-select: none;
     }
 
-    .style1 {
-        display: inline-grid;
-        background-color: rgba(0, 0, 0, 0.6);
-        border: 1px dashed rgba(255, 255, 255, 0.8);
-        color: white;
-        padding: 10px;
-        --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);
-    }
-
-
-    .style1.active {
-        border-color: #ff8700;
-        --typo3-state-primary-bg: #ff8700;
-        border-style: solid;
-        background-color: rgba(0, 0, 0, 0.8);
-    }
     img {
         pointer-events: none;
         -moz-user-select: none;
@@ -220,22 +204,6 @@
         align-self: center;
     }
 
-    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-ne {
-        top: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-sw, .ui-resizable-handle.ui-resizable-se {
-        bottom: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-ne, .ui-resizable-handle.ui-resizable-se {
-        right: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-sw {
-        left: -3px;
-    }
-
     svg {
         position: absolute;
         left: 0;
@@ -244,7 +212,7 @@
         height: 100%;
     }
 
-    polygon {
+    polygon, rect {
         stroke-width: 1px;
         fill: rgba(0, 0, 0, .6);
         cursor: move;
@@ -252,7 +220,7 @@
         stroke-dasharray: 2;
     }
 
-    polygon.active {
+    polygon.active, rect.active {
         stroke: #ff8700;
         stroke-dasharray: none;
     }
@@ -269,8 +237,8 @@
     <div class="wrapper">
         <svg viewBox="0 0 {width} {height}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}
-                {#if focuspoint.__shape === "polygon"}
-                    <g>
+                <g>
+                    {#if focuspoint.__shape === "polygon"}
                         <polygon
                             onclick={setActiveFocuspoint}
                             class={{ active: index === getActiveIndex() }}
@@ -279,28 +247,12 @@
                         {#each focuspoint.__data.points as [x, y], pointIndex}
                             <circle cx={x} cy={y} r="3" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} />
                         {/each}
-                    </g>
-                {/if}
+                    {:else}
+                        <rect class={["draggable", index === getActiveIndex() && "active"]} x={focuspoint.__data.x} y={focuspoint.__data.y} width={focuspoint.__data.width} height={focuspoint.__data.height} data-index={index} />
+                    {/if}
+                </g>
             {/each}
         </svg>
-        {#each $focuspoints as focuspoint, index}
-            {#if focuspoint.__shape === "rect"}
-                <div
-                    onclick={setActiveFocuspoint}
-                    class:active={index === getActiveIndex()}
-                    class:opacity-0={!initialized}
-                    data-index={index}
-                    class="draggable style1 resizable"
-                    style="left:{focuspoint.__data.x / canvasWidth * 100}%;top:{focuspoint.__data.y / canvasHeight * 100}%;width:{focuspoint.__data.width / width * 100}%;height:{focuspoint.__data.height / height * 100}%;"
-                    >
-                    <span class="text-break">{focuspointName(focuspoint, index)}</span>
-                    <span class="ui-resizable-handle ui-resizable-nw"></span>
-                    <span class="ui-resizable-handle ui-resizable-ne"></span>
-                    <span class="ui-resizable-handle ui-resizable-sw"></span>
-                    <span class="ui-resizable-handle ui-resizable-se"></span>
-                </div>
-            {/if}
-        {/each}
         <img bind:this={img} src={image} alt="Selected" unselectable="on" {onload} />
     </div>
 </div>
