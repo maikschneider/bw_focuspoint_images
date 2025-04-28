@@ -97,8 +97,8 @@ export const createNewFocuspoint = (isRect) => {
     if (isRect) {
       newFocuspoint.__shape = "rect";
       newFocuspoint.__data = {
-        x: 0.333,
-        y:  0.333,
+        x: 0,
+        y:  0,
         width: parseFloat(config.defaultWidth),
         height: parseFloat(config.defaultHeight),
       };
@@ -111,7 +111,7 @@ export const createNewFocuspoint = (isRect) => {
 
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
-    activateFocuspoint(get(focuspoints).length - 1);
+    activeIndex = focuspoints.length - 1;
 }
 
 export const iconStore = writable({});

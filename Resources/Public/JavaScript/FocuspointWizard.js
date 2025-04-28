@@ -4606,8 +4606,8 @@ var createNewFocuspoint = (isRect) => {
   if (isRect) {
     newFocuspoint.__shape = "rect";
     newFocuspoint.__data = {
-      x: 0.333,
-      y: 0.333,
+      x: 0,
+      y: 0,
       width: parseFloat(config.defaultWidth),
       height: parseFloat(config.defaultHeight)
     };
@@ -4623,7 +4623,7 @@ var createNewFocuspoint = (isRect) => {
     };
   }
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
-  activateFocuspoint(get2(focuspoints).length - 1);
+  set(activeIndex, focuspoints.length - 1);
 };
 var iconStore = writable({});
 var getIcon = async (iconName) => {
@@ -4680,21 +4680,21 @@ function onSvgDblClick(event2, $focuspoints, findClosestMiddlePointIndex) {
   points.splice(index2 + 1, 0, point);
   store_mutate(focuspoints, untrack($focuspoints)[getActiveIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_3 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle>`), Image[FILENAME], [[239, 28]]);
-var root_2 = add_locations(ns_template(`<polygon></polygon><!>`, 1), Image[FILENAME], [[233, 24]]);
+var root_3 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle>`), Image[FILENAME], [[238, 28]]);
+var root_2 = add_locations(ns_template(`<polygon></polygon><!>`, 1), Image[FILENAME], [[232, 24]]);
 var root_4 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><rect></rect>`, 1), Image[FILENAME], [
+  [241, 24],
   [242, 24],
   [243, 24],
   [244, 24],
-  [245, 24],
-  [246, 24]
+  [245, 24]
 ]);
-var root_1 = add_locations(ns_template(`<g><!></g>`), Image[FILENAME], [[231, 16]]);
+var root_1 = add_locations(ns_template(`<g><!></g>`), Image[FILENAME], [[230, 16]]);
 var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1lw40df"><svg class="svelte-1lw40df"></svg> <img alt="Selected" unselectable="on" class="svelte-1lw40df"></div></div>`), Image[FILENAME], [
   [
-    227,
+    226,
     0,
-    [[228, 4, [[229, 8], [251, 8]]]]
+    [[227, 4, [[228, 8], [250, 8]]]]
   ]
 ]);
 var $$css = {
@@ -4710,7 +4710,6 @@ function Image($$anchor, $$props) {
   let image = prop($$props, "image", 7);
   let canvasHeight = state(0);
   let canvasWidth = state(0);
-  let focuspointName = user_derived(() => (focuspoint, index2) => focusPointName(index2));
   let img;
   let initialized = state(false);
   let isDarkMode = state(false);
