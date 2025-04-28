@@ -1,11 +1,10 @@
 <script>
     import interact from 'interactjs';
-    import {focuspoints, focusPointName, getActiveIndex, setActiveIndex} from "../store.svelte";
+    import {focuspoints, getActiveIndex, setActiveIndex} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     let {image} = $props();
     let canvasHeight = $state(0)
     let canvasWidth = $state(0)
-    let focuspointName = $derived((focuspoint, index) => focusPointName(index))
     let img;
     let initialized = $state(false)
 
