@@ -2,3 +2,23 @@
     margin-right: auto;
     margin-inline-end: auto !important;
 }
+
+.shape {
+    stroke-width: 1px;
+    fill: rgba(0, 0, 0, .6);
+    cursor: move;
+    stroke: rgba(255, 255, 255, .8);
+    stroke-dasharray: 2;
+}
+
+.shape.active {
+    stroke: #ff8700;
+    stroke-dasharray: none;
+}
+
+.shape-handle {
+    cursor: pointer;
+    stroke-width: 5px;
+    stroke: transparent;
+    fill: #ff8700;
+}

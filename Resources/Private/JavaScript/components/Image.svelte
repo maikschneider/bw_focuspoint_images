@@ -2,6 +2,8 @@
     import interact from 'interactjs';
     import {focuspoints, getActiveIndex, setActiveIndex} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
+    import Rect from '../shapes/Rect.svelte';
+    import Polygon from '../shapes/Polygon.svelte';
     let {image} = $props();
     let canvasHeight = $state(0)
     let canvasWidth = $state(0)
@@ -12,7 +14,7 @@
     let width = $state(0);
     let height = $state(0);
 
-    interact('.draggable')
+    interact(".draggable")
         .resizable({
             edges: {left: true, right: true, bottom: true, top: true},
             modifiers: [
@@ -50,7 +52,7 @@
                 },
                 end: setActiveFocuspoint
             }
-        })
+        });
 
     interact('polygon').draggable({
         autoScroll: true,
@@ -112,12 +114,6 @@
         const points = $focuspoints[getActiveIndex()].__data.points.slice();
         points.splice(index + 1, 0, point);
         $focuspoints[getActiveIndex()].__data.points = points;
-    }
-
-    function onCircleDblClick(event) {
-        const index = parseInt(event.target.getAttribute('data-index'));
-        const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
-        $focuspoints[index].__data.points = $focuspoints[index].__data.points.filter((point, i) => i !== pointIndex);
     }
 
     function findClosestMiddlePointIndex(point) {
@@ -201,48 +197,17 @@
         width: 100%;
         height: 100%;
     }
-
-    .shape {
-        stroke-width: 1px;
-        fill: rgba(0, 0, 0, .6);
-        cursor: move;
-        stroke: rgba(255, 255, 255, .8);
-        stroke-dasharray: 2;
-    }
-
-    .shape.active {
-        stroke: #ff8700;
-        stroke-dasharray: none;
-    }
-
-    .shape-handle {
-        cursor: pointer;
-        stroke-width: 5px;
-        stroke: transparent;
-        fill: #ff8700;
-    }
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div class="wrapper">
         <svg viewBox="0 0 {width} {height}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}
-                <g>
+                <g class="shape-group">
                     {#if focuspoint.__shape === "polygon"}
-                        <polygon
-                            onclick={setActiveFocuspoint}
-                            class={["shape", index === getActiveIndex() && "active"]}
-                            points={focuspoint.__data.points.map(point => point.join(",")).join(" ")}
-                            data-index={index} />
-                        {#each focuspoint.__data.points as [x, y], pointIndex}
-                            <circle cx={x} cy={y} r="3" data-index={index} data-point-index={pointIndex} ondblclick={onCircleDblClick} class="shape-handle" />
-                        {/each}
+                        <Polygon index={index} />
                     {:else}
-                        <circle cx={focuspoint.__data.x} cy={focuspoint.__data.y} r="3" data-index={index} class="shape-handle" />
-                        <circle cx={focuspoint.__data.x + focuspoint.__data.width} cy={focuspoint.__data.y} r="3" data-index={index} class="shape-handle" />
-                        <circle cx={focuspoint.__data.x + focuspoint.__data.width} cy={focuspoint.__data.y + focuspoint.__data.height} r="3" data-index={index} class="shape-handle" />
-                        <circle cx={focuspoint.__data.x} cy={focuspoint.__data.y + focuspoint.__data.height} r="3" data-index={index} class="shape-handle" />
-                        <rect class={["draggable", "shape", index === getActiveIndex() && "active"]} x={focuspoint.__data.x} y={focuspoint.__data.y} width={focuspoint.__data.width} height={focuspoint.__data.height} data-index={index} />
+                        <Rect index={index} />
                     {/if}
                 </g>
             {/each}

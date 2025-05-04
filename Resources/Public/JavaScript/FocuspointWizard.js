@@ -1422,7 +1422,7 @@ ${indent}in ${name}`).join("")}
     throw error;
   }
 }
-function schedule_possible_effect_self_invalidation(signal, effect2, root10 = true) {
+function schedule_possible_effect_self_invalidation(signal, effect2, root12 = true) {
   var reactions = signal.reactions;
   if (reactions === null) return;
   for (var i = 0; i < reactions.length; i++) {
@@ -1436,7 +1436,7 @@ function schedule_possible_effect_self_invalidation(signal, effect2, root10 = tr
         false
       );
     } else if (effect2 === reaction) {
-      if (root10) {
+      if (root12) {
         set_signal_status(reaction, DIRTY);
       } else if ((reaction.f & CLEAN) !== 0) {
         set_signal_status(reaction, MAYBE_DIRTY);
@@ -1719,9 +1719,9 @@ function schedule_effect(signal) {
   }
   queued_root_effects.push(effect2);
 }
-function process_effects(root10) {
+function process_effects(root12) {
   var effects = [];
-  var effect2 = root10;
+  var effect2 = root12;
   while (effect2 !== null) {
     var flags = effect2.f;
     var is_branch = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) !== 0;
@@ -2447,21 +2447,21 @@ function ns_template(content, flags, ns = "svg") {
         /** @type {DocumentFragment} */
         create_fragment_from_html(wrapped)
       );
-      var root10 = (
+      var root12 = (
         /** @type {Element} */
         get_first_child(fragment)
       );
       if (is_fragment) {
         node = document.createDocumentFragment();
-        while (get_first_child(root10)) {
+        while (get_first_child(root12)) {
           node.appendChild(
             /** @type {Node} */
-            get_first_child(root10)
+            get_first_child(root12)
           );
         }
       } else {
         node = /** @type {Element} */
-        get_first_child(root10);
+        get_first_child(root12);
       }
     }
     var clone = (
@@ -3255,16 +3255,16 @@ function component(node, get_component, render_fn) {
 // node_modules/svelte/src/internal/client/dom/css.js
 function append_styles(anchor, css) {
   queue_micro_task(() => {
-    var root10 = anchor.getRootNode();
+    var root12 = anchor.getRootNode();
     var target = (
       /** @type {ShadowRoot} */
-      root10.host ? (
+      root12.host ? (
         /** @type {ShadowRoot} */
-        root10
+        root12
       ) : (
         /** @type {Document} */
-        root10.head ?? /** @type {Document} */
-        root10.ownerDocument.head
+        root12.head ?? /** @type {Document} */
+        root12.ownerDocument.head
       )
     );
     if (!target.querySelector("#" + css.hash)) {
@@ -4507,9 +4507,136 @@ function validate_store(store, name) {
 // Resources/Private/JavaScript/components/Image.svelte
 import interact from "interactjs";
 
+// Resources/Private/JavaScript/shapes/Polygon.svelte
+Polygon[FILENAME] = "Resources/Private/JavaScript/shapes/Polygon.svelte";
+var root_1 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle>`), Polygon[FILENAME], [[18, 4]]);
+var root = add_locations(ns_template(`<polygon></polygon><!>`, 1), Polygon[FILENAME], [[13, 0]]);
+function Polygon($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Polygon);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  const index2 = prop($$props, "index", 7);
+  function onCircleDblClick(event2) {
+    const index3 = parseInt(event2.target.getAttribute("data-index"));
+    const pointIndex = parseInt(event2.target.getAttribute("data-point-index"));
+    store_mutate(focuspoints, untrack($focuspoints)[index3].__data.points = $focuspoints()[index3].__data.points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
+  }
+  var fragment = root();
+  var polygon = first_child(fragment);
+  var node = sibling(polygon);
+  each(node, 1, () => $focuspoints()[index2()].__data.points, index, ($$anchor2, $$item, pointIndex) => {
+    let x = () => get($$item)[0];
+    x();
+    let y = () => get($$item)[1];
+    y();
+    var circle = root_1();
+    set_attribute(circle, "data-point-index", pointIndex);
+    circle.__dblclick = onCircleDblClick;
+    template_effect(() => {
+      set_attribute(circle, "cx", x());
+      set_attribute(circle, "cy", y());
+      set_attribute(circle, "data-index", index2());
+    });
+    append($$anchor2, circle);
+  });
+  template_effect(
+    ($0, $1) => {
+      set_class(polygon, 0, $0);
+      set_attribute(polygon, "points", $1);
+      set_attribute(polygon, "data-index", index2());
+    },
+    [
+      () => clsx2([
+        "shape",
+        strict_equals(index2(), getActiveIndex()) && "active"
+      ]),
+      () => $focuspoints()[index2()].__data.points.map((point) => point.join(",")).join(" ")
+    ]
+  );
+  append($$anchor, fragment);
+  var $$pop = pop({
+    get index() {
+      return index2();
+    },
+    set index($$value) {
+      index2($$value);
+      flushSync();
+    },
+    ...legacy_api()
+  });
+  $$cleanup();
+  return $$pop;
+}
+delegate(["dblclick"]);
+create_custom_element(Polygon, { index: {} }, [], [], true);
+
+// Resources/Private/JavaScript/shapes/Rect.svelte
+Rect[FILENAME] = "Resources/Private/JavaScript/shapes/Rect.svelte";
+var root2 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><rect></rect>`, 1), Rect[FILENAME], [
+  [7, 0],
+  [8, 0],
+  [9, 0],
+  [10, 0],
+  [11, 0]
+]);
+function Rect($$anchor, $$props) {
+  check_target(new.target);
+  push($$props, true, Rect);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
+  const index2 = prop($$props, "index", 7);
+  var fragment = root2();
+  var circle = first_child(fragment);
+  var circle_1 = sibling(circle);
+  var circle_2 = sibling(circle_1);
+  var circle_3 = sibling(circle_2);
+  var rect = sibling(circle_3);
+  template_effect(
+    ($0) => {
+      set_attribute(circle, "cx", $focuspoints()[index2()].__data.x);
+      set_attribute(circle, "cy", $focuspoints()[index2()].__data.y);
+      set_attribute(circle_1, "cx", $focuspoints()[index2()].__data.x + $focuspoints()[index2()].__data.width);
+      set_attribute(circle_1, "cy", $focuspoints()[index2()].__data.y);
+      set_attribute(circle_2, "cx", $focuspoints()[index2()].__data.x + $focuspoints()[index2()].__data.width);
+      set_attribute(circle_2, "cy", $focuspoints()[index2()].__data.y + $focuspoints()[index2()].__data.height);
+      set_attribute(circle_3, "cx", $focuspoints()[index2()].__data.x);
+      set_attribute(circle_3, "cy", $focuspoints()[index2()].__data.y + $focuspoints()[index2()].__data.height);
+      set_class(rect, 0, $0);
+      set_attribute(rect, "x", $focuspoints()[index2()].__data.x);
+      set_attribute(rect, "y", $focuspoints()[index2()].__data.y);
+      set_attribute(rect, "width", $focuspoints()[index2()].__data.width);
+      set_attribute(rect, "height", $focuspoints()[index2()].__data.height);
+      set_attribute(rect, "data-index", index2());
+    },
+    [
+      () => clsx2([
+        "draggable",
+        "shape",
+        strict_equals(index2(), getActiveIndex()) && "active"
+      ])
+    ]
+  );
+  append($$anchor, fragment);
+  var $$pop = pop({
+    get index() {
+      return index2();
+    },
+    set index($$value) {
+      index2($$value);
+      flushSync();
+    },
+    ...legacy_api()
+  });
+  $$cleanup();
+  return $$pop;
+}
+create_custom_element(Rect, { index: {} }, [], [], true);
+
 // Resources/Private/JavaScript/store.svelte.js
 var SHAPES = {
   rect: {
+    component: Rect,
     constructor(config) {
       return {
         x: 0,
@@ -4520,6 +4647,7 @@ var SHAPES = {
     }
   },
   polygon: {
+    component: Polygon,
     constructor() {
       return {
         points: [
@@ -4657,26 +4785,17 @@ function onSvgDblClick(event2, $focuspoints, findClosestMiddlePointIndex) {
   points.splice(index2 + 1, 0, point);
   store_mutate(focuspoints, untrack($focuspoints)[getActiveIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_3 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle>`), Image[FILENAME], [[238, 28]]);
-var root_2 = add_locations(ns_template(`<polygon></polygon><!>`, 1), Image[FILENAME], [[232, 24]]);
-var root_4 = add_locations(ns_template(`<circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><circle r="3" class="shape-handle svelte-1lw40df"></circle><rect></rect>`, 1), Image[FILENAME], [
-  [241, 24],
-  [242, 24],
-  [243, 24],
-  [244, 24],
-  [245, 24]
-]);
-var root_1 = add_locations(ns_template(`<g><!></g>`), Image[FILENAME], [[230, 16]]);
-var root = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-1lw40df"><svg class="svelte-1lw40df"></svg> <img alt="Selected" unselectable="on" class="svelte-1lw40df"></div></div>`), Image[FILENAME], [
+var root_12 = add_locations(ns_template(`<g class="shape-group"><!></g>`), Image[FILENAME], [[206, 16]]);
+var root3 = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-ukptgm"><svg class="svelte-ukptgm"></svg> <img alt="Selected" unselectable="on" class="svelte-ukptgm"></div></div>`), Image[FILENAME], [
   [
-    226,
+    202,
     0,
-    [[227, 4, [[228, 8], [250, 8]]]]
+    [[203, 4, [[204, 8], [215, 8]]]]
   ]
 ]);
 var $$css = {
-  hash: "svelte-1lw40df",
-  code: "\n    img.svelte-1lw40df {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: calc(100vh - 200px);\n    }\n\n    .cropper-bg.svelte-1lw40df {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0;\n    }\n\n    .cropper-bg--dark.svelte-1lw40df {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n\n    .wrapper.svelte-1lw40df {\n        position: relative;\n        align-self: center;\n    }\n\n    svg.svelte-1lw40df {\n        position: absolute;\n        left: 0;\n        top: 0;\n        width: 100%;\n        height: 100%;\n    }\n\n    .shape.svelte-1lw40df {\n        stroke-width: 1px;\n        fill: rgba(0, 0, 0, .6);\n        cursor: move;\n        stroke: rgba(255, 255, 255, .8);\n        stroke-dasharray: 2;\n    }\n\n    .shape.active.svelte-1lw40df {\n        stroke: #ff8700;\n        stroke-dasharray: none;\n    }\n\n    .shape-handle.svelte-1lw40df {\n        cursor: pointer;\n        stroke-width: 5px;\n        stroke: transparent;\n        fill: #ff8700;\n    }\n"
+  hash: "svelte-ukptgm",
+  code: "\n    img.svelte-ukptgm {\n        pointer-events: none;\n        -moz-user-select: none;\n        -webkit-user-select: none;\n        user-select: none;\n        max-width: 100%;\n        max-height: calc(100vh - 200px);\n    }\n\n    .cropper-bg.svelte-ukptgm {\n        padding: 20px;\n        display: flex;\n        justify-content: center;\n\n        --chess-color: rgba(0, 0, 0, 0.1);\n        opacity: 0.8;\n        background-image: linear-gradient(45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(-45deg, var(--chess-color) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--chess-color) 75%), linear-gradient(-45deg, transparent 75%, var(--chess-color) 75%);\n        background-size: 20px 20px;\n        background-position: 0 0, 0 10px, 10px -10px, -10px 0;\n    }\n\n    .cropper-bg--dark.svelte-ukptgm {\n        --chess-color: rgba(255, 255, 255, 0.1);\n    }\n\n    .wrapper.svelte-ukptgm {\n        position: relative;\n        align-self: center;\n    }\n\n    svg.svelte-ukptgm {\n        position: absolute;\n        left: 0;\n        top: 0;\n        width: 100%;\n        height: 100%;\n    }\n"
 };
 function Image($$anchor, $$props) {
   check_target(new.target);
@@ -4772,11 +4891,6 @@ function Image($$anchor, $$props) {
     set(width, img.naturalWidth, true);
     set(height, img.naturalHeight, true);
   }
-  function onCircleDblClick(event2) {
-    const index2 = parseInt(event2.target.getAttribute("data-index"));
-    const pointIndex = parseInt(event2.target.getAttribute("data-point-index"));
-    store_mutate(focuspoints, untrack($focuspoints)[index2].__data.points = $focuspoints()[index2].__data.points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
-  }
   function findClosestMiddlePointIndex(point) {
     const points = $focuspoints()[getActiveIndex()].__data.points;
     const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map((segment) => {
@@ -4813,7 +4927,7 @@ function Image($$anchor, $$props) {
     set(canvasWidth, img.parentElement.getBoundingClientRect().width, true);
     set(initialized, true);
   }
-  var div = root();
+  var div = root3();
   let classes;
   var div_1 = child(div);
   var svg = child(div_1);
@@ -4823,82 +4937,14 @@ function Image($$anchor, $$props) {
     findClosestMiddlePointIndex
   ];
   each(svg, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
-    var g = root_1();
+    var g = root_12();
     var node = child(g);
     {
       var consequent = ($$anchor3) => {
-        var fragment = root_2();
-        var polygon = first_child(fragment);
-        polygon.__click = setActiveFocuspoint;
-        set_attribute(polygon, "data-index", index2);
-        var node_1 = sibling(polygon);
-        each(node_1, 17, () => get(focuspoint).__data.points, index, ($$anchor4, $$item, pointIndex) => {
-          let x = () => get($$item)[0];
-          x();
-          let y = () => get($$item)[1];
-          y();
-          var circle = root_3();
-          set_attribute(circle, "data-index", index2);
-          set_attribute(circle, "data-point-index", pointIndex);
-          circle.__dblclick = onCircleDblClick;
-          template_effect(() => {
-            set_attribute(circle, "cx", x());
-            set_attribute(circle, "cy", y());
-          });
-          append($$anchor4, circle);
-        });
-        template_effect(
-          ($0, $1) => {
-            set_class(polygon, 0, $0, "svelte-1lw40df");
-            set_attribute(polygon, "points", $1);
-          },
-          [
-            () => clsx2([
-              "shape",
-              strict_equals(index2, getActiveIndex()) && "active"
-            ]),
-            () => get(focuspoint).__data.points.map((point) => point.join(",")).join(" ")
-          ]
-        );
-        append($$anchor3, fragment);
+        Polygon($$anchor3, { index: index2 });
       };
       var alternate = ($$anchor3) => {
-        var fragment_1 = root_4();
-        var circle_1 = first_child(fragment_1);
-        set_attribute(circle_1, "data-index", index2);
-        var circle_2 = sibling(circle_1);
-        set_attribute(circle_2, "data-index", index2);
-        var circle_3 = sibling(circle_2);
-        set_attribute(circle_3, "data-index", index2);
-        var circle_4 = sibling(circle_3);
-        set_attribute(circle_4, "data-index", index2);
-        var rect_1 = sibling(circle_4);
-        set_attribute(rect_1, "data-index", index2);
-        template_effect(
-          ($0) => {
-            set_attribute(circle_1, "cx", get(focuspoint).__data.x);
-            set_attribute(circle_1, "cy", get(focuspoint).__data.y);
-            set_attribute(circle_2, "cx", get(focuspoint).__data.x + get(focuspoint).__data.width);
-            set_attribute(circle_2, "cy", get(focuspoint).__data.y);
-            set_attribute(circle_3, "cx", get(focuspoint).__data.x + get(focuspoint).__data.width);
-            set_attribute(circle_3, "cy", get(focuspoint).__data.y + get(focuspoint).__data.height);
-            set_attribute(circle_4, "cx", get(focuspoint).__data.x);
-            set_attribute(circle_4, "cy", get(focuspoint).__data.y + get(focuspoint).__data.height);
-            set_class(rect_1, 0, $0, "svelte-1lw40df");
-            set_attribute(rect_1, "x", get(focuspoint).__data.x);
-            set_attribute(rect_1, "y", get(focuspoint).__data.y);
-            set_attribute(rect_1, "width", get(focuspoint).__data.width);
-            set_attribute(rect_1, "height", get(focuspoint).__data.height);
-          },
-          [
-            () => clsx2([
-              "draggable",
-              "shape",
-              strict_equals(index2, getActiveIndex()) && "active"
-            ])
-          ]
-        );
-        append($$anchor3, fragment_1);
+        Rect($$anchor3, { index: index2 });
       };
       if_block(node, ($$render) => {
         if (strict_equals(get(focuspoint).__shape, "polygon")) $$render(consequent);
@@ -4915,7 +4961,7 @@ function Image($$anchor, $$props) {
   reset(div);
   template_effect(
     ($0) => {
-      classes = set_class(div, 1, "cropper-bg svelte-1lw40df", null, classes, $0);
+      classes = set_class(div, 1, "cropper-bg svelte-ukptgm", null, classes, $0);
       set_attribute(svg, "viewBox", `0 0 ${get(width) ?? ""} ${get(height) ?? ""}`);
       set_attribute(img_1, "src", image());
     },
@@ -4942,13 +4988,13 @@ function Image($$anchor, $$props) {
   $$cleanup();
   return $$pop;
 }
-delegate(["dblclick", "click"]);
+delegate(["dblclick"]);
 create_custom_element(Image, { image: {} }, [], ["updateCanvasSizes"], true);
 
 // Resources/Private/JavaScript/components/Fields/Select.svelte
 Select[FILENAME] = "Resources/Private/JavaScript/components/Fields/Select.svelte";
-var root_12 = add_locations(template(`<option> </option>`), Select[FILENAME], [[14, 12]]);
-var root2 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <select class="form-select"></select></div>`), Select[FILENAME], [[8, 0, [[9, 4], [12, 4]]]]);
+var root_13 = add_locations(template(`<option> </option>`), Select[FILENAME], [[14, 12]]);
+var root4 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <select class="form-select"></select></div>`), Select[FILENAME], [[8, 0, [[9, 4], [12, 4]]]]);
 function Select($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Select);
@@ -4956,7 +5002,7 @@ function Select($$anchor, $$props) {
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   let options = Object.entries(config().options).map(([value, label]) => ({ value, label }));
-  var div = root2();
+  var div = root4();
   var label_1 = child(div);
   var text2 = child(label_1, true);
   reset(label_1);
@@ -4966,7 +5012,7 @@ function Select($$anchor, $$props) {
     value();
     let label = () => get($$item).label;
     label();
-    var option = root_12();
+    var option = root_13();
     var option_value = {};
     var text_1 = child(option, true);
     reset(option);
@@ -5018,14 +5064,14 @@ create_custom_element(Select, { config: {}, index: {}, name: {} }, [], [], true)
 
 // Resources/Private/JavaScript/components/Fields/Text.svelte
 Text2[FILENAME] = "Resources/Private/JavaScript/components/Fields/Text.svelte";
-var root3 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <input type="text" class="form-control"></div>`), Text2[FILENAME], [[7, 0, [[8, 4], [11, 4]]]]);
+var root5 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <input type="text" class="form-control"></div>`), Text2[FILENAME], [[7, 0, [[8, 4], [11, 4]]]]);
 function Text2($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Text2);
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
-  var div = root3();
+  var div = root5();
   var label = child(div);
   var text2 = child(label, true);
   reset(label);
@@ -5070,14 +5116,14 @@ create_custom_element(Text2, { config: {}, index: {}, name: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Fields/Textarea.svelte
 Textarea[FILENAME] = "Resources/Private/JavaScript/components/Fields/Textarea.svelte";
-var root4 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <textarea type="text" class="form-control"></textarea></div>`), Textarea[FILENAME], [[7, 0, [[8, 4], [11, 4]]]]);
+var root6 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <textarea type="text" class="form-control"></textarea></div>`), Textarea[FILENAME], [[7, 0, [[8, 4], [11, 4]]]]);
 function Textarea($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Textarea);
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
-  var div = root4();
+  var div = root6();
   var label = child(div);
   var text2 = child(label, true);
   reset(label);
@@ -5154,7 +5200,7 @@ create_custom_element(Icon, { name: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Fields/Link.svelte
 Link[FILENAME] = "Resources/Private/JavaScript/components/Fields/Link.svelte";
-var root5 = add_locations(template(`<div><label class="form-label"> </label> <div class="form-wizards-wrap svelte-jil9tm"><div class="form-wizards-element svelte-jil9tm"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text svelte-jil9tm"><!></span> <input class="form-control svelte-jil9tm" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" readonly=""> <input type="text"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input"><!></button></div> <button class="btn btn-default svelte-jil9tm"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default svelte-jil9tm"><!></button></div></div></div></div>`), Link[FILENAME], [
+var root7 = add_locations(template(`<div><label class="form-label"> </label> <div class="form-wizards-wrap svelte-jil9tm"><div class="form-wizards-element svelte-jil9tm"><div class="input-group t3js-form-field-link"><span class="t3js-form-field-link-icon input-group-text svelte-jil9tm"><!></span> <input class="form-control svelte-jil9tm" title="" value="" readonly="" hidden=""> <div class="form-control-clearable-wrapper"><input type="text" readonly=""> <input type="text"> <button type="button" tabindex="-1" title="Clear input" aria-label="Clear input"><!></button></div> <button class="btn btn-default svelte-jil9tm"><!></button></div></div> <div class="form-wizards-item-aside formwizards-item-aside--field-control"><div class="btn-group"><button aria-label="Open link wizard" class="btn btn-default svelte-jil9tm"><!></button></div></div></div></div>`), Link[FILENAME], [
   [
     75,
     0,
@@ -5238,7 +5284,7 @@ function Link($$anchor, $$props) {
     store_mutate(focuspoints, untrack($focuspoints)[index2()][name()] = "", untrack($focuspoints));
     get(linkBrowserData).preview = null;
   }
-  var div = root5();
+  var div = root7();
   let classes;
   var label = child(div);
   var text2 = child(label, true);
@@ -5341,8 +5387,8 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Fields/Checkbox.svelte
 Checkbox[FILENAME] = "Resources/Private/JavaScript/components/Fields/Checkbox.svelte";
-var root_13 = add_locations(template(`<span class="form-check-label-icon"><span class="form-check-label-icon-checked"><!></span> <span class="form-check-label-icon-unchecked"><!></span></span>`), Checkbox[FILENAME], [[25, 16, [[26, 20], [29, 20]]]]);
-var root6 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div><input type="checkbox" class="form-check-input me-1"> <label class="form-check-label"><!> </label></div></div>`), Checkbox[FILENAME], [
+var root_14 = add_locations(template(`<span class="form-check-label-icon"><span class="form-check-label-icon-checked"><!></span> <span class="form-check-label-icon-unchecked"><!></span></span>`), Checkbox[FILENAME], [[25, 16, [[26, 20], [29, 20]]]]);
+var root8 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div><input type="checkbox" class="form-check-input me-1"> <label class="form-check-label"><!> </label></div></div>`), Checkbox[FILENAME], [
   [
     11,
     0,
@@ -5360,7 +5406,7 @@ function Checkbox($$anchor, $$props) {
   let config = prop($$props, "config", 7), index2 = prop($$props, "index", 7), name = prop($$props, "name", 7);
   let isCheckbox = strict_equals(config()?.renderType, "check") || !Object.hasOwn(config(), "renderType");
   let isToggle = strict_equals(config()?.renderType, "checkboxToggle");
-  var div = root6();
+  var div = root8();
   var label = child(div);
   var text2 = child(label, true);
   reset(label);
@@ -5375,7 +5421,7 @@ function Checkbox($$anchor, $$props) {
   var node = child(label_1);
   {
     var consequent = ($$anchor2) => {
-      var span = root_13();
+      var span = root_14();
       var span_1 = child(span);
       var node_1 = child(span_1);
       Icon(node_1, { name: "actions-check" });
@@ -5437,7 +5483,7 @@ create_custom_element(Checkbox, { config: {}, index: {}, name: {} }, [], [], tru
 
 // Resources/Private/JavaScript/components/Sidebar.svelte
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_14 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
+var root_15 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
     71,
     12,
@@ -5461,8 +5507,8 @@ var root_14 = add_locations(template(`<div class="panel panel-default" data-crop
     ]
   ]
 ]);
-var root_42 = add_locations(template(`<button class="btn btn-success w-100 mt-3"><!> </button>`), Sidebar[FILENAME], [[115, 8]]);
-var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <!></div>`), Sidebar[FILENAME], [[68, 0, [[69, 4]]]]);
+var root_4 = add_locations(template(`<button class="btn btn-success w-100 mt-3"><!> </button>`), Sidebar[FILENAME], [[115, 8]]);
+var root9 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <!></div>`), Sidebar[FILENAME], [[68, 0, [[69, 4]]]]);
 var $$css3 = {
   hash: "svelte-1o07nn1",
   code: '\n    .modal-panel-sidebar.svelte-1o07nn1 {\n        padding-top: 0;\n        width: 100%;\n        --typo3-state-primary-bg: #ff8700;\n        --typo3-component-border-radius: 0;\n        --panel-border-radius: 0;\n    }\n\n    .panel-group.svelte-1o07nn1 {\n        margin-top: 0;\n        margin-bottom: 0;\n    }\n\n    .v12.svelte-1o07nn1 .panel-button:where(.svelte-1o07nn1) {\n        border: 0;\n        color: #FFF;\n        background: none;\n        gap: 10px;\n        align-items: center;\n        justify-content: start !important;\n        width: 100%;\n    }\n\n    .v12.svelte-1o07nn1 .panel-button[aria-expanded="true"]:where(.svelte-1o07nn1) {\n        border-left: 2px solid #ff8700;\n    }\n\n    .v12.svelte-1o07nn1 .caret:where(.svelte-1o07nn1) {\n        border-top-color: #FFF;\n    }\n\n'
@@ -5485,11 +5531,11 @@ function Sidebar($$anchor, $$props) {
     link: Link,
     checkbox: Checkbox
   };
-  var div = root7();
+  var div = root9();
   let classes;
   var div_1 = child(div);
   each(div_1, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
-    var div_2 = root_14();
+    var div_2 = root_15();
     var div_3 = child(div_2);
     var h4 = child(div_3);
     set_attribute(h4, "id", `cropper-accordion-heading-${index2 ?? ""}`);
@@ -5575,7 +5621,7 @@ function Sidebar($$anchor, $$props) {
   each(node_4, 17, () => Object.entries(SHAPES), index, ($$anchor2, $$item) => {
     let key = () => get($$item)[0];
     key();
-    var button_2 = root_42();
+    var button_2 = root_4();
     var node_5 = child(button_2);
     Icon(node_5, { name: "actions-add" });
     var text_2 = sibling(node_5);
@@ -5620,7 +5666,7 @@ function onSaveButtonClick(__2, $focuspoints, jsonPoints, itemFormElName) {
   }
 }
 var on_click = (__3, isSettingsOpenValue) => isSettingsOpenValue(false);
-var root8 = add_locations(template(`<div><fieldset class="form-section svelte-12frn6g"><div class="d-flex justify-content-between"><h3 class="form-section-headline"></h3> <button aria-label="Close settings" class="btn-close svelte-12frn6g"><!> <span class="visually-hidden"></span></button></div> <div class="row"><label for="points">Import / Export</label> <div class="form-group"><textarea id="points" rows="10" cols="50"></textarea> <div class="d-flex justify-content-between"><div><button class="btn btn-default"><!> </button> <button class="btn btn-default"><!> </button></div> <div><button class="btn btn-default"><!> </button> <button class="btn btn-primary"><!> </button></div></div></div></div></fieldset></div>`), Settings[FILENAME], [
+var root10 = add_locations(template(`<div><fieldset class="form-section svelte-12frn6g"><div class="d-flex justify-content-between"><h3 class="form-section-headline"></h3> <button aria-label="Close settings" class="btn-close svelte-12frn6g"><!> <span class="visually-hidden"></span></button></div> <div class="row"><label for="points">Import / Export</label> <div class="form-group"><textarea id="points" rows="10" cols="50"></textarea> <div class="d-flex justify-content-between"><div><button class="btn btn-default"><!> </button> <button class="btn btn-default"><!> </button></div> <div><button class="btn btn-default"><!> </button> <button class="btn btn-primary"><!> </button></div></div></div></div></fieldset></div>`), Settings[FILENAME], [
   [
     70,
     0,
@@ -5693,7 +5739,7 @@ function Settings($$anchor, $$props) {
     navigator.clipboard.writeText(focuspointArea.value);
     Notification.success(window.parent.frames.list_frame.TYPO3.lang["wizard.settings.copied"], window.parent.frames.list_frame.TYPO3.lang["wizard.settings.copied.message"], 3);
   }
-  var div = root8();
+  var div = root10();
   let classes;
   var fieldset = child(div);
   var div_1 = child(fieldset);
@@ -5807,8 +5853,8 @@ create_custom_element(Settings, { itemFormElName: {}, isSettingsOpenValue: {} },
 
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root_22 = add_locations(template(`<!> <div class="resize-handle svelte-2ek5u1" aria-label="Resize sidebar"></div> <!>`, 1), FocuspointWizard[FILENAME], [[95, 8]]);
-var root9 = add_locations(template(`<div class="wizard svelte-2ek5u1"><!></div>`), FocuspointWizard[FILENAME], [[90, 0]]);
+var root_2 = add_locations(template(`<!> <div class="resize-handle svelte-2ek5u1" aria-label="Resize sidebar"></div> <!>`, 1), FocuspointWizard[FILENAME], [[95, 8]]);
+var root11 = add_locations(template(`<div class="wizard svelte-2ek5u1"><!></div>`), FocuspointWizard[FILENAME], [[90, 0]]);
 var $$css5 = {
   hash: "svelte-2ek5u1",
   code: "\n    .wizard.svelte-2ek5u1 {\n        display: grid;\n        max-height: 100%;\n        grid-template-columns: 1fr 1px var(--sidebar-width, 300px);\n        grid-template-rows: 100%;\n    }\n\n    .resize-handle.svelte-2ek5u1 {\n        cursor: ew-resize !important;\n        user-select: none;\n        position: relative;\n    }\n\n    .resize-handle.svelte-2ek5u1:after {\n        content: '';\n        position: absolute;\n        z-index: 1;\n        top: 0;\n        right: -4px;\n        width: 4px;\n        height: 100%;\n        background: rgba(255, 255, 255, 0);\n    }\n\n    .resize-handle.svelte-2ek5u1:hover:after {\n        background: var(--scaffold-content-navigation-drag-bg-hover, #bbb);\n    }\n"
@@ -5857,7 +5903,7 @@ function FocuspointWizard($$anchor, $$props) {
   const handleSettings = () => {
     set(isSettingsOpen, !get(isSettingsOpen));
   };
-  var div = root9();
+  var div = root11();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
@@ -5874,7 +5920,7 @@ function FocuspointWizard($$anchor, $$props) {
       });
     };
     var alternate = ($$anchor2) => {
-      var fragment_1 = root_22();
+      var fragment_1 = root_2();
       var node_1 = first_child(fragment_1);
       Image(node_1, {
         get image() {
