@@ -1,6 +1,6 @@
 <script>
     import interact from 'interactjs';
-    import {focuspoints, getActiveIndex, setActiveIndex} from "../store.svelte";
+    import {focuspoints, getActiveIndex, setActiveIndex, SHAPES} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     import Rect from '../shapes/Rect.svelte';
     import Polygon from '../shapes/Polygon.svelte';
@@ -205,11 +205,7 @@
         <svg viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}
                 <g class="shape-group">
-                    {#if focuspoint.__shape === "polygon"}
-                        <Polygon index={index} />
-                    {:else}
-                        <Rect index={index} />
-                    {/if}
+                    <svelte:component this={SHAPES[focuspoint.__shape].component} index={index} />
                 </g>
             {/each}
         </svg>

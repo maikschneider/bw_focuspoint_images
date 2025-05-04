@@ -1,7 +1,10 @@
 import {writable, get} from 'svelte/store';
+import Polygon from "./shapes/Polygon.svelte";
+import Rect from "./shapes/Rect.svelte";
 
 export const SHAPES = {
   rect: {
+    component: Rect,
     constructor(config) {
       return {
         x: 0,
@@ -12,6 +15,7 @@ export const SHAPES = {
     }
   },
   polygon: {
+    component: Polygon,
     constructor() {
       return {
         points: [[10, 10], [50, 10], [50, 50], [10, 50]]

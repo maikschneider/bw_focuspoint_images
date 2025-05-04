@@ -4509,8 +4509,8 @@ import interact from "interactjs";
 
 // Resources/Private/JavaScript/shapes/Polygon.svelte
 Polygon[FILENAME] = "Resources/Private/JavaScript/shapes/Polygon.svelte";
-var root_1 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle>`), Polygon[FILENAME], [[18, 4]]);
-var root = add_locations(ns_template(`<polygon></polygon><!>`, 1), Polygon[FILENAME], [[13, 0]]);
+var root_1 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle>`), Polygon[FILENAME], [[26, 4]]);
+var root = add_locations(ns_template(`<polygon></polygon><!>`, 1), Polygon[FILENAME], [[21, 0]]);
 function Polygon($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Polygon);
@@ -4521,6 +4521,11 @@ function Polygon($$anchor, $$props) {
     const index3 = parseInt(event2.target.getAttribute("data-index"));
     const pointIndex = parseInt(event2.target.getAttribute("data-point-index"));
     store_mutate(focuspoints, untrack($focuspoints)[index3].__data.points = $focuspoints()[index3].__data.points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
+  }
+  function getPoints() {
+    return $focuspoints()[index2()].__data.points;
+  }
+  function onHandleDblClick(event2) {
   }
   var fragment = root();
   var polygon = first_child(fragment);
@@ -4556,6 +4561,12 @@ function Polygon($$anchor, $$props) {
   );
   append($$anchor, fragment);
   var $$pop = pop({
+    get getPoints() {
+      return getPoints;
+    },
+    get onHandleDblClick() {
+      return onHandleDblClick;
+    },
     get index() {
       return index2();
     },
@@ -4569,16 +4580,16 @@ function Polygon($$anchor, $$props) {
   return $$pop;
 }
 delegate(["dblclick"]);
-create_custom_element(Polygon, { index: {} }, [], [], true);
+create_custom_element(Polygon, { index: {} }, [], ["getPoints", "onHandleDblClick"], true);
 
 // Resources/Private/JavaScript/shapes/Rect.svelte
 Rect[FILENAME] = "Resources/Private/JavaScript/shapes/Rect.svelte";
 var root2 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><rect></rect>`, 1), Rect[FILENAME], [
-  [7, 0],
-  [8, 0],
-  [9, 0],
-  [10, 0],
-  [11, 0]
+  [21, 0],
+  [22, 0],
+  [23, 0],
+  [24, 0],
+  [25, 0]
 ]);
 function Rect($$anchor, $$props) {
   check_target(new.target);
@@ -4586,6 +4597,17 @@ function Rect($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const index2 = prop($$props, "index", 7);
+  function getPoints() {
+    const { x, y, width, height } = $focuspoints()[index2()].__data;
+    return [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height]
+    ];
+  }
+  function onHandleDblClick(event2) {
+  }
   var fragment = root2();
   var circle = first_child(fragment);
   var circle_1 = sibling(circle);
@@ -4619,6 +4641,12 @@ function Rect($$anchor, $$props) {
   );
   append($$anchor, fragment);
   var $$pop = pop({
+    get getPoints() {
+      return getPoints;
+    },
+    get onHandleDblClick() {
+      return onHandleDblClick;
+    },
     get index() {
       return index2();
     },
@@ -4631,7 +4659,7 @@ function Rect($$anchor, $$props) {
   $$cleanup();
   return $$pop;
 }
-create_custom_element(Rect, { index: {} }, [], [], true);
+create_custom_element(Rect, { index: {} }, [], ["getPoints", "onHandleDblClick"], true);
 
 // Resources/Private/JavaScript/store.svelte.js
 var SHAPES = {
@@ -4790,7 +4818,7 @@ var root3 = add_locations(template(`<div touch-action="none"><div class="wrapper
   [
     203,
     0,
-    [[204, 4, [[205, 8], [216, 8]]]]
+    [[204, 4, [[205, 8], [212, 8]]]]
   ]
 ]);
 var $$css = {
@@ -4939,18 +4967,9 @@ function Image($$anchor, $$props) {
   each(svg, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
     var g = root_12();
     var node = child(g);
-    {
-      var consequent = ($$anchor3) => {
-        Polygon($$anchor3, { index: index2 });
-      };
-      var alternate = ($$anchor3) => {
-        Rect($$anchor3, { index: index2 });
-      };
-      if_block(node, ($$render) => {
-        if (strict_equals(get(focuspoint).__shape, "polygon")) $$render(consequent);
-        else $$render(alternate, false);
-      });
-    }
+    component(node, () => SHAPES[get(focuspoint).__shape].component, ($$anchor3, $$component) => {
+      $$component($$anchor3, { index: index2 });
+    });
     reset(g);
     append($$anchor2, g);
   });
