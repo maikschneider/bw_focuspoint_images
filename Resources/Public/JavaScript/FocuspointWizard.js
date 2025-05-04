@@ -4785,12 +4785,12 @@ function onSvgDblClick(event2, $focuspoints, findClosestMiddlePointIndex) {
   points.splice(index2 + 1, 0, point);
   store_mutate(focuspoints, untrack($focuspoints)[getActiveIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_12 = add_locations(ns_template(`<g class="shape-group"><!></g>`), Image[FILENAME], [[206, 16]]);
+var root_12 = add_locations(ns_template(`<g class="shape-group"><!></g>`), Image[FILENAME], [[207, 16]]);
 var root3 = add_locations(template(`<div touch-action="none"><div class="wrapper svelte-ukptgm"><svg class="svelte-ukptgm"></svg> <img alt="Selected" unselectable="on" class="svelte-ukptgm"></div></div>`), Image[FILENAME], [
   [
-    202,
+    203,
     0,
-    [[203, 4, [[204, 8], [215, 8]]]]
+    [[204, 4, [[205, 8], [216, 8]]]]
   ]
 ]);
 var $$css = {
@@ -4806,11 +4806,11 @@ function Image($$anchor, $$props) {
   let image = prop($$props, "image", 7);
   let canvasHeight = state(0);
   let canvasWidth = state(0);
-  let img;
+  let imageWidth = state(0);
+  let imageHeight = state(0);
   let initialized = state(false);
   let isDarkMode = state(false);
-  let width = state(0);
-  let height = state(0);
+  let imgElement;
   interact(".draggable").resizable({
     edges: {
       left: true,
@@ -4825,10 +4825,10 @@ function Image($$anchor, $$props) {
       start: setActiveFocuspoint,
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x / get(width) * get(canvasWidth) + event2.deltaRect.left, untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y / get(height) * get(canvasHeight) + event2.deltaRect.top, untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.width = event2.rect.width / get(canvasWidth) * get(width), untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.height = event2.rect.height / get(canvasHeight) * get(height), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x / get(imageWidth) * get(canvasWidth) + event2.deltaRect.left, untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y / get(imageHeight) * get(canvasHeight) + event2.deltaRect.top, untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.width = event2.rect.width / get(canvasWidth) * get(imageWidth), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.height = event2.rect.height / get(canvasHeight) * get(imageHeight), untrack($focuspoints));
       },
       end: setActiveFocuspoint
     }
@@ -4841,8 +4841,8 @@ function Image($$anchor, $$props) {
       start: setActiveFocuspoint,
       move(event2) {
         const index2 = parseInt(event2.target.getAttribute("data-index"));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x + event2.dx / get(canvasWidth) * get(width), untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y + event2.dy / get(canvasHeight) * get(height), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x + event2.dx / get(canvasWidth) * get(imageWidth), untrack($focuspoints));
+        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y + event2.dy / get(canvasHeight) * get(imageHeight), untrack($focuspoints));
       },
       end: setActiveFocuspoint
     }
@@ -4872,10 +4872,10 @@ function Image($$anchor, $$props) {
     }
   });
   onMount(() => {
-    if (img.complete) {
+    if (imgElement.complete) {
       setCanvasSizes();
     } else {
-      img.addEventListener("load", setCanvasSizes);
+      imgElement.addEventListener("load", setCanvasSizes);
     }
     window.addEventListener("resize", updateCanvasSizes);
     const colorScheme = document.querySelector("html").getAttribute("data-color-scheme");
@@ -4888,8 +4888,8 @@ function Image($$anchor, $$props) {
     setActiveIndex(index2);
   }
   function onload() {
-    set(width, img.naturalWidth, true);
-    set(height, img.naturalHeight, true);
+    set(imageWidth, imgElement.naturalWidth, true);
+    set(imageHeight, imgElement.naturalHeight, true);
   }
   function findClosestMiddlePointIndex(point) {
     const points = $focuspoints()[getActiveIndex()].__data.points;
@@ -4923,8 +4923,8 @@ function Image($$anchor, $$props) {
     );
   }
   function updateCanvasSizes() {
-    set(canvasHeight, img.parentElement.getBoundingClientRect().height, true);
-    set(canvasWidth, img.parentElement.getBoundingClientRect().width, true);
+    set(canvasHeight, imgElement.parentElement.getBoundingClientRect().height, true);
+    set(canvasWidth, imgElement.parentElement.getBoundingClientRect().width, true);
     set(initialized, true);
   }
   var div = root3();
@@ -4955,22 +4955,22 @@ function Image($$anchor, $$props) {
     append($$anchor2, g);
   });
   reset(svg);
-  var img_1 = sibling(svg, 2);
-  bind_this(img_1, ($$value) => img = $$value, () => img);
+  var img = sibling(svg, 2);
+  bind_this(img, ($$value) => imgElement = $$value, () => imgElement);
   reset(div_1);
   reset(div);
   template_effect(
     ($0) => {
       classes = set_class(div, 1, "cropper-bg svelte-ukptgm", null, classes, $0);
-      set_attribute(svg, "viewBox", `0 0 ${get(width) ?? ""} ${get(height) ?? ""}`);
-      set_attribute(img_1, "src", image());
+      set_attribute(svg, "viewBox", `0 0 ${get(imageWidth) ?? ""} ${get(imageHeight) ?? ""}`);
+      set_attribute(img, "src", image());
     },
     [
       () => ({ "cropper-bg--dark": get(isDarkMode) })
     ]
   );
-  event("load", img_1, onload);
-  replay_events(img_1);
+  event("load", img, onload);
+  replay_events(img);
   append($$anchor, div);
   var $$pop = pop({
     get updateCanvasSizes() {

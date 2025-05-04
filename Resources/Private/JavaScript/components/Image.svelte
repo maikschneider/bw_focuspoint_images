@@ -4,15 +4,16 @@
     import {onDestroy, onMount} from "svelte";
     import Rect from '../shapes/Rect.svelte';
     import Polygon from '../shapes/Polygon.svelte';
-    let {image} = $props();
-    let canvasHeight = $state(0)
-    let canvasWidth = $state(0)
-    let img;
-    let initialized = $state(false)
 
+    let {image} = $props();
+
+    let canvasHeight = $state(0);
+    let canvasWidth = $state(0);
+    let imageWidth = $state(0);
+    let imageHeight = $state(0);
+    let initialized = $state(false);
     let isDarkMode = $state(false);
-    let width = $state(0);
-    let height = $state(0);
+    let imgElement;
 
     interact(".draggable")
         .resizable({
@@ -27,10 +28,10 @@
                 start: setActiveFocuspoint,
                 move(event) {
                     const index = parseInt(event.target.getAttribute('data-index'));
-                    $focuspoints[index].__data.x = ($focuspoints[index].__data.x / width * canvasWidth + event.deltaRect.left);
-                    $focuspoints[index].__data.y = ($focuspoints[index].__data.y / height * canvasHeight + event.deltaRect.top);
-                    $focuspoints[index].__data.width = event.rect.width / canvasWidth * width;
-                    $focuspoints[index].__data.height = event.rect.height / canvasHeight * height;
+                    $focuspoints[index].__data.x = ($focuspoints[index].__data.x / imageWidth * canvasWidth + event.deltaRect.left);
+                    $focuspoints[index].__data.y = ($focuspoints[index].__data.y / imageHeight * canvasHeight + event.deltaRect.top);
+                    $focuspoints[index].__data.width = event.rect.width / canvasWidth * imageWidth;
+                    $focuspoints[index].__data.height = event.rect.height / canvasHeight * imageHeight;
                 },
                 end: setActiveFocuspoint
             }
@@ -47,8 +48,8 @@
                 start: setActiveFocuspoint,
                 move(event) {
                     const index = parseInt(event.target.getAttribute('data-index'));
-                    $focuspoints[index].__data.x = $focuspoints[index].__data.x + event.dx / canvasWidth * width;
-                    $focuspoints[index].__data.y = $focuspoints[index].__data.y + event.dy / canvasHeight * height;
+                    $focuspoints[index].__data.x = $focuspoints[index].__data.x + event.dx / canvasWidth * imageWidth;
+                    $focuspoints[index].__data.y = $focuspoints[index].__data.y + event.dy / canvasHeight * imageHeight;
                 },
                 end: setActiveFocuspoint
             }
@@ -80,10 +81,10 @@
     });
 
     onMount(() => {
-        if (img.complete) {
+        if (imgElement.complete) {
             setCanvasSizes()
         } else {
-            img.addEventListener('load', setCanvasSizes)
+            imgElement.addEventListener('load', setCanvasSizes)
         }
 
         window.addEventListener('resize', updateCanvasSizes)
@@ -99,8 +100,8 @@
     }
 
     function onload() {
-        width = img.naturalWidth;
-        height = img.naturalHeight;
+        imageWidth = imgElement.naturalWidth;
+        imageHeight = imgElement.naturalHeight;
     }
 
     function onSvgDblClick(event) {
@@ -152,8 +153,8 @@
     }
 
     export function updateCanvasSizes() {
-        canvasHeight = img.parentElement.getBoundingClientRect().height
-        canvasWidth = img.parentElement.getBoundingClientRect().width
+        canvasHeight = imgElement.parentElement.getBoundingClientRect().height
+        canvasWidth = imgElement.parentElement.getBoundingClientRect().width
         initialized = true
     }
 
@@ -201,7 +202,7 @@
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div class="wrapper">
-        <svg viewBox="0 0 {width} {height}" ondblclick={onSvgDblClick}>
+        <svg viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}
                 <g class="shape-group">
                     {#if focuspoint.__shape === "polygon"}
@@ -212,6 +213,6 @@
                 </g>
             {/each}
         </svg>
-        <img bind:this={img} src={image} alt="Selected" unselectable="on" {onload} />
+        <img bind:this={imgElement} src={image} alt="Selected" unselectable="on" {onload} />
     </div>
 </div>
