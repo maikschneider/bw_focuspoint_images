@@ -5,7 +5,8 @@
         wizardConfigStore,
         setActiveIndex,
         focusPointName, fieldMeetsCondition,
-        getActiveIndex
+        getActiveIndex,
+        SHAPES
     } from '../store.svelte'
     import Select from "./Fields/Select.svelte";
     import Text from "./Fields/Text.svelte";
@@ -110,15 +111,10 @@
         {/each}
     </div>
 
-    <div class="pt-3">
-        <button class="btn btn-success w-100" on:click|preventDefault={() => createNewFocuspoint("polygon")}>
+    {#each Object.entries(SHAPES) as [key]}
+        <button class="btn btn-success w-100 mt-3" on:click|preventDefault={() => createNewFocuspoint(key)}>
             <Icon name="actions-add" />
-            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.new.polygon']}
+            {window.parent.frames.list_frame.TYPO3.lang[`wizard.single_point.button.new.${key}`]}
         </button>
-        <button class="btn btn-success w-100" on:click|preventDefault={() => createNewFocuspoint("rect")}>
-            <Icon name="actions-add" />
-            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.new.rect']}
-        </button>
-    </div>
-
+    {/each}
 </div>

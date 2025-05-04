@@ -4508,24 +4508,28 @@ function validate_store(store, name) {
 import interact from "interactjs";
 
 // Resources/Private/JavaScript/store.svelte.js
-var SHAPE_CONSTRUCTOR = {
-  rect(config) {
-    return {
-      x: 0,
-      y: 0,
-      width: parseFloat(config.defaultWidth),
-      height: parseFloat(config.defaultHeight)
-    };
+var SHAPES = {
+  rect: {
+    constructor(config) {
+      return {
+        x: 0,
+        y: 0,
+        width: parseFloat(config.defaultWidth),
+        height: parseFloat(config.defaultHeight)
+      };
+    }
   },
-  polygon() {
-    return {
-      points: [
-        [10, 10],
-        [50, 10],
-        [50, 50],
-        [10, 50]
-      ]
-    };
+  polygon: {
+    constructor() {
+      return {
+        points: [
+          [10, 10],
+          [50, 10],
+          [50, 50],
+          [10, 50]
+        ]
+      };
+    }
   }
 };
 var wizardConfigStore = writable(null);
@@ -4607,9 +4611,9 @@ var createNewFocuspoint = (shape) => {
     {}
   );
   newFocuspoint.__shape = shape;
-  newFocuspoint.__data = SHAPE_CONSTRUCTOR[shape](config);
+  newFocuspoint.__data = SHAPES[shape].constructor(config);
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
-  set(activeIndex, focuspoints.length - 1);
+  set(activeIndex, get2(focuspoints).length - 1);
 };
 var setActiveIndex = (index2) => {
   set(activeIndex, index2, true);
@@ -5435,38 +5439,30 @@ create_custom_element(Checkbox, { config: {}, index: {}, name: {} }, [], [], tru
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
 var root_14 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
-    70,
+    71,
     12,
     [
       [
-        71,
+        72,
         16,
         [
           [
-            72,
+            73,
             20,
-            [[73, 24, [[82, 28], [83, 28]]]]
+            [[74, 24, [[83, 28], [84, 28]]]]
           ]
         ]
       ],
       [
-        89,
+        90,
         16,
-        [[96, 20, [[103, 24]]]]
+        [[97, 20, [[104, 24]]]]
       ]
     ]
   ]
 ]);
-var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100"><!> </button> <button class="btn btn-success w-100"><!> </button></div></div>`), Sidebar[FILENAME], [
-  [
-    67,
-    0,
-    [
-      [68, 4],
-      [113, 4, [[114, 8], [118, 8]]]
-    ]
-  ]
-]);
+var root_42 = add_locations(template(`<button class="btn btn-success w-100 mt-3"><!> </button>`), Sidebar[FILENAME], [[115, 8]]);
+var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <!></div>`), Sidebar[FILENAME], [[68, 0, [[69, 4]]]]);
 var $$css3 = {
   hash: "svelte-1o07nn1",
   code: '\n    .modal-panel-sidebar.svelte-1o07nn1 {\n        padding-top: 0;\n        width: 100%;\n        --typo3-state-primary-bg: #ff8700;\n        --typo3-component-border-radius: 0;\n        --panel-border-radius: 0;\n    }\n\n    .panel-group.svelte-1o07nn1 {\n        margin-top: 0;\n        margin-bottom: 0;\n    }\n\n    .v12.svelte-1o07nn1 .panel-button:where(.svelte-1o07nn1) {\n        border: 0;\n        color: #FFF;\n        background: none;\n        gap: 10px;\n        align-items: center;\n        justify-content: start !important;\n        width: 100%;\n    }\n\n    .v12.svelte-1o07nn1 .panel-button[aria-expanded="true"]:where(.svelte-1o07nn1) {\n        border-left: 2px solid #ff8700;\n    }\n\n    .v12.svelte-1o07nn1 .caret:where(.svelte-1o07nn1) {\n        border-top-color: #FFF;\n    }\n\n'
@@ -5575,28 +5571,25 @@ function Sidebar($$anchor, $$props) {
     append($$anchor2, div_2);
   });
   reset(div_1);
-  var div_6 = sibling(div_1, 2);
-  var button_2 = child(div_6);
-  var node_4 = child(button_2);
-  Icon(node_4, { name: "actions-add" });
-  var text_2 = sibling(node_4);
-  text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.new.polygon"] ?? ""}`;
-  reset(button_2);
-  var button_3 = sibling(button_2, 2);
-  var node_5 = child(button_3);
-  Icon(node_5, { name: "actions-add" });
-  var text_3 = sibling(node_5);
-  text_3.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.new.rect"] ?? ""}`;
-  reset(button_3);
-  reset(div_6);
+  var node_4 = sibling(div_1, 2);
+  each(node_4, 17, () => Object.entries(SHAPES), index, ($$anchor2, $$item) => {
+    let key = () => get($$item)[0];
+    key();
+    var button_2 = root_42();
+    var node_5 = child(button_2);
+    Icon(node_5, { name: "actions-add" });
+    var text_2 = sibling(node_5);
+    reset(button_2);
+    template_effect(() => set_text(text_2, ` ${window.parent.frames.list_frame.TYPO3.lang[`wizard.single_point.button.new.${key()}`] ?? ""}`));
+    event("click", button_2, preventDefault(() => createNewFocuspoint(key())));
+    append($$anchor2, button_2);
+  });
   reset(div);
   template_effect(($0) => classes = set_class(div, 1, "modal-panel-sidebar svelte-1o07nn1", null, classes, $0), [
     () => ({
       v12: $wizardConfigStore() && $wizardConfigStore().typo3Version < 13
     })
   ]);
-  event("click", button_2, preventDefault(() => createNewFocuspoint("polygon")));
-  event("click", button_3, preventDefault(() => createNewFocuspoint("rect")));
   append($$anchor, div);
   var $$pop = pop({ ...legacy_api() });
   $$cleanup();

@@ -1,18 +1,22 @@
 import {writable, get} from 'svelte/store';
 
-const SHAPE_CONSTRUCTOR = {
-  rect(config) {
-    return {
-      x: 0,
-      y: 0,
-      width: parseFloat(config.defaultWidth),
-      height: parseFloat(config.defaultHeight),
-    };
+export const SHAPES = {
+  rect: {
+    constructor(config) {
+      return {
+        x: 0,
+        y: 0,
+        width: parseFloat(config.defaultWidth),
+        height: parseFloat(config.defaultHeight),
+      };
+    }
   },
-  polygon() {
-    return {
-      points: [[10, 10], [50, 10], [50, 50], [10, 50]]
-    };
+  polygon: {
+    constructor() {
+      return {
+        points: [[10, 10], [50, 10], [50, 50], [10, 50]]
+      };
+    }
   }
 };
 
@@ -110,11 +114,11 @@ export const createNewFocuspoint = (shape) => {
     }, {});
 
     newFocuspoint.__shape = shape;
-    newFocuspoint.__data = SHAPE_CONSTRUCTOR[shape](config);
+    newFocuspoint.__data = SHAPES[shape].constructor(config);
 
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
-    activeIndex = focuspoints.length - 1;
+    activeIndex = get(focuspoints).length - 1;
 }
 
 export const setActiveIndex = index => {
