@@ -1,5 +1,21 @@
 import {writable, get} from 'svelte/store';
 
+const SHAPE_CONSTRUCTOR = {
+  rect(config) {
+    return {
+      x: 0,
+      y: 0,
+      width: parseFloat(config.defaultWidth),
+      height: parseFloat(config.defaultHeight),
+    };
+  },
+  polygon() {
+    return {
+      points: [[10, 10], [50, 10], [50, 50], [10, 50]]
+    };
+  }
+};
+
 export const wizardConfigStore = writable(null);
 
 export const focuspoints = writable([]);
@@ -84,7 +100,7 @@ export const fieldMeetsCondition = (fieldName, point) => {
     }
 }
 
-export const createNewFocuspoint = (isRect) => {
+export const createNewFocuspoint = (shape) => {
     const config = get(wizardConfigStore);
 
     // create a new focuspoint with default fields
@@ -93,20 +109,8 @@ export const createNewFocuspoint = (isRect) => {
       return acc;
     }, {});
 
-    if (isRect) {
-      newFocuspoint.__shape = "rect";
-      newFocuspoint.__data = {
-        x: 0,
-        y:  0,
-        width: parseFloat(config.defaultWidth),
-        height: parseFloat(config.defaultHeight),
-      };
-    } else {
-      newFocuspoint.__shape = "polygon";
-      newFocuspoint.__data = {
-        points: [[10, 10], [50, 10], [50, 50], [10, 50]]
-      };
-    }
+    newFocuspoint.__shape = shape;
+    newFocuspoint.__data = SHAPE_CONSTRUCTOR[shape](config);
 
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);

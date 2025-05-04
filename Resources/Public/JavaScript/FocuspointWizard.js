@@ -468,7 +468,6 @@ function proxy(value) {
               prop2,
               with_parent(() => state(UNINITIALIZED, stack2))
             );
-            update_version(version);
           }
         } else {
           if (is_proxied_array && typeof prop2 === "string") {
@@ -1109,11 +1108,16 @@ function destroy_block_effect_children(signal) {
 function destroy_effect(effect2, remove_dom = true) {
   var removed = false;
   if ((remove_dom || (effect2.f & HEAD_EFFECT) !== 0) && effect2.nodes_start !== null) {
-    remove_effect_dom(
-      effect2.nodes_start,
-      /** @type {TemplateNode} */
-      effect2.nodes_end
-    );
+    var node = effect2.nodes_start;
+    var end = effect2.nodes_end;
+    while (node !== null) {
+      var next2 = node === end ? null : (
+        /** @type {TemplateNode} */
+        get_next_sibling(node)
+      );
+      node.remove();
+      node = next2;
+    }
     removed = true;
   }
   destroy_effect_children(effect2, remove_dom && !removed);
@@ -1134,16 +1138,6 @@ function destroy_effect(effect2, remove_dom = true) {
     effect2.component_function = null;
   }
   effect2.next = effect2.prev = effect2.teardown = effect2.ctx = effect2.deps = effect2.fn = effect2.nodes_start = effect2.nodes_end = null;
-}
-function remove_effect_dom(node, end) {
-  while (node !== null) {
-    var next2 = node === end ? null : (
-      /** @type {TemplateNode} */
-      get_next_sibling(node)
-    );
-    node.remove();
-    node = next2;
-  }
 }
 function unlink_effect(effect2) {
   var parent = effect2.parent;
@@ -1388,47 +1382,51 @@ function handle_error(error, effect2, previous_effect, component_context2) {
   if (previous_effect !== null) {
     is_throwing_error = true;
   }
-  if (dev_fallback_default && component_context2 !== null && error instanceof Error && !handled_errors.has(error)) {
-    handled_errors.add(error);
-    const component_stack = [];
-    const effect_name = effect2.fn?.name;
-    if (effect_name) {
-      component_stack.push(effect_name);
-    }
-    let current_context = component_context2;
-    while (current_context !== null) {
+  if (!dev_fallback_default || component_context2 === null || !(error instanceof Error) || handled_errors.has(error)) {
+    propagate_error(error, effect2);
+    return;
+  }
+  handled_errors.add(error);
+  const component_stack = [];
+  const effect_name = effect2.fn?.name;
+  if (effect_name) {
+    component_stack.push(effect_name);
+  }
+  let current_context = component_context2;
+  while (current_context !== null) {
+    if (dev_fallback_default) {
       var filename = current_context.function?.[FILENAME];
       if (filename) {
         const file = filename.split("/").pop();
         component_stack.push(file);
       }
-      current_context = current_context.p;
     }
-    const indent = is_firefox ? "  " : "	";
-    define_property(error, "message", {
-      value: error.message + `
+    current_context = current_context.p;
+  }
+  const indent = is_firefox ? "  " : "	";
+  define_property(error, "message", {
+    value: error.message + `
 ${component_stack.map((name) => `
 ${indent}in ${name}`).join("")}
 `
-    });
-    define_property(error, "component_stack", {
-      value: component_stack
-    });
-    const stack2 = error.stack;
-    if (stack2) {
-      const lines = stack2.split("\n");
-      const new_lines = [];
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.includes("svelte/src/internal")) {
-          continue;
-        }
-        new_lines.push(line);
+  });
+  define_property(error, "component_stack", {
+    value: component_stack
+  });
+  const stack2 = error.stack;
+  if (stack2) {
+    const lines = stack2.split("\n");
+    const new_lines = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.includes("svelte/src/internal")) {
+        continue;
       }
-      define_property(error, "stack", {
-        value: new_lines.join("\n")
-      });
+      new_lines.push(line);
     }
+    define_property(error, "stack", {
+      value: new_lines.join("\n")
+    });
   }
   propagate_error(error, effect2);
   if (should_rethrow_error(effect2)) {
@@ -1518,7 +1516,7 @@ function update_reaction(reaction) {
         );
       }
     }
-    if (previous_reaction !== null && previous_reaction !== reaction) {
+    if (previous_reaction !== reaction) {
       read_version++;
       if (untracked_writes !== null) {
         if (previous_untracked_writes === null) {
@@ -3168,88 +3166,78 @@ function check_hash(element2, server_hash, value) {
   }
   hydration_html_changed(sanitize_location(location));
 }
-function html(node, get_value, svg = false, mathml = false, skip_warning = false) {
+function html(node, get_value, svg, mathml, skip_warning) {
   var anchor = node;
   var value = "";
-  template_effect(() => {
-    var effect2 = (
-      /** @type {Effect} */
-      active_effect
-    );
+  var effect2;
+  block(() => {
     if (value === (value = get_value() ?? "")) {
-      if (hydrating) hydrate_next();
+      if (hydrating) {
+        hydrate_next();
+      }
       return;
     }
-    if (effect2.nodes_start !== null) {
-      remove_effect_dom(
-        effect2.nodes_start,
-        /** @type {TemplateNode} */
-        effect2.nodes_end
-      );
-      effect2.nodes_start = effect2.nodes_end = null;
+    if (effect2 !== void 0) {
+      destroy_effect(effect2);
+      effect2 = void 0;
     }
     if (value === "") return;
-    if (hydrating) {
-      var hash2 = (
-        /** @type {Comment} */
-        hydrate_node.data
+    effect2 = branch(() => {
+      if (hydrating) {
+        var hash2 = (
+          /** @type {Comment} */
+          hydrate_node.data
+        );
+        var next2 = hydrate_next();
+        var last = next2;
+        while (next2 !== null && (next2.nodeType !== 8 || /** @type {Comment} */
+        next2.data !== "")) {
+          last = next2;
+          next2 = /** @type {TemplateNode} */
+          get_next_sibling(next2);
+        }
+        if (next2 === null) {
+          hydration_mismatch();
+          throw HYDRATION_ERROR;
+        }
+        if (dev_fallback_default && !skip_warning) {
+          check_hash(
+            /** @type {Element} */
+            next2.parentNode,
+            hash2,
+            value
+          );
+        }
+        assign_nodes(hydrate_node, last);
+        anchor = set_hydrate_node(next2);
+        return;
+      }
+      var html2 = value + "";
+      if (svg) html2 = `<svg>${html2}</svg>`;
+      else if (mathml) html2 = `<math>${html2}</math>`;
+      var node2 = create_fragment_from_html(html2);
+      if (svg || mathml) {
+        node2 = /** @type {Element} */
+        get_first_child(node2);
+      }
+      assign_nodes(
+        /** @type {TemplateNode} */
+        get_first_child(node2),
+        /** @type {TemplateNode} */
+        node2.lastChild
       );
-      var next2 = hydrate_next();
-      var last = next2;
-      while (next2 !== null && (next2.nodeType !== 8 || /** @type {Comment} */
-      next2.data !== "")) {
-        last = next2;
-        next2 = /** @type {TemplateNode} */
-        get_next_sibling(next2);
+      if (svg || mathml) {
+        while (get_first_child(node2)) {
+          anchor.before(
+            /** @type {Node} */
+            get_first_child(node2)
+          );
+        }
+      } else {
+        anchor.before(node2);
       }
-      if (next2 === null) {
-        hydration_mismatch();
-        throw HYDRATION_ERROR;
-      }
-      if (dev_fallback_default && !skip_warning) {
-        check_hash(
-          /** @type {Element} */
-          next2.parentNode,
-          hash2,
-          value
-        );
-      }
-      assign_nodes(hydrate_node, last);
-      anchor = set_hydrate_node(next2);
-      return;
-    }
-    var html2 = value + "";
-    if (svg) html2 = `<svg>${html2}</svg>`;
-    else if (mathml) html2 = `<math>${html2}</math>`;
-    var node2 = create_fragment_from_html(html2);
-    if (svg || mathml) {
-      node2 = /** @type {Element} */
-      get_first_child(node2);
-    }
-    assign_nodes(
-      /** @type {TemplateNode} */
-      get_first_child(node2),
-      /** @type {TemplateNode} */
-      node2.lastChild
-    );
-    if (svg || mathml) {
-      while (get_first_child(node2)) {
-        anchor.before(
-          /** @type {Node} */
-          get_first_child(node2)
-        );
-      }
-    } else {
-      anchor.before(node2);
-    }
+    });
   });
-}
-
-// node_modules/svelte/src/internal/shared/validate.js
-function validate_store(store, name) {
-  if (store != null && typeof store.subscribe !== "function") {
-    store_invalid_shape(name);
-  }
 }
 
 // node_modules/svelte/src/internal/client/dom/blocks/svelte-component.js
@@ -4520,10 +4508,37 @@ function create_custom_element(Component, props_definition, slots, exports, use_
   return Class;
 }
 
+// node_modules/svelte/src/internal/shared/validate.js
+function validate_store(store, name) {
+  if (store != null && typeof store.subscribe !== "function") {
+    store_invalid_shape(name);
+  }
+}
+
 // Resources/Private/JavaScript/components/Image.svelte
 import interact from "interactjs";
 
 // Resources/Private/JavaScript/store.svelte.js
+var SHAPE_CONSTRUCTOR = {
+  rect(config) {
+    return {
+      x: 0,
+      y: 0,
+      width: parseFloat(config.defaultWidth),
+      height: parseFloat(config.defaultHeight)
+    };
+  },
+  polygon() {
+    return {
+      points: [
+        [10, 10],
+        [50, 10],
+        [50, 50],
+        [10, 50]
+      ]
+    };
+  }
+};
 var wizardConfigStore = writable(null);
 var focuspoints = writable([]);
 var activeIndex = state(0);
@@ -4593,7 +4608,7 @@ var fieldMeetsCondition = (fieldName, point) => {
       return false;
   }
 };
-var createNewFocuspoint = (isRect) => {
+var createNewFocuspoint = (shape) => {
   const config = get2(wizardConfigStore);
   const newFocuspoint = Object.keys(config.fields).reduce(
     (acc, key) => {
@@ -4602,25 +4617,8 @@ var createNewFocuspoint = (isRect) => {
     },
     {}
   );
-  if (isRect) {
-    newFocuspoint.__shape = "rect";
-    newFocuspoint.__data = {
-      x: 0,
-      y: 0,
-      width: parseFloat(config.defaultWidth),
-      height: parseFloat(config.defaultHeight)
-    };
-  } else {
-    newFocuspoint.__shape = "polygon";
-    newFocuspoint.__data = {
-      points: [
-        [10, 10],
-        [50, 10],
-        [50, 50],
-        [10, 50]
-      ]
-    };
-  }
+  newFocuspoint.__shape = shape;
+  newFocuspoint.__data = SHAPE_CONSTRUCTOR[shape](config);
   focuspoints.update((focuspoints2) => [...focuspoints2, newFocuspoint]);
   set(activeIndex, focuspoints.length - 1);
 };
@@ -5146,7 +5144,7 @@ function Icon($$anchor, $$props) {
   });
   var fragment = comment();
   var node = first_child(fragment);
-  html(node, () => get(innerHtml));
+  html(node, () => get(innerHtml), false, false);
   append($$anchor, fragment);
   return pop({
     get name() {
@@ -5257,7 +5255,7 @@ function Link($$anchor, $$props) {
   var div_3 = child(div_2);
   var span = child(div_3);
   var node = child(span);
-  html(node, () => get(previewIcon));
+  html(node, () => get(previewIcon), false, false);
   reset(span);
   var input = sibling(span, 2);
   var div_4 = sibling(input, 2);
@@ -5509,7 +5507,7 @@ function Sidebar($$anchor, $$props) {
     var div_2 = root_14();
     var div_3 = child(div_2);
     var h4 = child(div_3);
-    set_attribute(h4, "id", `cropper-accordion-heading-${index2}`);
+    set_attribute(h4, "id", `cropper-accordion-heading-${index2 ?? ""}`);
     var button = child(h4);
     let classes_1;
     var span = sibling(child(button), 2);
@@ -5519,9 +5517,9 @@ function Sidebar($$anchor, $$props) {
     reset(h4);
     reset(div_3);
     var div_4 = sibling(div_3, 2);
-    set_attribute(div_4, "id", `cropper-collapse-${index2}`);
+    set_attribute(div_4, "id", `cropper-collapse-${index2 ?? ""}`);
     let classes_2;
-    set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2}`);
+    set_attribute(div_4, "aria-labelledby", `cropper-accordion-heading-${index2 ?? ""}`);
     var div_5 = child(div_4);
     var node = child(div_5);
     each(node, 1, () => Object.entries($wizardConfigStore().fields), index, ($$anchor3, $$item) => {
@@ -5607,8 +5605,8 @@ function Sidebar($$anchor, $$props) {
       v12: $wizardConfigStore() && $wizardConfigStore().typo3Version < 13
     })
   ]);
-  event("click", button_2, preventDefault(() => createNewFocuspoint(false)));
-  event("click", button_3, preventDefault(() => createNewFocuspoint(true)));
+  event("click", button_2, preventDefault(() => createNewFocuspoint("polygon")));
+  event("click", button_3, preventDefault(() => createNewFocuspoint("rect")));
   append($$anchor, div);
   var $$pop = pop({ ...legacy_api() });
   $$cleanup();
