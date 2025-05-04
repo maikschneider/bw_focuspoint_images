@@ -40,9 +40,13 @@
 				<source>Delete</source>
 				<target>Löschen</target>
 			</trans-unit>
-			<trans-unit id="wizard.single_point.button.addnew">
-				<source>Add new Focus Point</source>
-				<target>Neuen Punkt hinzufügen</target>
+			<trans-unit id="wizard.single_point.button.new.rect">
+				<source>New Rect</source>
+				<target>Neues Rechteck</target>
+			</trans-unit>
+			<trans-unit id="wizard.single_point.button.new.polygon">
+				<source>New Polygon</source>
+				<target>Neuer Pfad</target>
 			</trans-unit>
 			<trans-unit id="wizard.fields.title">
 				<source />

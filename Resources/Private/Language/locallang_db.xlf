@@ -30,8 +30,11 @@
 			<trans-unit id="wizard.single_point.button.delete">
 				<source>Delete</source>
 			</trans-unit>
-			<trans-unit id="wizard.single_point.button.addnew">
-				<source>Add new Focus Point</source>
+			<trans-unit id="wizard.single_point.button.new.rect">
+				<source>New Rect</source>
+			</trans-unit>
+			<trans-unit id="wizard.single_point.button.new.polygon">
+				<source>New Polygon</source>
 			</trans-unit>
 			<trans-unit id="wizard.fields.link">
 				<source>Link</source>

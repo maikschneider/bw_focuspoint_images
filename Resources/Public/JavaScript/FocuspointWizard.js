@@ -337,17 +337,6 @@ function reset(node) {
   }
   hydrate_node = node;
 }
-function next(count = 1) {
-  if (hydrating) {
-    var i = count;
-    var node = hydrate_node;
-    while (i--) {
-      node = /** @type {TemplateNode} */
-      get_next_sibling(node);
-    }
-    hydrate_node = node;
-  }
-}
 function remove_nodes() {
   var depth = 0;
   var node = hydrate_node;
@@ -5468,7 +5457,7 @@ var root_14 = add_locations(template(`<div class="panel panel-default" data-crop
     ]
   ]
 ]);
-var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100 "><!> </button> <button class="btn btn-success w-100 "><!> Add rect</button></div></div>`), Sidebar[FILENAME], [
+var root7 = add_locations(template(`<div><div class="panel-group svelte-1o07nn1" role="tablist" aria-multiselectable="false"></div> <div class="pt-3"><button class="btn btn-success w-100"><!> </button> <button class="btn btn-success w-100"><!> </button></div></div>`), Sidebar[FILENAME], [
   [
     67,
     0,
@@ -5591,12 +5580,13 @@ function Sidebar($$anchor, $$props) {
   var node_4 = child(button_2);
   Icon(node_4, { name: "actions-add" });
   var text_2 = sibling(node_4);
-  text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.addnew"] ?? ""}`;
+  text_2.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.new.polygon"] ?? ""}`;
   reset(button_2);
   var button_3 = sibling(button_2, 2);
   var node_5 = child(button_3);
   Icon(node_5, { name: "actions-add" });
-  next();
+  var text_3 = sibling(node_5);
+  text_3.nodeValue = ` ${window.parent.frames.list_frame.TYPO3.lang["wizard.single_point.button.new.rect"] ?? ""}`;
   reset(button_3);
   reset(div_6);
   reset(div);

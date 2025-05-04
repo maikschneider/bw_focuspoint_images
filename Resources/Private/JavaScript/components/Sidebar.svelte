@@ -111,13 +111,13 @@
     </div>
 
     <div class="pt-3">
-        <button class="btn btn-success w-100 " on:click|preventDefault={() => createNewFocuspoint("polygon")}>
+        <button class="btn btn-success w-100" on:click|preventDefault={() => createNewFocuspoint("polygon")}>
             <Icon name="actions-add" />
-            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.addnew']}
+            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.new.polygon']}
         </button>
-        <button class="btn btn-success w-100 " on:click|preventDefault={() => createNewFocuspoint("rect")}>
+        <button class="btn btn-success w-100" on:click|preventDefault={() => createNewFocuspoint("rect")}>
             <Icon name="actions-add" />
-            Add rect
+            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.new.rect']}
         </button>
     </div>
 
