@@ -1,6 +1,6 @@
 <svelte:options customElement={{tag: 'focuspoint-element', shadow: 'none'}} />
 
-<script>
+<script lang="ts">
     import {onDestroy, onMount} from "svelte"
     import Modal from '@typo3/backend/modal.js'
     import Icons from '@typo3/backend/icons.js'
@@ -22,7 +22,7 @@
         window.document.removeEventListener(`${itemFormElName}-wizard-update`, onWizardUpdate)
     })
 
-    function onButtonClick(e) {
+    function onButtonClick(e: MouseEvent & {currentTarget: EventTarget & HTMLButtonElement}) {
         e.preventDefault()
 
         const typo3Version = JSON.parse(wizardConfig).typo3Version
@@ -74,11 +74,11 @@
         document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
     }
 
-    function onWizardUpdate(e) {
+    function onWizardUpdate(e: WizardUpdateEvent) {
         itemFormElValue = JSON.stringify(e.detail.focuspoints)
     }
 
-    function onLinkSelection(e) {
+    function onLinkSelection(e: Event & {currentTarget: EventTarget & HTMLInputElement}) {
         window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-link-selected`, {
             detail: {link: e.currentTarget.value}
         }))

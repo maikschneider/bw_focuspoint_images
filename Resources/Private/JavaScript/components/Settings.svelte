@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {focuspoints, wizardConfigStore} from '../store.svelte';
     import Notification from "@typo3/backend/notification.js";
     import Icon from "./Icon.svelte";

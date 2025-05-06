@@ -1,19 +1,16 @@
-<script>
+<script lang="ts">
     import interact from 'interactjs';
     import {focuspoints, getActiveIndex, setActiveIndex, SHAPES} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
-    import Rect from '../shapes/Rect.svelte';
-    import Polygon from '../shapes/Polygon.svelte';
 
-    let {image} = $props();
+    const {image}: {image: string} = $props();
 
-    let canvasHeight = $state(0);
-    let canvasWidth = $state(0);
-    let imageWidth = $state(0);
-    let imageHeight = $state(0);
-    let initialized = $state(false);
-    let isDarkMode = $state(false);
-    let imgElement;
+    let canvasHeight: number = $state(0);
+    let canvasWidth: number = $state(0);
+    let imageWidth: number = $state(0);
+    let imageHeight: number = $state(0);
+    let isDarkMode: boolean = $state(false);
+    let imgElement: HTMLImageElement;
 
     interact(".draggable")
         .resizable({
@@ -26,7 +23,7 @@
             ],
             listeners: {
                 start: setActiveFocuspoint,
-                move(event) {
+                move(event: any) {
                     const index = parseInt(event.target.getAttribute('data-index'));
                     $focuspoints[index].__data.x = ($focuspoints[index].__data.x / imageWidth * canvasWidth + event.deltaRect.left);
                     $focuspoints[index].__data.y = ($focuspoints[index].__data.y / imageHeight * canvasHeight + event.deltaRect.top);
@@ -46,7 +43,7 @@
             autoScroll: true,
             listeners: {
                 start: setActiveFocuspoint,
-                move(event) {
+                move(event: any) {
                     const index = parseInt(event.target.getAttribute('data-index'));
                     $focuspoints[index].__data.x = $focuspoints[index].__data.x + event.dx / canvasWidth * imageWidth;
                     $focuspoints[index].__data.y = $focuspoints[index].__data.y + event.dy / canvasHeight * imageHeight;
@@ -60,9 +57,9 @@
         listeners: {
             // call this function on every dragmove event
             start: setActiveFocuspoint,
-            move(event) {
+            move(event: any) {
                 const index = parseInt(event.target.getAttribute('data-index'));
-                $focuspoints[index].__data.points = $focuspoints[index].__data.points.map(([x, y]) => [x + event.dx, y + event.dy]);
+                $focuspoints[index].__data.points = $focuspoints[index].__data.points.map(([x, y]: [number, number]) => [x + event.dx, y + event.dy]);
             },
             end: setActiveFocuspoint
         }
@@ -70,7 +67,7 @@
     interact("polygon ~ .shape-handle").draggable({
         listeners: {
             start: setActiveFocuspoint,
-            move(event) {
+            move(event: any) {
                 const index = parseInt(event.target.getAttribute('data-index'));
                 const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
                 const [x, y] = $focuspoints[index].__data.points[pointIndex];
@@ -88,13 +85,13 @@
         }
 
         window.addEventListener('resize', updateCanvasSizes)
-        const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
-        const theme = document.querySelector('html').getAttribute('data-theme');
+        const colorScheme = document.querySelector('html')!.getAttribute('data-color-scheme');
+        const theme = document.querySelector('html')!.getAttribute('data-theme');
         const darkModePrefer = window.matchMedia('(prefers-color-scheme: dark)').matches;
         isDarkMode = colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light');
     });
 
-    function setActiveFocuspoint(event) {
+    function setActiveFocuspoint(event: any) {
         const index = parseInt(event.target.getAttribute('data-index'));
         setActiveIndex(index);
     }
@@ -104,22 +101,22 @@
         imageHeight = imgElement.naturalHeight;
     }
 
-    function onSvgDblClick(event) {
+    function onSvgDblClick(event: MouseEvent) {
         if (!$focuspoints[getActiveIndex()] || !(event.target instanceof SVGSVGElement))
             return;
         const rect = event.target.getBoundingClientRect();
         const viewBox = event.target.viewBox.baseVal;
         const ratio = viewBox.width / rect.width;
-        const point = [event.layerX * ratio, event.layerY * ratio];
+        const point = [event.layerX * ratio, event.layerY * ratio] as [number, number];
         const index = findClosestMiddlePointIndex(point);
         const points = $focuspoints[getActiveIndex()].__data.points.slice();
         points.splice(index + 1, 0, point);
         $focuspoints[getActiveIndex()].__data.points = points;
     }
 
-    function findClosestMiddlePointIndex(point) {
+    function findClosestMiddlePointIndex(point: [number, number]) {
         const points = $focuspoints[getActiveIndex()].__data.points;
-        const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map(segment => {
+        const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map((segment: [[number, number], [number, number]]) => {
             const [[x1, y1], [x2, y2]] = segment;
             return [
                 x1 + (x2 - x1) / 2,
@@ -127,18 +124,18 @@
             ];
         });
         let index = 0;
-        let closest = [Infinity, Infinity];
+        let closest = [Infinity, Infinity] as [number, number];
         for (const i in middlePoints) {
             const middlePoint = middlePoints[i];
             if (distance(point, middlePoint) < distance(point, closest)) {
                 closest = middlePoint;
-                index = i;
+                index = +i;
             }
         }
         return +index;
     }
 
-    function distance([x1, y1], [x2, y2]) {
+    function distance([x1, y1]: [number, number], [x2, y2]: [number, number]) {
         return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
     }
 
@@ -153,9 +150,8 @@
     }
 
     export function updateCanvasSizes() {
-        canvasHeight = imgElement.parentElement.getBoundingClientRect().height
-        canvasWidth = imgElement.parentElement.getBoundingClientRect().width
-        initialized = true
+        canvasHeight = imgElement.parentElement!.getBoundingClientRect().height
+        canvasWidth = imgElement.parentElement!.getBoundingClientRect().width
     }
 
 </script>
@@ -200,7 +196,7 @@
     }
 </style>
 
-<div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
+<div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
     <div class="wrapper">
         <svg viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}

@@ -1,10 +1,12 @@
 {
 	"extends": "@tsconfig/svelte/tsconfig.json",
 	"compilerOptions": {
-		"strict": true
+		"strict": true,
+		"lib": [
+			"ESNext"
+		]
 	},
 	"include": [
-  		"Resources/Private/JavaScript/FocuspointElement.svelte",
-        "Resources/Private/JavaScript/FocuspointWizard.svelte"
+  		"./Resources/Private/JavaScript/**/*"
 	]
 }

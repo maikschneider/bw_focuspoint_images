@@ -1,10 +1,14 @@
-<script>
+<script lang="ts">
     import Icons from "@typo3/backend/icons.js";
 
-    const {name} = $props();
-    let innerHtml = $state("");
+    type Props = {
+        name: string;
+    }
 
-    Icons.getIcon(name, Icons.sizes.small).then((html) => {
+    const {name}: Props = $props();
+    let innerHtml: string = $state("");
+
+    Icons.getIcon(name, Icons.sizes.small).then((html: string) => {
         innerHtml = html;
     });
 </script>

@@ -30,7 +30,7 @@
     }
 </style>
 
-<script>
+<script lang="ts">
     import {onDestroy, onMount} from "svelte";
     import Image from './components/Image.svelte';
     import Sidebar from "./components/Sidebar.svelte";
@@ -44,7 +44,7 @@
     let sidebarWidth = $state(300)
     const minSidebarWidth = 200
 
-    const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName}"]`)
+    const hiddenInput = window.parent.frames.list_frame.document.querySelector<HTMLInputElement>(`[name="${itemFormElName}"]`)!
 
     onMount(() => {
         initStores(hiddenInput, wizardConfig)

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {focuspoints, getActiveIndex} from "../store.svelte";
 
     const {index} = $props();

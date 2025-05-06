@@ -1,16 +1,26 @@
-<script>
+<script lang="ts">
     import {focuspoints, wizardConfigStore} from '../../store.svelte.js'
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
     import Icon from '../Icon.svelte';
 
+    type LinkBrowserData = {
+        url: string;
+        preview?: {
+            text?: string;
+            icon?: string;
+        }
+    };
+
     let {config, index, name} = $props()
-    let linkBrowserData = $state(null)
+    let linkBrowserData: LinkBrowserData | null = $state(null)
     let readOnly = $state(true)
+    // @ts-ignore
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
+    // @ts-ignore
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
 
-    const handleLinkSelection = (event) => {
+    const handleLinkSelection = (event: LinkSelectedEvent) => {
         $focuspoints[index][name] = event.detail.link
         updateLinkBrowserInfo()
     }
@@ -30,7 +40,7 @@
 
         const modal = Modal.advanced({
             type: Modal.types.iframe,
-            content: linkBrowserData.url,
+            content: linkBrowserData!.url,
             size: Modal.sizes.large,
         })
 

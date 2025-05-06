@@ -1,10 +1,12 @@
-<script>
+<script lang="ts">
     let {image, points, itemFormElName} = $props();
 
     let width = $state(0);
     let height = $state(0);
 
-    function onload(e) {
+    function onload(e: Event) {
+        if (!(e.target instanceof HTMLImageElement))
+            return;
         width = e.target.naturalWidth;
         height = e.target.naturalHeight;
     }
@@ -43,7 +45,7 @@
                 <rect x="0" y="0" width={width} height={height} fill="white" />
                 {#each points as point}
                     {#if point.__shape === "polygon"}
-                        <polygon points={point.__data.points.map(xy => xy.join(",")).join(" ")} fill="black" />
+                        <polygon points={point.__data.points.map((xy: [number, number]) => xy.join(",")).join(" ")} fill="black" />
                     {:else if point.__shape === "rect"}
                         <rect x={point.__data.x} y={point.__data.y} width={point.__data.width} height={point.__data.height} />
                     {/if}
