@@ -1,0 +1,10 @@
+{
+	"extends": "@tsconfig/svelte/tsconfig.json",
+	"compilerOptions": {
+		"strict": true
+	},
+	"include": [
+  		"Resources/Private/JavaScript/FocuspointElement.svelte",
+        "Resources/Private/JavaScript/FocuspointWizard.svelte"
+	]
+}
