@@ -20,7 +20,7 @@
     // @ts-ignore
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
 
-    const handleLinkSelection = (event: LinkSelectedEvent) => {
+    const handleLinkSelection = (event: FocuspointLinkSelectedEvent) => {
         $focuspoints[index][name] = event.detail.link
         updateLinkBrowserInfo()
     }

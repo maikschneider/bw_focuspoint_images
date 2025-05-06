@@ -1,10 +1,10 @@
-declare type WizardUpdateEvent = {
+declare type FocuspointWizardUpdateEvent = {
   detail: {
     focuspoints: any[];
   };
 };
 
-declare type LinkSelectedEvent = {
+declare type FocuspointLinkSelectedEvent = {
   detail: {
     link: string;
   };
@@ -28,11 +28,11 @@ interface Window {
 
 interface Document {
 
-  addEventListener(event: `${string}-wizard-update`, listener: (event: WizardUpdateEvent) => void): void;
+  addEventListener(event: `${string}-wizard-update`, listener: (event: FocuspointWizardUpdateEvent) => void): void;
 
-  removeEventListener(event: `${string}-wizard-update`, listener: (event: WizardUpdateEvent) => void): void;
+  removeEventListener(event: `${string}-wizard-update`, listener: (event: FocuspointWizardUpdateEvent) => void): void;
 
-  addEventListener(event: `${string}-link-selected`, listener: (event: LinkSelectedEvent) => void): void;
+  addEventListener(event: `${string}-link-selected`, listener: (event: FocuspointLinkSelectedEvent) => void): void;
 
-  removeEventListener(event: `${string}-link-selected`, listener: (event: LinkSelectedEvent) => void): void;
+  removeEventListener(event: `${string}-link-selected`, listener: (event: FocuspointLinkSelectedEvent) => void): void;
 }

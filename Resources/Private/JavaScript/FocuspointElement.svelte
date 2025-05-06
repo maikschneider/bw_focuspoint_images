@@ -74,7 +74,7 @@
         document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
     }
 
-    function onWizardUpdate(e: WizardUpdateEvent) {
+    function onWizardUpdate(e: FocuspointWizardUpdateEvent) {
         itemFormElValue = JSON.stringify(e.detail.focuspoints)
     }
 
