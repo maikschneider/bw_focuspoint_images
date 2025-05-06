@@ -6,10 +6,10 @@
 
     type LinkBrowserData = {
         url: string;
-        preview?: {
+        preview: {
             text?: string;
             icon?: string;
-        }
+        } | null;
     };
 
     let {config, index, name} = $props()
@@ -55,7 +55,7 @@
 
     function onInputClear() {
         $focuspoints[index][name] = ''
-        linkBrowserData.preview = null
+        linkBrowserData!.preview = null
     }
 </script>
 
@@ -82,7 +82,7 @@
     }
 </style>
 
-<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version! < 13}>
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>
@@ -90,7 +90,7 @@
         <div class="form-wizards-element">
             <div class="input-group t3js-form-field-link">
                 <span class="t3js-form-field-link-icon input-group-text">{@html previewIcon}</span>
-                <input class="form-control" title="" value="" readonly="" hidden="">
+                <input class="form-control" title="" value="" readonly hidden="">
                 <div class="form-control-clearable-wrapper">
                     <input
                             type="text"

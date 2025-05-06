@@ -4,7 +4,7 @@
     import Icon from "./Icon.svelte";
 
     let {itemFormElName, isSettingsOpenValue = $bindable()} = $props()
-    let focuspointArea;
+    let focuspointArea: HTMLTextAreaElement;
     let jsonPoints = $state(JSON.stringify($focuspoints, null, "\t"));
     let hasError = $state(false)
     let hasChange = $state(false)
@@ -67,7 +67,7 @@
     }
 </style>
 
-<div class="d-flex justify-content-center align-items-center wrapper" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="d-flex justify-content-center align-items-center wrapper" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version! < 13}>
 
     <fieldset class="form-section">
         <div class="d-flex justify-content-between">

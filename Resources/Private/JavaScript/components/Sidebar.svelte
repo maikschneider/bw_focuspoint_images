@@ -15,9 +15,7 @@
     import Checkbox from "./Fields/Checkbox.svelte";
     import Icon from './Icon.svelte';
 
-    let focuspointName = $derived((focuspoint, index) => focusPointName(index))
-
-    function deleteFocuspoint(index) {
+    function deleteFocuspoint(index: number) {
         $focuspoints = $focuspoints.filter((focuspoint, i) => i !== index)
     }
 
@@ -65,7 +63,7 @@
 
 </style>
 
-<div class="modal-panel-sidebar" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="modal-panel-sidebar" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version! < 13}>
     <div class="panel-group" role="tablist" aria-multiselectable="false">
         {#each $focuspoints as focuspoint, index}
             <div class="panel panel-default" data-crop-variant-container="default">
@@ -82,7 +80,7 @@
                             data-crop-variant="">
                             <span class="caret"></span>
                             <span class="panel-title">
-                                {focuspointName(focuspoint, index)}
+                                {focusPointName(index)}
                             </span>
                         </button>
                     </h4>

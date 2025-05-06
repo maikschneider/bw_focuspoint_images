@@ -10,19 +10,20 @@ declare type FocuspointLinkSelectedEvent = {
   };
 };
 
-declare const TYPO3: {
+declare type TYPO3 = {
   lang: {[K in string]: string};
   settings: {
     ajaxUrls: {[K in string]: string};
   };
+  Modal: {
+    dismiss(): void;
+  };
 };
 
+declare const TYPO3: TYPO3;
+
 interface Window {
-  TYPO3: {
-    Modal: {
-      dismiss(): void;
-    }
-  }
+  TYPO3: TYPO3;
   list_frame: Window;
 }
 

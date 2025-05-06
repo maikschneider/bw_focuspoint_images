@@ -13,6 +13,10 @@ declare module "@typo3/backend/modal.js" {
     iframe
   }
 
+  export declare interface Modal {
+    addEventListener(event: "typo3-modal-hidden", listener: () => void): void;
+  }
+
   export function advanced(config: {
     additionalCssClasses?: string[];
     buttons?: {
@@ -27,5 +31,6 @@ declare module "@typo3/backend/modal.js" {
     title?: string;
     style?: styles | null;
     staticBackdrop?: boolean;
-  }): void;
+    type?: types;
+  }): Modal;
 }

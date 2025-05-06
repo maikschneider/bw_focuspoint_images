@@ -13,6 +13,7 @@ type WizardConfig = {
   defaultWidth?: string;
   defaultHeight?: string;
   itemFormElName?: string;
+  typo3Version?: number;
   fields: {
     [K in string]: {
       displayCond?: string;
