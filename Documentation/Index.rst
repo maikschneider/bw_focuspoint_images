@@ -192,11 +192,11 @@ Upgrade
 
 To version 6.x
 ---------------
-The rectangular shapes were replaced with custom polygon areas.
+Added polygon shapes.
 
-The JSON schema for the column `focus_points` was changed. Objects do not have the properties `x`, `y`, `width` and `height`. Instead, they must be replaced with a property `points` that contains an array of two-dimensional points.
+The JSON schema for the column `focus_points` was changed. Object properties like `x`, `y`, `width` and `height` are moved one level deeper into the key `__data`. In order to migrate the schema there is a command `focuspoint:schema:repair`
 
-Default fields like `name`, `description`, `color`, `hasLink` were deleted but they can be created per project anyways. The default Fluid template renders only polygons and links. You must override them if you need extra fields to be rendered.
+Default fields like `name`, `description`, `color`, `hasLink` were deleted but they can be created per project anyways. The default Fluid template renders only shapes and links. You must override them if you need extra fields to be rendered.
 
 Fixed a visual bug, when the `<svg>` element couldn't fully overlap the `<img>` when the image's width is not 100%. All images by default have the width of 100%.
 
@@ -243,4 +243,4 @@ Feel free to contribute!
     TYPO3 v12 support
 
 .. versionadded:: 6.0.0
-    Replace rectangular areas with custom polygon forms
+    Add polygons in addition to rects
