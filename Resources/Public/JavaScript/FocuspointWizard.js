@@ -5118,7 +5118,7 @@ function Image($$anchor, $$props) {
     set(isDarkMode, strict_equals(colorScheme, "dark") || strict_equals(theme, "auto") && darkModePrefer && strict_equals(colorScheme, "light", false), true);
   });
   function setActiveFocuspoint(event2) {
-    const index2 = parseInt(event2.target.getAttribute("data-index"));
+    const index2 = parseInt(event2.target.getAttribute("data-shape-index") ?? event2.target.getAttribute("data-index"));
     setActiveIndex(index2);
   }
   function onload() {

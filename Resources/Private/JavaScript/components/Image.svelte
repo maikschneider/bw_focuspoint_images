@@ -64,7 +64,7 @@
     });
 
     function setActiveFocuspoint(event: any) {
-        const index = parseInt(event.target.getAttribute('data-index'));
+        const index = parseInt(event.target.getAttribute("data-shape-index") ?? event.target.getAttribute('data-index'));
         setActiveIndex(index);
     }
 
