@@ -18,7 +18,7 @@
 
 .shape-handle {
     cursor: pointer;
-    stroke-width: 5px;
+    stroke-width: 10px;
     stroke: transparent;
     fill: #ff8700;
 }
