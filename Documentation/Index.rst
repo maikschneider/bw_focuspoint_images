@@ -2,7 +2,8 @@ Overview
 ====================
 
 With this TYPO3 extension you can create responsive image maps in the
-backend. This extension ships an image editor that can be used to add areas and information to an image.
+backend. This extension ships an image editor that can be used to add
+interactive clickable areas and information to an image.
 
 .. figure:: ./Images/example_backend.png
    :alt: Editor in the backend
@@ -11,26 +12,17 @@ backend. This extension ships an image editor that can be used to add areas and 
 Examples
 --------
 
-.. _example1:
+.. _example:
 
-Example 1: Default output
+Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Frontend output with configuration of :ref:`example PageTS <pagets_fields>`
 
-.. figure:: ./Images/example_frontend.jpg
+.. figure:: ./Images/example_frontend.png
    :alt: Frontend output example 1
    :class: with-shadow
 
-
-Example 2: SVG Animation
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-In this example the focus areas are animated via SVG. The additional information are displayed next to the image with some delay.
-
-.. figure:: ./Images/example_animation.gif
-   :alt: Frontend output example 2
-   :class: with-shadow
 
 For administrators
 ==================
@@ -60,9 +52,15 @@ Usage
 Add the new content element “Image with Focuspoints” to any page, link a new
 image and start adding your focus areas.
 
-.. figure:: ./Images/backend-collage.jpg
+.. figure:: ./Images/backend_select.png
    :alt: Backend view
    :class: with-shadow
+
+The next actions are available in the editor:
+
+* Moving areas around with the mouse
+* Double-click outside any area to create a new point for an active area
+* Double-click on any point to delete the point
 
 Configuration
 -------------
@@ -78,34 +76,16 @@ This example configuration is used to generate the output shown in :ref:`Example
 
 .. code:: typoscript
 
-   mod.tx_bwfocuspointimages.settings.fields {
-
-       name {
-           title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
-           type = text
-       }
-
-       description {
-           title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.description
-           type = textarea
-       }
-
-       color {
-           title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color
-           type = select
-           options {
-               red = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.red
-               green = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.green
-               blue = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.blue
-           }
-       }
-
-       link {
-          title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
-          type = link
-       }
-
-   }
+    mod.tx_bwfocuspointimages.settings.fields {
+        link {
+            title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
+            type = link
+        }
+        title {
+            title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.title
+            type = text
+        }
+    }
 
 Adjusting the link wizard
 +++++++++++++++++++++++++
@@ -210,6 +190,16 @@ To decode the json format and use relative points in your fluid template, use th
 Upgrade
 =======
 
+To version 6.x
+---------------
+Added polygon shapes.
+
+The JSON schema for the column `focus_points` was changed. Object properties like `x`, `y`, `width` and `height` are moved one level deeper into the key `__data`. In order to migrate the schema there is a command `focuspoint:schema:repair`
+
+Default fields like `name`, `description`, `color`, `hasLink` were deleted but they can be created per project anyways. The default Fluid template renders only shapes and links. You must override them if you need extra fields to be rendered.
+
+Fixed a visual bug, when the `<svg>` element couldn't fully overlap the `<img>` when the image's width is not 100%. All images by default have the width of 100%.
+
 To version 4.x
 ---------------
 
@@ -250,4 +240,7 @@ Feel free to contribute!
    Native link browser: Supports all configured LinkBrowsers (e.g. Files), drop support of TYPO3 v7 & v8, new backend preview
 
 .. versionadded:: 4.0.0
-	TYPO3 v12 support
+    TYPO3 v12 support
+
+.. versionadded:: 6.0.0
+    Add polygons in addition to rects

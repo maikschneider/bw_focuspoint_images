@@ -251,4 +251,12 @@ class HelperUtility
         $data['additionalAttributes'] = '<div class="help-block">' . implode(' - ', $additionalAttributes) . '</div>';
         return $data;
     }
+
+    public static function arraySome(array $array, callable $f): bool
+    {
+        foreach ($array as $item)
+            if ($f($item))
+                return true;
+        return false;
+    }
 }

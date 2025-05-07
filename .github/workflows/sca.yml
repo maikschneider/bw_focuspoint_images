@@ -48,3 +48,8 @@ jobs:
         with:
           files: phpstan.xml
           notices-as-warnings: true
+
+      - name: TypeScript check
+        run: |
+          ddev npm install
+          ddev npm run check

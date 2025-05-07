@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {focuspoints} from '../../store.svelte.js'
 
     let {config, index, name} = $props()
