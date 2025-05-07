@@ -195,6 +195,54 @@ tt_content.your_list_type {
 }
 ```
 
+For contributors
+================
+
+Let's say you want to create a new shape - triangle. In order to define a new shape, you need to:
+1. Create a class `TriangleShapeRenderer` that implements the `ShapeRendererInterface` interface with the method `render()` that should return a corresponding SVG-shape. It's to render previews in the backend and to render shapes through the `<focuspoint:shape>` view helper (see examples for rects and polygons)
+2. Extend the `ShapeRendererFactory::MAPPING` array with a new keyword that maps to the previously created shape renderer: `'triangle' => TriangleShapeRenderer::class`
+3. Add a new Svelte component that should render the triangle:
+```svelte
+<!-- shapes/Triangle.svelte -->
+<script lang="ts">
+    import {focuspoints} from "../store.svelte";
+
+    const {index} = $props();
+
+    export function getHandles(): [number, number][] {...} // Returns an array of handles (points). Required
+
+    export function onDrag(event: InteractjsDragEvent): void {...} // How the triangle data gets transformed when the figure is being dragged. Required.
+
+    export function onHandleDrag(event: InteractjsDragEvent): void {...} // How the triangle's individual handle gets transformed when the handle is being dragged. Optional.
+
+    export function onHandleDoubleClick(event: MouseEvent & {currentTarget: EventTarget & SVGCircleElement}) {...} // What happens when double-click on a handle is performed. Optional.
+</script>
+
+<!-- Render implementation -->
+```
+
+4. Extend the `SHAPES` constant in the `store.svelte.ts` with a new creation logic:
+```ts
+import Triangle from "./shapes/Triangle.svelte";
+
+export const SHAPES: {[K in ShapeType]: ShapeConfig} = {
+  // ...
+  triangle: {
+    component: Triangle,
+    constructor(config: WizardConfig): object {
+      // Let's suppose the next six variables are defined. The return type can be any
+      return [
+        [x1, y1],
+        [x2, y2],
+        [x3, y3],
+      ];
+    }
+  },
+  // ...
+};
+```
+5. Add a new translation for buttons (see `wizard.single_point.button.new.polygon` translation entry)
+
 License
 =======
 
