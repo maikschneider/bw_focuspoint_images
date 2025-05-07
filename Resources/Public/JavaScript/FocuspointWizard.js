@@ -276,6 +276,15 @@ https://svelte.dev/e/binding_property_non_reactive`, bold, normal);
     console.warn(`https://svelte.dev/e/binding_property_non_reactive`);
   }
 }
+function event_handler_invalid(handler, suggestion) {
+  if (dev_fallback_default) {
+    console.warn(`%c[svelte] event_handler_invalid
+%c${handler} should be a function. Did you mean to ${suggestion}?
+https://svelte.dev/e/event_handler_invalid`, bold, normal);
+  } else {
+    console.warn(`https://svelte.dev/e/event_handler_invalid`);
+  }
+}
 function hydration_attribute_changed(attribute, html2, value) {
   if (dev_fallback_default) {
     console.warn(`%c[svelte] hydration_attribute_changed
@@ -2438,6 +2447,28 @@ function handle_event_propagation(event2) {
     set_active_reaction(previous_reaction);
     set_active_effect(previous_effect);
   }
+}
+function apply(thunk, element2, args, component2, loc, has_side_effects = false, remove_parens = false) {
+  let handler;
+  let error;
+  try {
+    handler = thunk();
+  } catch (e) {
+    error = e;
+  }
+  if (typeof handler !== "function" && (has_side_effects || handler != null || error)) {
+    const filename = component2?.[FILENAME];
+    const location = loc ? ` at ${filename}:${loc[0]}:${loc[1]}` : ` in ${filename}`;
+    const phase = args[0]?.eventPhase < Event.BUBBLING_PHASE ? "capture" : "";
+    const event_name = args[0]?.type + phase;
+    const description = `\`${event_name}\` handler${location}`;
+    const suggestion = remove_parens ? "remove the trailing `()`" : "add a leading `() =>`";
+    event_handler_invalid(description, suggestion);
+    if (error) {
+      throw error;
+    }
+  }
+  handler?.apply(element2, args);
 }
 
 // node_modules/svelte/src/internal/client/dom/blocks/svelte-head.js
@@ -4666,40 +4697,29 @@ import interact from "interactjs";
 
 // Resources/Private/JavaScript/shapes/Polygon.svelte
 Polygon[FILENAME] = "Resources/Private/JavaScript/shapes/Polygon.svelte";
-var root_1 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle>`), Polygon[FILENAME], [[22, 4]]);
-var root = add_locations(ns_template(`<polygon class="shape"></polygon><!>`, 1), Polygon[FILENAME], [[17, 0]]);
+var root = add_locations(ns_template(`<polygon class="shape"></polygon>`), Polygon[FILENAME], [[26, 0]]);
 function Polygon($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Polygon);
   const [$$stores, $$cleanup] = setup_stores();
   const $focuspoints = () => (validate_store(focuspoints, "focuspoints"), store_get(focuspoints, "$focuspoints", $$stores));
   const index2 = prop($$props, "index", 7);
-  function onCircleDblClick(event2) {
-    const index3 = parseInt(event2.currentTarget.getAttribute("data-index"));
-    const pointIndex = parseInt(event2.currentTarget.getAttribute("data-point-index"));
-    store_mutate(focuspoints, untrack($focuspoints)[index3].__data.points = $focuspoints()[index3].__data.points.filter((point, i) => strict_equals(i, pointIndex, false)), untrack($focuspoints));
+  function getHandles() {
+    return $focuspoints()[index2()].__data.points;
   }
   function onDrag(event2) {
     store_mutate(focuspoints, untrack($focuspoints)[index2()].__data.points = $focuspoints()[index2()].__data.points.map(([x, y]) => [x + event2.dx, y + event2.dy]), untrack($focuspoints));
   }
-  var fragment = root();
-  var polygon = first_child(fragment);
-  var node = sibling(polygon);
-  each(node, 1, () => $focuspoints()[index2()].__data.points, index, ($$anchor2, $$item, pointIndex) => {
-    let x = () => get($$item)[0];
-    x();
-    let y = () => get($$item)[1];
-    y();
-    var circle = root_1();
-    set_attribute(circle, "data-point-index", pointIndex);
-    circle.__dblclick = onCircleDblClick;
-    template_effect(() => {
-      set_attribute(circle, "cx", x());
-      set_attribute(circle, "cy", y());
-      set_attribute(circle, "data-index", index2());
-    });
-    append($$anchor2, circle);
-  });
+  function onHandleDrag(event2) {
+    const handleIndex = parseInt(event2.target.getAttribute("data-index"));
+    const [x, y] = $focuspoints()[index2()].__data.points[handleIndex];
+    store_mutate(focuspoints, untrack($focuspoints)[index2()].__data.points[handleIndex] = [x + event2.dx, y + event2.dy], untrack($focuspoints));
+  }
+  function onHandleDoubleClick(event2) {
+    const handleIndex = parseInt(event2.currentTarget.getAttribute("data-index"));
+    store_mutate(focuspoints, untrack($focuspoints)[index2()].__data.points = $focuspoints()[index2()].__data.points.filter((point, i) => strict_equals(i, handleIndex, false)), untrack($focuspoints));
+  }
+  var polygon = root();
   template_effect(
     ($0) => {
       set_attribute(polygon, "points", $0);
@@ -4709,10 +4729,19 @@ function Polygon($$anchor, $$props) {
       () => $focuspoints()[index2()].__data.points.map((point) => point.join(",")).join(" ")
     ]
   );
-  append($$anchor, fragment);
+  append($$anchor, polygon);
   var $$pop = pop({
+    get getHandles() {
+      return getHandles;
+    },
     get onDrag() {
       return onDrag;
+    },
+    get onHandleDrag() {
+      return onHandleDrag;
+    },
+    get onHandleDoubleClick() {
+      return onHandleDoubleClick;
     },
     get index() {
       return index2();
@@ -4726,18 +4755,22 @@ function Polygon($$anchor, $$props) {
   $$cleanup();
   return $$pop;
 }
-delegate(["dblclick"]);
-create_custom_element(Polygon, { index: {} }, [], ["onDrag"], true);
+create_custom_element(
+  Polygon,
+  { index: {} },
+  [],
+  [
+    "getHandles",
+    "onDrag",
+    "onHandleDrag",
+    "onHandleDoubleClick"
+  ],
+  true
+);
 
 // Resources/Private/JavaScript/shapes/Rect.svelte
 Rect[FILENAME] = "Resources/Private/JavaScript/shapes/Rect.svelte";
-var root2 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><circle r="3" class="shape-handle"></circle><rect class="draggable shape"></rect>`, 1), Rect[FILENAME], [
-  [12, 0],
-  [13, 0],
-  [14, 0],
-  [15, 0],
-  [16, 0]
-]);
+var root2 = add_locations(ns_template(`<rect class="draggable shape"></rect>`), Rect[FILENAME], [[67, 0]]);
 function Rect($$anchor, $$props) {
   check_target(new.target);
   push($$props, true, Rect);
@@ -4748,31 +4781,68 @@ function Rect($$anchor, $$props) {
     store_mutate(focuspoints, untrack($focuspoints)[index2()].__data.x = $focuspoints()[index2()].__data.x + event2.dx / canvasWidth() * imageWidth(), untrack($focuspoints));
     store_mutate(focuspoints, untrack($focuspoints)[index2()].__data.y = $focuspoints()[index2()].__data.y + event2.dy / canvasHeight() * imageHeight(), untrack($focuspoints));
   }
-  var fragment = root2();
-  var circle = first_child(fragment);
-  var circle_1 = sibling(circle);
-  var circle_2 = sibling(circle_1);
-  var circle_3 = sibling(circle_2);
-  var rect = sibling(circle_3);
+  function onHandleDrag({ dx, dy, target }) {
+    const handleIndex = parseInt(target.getAttribute("data-index"));
+    let { x, y, width, height } = $focuspoints()[index2()].__data;
+    switch (handleIndex) {
+      case 0:
+        x += dx;
+        y += dy;
+        width -= dx;
+        height -= dy;
+        break;
+      case 1:
+        y += dy;
+        width += dx;
+        height -= dy;
+        break;
+      case 2:
+        width += dx;
+        height += dy;
+        break;
+      case 3:
+        x += dx;
+        width -= dx;
+        height += dy;
+        break;
+    }
+    if (width < 1) {
+      if (strict_equals(handleIndex, 0) || strict_equals(handleIndex, 3)) x += width - 1;
+      width = 1;
+    }
+    if (height < 1) {
+      if (handleIndex <= 1) y += height - 1;
+      height = 1;
+    }
+    store_mutate(focuspoints, untrack($focuspoints)[index2()].__data = { x, y, width, height }, untrack($focuspoints));
+  }
+  function getHandles() {
+    const { x, y, width, height } = $focuspoints()[index2()].__data;
+    return [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height]
+    ];
+  }
+  var rect = root2();
   template_effect(() => {
-    set_attribute(circle, "cx", $focuspoints()[index2()].__data.x);
-    set_attribute(circle, "cy", $focuspoints()[index2()].__data.y);
-    set_attribute(circle_1, "cx", $focuspoints()[index2()].__data.x + $focuspoints()[index2()].__data.width);
-    set_attribute(circle_1, "cy", $focuspoints()[index2()].__data.y);
-    set_attribute(circle_2, "cx", $focuspoints()[index2()].__data.x + $focuspoints()[index2()].__data.width);
-    set_attribute(circle_2, "cy", $focuspoints()[index2()].__data.y + $focuspoints()[index2()].__data.height);
-    set_attribute(circle_3, "cx", $focuspoints()[index2()].__data.x);
-    set_attribute(circle_3, "cy", $focuspoints()[index2()].__data.y + $focuspoints()[index2()].__data.height);
     set_attribute(rect, "x", $focuspoints()[index2()].__data.x);
     set_attribute(rect, "y", $focuspoints()[index2()].__data.y);
     set_attribute(rect, "width", $focuspoints()[index2()].__data.width);
     set_attribute(rect, "height", $focuspoints()[index2()].__data.height);
     set_attribute(rect, "data-index", index2());
   });
-  append($$anchor, fragment);
+  append($$anchor, rect);
   var $$pop = pop({
     get onDrag() {
       return onDrag;
+    },
+    get onHandleDrag() {
+      return onHandleDrag;
+    },
+    get getHandles() {
+      return getHandles;
     },
     get index() {
       return index2();
@@ -4824,7 +4894,7 @@ create_custom_element(
     canvasHeight: {}
   },
   [],
-  ["onDrag"],
+  ["onDrag", "onHandleDrag", "getHandles"],
   true
 );
 
@@ -4980,12 +5050,13 @@ function onSvgDblClick(event2, $focuspoints, findClosestMiddlePointIndex) {
   points.splice(index2 + 1, 0, point);
   store_mutate(focuspoints, untrack($focuspoints)[getActiveIndex()].__data.points = points, untrack($focuspoints));
 }
-var root_12 = add_locations(ns_template(`<g><!></g>`), Image[FILENAME], [[191, 16]]);
+var root_2 = add_locations(ns_template(`<circle r="3" class="shape-handle"></circle>`), Image[FILENAME], [[178, 24]]);
+var root_1 = add_locations(ns_template(`<g><!><!></g>`), Image[FILENAME], [[175, 16]]);
 var root3 = add_locations(template(`<div><div class="wrapper svelte-ukptgm"><svg class="svelte-ukptgm"></svg> <img alt="Selected" unselectable="on" class="svelte-ukptgm"></div></div>`), Image[FILENAME], [
   [
-    187,
+    171,
     0,
-    [[188, 4, [[189, 8], [196, 8]]]]
+    [[172, 4, [[173, 8], [183, 8]]]]
   ]
 ]);
 var $$css = {
@@ -5020,36 +5091,16 @@ function Image($$anchor, $$props) {
       end: setActiveFocuspoint
     }
   });
-  interact(".draggable").resizable({
-    edges: {
-      left: true,
-      right: true,
-      bottom: true,
-      top: true
-    },
+  interact(".shape-handle").draggable({
     modifiers: [
-      interact.modifiers.restrictEdges({ outer: "parent", endOnly: true })
+      interact.modifiers.restrictRect({ restriction: "parent", endOnly: true })
     ],
+    autoScroll: true,
     listeners: {
       start: setActiveFocuspoint,
       move(event2) {
-        const index2 = parseInt(event2.target.getAttribute("data-index"));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.x = $focuspoints()[index2].__data.x / get(imageWidth) * get(canvasWidth) + event2.deltaRect.left, untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.y = $focuspoints()[index2].__data.y / get(imageHeight) * get(canvasHeight) + event2.deltaRect.top, untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.width = event2.rect.width / get(canvasWidth) * get(imageWidth), untrack($focuspoints));
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.height = event2.rect.height / get(canvasHeight) * get(imageHeight), untrack($focuspoints));
-      },
-      end: setActiveFocuspoint
-    }
-  });
-  interact("polygon ~ .shape-handle").draggable({
-    listeners: {
-      start: setActiveFocuspoint,
-      move(event2) {
-        const index2 = parseInt(event2.target.getAttribute("data-index"));
-        const pointIndex = parseInt(event2.target.getAttribute("data-point-index"));
-        const [x, y] = $focuspoints()[index2].__data.points[pointIndex];
-        store_mutate(focuspoints, untrack($focuspoints)[index2].__data.points[pointIndex] = [x + event2.dx, y + event2.dy], untrack($focuspoints));
+        const shapeIndex = parseInt(event2.target.getAttribute("data-shape-index") ?? "-1");
+        get(instanceArray)[shapeIndex]?.onHandleDrag?.(event2);
       },
       end: setActiveFocuspoint
     }
@@ -5119,13 +5170,14 @@ function Image($$anchor, $$props) {
     findClosestMiddlePointIndex
   ];
   each(svg, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
-    var g = root_12();
+    var g = root_1();
+    g.__click = () => setActiveIndex(index2);
     var node = child(g);
     validate_binding(
       "bind:this={instanceArray[index]}",
       () => (mark_store_binding(), get(instanceArray)),
       () => index2,
-      192,
+      176,
       38
     );
     component(node, () => SHAPES[get(focuspoint).__shape].component, ($$anchor3, $$component) => {
@@ -5149,6 +5201,24 @@ function Image($$anchor, $$props) {
         (index3) => get(instanceArray)?.[index3],
         () => [index2]
       );
+    });
+    var node_1 = sibling(node);
+    each(node_1, 17, () => get(instanceArray)[index2]?.getHandles?.(), index, ($$anchor3, $$item, handleIndex) => {
+      let x = () => get($$item)[0];
+      x();
+      let y = () => get($$item)[1];
+      y();
+      var circle = root_2();
+      set_attribute(circle, "data-shape-index", index2);
+      set_attribute(circle, "data-index", handleIndex);
+      circle.__dblclick = function(...$$args) {
+        apply(() => get(instanceArray)[index2]?.onHandleDoubleClick, this, $$args, Image, [178, 114]);
+      };
+      template_effect(() => {
+        set_attribute(circle, "cx", x());
+        set_attribute(circle, "cy", y());
+      });
+      append($$anchor3, circle);
     });
     reset(g);
     template_effect(($0) => set_class(g, 0, $0), [
@@ -5193,7 +5263,7 @@ function Image($$anchor, $$props) {
   $$cleanup();
   return $$pop;
 }
-delegate(["dblclick"]);
+delegate(["dblclick", "click"]);
 create_custom_element(Image, { image: {} }, [], ["updateCanvasSizes"], true);
 
 // node_modules/svelte/src/internal/flags/legacy.js
@@ -5201,7 +5271,7 @@ enable_legacy_mode_flag();
 
 // Resources/Private/JavaScript/components/Fields/Select.svelte
 Select[FILENAME] = "Resources/Private/JavaScript/components/Fields/Select.svelte";
-var root_13 = add_locations(template(`<option> </option>`), Select[FILENAME], [[14, 12]]);
+var root_12 = add_locations(template(`<option> </option>`), Select[FILENAME], [[14, 12]]);
 var root4 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <select class="form-select"></select></div>`), Select[FILENAME], [[8, 0, [[9, 4], [12, 4]]]]);
 function Select($$anchor, $$props) {
   check_target(new.target);
@@ -5220,7 +5290,7 @@ function Select($$anchor, $$props) {
     value();
     let label = () => get($$item).label;
     label();
-    var option = root_13();
+    var option = root_12();
     var option_value = {};
     var text_1 = child(option, true);
     reset(option);
@@ -5595,7 +5665,7 @@ create_custom_element(Link, { config: {}, index: {}, name: {} }, [], [], true);
 
 // Resources/Private/JavaScript/components/Fields/Checkbox.svelte
 Checkbox[FILENAME] = "Resources/Private/JavaScript/components/Fields/Checkbox.svelte";
-var root_14 = add_locations(template(`<span class="form-check-label-icon"><span class="form-check-label-icon-checked"><!></span> <span class="form-check-label-icon-unchecked"><!></span></span>`), Checkbox[FILENAME], [[25, 16, [[26, 20], [29, 20]]]]);
+var root_13 = add_locations(template(`<span class="form-check-label-icon"><span class="form-check-label-icon-checked"><!></span> <span class="form-check-label-icon-unchecked"><!></span></span>`), Checkbox[FILENAME], [[25, 16, [[26, 20], [29, 20]]]]);
 var root8 = add_locations(template(`<div class="form-group"><label class="form-label"> </label> <div><input type="checkbox" class="form-check-input me-1"> <label class="form-check-label"><!> </label></div></div>`), Checkbox[FILENAME], [
   [
     11,
@@ -5629,7 +5699,7 @@ function Checkbox($$anchor, $$props) {
   var node = child(label_1);
   {
     var consequent = ($$anchor2) => {
-      var span = root_14();
+      var span = root_13();
       var span_1 = child(span);
       var node_1 = child(span_1);
       Icon(node_1, { name: "actions-check" });
@@ -5691,7 +5761,7 @@ create_custom_element(Checkbox, { config: {}, index: {}, name: {} }, [], [], tru
 
 // Resources/Private/JavaScript/components/Sidebar.svelte
 Sidebar[FILENAME] = "Resources/Private/JavaScript/components/Sidebar.svelte";
-var root_15 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
+var root_14 = add_locations(template(`<div class="panel panel-default" data-crop-variant-container="default"><div class="panel-heading" role="tab"><h4 class="panel-title"><button data-bs-toggle="collapse" aria-controls="cropper-collapse-1" data-crop-variant-id="default" data-crop-variant=""><span class="caret svelte-1o07nn1"></span> <span class="panel-title"> </span></button></h4></div> <div role="tabpanel"><div class="panel-body"><!> <button class="btn btn-danger" name="reset" title="Reset"><!> </button></div></div></div>`), Sidebar[FILENAME], [
   [
     70,
     12,
@@ -5743,7 +5813,7 @@ function Sidebar($$anchor, $$props) {
   let classes;
   var div_1 = child(div);
   each(div_1, 5, $focuspoints, index, ($$anchor2, focuspoint, index2) => {
-    var div_2 = root_15();
+    var div_2 = root_14();
     var div_3 = child(div_2);
     var h4 = child(div_3);
     set_attribute(h4, "id", `cropper-accordion-heading-${index2}`);
@@ -6066,7 +6136,7 @@ create_custom_element(Settings, { itemFormElName: {}, isSettingsOpenValue: {} },
 
 // Resources/Private/JavaScript/FocuspointWizard.svelte
 FocuspointWizard[FILENAME] = "Resources/Private/JavaScript/FocuspointWizard.svelte";
-var root_2 = add_locations(template(`<!> <div class="resize-handle svelte-2ek5u1" aria-label="Resize sidebar"></div> <!>`, 1), FocuspointWizard[FILENAME], [[95, 8]]);
+var root_22 = add_locations(template(`<!> <div class="resize-handle svelte-2ek5u1" aria-label="Resize sidebar"></div> <!>`, 1), FocuspointWizard[FILENAME], [[95, 8]]);
 var root11 = add_locations(template(`<div class="wizard svelte-2ek5u1"><!></div>`), FocuspointWizard[FILENAME], [[90, 0]]);
 var $$css5 = {
   hash: "svelte-2ek5u1",
@@ -6133,7 +6203,7 @@ function FocuspointWizard($$anchor, $$props) {
       });
     };
     var alternate = ($$anchor2) => {
-      var fragment_1 = root_2();
+      var fragment_1 = root_22();
       var node_1 = first_child(fragment_1);
       Image(node_1, {
         get image() {

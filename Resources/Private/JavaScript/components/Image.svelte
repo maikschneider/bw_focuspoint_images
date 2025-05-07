@@ -31,35 +31,19 @@
         }
     });
 
-    interact(".draggable").resizable({
-        edges: {left: true, right: true, bottom: true, top: true},
+    interact(".shape-handle").draggable({
         modifiers: [
-            interact.modifiers.restrictEdges({
-                outer: "parent",
+            interact.modifiers.restrictRect({
+                restriction: 'parent',
                 endOnly: true
-            }),
+            })
         ],
+        autoScroll: true,
         listeners: {
             start: setActiveFocuspoint,
-            move(event: any) {
-                const index = parseInt(event.target.getAttribute('data-index'));
-                $focuspoints[index].__data.x = ($focuspoints[index].__data.x / imageWidth * canvasWidth + event.deltaRect.left);
-                $focuspoints[index].__data.y = ($focuspoints[index].__data.y / imageHeight * canvasHeight + event.deltaRect.top);
-                $focuspoints[index].__data.width = event.rect.width / canvasWidth * imageWidth;
-                $focuspoints[index].__data.height = event.rect.height / canvasHeight * imageHeight;
-            },
-            end: setActiveFocuspoint
-        }
-    });
-
-    interact("polygon ~ .shape-handle").draggable({
-        listeners: {
-            start: setActiveFocuspoint,
-            move(event: any) {
-                const index = parseInt(event.target.getAttribute('data-index'));
-                const pointIndex = parseInt(event.target.getAttribute("data-point-index"));
-                const [x, y] = $focuspoints[index].__data.points[pointIndex];
-                $focuspoints[index].__data.points[pointIndex] = [x + event.dx, y + event.dy];
+            move(event: InteractjsDragEvent) {
+                const shapeIndex = parseInt(event.target.getAttribute('data-shape-index') ?? "-1");
+                instanceArray[shapeIndex]?.onHandleDrag?.(event);
             },
             end: setActiveFocuspoint
         }
@@ -188,8 +172,11 @@
     <div class="wrapper">
         <svg viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}
-                <g class={["shape-group", index === getActiveIndex() && "active"]}>
+                <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => setActiveIndex(index)}>
                     <svelte:component bind:this={instanceArray[index]} this={SHAPES[focuspoint.__shape].component as ConstructorOfATypedSvelteComponent} index={index} imageWidth={imageWidth} imageHeight={imageHeight} canvasWidth={canvasWidth} canvasHeight={canvasHeight} />
+                    {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
+                        <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" />
+                    {/each}
                 </g>
             {/each}
         </svg>
