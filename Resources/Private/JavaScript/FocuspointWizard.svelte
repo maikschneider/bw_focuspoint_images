@@ -60,7 +60,7 @@
         interact('.resize-handle').draggable({
             axis: 'x',
             listeners: {
-                move(event) {
+                move(event: {dx: number}) {
                     const newWidth = sidebarWidth + event.dx * -1
                     if (newWidth >= minSidebarWidth) {
                         sidebarWidth = newWidth

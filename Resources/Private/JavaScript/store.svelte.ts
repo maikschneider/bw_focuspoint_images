@@ -2,7 +2,12 @@ import {writable, get} from 'svelte/store';
 import Polygon from "./shapes/Polygon.svelte";
 import Rect from "./shapes/Rect.svelte";
 
-type ShapeType = "rect" | "polygon";
+export type ShapeType = "rect" | "polygon";
+
+type Focuspoint = {[K in string]: string} & {
+  __shape: ShapeType;
+  __data: any;
+}
 
 type ShapeConfig = {
   component: Function;
@@ -19,6 +24,7 @@ type WizardConfig = {
       displayCond?: string;
       default?: string;
       useAsName?: boolean | number | string;
+      type?: string;
     }
   }
 }
@@ -47,7 +53,7 @@ export const SHAPES: {[K in ShapeType]: ShapeConfig} = {
 
 export const wizardConfigStore = writable<WizardConfig>({fields: {}});
 
-export const focuspoints = writable<any[]>([]);
+export const focuspoints = writable<Focuspoint[]>([]);
 
 let activeIndex = $state(0);
 

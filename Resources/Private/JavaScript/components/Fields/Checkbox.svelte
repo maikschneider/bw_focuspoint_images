@@ -18,7 +18,7 @@
             type="checkbox"
             class="form-check-input me-1"
             id="input-{index}-{name}"
-            bind:checked={$focuspoints[index][name]}
+            bind:checked={$focuspoints[index][name] as unknown as boolean}
             aria-labelledby="label-{index}-{name}" />
         <label class="form-check-label" for="input-{index}-{name}">
             {#if isCheckbox}

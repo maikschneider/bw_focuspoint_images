@@ -3,6 +3,7 @@ declare module "interactjs" {
   declare type Chainable = {
     resizable(config: {}): Chainable;
     draggable(config: {}): Chainable;
+    unset(): void;
   };
 
   declare interface Interact {

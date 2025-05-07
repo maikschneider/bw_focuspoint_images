@@ -6,8 +6,9 @@
         setActiveIndex,
         focusPointName, fieldMeetsCondition,
         getActiveIndex,
-        SHAPES
+        SHAPES,
     } from '../store.svelte'
+    import type {ShapeType} from "../store.svelte";
     import Select from "./Fields/Select.svelte";
     import Text from "./Fields/Text.svelte";
     import Textarea from "./Fields/Textarea.svelte";
@@ -94,8 +95,8 @@
                     aria-labelledby="cropper-accordion-heading-{index}">
                     <div class="panel-body">
                         {#each Object.entries($wizardConfigStore.fields) as [key, field]}
-                            {#if fieldMeetsCondition(key, focuspoint)}
-                                <svelte:component this={components[field.type]} index={index} name={key} config={field ?? {}} />
+                            {#if fieldMeetsCondition(key, focuspoint) && field.type && field.type in components}
+                                <svelte:component this={components[field.type as keyof typeof components]} index={index} name={key} config={field ?? {}} />
                             {/if}
                         {/each}
 
@@ -110,7 +111,7 @@
     </div>
 
     {#each Object.entries(SHAPES) as [key]}
-        <button class="btn btn-success w-100 mt-3" on:click|preventDefault={() => createNewFocuspoint(key)}>
+        <button class="btn btn-success w-100 mt-3" on:click|preventDefault={() => createNewFocuspoint(key as ShapeType)}>
             <Icon name="actions-add" />
             {window.parent.frames.list_frame.TYPO3.lang[`wizard.single_point.button.new.${key}`]}
         </button>
