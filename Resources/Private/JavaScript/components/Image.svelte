@@ -200,7 +200,7 @@
     <div class="wrapper">
         <svg viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
             {#each $focuspoints as focuspoint, index}
-                <g class="shape-group">
+                <g class={["shape-group", index === getActiveIndex() && "active"]}>
                     <svelte:component this={SHAPES[focuspoint.__shape].component as ConstructorOfATypedSvelteComponent} index={index} />
                 </g>
             {/each}

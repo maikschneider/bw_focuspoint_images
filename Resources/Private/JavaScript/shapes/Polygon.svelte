@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {focuspoints, getActiveIndex} from "../store.svelte";
+    import {focuspoints} from "../store.svelte";
 
     const {index} = $props();
 
@@ -11,7 +11,7 @@
 </script>
 
 <polygon
-    class={["shape", index === getActiveIndex() && "active"]}
+    class="shape"
     points={$focuspoints[index].__data.points.map((point: [number, number]) => point.join(",")).join(" ")}
     data-index={index} />
 {#each $focuspoints[index].__data.points as [x, y], pointIndex}

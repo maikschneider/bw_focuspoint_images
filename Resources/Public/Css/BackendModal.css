@@ -11,7 +11,7 @@
     stroke-dasharray: 2;
 }
 
-.shape.active {
+.shape-group.active .shape {
     stroke: #ff8700;
     stroke-dasharray: none;
 }
