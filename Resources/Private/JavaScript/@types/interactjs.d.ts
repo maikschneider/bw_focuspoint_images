@@ -1,3 +1,9 @@
+declare type InteractjsDragEvent = {
+  dx: number;
+  dy: number;
+  target: Element;
+}
+
 declare module "interactjs" {
 
   declare type Chainable = {

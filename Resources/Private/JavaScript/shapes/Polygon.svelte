@@ -8,6 +8,10 @@
         const pointIndex = parseInt(event.currentTarget.getAttribute("data-point-index")!);
         $focuspoints[index].__data.points = $focuspoints[index].__data.points.filter((point: [number, number], i: number) => i !== pointIndex);
     }
+
+    export function onDrag(event: InteractjsDragEvent): void {
+        $focuspoints[index].__data.points = $focuspoints[index].__data.points.map(([x, y]: [number, number]) => [x + event.dx, y + event.dy]);
+    }
 </script>
 
 <polygon
