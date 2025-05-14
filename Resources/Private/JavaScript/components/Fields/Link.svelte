@@ -1,5 +1,6 @@
 <script lang="ts">
-    import {focuspoints, wizardConfigStore} from '../../store.svelte.js'
+    import {onMount} from "svelte";
+    import {focuspoints, wizardConfigStore} from '../../store.svelte.js';
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
     import Icon from '../Icon.svelte';
@@ -19,6 +20,8 @@
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
     // @ts-ignore
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
+
+    onMount(() => updateLinkBrowserInfo());
 
     const handleLinkSelection = (event: FocuspointLinkSelectedEvent) => {
         $focuspoints[index][name] = event.detail.link
