@@ -1,16 +1,11 @@
-<script>
-    import {onMount} from "svelte";
-    import {focuspoints, getIcon, iconStore} from '../../store.svelte.js'
+<script lang="ts">
+    import {focuspoints} from '../../store.svelte.js'
+    import Icon from "../Icon.svelte";
 
     let {config, index, name} = $props()
 
     let isCheckbox = config?.renderType === 'check' || !Object.hasOwn(config, 'renderType')
     let isToggle = config?.renderType === 'checkboxToggle'
-
-    onMount(() => {
-        getIcon('actions-check')
-        getIcon('empty-empty')
-    })
 </script>
 
 <div class="form-group">
@@ -23,16 +18,16 @@
             type="checkbox"
             class="form-check-input me-1"
             id="input-{index}-{name}"
-            bind:checked={$focuspoints[index][name]}
+            bind:checked={$focuspoints[index][name] as unknown as boolean}
             aria-labelledby="label-{index}-{name}" />
         <label class="form-check-label" for="input-{index}-{name}">
             {#if isCheckbox}
                 <span class="form-check-label-icon">
                     <span class="form-check-label-icon-checked">
-                        {@html $iconStore['actions-check']}
+                        <Icon name="actions-check" />
                     </span>
                     <span class="form-check-label-icon-unchecked">
-                        {@html $iconStore['empty-empty']}
+                        <Icon name="empty-empty" />
                     </span>
                 </span>
             {/if}

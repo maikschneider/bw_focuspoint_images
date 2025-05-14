@@ -2,6 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\Preview;
 
+use Blueways\BwFocuspointImages\Renderer\ShapeRendererFactory;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
@@ -12,6 +13,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
+    private readonly ShapeRendererFactory $shapeRendererFactory;
+
+    public function __construct()
+    {
+        $this->shapeRendererFactory = GeneralUtility::makeInstance(ShapeRendererFactory::class);
+    }
+
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
         $content = '';
@@ -78,46 +86,31 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
             return '';
         }
 
-        $points = json_decode((string)$focuspoints, false) ?: [];
-        if (empty($points)) {
+        $focuspoints = json_decode((string)$focuspoints, true) ?: [];
+        if (empty($focuspoints)) {
             return '';
         }
 
-        $svg = '<svg viewBox="0 0 200 200" preserveAspectRatio="none" class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-            <mask id="mask' . $fileReference->getUid() . '"><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />';
+        $width = $fileReference->getProperty('width');
+        $height = $fileReference->getProperty('height');
+        $uid = $fileReference->getUid();
+        $viewBox = "0 0 {$width} {$height}";
+        $shapes = join(
+            '',
+            array_map(
+                fn (array $focuspoint): string => $this->shapeRendererFactory->getRenderer(@$focuspoint['__shape'] ?? '')?->render($focuspoint['__data']),
+                $focuspoints
+            )
+        );
 
-        foreach ($points as $point) {
-            $x = $point->x * 100;
-            $y = $point->y * 100;
-            $height = $point->height * 100;
-            $width = $point->width * 100;
-
-            $svg .= '<rect x="' . $x . '%"
-                y="' . $y . '%"
-                width="' . $width . '%"
-                height="' . $height . '%"
-                fill="#000"/>';
-        }
-
-        $svg .= '</mask>';
-        $svg .= '<rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask' . $fileReference->getUid() . ')" />';
-
-        foreach ($points as $point) {
-            $x = $point->x * 100;
-            $y = $point->y * 100;
-            $height = $point->height * 100;
-            $width = $point->width * 100;
-
-            $svg .= '<rect x="' . $x . '%"
-                y="' . $y . '%"
-                stroke="#ff8700"
-                stroke-width="1.5px"
-                width="' . $width . '%"
-                height="' . $height . '%"
-                fill="none"/>';
-        }
-
-        $svg .= '</svg>';
-        return $svg;
+        return <<<HTML
+        <svg viewBox="{$viewBox}">
+            <mask id="mask-{$uid}">
+                <rect x="0" y="0" width="{$width}" height="{$height}" style="fill:white" />
+                {$shapes}
+            </mask>
+            <rect x="0" y="0" width="{$width}" height="{$height}" fill="rgba(0, 0, 0, .7)" mask="url(#mask-{$uid})" />
+        </svg>
+        HTML;
     }
 }

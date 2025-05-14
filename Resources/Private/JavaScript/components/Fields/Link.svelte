@@ -1,23 +1,29 @@
-<script>
-    import {focuspoints, getIcon, wizardConfigStore, iconStore} from '../../store.svelte.js'
+<script lang="ts">
+    import {onMount} from "svelte";
+    import {focuspoints, wizardConfigStore} from '../../store.svelte.js';
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
-    import {onMount} from "svelte";
+    import Icon from '../Icon.svelte';
+
+    type LinkBrowserData = {
+        url: string;
+        preview: {
+            text?: string;
+            icon?: string;
+        } | null;
+    };
 
     let {config, index, name} = $props()
-    let linkBrowserData = $state(null)
+    let linkBrowserData: LinkBrowserData | null = $state(null)
     let readOnly = $state(true)
+    // @ts-ignore
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
+    // @ts-ignore
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
 
-    onMount(() => {
-        updateLinkBrowserInfo()
-        getIcon('actions-close')
-        getIcon('actions-wizard-link')
-        getIcon('actions-version-workspaces-preview-link')
-    })
+    onMount(() => updateLinkBrowserInfo());
 
-    const handleLinkSelection = (event) => {
+    const handleLinkSelection = (event: FocuspointLinkSelectedEvent) => {
         $focuspoints[index][name] = event.detail.link
         updateLinkBrowserInfo()
     }
@@ -37,7 +43,7 @@
 
         const modal = Modal.advanced({
             type: Modal.types.iframe,
-            content: linkBrowserData.url,
+            content: linkBrowserData!.url,
             size: Modal.sizes.large,
         })
 
@@ -52,7 +58,7 @@
 
     function onInputClear() {
         $focuspoints[index][name] = ''
-        linkBrowserData.preview = null
+        linkBrowserData!.preview = null
     }
 </script>
 
@@ -79,7 +85,7 @@
     }
 </style>
 
-<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version! < 13}>
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>
@@ -87,7 +93,7 @@
         <div class="form-wizards-element">
             <div class="input-group t3js-form-field-link">
                 <span class="t3js-form-field-link-icon input-group-text">{@html previewIcon}</span>
-                <input class="form-control" title="" value="" readonly="" hidden="">
+                <input class="form-control" title="" value="" readonly hidden="">
                 <div class="form-control-clearable-wrapper">
                     <input
                             type="text"
@@ -110,11 +116,11 @@
                             title="Clear input"
                             aria-label="Clear input"
                             class="close text-black">
-                        {@html $iconStore['actions-close']}
+                        <Icon name="actions-close" />
                     </button>
                 </div>
                 <button class="btn btn-default" on:click|preventDefault={() => readOnly = !readOnly}>
-                    {@html $iconStore['actions-version-workspaces-preview-link']}
+                    <Icon name="actions-version-workspaces-preview-link" />
                 </button>
             </div>
         </div>
@@ -122,7 +128,7 @@
             <div class="btn-group">
                 <button
                         on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">
-                    {@html $iconStore['actions-wizard-link']}
+                    <Icon name="actions-wizard-link" />
                 </button>
             </div>
         </div>
