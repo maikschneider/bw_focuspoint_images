@@ -18,5 +18,3 @@ $additionalColumns = [
 ];
 
 ExtensionManagementUtility::addTCAcolumns('sys_file_reference', $additionalColumns);
-
-//$GLOBALS['TCA']['sys_file_reference']['palettes']['imageoverlayPalette']['showitem'] = 'focus_points';

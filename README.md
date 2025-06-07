@@ -45,7 +45,7 @@ For administrators
 3.  Include PageTS
 
     Add the static PageTS template **Bw Focuspoint Images Content Element** or manually
-    import the PageTS in your sitepackage:
+    import the PageTS into your sitepackage:
 
     ```typoscript
     @import 'EXT:bw_focuspoint_images/Configuration/TsConfig/Page/newContentElement.tsconfig'
