@@ -42,7 +42,16 @@ For administrators
     **static TypoScript template** or manually include setup and
     constants.
 
-3.  Define your own wizard fields
+3.  Include PageTS
+
+    Add the static PageTS template **Bw Focuspoint Images Content Element** or manually
+    import the PageTS in your sitepackage:
+
+    ```typoscript
+    @import 'EXT:bw_focuspoint_images/Configuration/TsConfig/Page/newContentElement.tsconfig'
+    ```
+
+4.  Define your own wizard fields
 
     There are **no default fields** defined! An example with working
     frontend output can be found in the PageTS section.
