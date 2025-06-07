@@ -1,11 +1,25 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Access to an undefined property object\\:\\:\\$uid\\.$#"
+			message: '#^Dead catch \- TYPO3\\CMS\\Core\\Resource\\Exception\\FileDoesNotExistException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
 			count: 1
-			path: Classes/DataProcessing/FocuspointProcessor.php
+			path: Classes/Utility/HelperUtility.php
 
 		-
-			message: "#^If condition is always true\\.$#"
+			message: '#^Dead catch \- TYPO3\\CMS\\Core\\Resource\\Exception\\FolderDoesNotExistException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: Classes/Utility/HelperUtility.php
+
+		-
+			message: '#^Dead catch \- TYPO3\\CMS\\Core\\Resource\\Exception\\InvalidPathException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: Classes/Utility/HelperUtility.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
 			count: 2
 			path: Classes/Utility/HelperUtility.php
