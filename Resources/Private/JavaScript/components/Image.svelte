@@ -11,6 +11,47 @@
     let initialized = $state(false)
     let isDarkMode = $state(false)
 
+    // Handle keyboard navigation
+    function handleKeyDown(event) {
+        // Find the active focuspoint
+        const activeIndex = $focuspoints.findIndex(point => point.active);
+        if (activeIndex === -1) return;
+
+        // Set step size - larger with shift key
+        const step = event.shiftKey ? 10 : 1;
+
+        // Move based on arrow key
+        switch(event.key) {
+            case 'ArrowUp':
+                event.preventDefault();
+                movePoint(activeIndex, 0, -step);
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                movePoint(activeIndex, 0, step);
+                break;
+            case 'ArrowLeft':
+                event.preventDefault();
+                movePoint(activeIndex, -step, 0);
+                break;
+            case 'ArrowRight':
+                event.preventDefault();
+                movePoint(activeIndex, step, 0);
+                break;
+        }
+    }
+
+    // Helper function to move a point by x,y pixels
+    function movePoint(index, deltaX, deltaY) {
+        // Calculate the new positions in pixels
+        const newX = ($focuspoints[index].x * canvasWidth) + deltaX;
+        const newY = ($focuspoints[index].y * canvasHeight) + deltaY;
+
+        // Convert back to relative coordinates (0-1 range)
+        $focuspoints[index].x = Math.max(0, Math.min(1, newX / canvasWidth));
+        $focuspoints[index].y = Math.max(0, Math.min(1, newY / canvasHeight));
+    }
+
     interact('.draggable')
         .resizable({
             edges: {left: true, right: true, bottom: true, top: true},
@@ -77,6 +118,7 @@
         }
 
         window.addEventListener('resize', updateCanvasSizes)
+        window.addEventListener('keydown', handleKeyDown)
 
         const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
         const theme = document.querySelector('html').getAttribute('data-theme');
@@ -88,6 +130,7 @@
 
     onDestroy(() => {
         window.removeEventListener('resize', updateCanvasSizes)
+        window.removeEventListener('keydown', handleKeyDown)
     })
 
     function setCanvasSizes() {
