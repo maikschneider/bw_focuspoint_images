@@ -76,7 +76,7 @@
 				<source>Top</source>
 			</trans-unit>
 			<trans-unit id="tca.wizard.svg.title">
-				<source>Image with Focuspoints</source>
+				<source>Image with focus points</source>
 			</trans-unit>
 			<trans-unit id="tca.wizard.svg.description">
 				<source>Displays an image with highlighted areas and additional information</source>

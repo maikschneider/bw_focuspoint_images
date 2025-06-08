@@ -98,8 +98,8 @@
 				<target>Oberstes Fenster</target>
 			</trans-unit>
 			<trans-unit id="tca.wizard.svg.title">
-				<source>SVG Focuspoints</source>
-				<target>SVG Fokuspunkte</target>
+				<source>Image with focus points</source>
+				<target>Bild mit Fokuspunkten</target>
 			</trans-unit>
 			<trans-unit id="tca.wizard.svg.description">
 				<source>Displays the focus points of an image using SVG</source>
