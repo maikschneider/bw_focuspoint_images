@@ -1,90 +1,115 @@
-<script>
+<script lang="ts">
     import interact from 'interactjs';
-    import {activateFocuspoint, focusPointName, focuspoints} from "../store.svelte";
+    import {focuspoints, getActiveIndex, setActiveIndex, SHAPES} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
 
-    let {image} = $props()
-    let canvasHeight = $state(0)
-    let canvasWidth = $state(0)
-    let focuspointName = $derived((focuspoint, index) => focusPointName(index))
-    let img
-    let initialized = $state(false)
-    let isDarkMode = $state(false)
+    const {image}: {image: string} = $props();
 
-    interact('.draggable')
-        .resizable({
-            edges: {left: true, right: true, bottom: true, top: true},
-            modifiers: [
-                interact.modifiers.restrictEdges({
-                    outer: "parent",
-                    endOnly: true
-                }),
-            ],
-            listeners: {
-                move(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
+    let canvasHeight: number = $state(0);
+    let canvasWidth: number = $state(0);
+    let imageWidth: number = $state(0);
+    let imageHeight: number = $state(0);
+    let isDarkMode: boolean = $state(false);
+    let instanceArray: any[] = $state([]);
+    let imgElement: HTMLImageElement;
 
-                    $focuspoints[index].width = event.rect.width / canvasWidth
-                    $focuspoints[index].height = event.rect.height / canvasHeight
+    interact(".shape").draggable({
+        modifiers: [
+            interact.modifiers.restrictRect({
+                restriction: 'parent',
+                endOnly: true
+            })
+        ],
+        autoScroll: true,
+        listeners: {
+            start: setActiveFocuspoint,
+            move(event: InteractjsDragEvent) {
+                const index = parseInt(event.target.getAttribute('data-index') ?? "-1");
+                instanceArray[index]?.onDrag?.(event);
+            },
+            end: setActiveFocuspoint
+        }
+    });
 
-                    const x = ($focuspoints[index].x * canvasWidth) + event.deltaRect.left
-                    const y = ($focuspoints[index].y * canvasHeight) + event.deltaRect.top
-
-                    $focuspoints[index].x = (x / canvasWidth)
-                    $focuspoints[index].y = (y / canvasHeight)
-                },
-                end(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-                    if ($focuspoints[index].active) {
-                        activateFocuspoint(index)
-                    }
-                }
-            }
-        })
-        .draggable({
-            modifiers: [
-                interact.modifiers.restrictRect({
-                    restriction: 'parent',
-                    endOnly: true
-                })
-            ],
-            autoScroll: true,
-            listeners: {
-                // call this function on every dragmove event
-                move(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-
-                    const x = ($focuspoints[index].x * canvasWidth) + event.dx;
-                    const y = ($focuspoints[index].y * canvasHeight) + event.dy;
-
-                    $focuspoints[index].x = (x / canvasWidth)
-                    $focuspoints[index].y = (y / canvasHeight)
-                },
-                end(event) {
-                    const index = parseInt(event.target.getAttribute('data-index'))
-                    if ($focuspoints[index].active) {
-                        activateFocuspoint(index)
-                    }
-                }
-            }
-        })
+    interact(".shape-handle").draggable({
+        modifiers: [
+            interact.modifiers.restrictRect({
+                restriction: 'parent',
+                endOnly: true
+            })
+        ],
+        autoScroll: true,
+        listeners: {
+            start: setActiveFocuspoint,
+            move(event: InteractjsDragEvent) {
+                const shapeIndex = parseInt(event.target.getAttribute('data-shape-index') ?? "-1");
+                instanceArray[shapeIndex]?.onHandleDrag?.(event);
+            },
+            end: setActiveFocuspoint
+        }
+    });
 
     onMount(() => {
-        if (img.complete) {
+        if (imgElement.complete) {
             setCanvasSizes()
         } else {
-            img.addEventListener('load', setCanvasSizes)
+            imgElement.addEventListener('load', setCanvasSizes)
         }
 
         window.addEventListener('resize', updateCanvasSizes)
-
-        const colorScheme = document.querySelector('html').getAttribute('data-color-scheme');
-        const theme = document.querySelector('html').getAttribute('data-theme');
+        const colorScheme = document.querySelector('html')!.getAttribute('data-color-scheme');
+        const theme = document.querySelector('html')!.getAttribute('data-theme');
         const darkModePrefer = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light')) {
-            isDarkMode = true
+        isDarkMode = colorScheme === 'dark' || (theme === 'auto' && darkModePrefer && colorScheme !== 'light');
+    });
+
+    function setActiveFocuspoint(event: any) {
+        const index = parseInt(event.target.getAttribute("data-shape-index") ?? event.target.getAttribute('data-index'));
+        setActiveIndex(index);
+    }
+
+    function onload() {
+        imageWidth = imgElement.naturalWidth;
+        imageHeight = imgElement.naturalHeight;
+    }
+
+    function onSvgDblClick(event: MouseEvent) {
+        if (!$focuspoints[getActiveIndex()] || !(event.target instanceof SVGSVGElement))
+            return;
+        const rect = event.target.getBoundingClientRect();
+        const viewBox = event.target.viewBox.baseVal;
+        const ratio = viewBox.width / rect.width;
+        const point = [event.layerX * ratio, event.layerY * ratio] as [number, number];
+        const index = findClosestMiddlePointIndex(point);
+        const points = $focuspoints[getActiveIndex()].__data.points.slice();
+        points.splice(index + 1, 0, point);
+        $focuspoints[getActiveIndex()].__data.points = points;
+    }
+
+    function findClosestMiddlePointIndex(point: [number, number]) {
+        const points = $focuspoints[getActiveIndex()].__data.points;
+        const middlePoints = [...points, points[0]].reduce((acc, cur, i, arr) => [...acc, [cur, arr[i + 1]]], []).slice(0, -1).map((segment: [[number, number], [number, number]]) => {
+            const [[x1, y1], [x2, y2]] = segment;
+            return [
+                x1 + (x2 - x1) / 2,
+                y1 + (y2 - y1) / 2
+            ];
+        });
+        let index = 0;
+        let closest = [Infinity, Infinity] as [number, number];
+        for (const i in middlePoints) {
+            const middlePoint = middlePoints[i];
+            if (distance(point, middlePoint) < distance(point, closest)) {
+                closest = middlePoint;
+                index = +i;
+            }
         }
-    })
+        return +index;
+    }
+
+    function distance([x1, y1]: [number, number], [x2, y2]: [number, number]) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
 
     onDestroy(() => {
         window.removeEventListener('resize', updateCanvasSizes)
@@ -97,56 +122,13 @@
     }
 
     export function updateCanvasSizes() {
-        canvasHeight = img.parentElement.getBoundingClientRect().height
-        canvasWidth = img.parentElement.getBoundingClientRect().width
-        initialized = true
+        canvasHeight = imgElement.parentElement!.getBoundingClientRect().height
+        canvasWidth = imgElement.parentElement!.getBoundingClientRect().width
     }
-
-    const getPositionX = $derived((index) => {
-        return $focuspoints[index].x * canvasWidth
-    })
-
-    const getPositionY = $derived((index) => {
-        return $focuspoints[index].y * canvasHeight
-    })
-
-    const getFocuspointWidth = $derived((index) => {
-        return $focuspoints[index].width * canvasWidth
-    })
-
-    const getFocuspointHeight = $derived((index) => {
-        return $focuspoints[index].height * canvasHeight
-    })
 
 </script>
 
 <style>
-    .draggable {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.15s ease;
-        user-select: none;
-    }
-
-    .style1 {
-        display: inline-grid;
-        background-color: rgba(0, 0, 0, 0.6);
-        border: 1px dashed rgba(255, 255, 255, 0.8);
-        color: white;
-        padding: 10px;
-        --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);
-    }
-
-
-    .style1.active {
-        border-color: #ff8700;
-        --typo3-state-primary-bg: #ff8700;
-        border-style: solid;
-        background-color: rgba(0, 0, 0, 0.8);
-    }
-
     img {
         pointer-events: none;
         -moz-user-select: none;
@@ -173,45 +155,31 @@
     }
 
     .wrapper {
+        position: relative;
         align-self: center;
     }
 
-    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-ne {
-        top: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-sw, .ui-resizable-handle.ui-resizable-se {
-        bottom: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-ne, .ui-resizable-handle.ui-resizable-se {
-        right: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-sw {
-        left: -3px;
+    svg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
     }
 </style>
 
-<div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
+<div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
     <div class="wrapper">
-        {#each $focuspoints as focuspoint, index}
-            <div
-                onclick={() => activateFocuspoint(index)}
-                class:active={focuspoint.active}
-                class:opacity-0={!initialized}
-                data-index={index}
-                class="draggable style1 resizable"
-                style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
-                data-x="{getPositionX(index)}"
-                data-y="{getPositionY(index)}">
-                <span class="text-break">{focuspointName(focuspoint, index)}</span>
-                <span class="ui-resizable-handle ui-resizable-nw"></span>
-                <span class="ui-resizable-handle ui-resizable-ne"></span>
-                <span class="ui-resizable-handle ui-resizable-sw"></span>
-                <span class="ui-resizable-handle ui-resizable-se"></span>
-            </div>
-        {/each}
-        <img bind:this={img} src={image} alt="Selected" unselectable="on" />
+        <svg viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
+            {#each $focuspoints as focuspoint, index}
+                <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => setActiveIndex(index)}>
+                    <svelte:component bind:this={instanceArray[index]} this={SHAPES[focuspoint.__shape].component as ConstructorOfATypedSvelteComponent} index={index} imageWidth={imageWidth} imageHeight={imageHeight} canvasWidth={canvasWidth} canvasHeight={canvasHeight} />
+                    {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
+                        <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" />
+                    {/each}
+                </g>
+            {/each}
+        </svg>
+        <img bind:this={imgElement} src={image} alt="Selected" unselectable="on" {onload} />
     </div>
 </div>

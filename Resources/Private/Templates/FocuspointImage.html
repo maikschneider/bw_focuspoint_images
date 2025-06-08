@@ -1,55 +1,23 @@
+{namespace focuspoint = Blueways\BwFocuspointImages\ViewHelpers}
+
 <f:layout name="Default" />
 
 <f:section name="Main">
+    <f:asset.css identifier="tx_bwfocuspointimages_focuspoint" href="EXT:bw_focuspoint_images/Resources/Public/Css/FocuspointImage.css" />
 
     <f:for each="{images}" as="image" key="key">
-
-        <f:asset.script
-            identifier="tx_bwfocuspointimages_focuspoint"
-            src="EXT:bw_focuspoint_images/Resources/Public/JavaScript/FocuspointImage.js" />
-        <f:asset.css
-            identifier="tx_bwfocuspointimages_focuspoint"
-            href="EXT:bw_focuspoint_images/Resources/Public/Css/FocuspointImage.css" />
-
         <div class="focuspoint">
-
-            <f:image image="{image}" maxWidth="1600" maxHeight="1200" />
-
-            <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
-                <f:for each="{points.{key}}" as="point" iteration="i">
-                    <f:if condition="{point.link}">
-                        <a xlink:href="{f:uri.typolink(parameter: point.link)}" target="{point.linkTarget}">
-                    </f:if>
-                    <rect
-                        x="{point.x}%"
-                        y="{point.y}%"
-                        id="focuspoint-{image.uid}-{i.cycle}"
-                        stroke="{point.color}"
-                        stroke-width="2px"
-                        class="focuspoint__svg__rect"
-                        width="{point.width}%"
-                        height="{point.height}%"
-                        opacity="0.7"
-                        fill="{point.color}" />
-                    <f:if condition="{point.link}">
-                        </a>
-                    </f:if>
-                    <text x="{point.textX}%" fill="#FFF" y="{point.textY}%" alignment-baseline="middle" text-anchor="middle">
-                        {point.name}
-                    </text>
+            <f:image image="{image}"/>
+            <svg viewBox="0 0 {points.{key}.width} {points.{key}.height}" class="focuspoint__svg">
+                <f:for each="{points.{key}.areas}" as="area" iteration="i">
+                    <a href="{f:uri.typolink(parameter: area.link)}" target="{area.linkTarget}">
+                        <f:if condition="{area.title}">
+                            <title>{area.title}</title>
+                        </f:if>
+                        <focuspoint:shape type="{area.__shape}" data="{area.__data}" />
+                    </a>
                 </f:for>
             </svg>
-
-            <f:for each="{points.{key}}" as="point" iteration="i">
-                <div class="focuspoint__description" id="focuspoint-{image.uid}-{i.cycle}-description">
-                    <h3>{point.name}</h3>
-                    <p>
-                        <f:format.nl2br>{point.description}</f:format.nl2br>
-                    </p>
-                </div>
-            </f:for>
-
         </div>
     </f:for>
-
 </f:section>

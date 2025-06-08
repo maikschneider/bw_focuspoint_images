@@ -66,9 +66,6 @@ trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
 
-[*.php]
-indent_style = unset
-
 [.ddev/**]
 charset = unset
 end_of_line = unset

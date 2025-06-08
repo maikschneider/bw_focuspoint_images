@@ -1,23 +1,71 @@
 import {writable, get} from 'svelte/store';
-import Icons from '@typo3/backend/icons.js'
+import Polygon from "./shapes/Polygon.svelte";
+import Rect from "./shapes/Rect.svelte";
 
-export const wizardConfigStore = writable(null);
+export type ShapeType = "rect" | "polygon";
 
-export const focuspoints = writable([]);
+type Focuspoint = {[K in string]: string} & {
+  __shape: ShapeType;
+  __data: any;
+}
 
-export const initStores = (hiddenInput, wizardConfig, hiddenElement) => {
+type ShapeConfig = {
+  component: Function;
+  constructor(config: WizardConfig): object;
+}
+
+type WizardConfig = {
+  defaultWidth?: string;
+  defaultHeight?: string;
+  itemFormElName?: string;
+  typo3Version?: number;
+  fields: {
+    [K in string]: {
+      displayCond?: string;
+      default?: string;
+      useAsName?: boolean | number | string;
+      type?: string;
+    }
+  }
+}
+
+export const SHAPES: {[K in ShapeType]: ShapeConfig} = {
+  rect: {
+    component: Rect,
+    constructor(config: WizardConfig): object {
+      return {
+        x: 0,
+        y: 0,
+        width: parseFloat(config.defaultWidth ?? "0"),
+        height: parseFloat(config.defaultHeight ?? "0"),
+      };
+    }
+  },
+  polygon: {
+    component: Polygon,
+    constructor(): object {
+      return {
+        points: [[10, 10], [50, 10], [50, 50], [10, 50]]
+      };
+    }
+  }
+};
+
+export const wizardConfigStore = writable<WizardConfig>({fields: {}});
+
+export const focuspoints = writable<Focuspoint[]>([]);
+
+let activeIndex = $state(0);
+
+export const initStores = (hiddenInput: HTMLInputElement, wizardConfig: string): void => {
     wizardConfigStore.set(JSON.parse(wizardConfig));
     focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : '[]'));
 }
 
 /**
 * Evaluate a condition, e.g. FIELD:name:REQ:true
-*
-* @param fieldName
-* @param point
-* @returns {boolean}
 */
-export const fieldMeetsCondition = (fieldName, point) => {
+export const fieldMeetsCondition = (fieldName: string, point: {[K in string]: string}): boolean => {
     const condition = get(wizardConfigStore).fields[fieldName].displayCond;
     if (!condition) {
         return true;
@@ -28,7 +76,7 @@ export const fieldMeetsCondition = (fieldName, point) => {
         return true;
     }
 
-    const [type, field, operator, value] = parts;
+    const [, field, operator, value] = parts;
     if (!Object.hasOwn(point, field)) {
         return true;
     }
@@ -83,52 +131,32 @@ export const fieldMeetsCondition = (fieldName, point) => {
     }
 }
 
-export const createNewFocuspoint = () => {
+export const createNewFocuspoint = (shape: ShapeType): void => {
     const config = get(wizardConfigStore);
 
     // create a new focuspoint with default fields
-    const newFocuspoint = Object.keys(config.fields).reduce((acc, key) => {
+    const newFocuspoint: any = Object.keys(config.fields).reduce((acc: any, key) => {
       acc[key] = config.fields[key].default ?? null;
       return acc;
     }, {});
 
-    // set default values
-    newFocuspoint.x = 0.333;
-    newFocuspoint.y =  0.333;
-    newFocuspoint.width = parseFloat(config.defaultWidth);
-    newFocuspoint.height = parseFloat(config.defaultHeight);
+    newFocuspoint.__shape = shape;
+    newFocuspoint.__data = SHAPES[shape].constructor(config);
 
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
-    activateFocuspoint(get(focuspoints).length - 1);
+    activeIndex = get(focuspoints).length - 1;
 }
 
-export const iconStore = writable({});
-
-export const getIcon = async (iconName) => {
-    const store = get(iconStore);
-    if (store[iconName]) {
-        return;
-    }
-
-    Icons.getIcon(iconName, Icons.sizes.small).then((html) => {
-        iconStore.update((store) => {
-            store[iconName] = html;
-            return store
-        });
-    })
+export const setActiveIndex = (index: number) => {
+  activeIndex = index;
 }
 
-export const activateFocuspoint = (index) => {
-    focuspoints.update((store) => {
-        store.forEach((focuspoint, i) => {
-            focuspoint.active = i === index ? !focuspoint.active : false;
-        });
-        return store;
-    })
+export const getActiveIndex = (): number => {
+  return activeIndex;
 }
 
-export const focusPointName = (index) => {
+export const focusPointName = (index: number) => {
     const config = get(wizardConfigStore);
     const nameFields = Object.entries(config.fields).filter(([key, value]) => {
         return value['useAsName'] === true || value['useAsName'] === 'true' || value['useAsName'] === '1' || value['useAsName'] === 1;

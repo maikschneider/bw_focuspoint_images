@@ -1,29 +1,18 @@
-Overview
-========
+# Overview
 
 With this TYPO3 extension you can create responsive image maps in the
 backend. This extension ships an image editor that can be used to add
-areas and information to an image.
+interactive clickable areas and information to an image.
 
-![Backend Editor](Documentation/Images/example_backend.png)
+![Backend Editor](/Documentation/Images/example_backend.png)
 
-Examples
-========
-
-Example 1: Default output
--------------------------
+## Example
 
 Frontend output with configuration of example PageTS
 
-![Example 1](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_frontend.jpg)
+![Example](/Documentation/Images/example_frontend.png)
 
-Example 2: SVG Animation
-------------------------
-
-In this example the focus areas are animated via SVG. The additional
-information are displayed next to the image with some delay.
-
-![Example 2](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_animation.gif)
+The image with all defined areas gets rendered. The default behavior of the areas is to redirect the user to the specified link. It can be an external link, a page inside TYPO3 or a link to a specific component on a page.
 
 For administrators
 ==================
@@ -61,52 +50,29 @@ For administrators
 Add the new content element "Image with Focuspoints" to any page, link a new
 image and start adding your focus areas.
 
-![Backend view](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/backend-collage.jpg)
+![](/Documentation/Images/backend_select.png)
+
+The next actions are available in the editor:
+- Moving areas around with the mouse
+- Double-click outside any area to create a new point for an active area
+- Double-click on any point to delete the point
 
 ### Configuration
 
 To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select**, **link** and **checkbox** inputs in the wizard.
 
-This example configuration is used to generate the output shown in Example 1
+This example configuration is used to generate the output shown in the example ([`/Tests/Fixtures/example1.tsconfig`](/Tests/Fixtures/example1.tsconfig))
 
 ```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
-
-    name {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
-        type = text
-        useAsName = 1
-    }
-
-    description {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.description
-        type = textarea
-    }
-
-    color {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color
-        type = select
-        options {
-            red = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.red
-            green = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.green
-            blue = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.blue
-        }
-        default = red
-    }
-
-    hasLink {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink
-        type = checkbox
-        label = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink.yes
-        default = true
-    }
-
     link {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
-        displayCond = FIELD:hasLink:REQ:true
     }
-
+    title {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.title
+        type = text
+    }
 }
 ```
 
@@ -237,6 +203,54 @@ tt_content.your_list_type {
     }
 }
 ```
+
+For contributors
+================
+
+Let's say you want to create a new shape - triangle. In order to define a new shape, you need to:
+1. Create a class `TriangleShapeRenderer` that implements the `ShapeRendererInterface` interface with the method `render()` that should return a corresponding SVG-shape. It's to render previews in the backend and to render shapes through the `<focuspoint:shape>` view helper (see examples for rects and polygons)
+2. Extend the `ShapeRendererFactory::MAPPING` array with a new keyword that maps to the previously created shape renderer: `'triangle' => TriangleShapeRenderer::class`
+3. Add a new Svelte component that should render the triangle:
+```svelte
+<!-- shapes/Triangle.svelte -->
+<script lang="ts">
+    import {focuspoints} from "../store.svelte";
+
+    const {index} = $props();
+
+    export function getHandles(): [number, number][] {...} // Returns an array of handles (points). Required
+
+    export function onDrag(event: InteractjsDragEvent): void {...} // How the triangle data gets transformed when the figure is being dragged. Required.
+
+    export function onHandleDrag(event: InteractjsDragEvent): void {...} // How the triangle's individual handle gets transformed when the handle is being dragged. Optional.
+
+    export function onHandleDoubleClick(event: MouseEvent & {currentTarget: EventTarget & SVGCircleElement}) {...} // What happens when double-click on a handle is performed. Optional.
+</script>
+
+<!-- Render implementation -->
+```
+
+4. Extend the `SHAPES` constant in the `store.svelte.ts` with a new creation logic:
+```ts
+import Triangle from "./shapes/Triangle.svelte";
+
+export const SHAPES: {[K in ShapeType]: ShapeConfig} = {
+  // ...
+  triangle: {
+    component: Triangle,
+    constructor(config: WizardConfig): object {
+      // Let's suppose the next six variables are defined. The return type can be any
+      return [
+        [x1, y1],
+        [x2, y2],
+        [x3, y3],
+      ];
+    }
+  },
+  // ...
+};
+```
+5. Add a new translation for buttons (see `wizard.single_point.button.new.polygon` translation entry)
 
 License
 =======

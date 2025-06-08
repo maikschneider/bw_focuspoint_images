@@ -1,0 +1,12 @@
+{
+	"extends": "@tsconfig/svelte/tsconfig.json",
+	"compilerOptions": {
+		"strict": true,
+		"lib": [
+			"ESNext"
+		]
+	},
+	"include": [
+  		"./Resources/Private/JavaScript/**/*"
+	]
+}

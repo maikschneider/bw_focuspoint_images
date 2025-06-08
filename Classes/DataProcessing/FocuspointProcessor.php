@@ -34,17 +34,9 @@ class FocuspointProcessor extends FilesProcessor
         // the TCA is configured to use max. 1 image, however the file collector returns an array
         foreach ($processedData['images'] as $key => $file) {
             $points = $file->getProperty('focus_points') ?: '[]';
-            $points = json_decode((string)$points, false) ?: [];
+            $points = json_decode($points, true) ?: [];
 
-            foreach ($points as $point) {
-                $point->x *= 100;
-                $point->y *= 100;
-                $point->height *= 100;
-                $point->width *= 100;
-                // calculate center of each point for text positioning
-                $point->textX = $point->x + ($point->width / 2);
-                $point->textY = $point->y + ($point->height / 2);
-
+            foreach ($points as &$point) {
                 foreach ($point as $fieldName => &$fieldValue) {
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
                     if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
@@ -57,19 +49,23 @@ class FocuspointProcessor extends FilesProcessor
                     }
 
                     // in case of typolinks with target, add a new field {$fieldName}Target='_blank'
-                    if (is_string($fieldValue) && strpos($fieldValue, 't3://') === 0) {
-                        $linkValues = $typoLinkCodecService->decode($fieldValue);
-                        if ($linkValues['target']) {
-                            $attributeName = $fieldName . 'Target';
-                            $point->$attributeName = $linkValues['target'];
-                        }
+                    if (!is_string($fieldValue) || strpos($fieldValue, 't3://') !== 0) {
+                        continue;
                     }
+                    $linkValues = $typoLinkCodecService->decode($fieldValue);
+                    if (!$linkValues['target']) {
+                        continue;
+                    }
+                    $attributeName = $fieldName . 'Target';
+                    $point[$attributeName] = $linkValues['target'];
                 }
-
-                unset($fieldValue);
             }
 
-            $processedData['points'][$key] = $points;
+            $processedData['points'][$key] = [
+                'width' => $file->getProperty('width'),
+                'height' => $file->getProperty('height'),
+                'areas' => $points,
+            ];
         }
 
         return $processedData;
