@@ -16,13 +16,15 @@ areas and information to an image.
 
 ![Backend Editor](Documentation/Images/example_backend.png)
 
-Examples
-========
+Screenshots
+===========
+
+This extension can be used in various ways, depending on the configuration.
 
 Example 1: Default output
 -------------------------
 
-Frontend output with configuration of example PageTS
+Frontend output with the [example configuration](#configuration).
 
 ![Example 1](Documentation/Images/example_frontend.png)
 
@@ -32,7 +34,14 @@ Example 2: SVG Animation
 In this example the focus areas are animated via SVG. The additional
 information are displayed next to the image with some delay.
 
-![Example 2](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_animation.gif)
+![Example 2](Documentation/Images/example_animation.gif)
+
+Example 3: Annotations for tutorials
+------------------------
+
+The TYPO3 extension [xima_typo3_manual](https://github.com/xima-media/xima-typo3-manual) uses this extension to annotate screenshots.
+
+![Example 3](Documentation/Images/example_manual.png)
 
 For administrators
 ==================
