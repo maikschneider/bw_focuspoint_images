@@ -62,7 +62,7 @@ For administrators
 
 3.  Include PageTS
 
-    Add the static PageTS template **Bw Focuspoint Images Content Element** or manually
+    Add the static PageTS template **Focuspoint Images: Content Element** or manually
     import the PageTS into your sitepackage:
 
     ```typoscript
