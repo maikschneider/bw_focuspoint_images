@@ -1,8 +1,17 @@
-Overview
-========
+<div align="center">
 
-With this TYPO3 extension you can create responsive image maps in the
-backend. This extension ships an image editor that can be used to add
+![Extension icon](Resources/Public/Icons/Extension.svg)
+
+# TYPO3 extension `bw_focuspoint_images`
+
+![Latest version](https://typo3-badges.dev/badge/bw_focuspoint_images/version/shields.svg)
+[![Supported TYPO3 versions](https://typo3-badges.dev/badge/bw_focuspoint_images/typo3/shields.svg)](https://extensions.typo3.org/extension/bw_focuspoint_images)
+![Total downloads](https://typo3-badges.dev/badge/bw_focuspoint_images/downloads/shields.svg)
+[![Composer](https://typo3-badges.dev/badge/bw_focuspoint_images/composer/shields.svg)](https://packagist.org/packages/blueways/bw-focuspoint-images)
+
+</div>
+
+This TYPO3 extension ships an image editor that can be used to add
 areas and information to an image.
 
 ![Backend Editor](Documentation/Images/example_backend.png)
@@ -15,7 +24,7 @@ Example 1: Default output
 
 Frontend output with configuration of example PageTS
 
-![Example 1](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/example_frontend.jpg)
+![Example 1](Documentation/Images/example_frontend.png)
 
 Example 2: SVG Animation
 ------------------------
@@ -232,7 +241,7 @@ tt_content.your_list_type {
         15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
         15 {
             references.fieldName = assets
-            as = image
+            as = images
         }
     }
 }
