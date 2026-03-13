@@ -14,6 +14,7 @@ class FocuspointProcessor extends FilesProcessor
     *
     * @return array
     */
+    #[\Override]
     public function process(
         ContentObjectRenderer $cObj,
         array $contentObjectConfiguration,
@@ -49,7 +50,7 @@ class FocuspointProcessor extends FilesProcessor
                     }
 
                     // in case of typolinks with target, add a new field {$fieldName}Target='_blank'
-                    if (!is_string($fieldValue) || strpos($fieldValue, 't3://') !== 0) {
+                    if (!is_string($fieldValue) || !str_starts_with($fieldValue, 't3://')) {
                         continue;
                     }
                     $linkValues = $typoLinkCodecService->decode($fieldValue);

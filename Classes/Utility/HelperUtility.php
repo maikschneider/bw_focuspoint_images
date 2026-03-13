@@ -2,8 +2,8 @@
 
 namespace Blueways\BwFocuspointImages\Utility;
 
+use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
@@ -18,24 +18,8 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 
 class HelperUtility
 {
-    protected TypoScriptService $typoScriptService;
-
-    protected LinkService $linkService;
-
-    protected IconFactory $iconFactory;
-
-    protected TypoLinkCodecService $typoLinkCodecService;
-
-    public function __construct(
-        TypoScriptService $typoScriptService,
-        LinkService $linkService,
-        IconFactory $iconFactory,
-        TypoLinkCodecService $typoLinkCodecService
-    ) {
-        $this->typoScriptService = $typoScriptService;
-        $this->linkService = $linkService;
-        $this->iconFactory = $iconFactory;
-        $this->typoLinkCodecService = $typoLinkCodecService;
+    public function __construct(protected TypoScriptService $typoScriptService, protected LinkService $linkService, protected IconFactory $iconFactory, protected TypoLinkCodecService $typoLinkCodecService)
+    {
     }
 
     public function getPagesTSconfig(int $pid): array
@@ -86,7 +70,7 @@ class HelperUtility
 
         try {
             $linkData = $this->linkService->resolve($linkParts['url']);
-        } catch (FileDoesNotExistException | FolderDoesNotExistException | UnknownLinkHandlerException | InvalidPathException $e) {
+        } catch (FileDoesNotExistException | FolderDoesNotExistException | UnknownLinkHandlerException | InvalidPathException) {
             return $data;
         }
 
@@ -98,20 +82,12 @@ class HelperUtility
             }
 
             if ($value !== '' && $value !== '0') {
-                switch ($key) {
-                    case 'class':
-                        $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class');
-                        break;
-                    case 'title':
-                        $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:title');
-                        break;
-                    case 'additionalParams':
-                        $label = $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params');
-                        break;
-                    default:
-                        $label = $key;
-                }
-
+                $label = match ($key) {
+                    'class' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class'),
+                    'title' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:title'),
+                    'additionalParams' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params'),
+                    default => $key,
+                };
                 $additionalAttributes[] = '<span><strong>' . htmlspecialchars((string)$label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
             }
         }
@@ -146,7 +122,7 @@ class HelperUtility
 
                     $data = [
                         'text' => $pageRecord['_thePathFull'] . '[' . $pageRecord['uid'] . ']' . $fragmentTitle,
-                        'icon' => $this->iconFactory->getIconForRecord('pages', $pageRecord, Icon::SIZE_SMALL)->render(),
+                        'icon' => $this->iconFactory->getIconForRecord('pages', $pageRecord, IconSize::SMALL)->render(),
                     ];
                 }
 
@@ -154,7 +130,7 @@ class HelperUtility
             case LinkService::TYPE_EMAIL:
                 $data = [
                     'text' => $linkData['email'],
-                    'icon' => $this->iconFactory->getIcon('content-elements-mailform', Icon::SIZE_SMALL)->render(),
+                    'icon' => $this->iconFactory->getIcon('content-elements-mailform', IconSize::SMALL)->render(),
                 ];
                 break;
             case LinkService::TYPE_URL:
@@ -162,7 +138,7 @@ class HelperUtility
                     'text' => $linkData['url'],
                     'icon' => $this->iconFactory->getIcon(
                         'apps-pagetree-page-shortcut-external',
-                        Icon::SIZE_SMALL
+                        IconSize::SMALL
                     )->render(),
 
                 ];
@@ -175,7 +151,7 @@ class HelperUtility
                         'text' => $file->getPublicUrl(),
                         'icon' => $this->iconFactory->getIconForFileExtension(
                             $file->getExtension(),
-                            Icon::SIZE_SMALL
+                            IconSize::SMALL
                         )->render(),
                     ];
                 }
@@ -189,7 +165,7 @@ class HelperUtility
                         'text' => $folder->getPublicUrl(),
                         'icon' => $this->iconFactory->getIcon(
                             'apps-filetree-folder-default',
-                            Icon::SIZE_SMALL
+                            IconSize::SMALL
                         )->render(),
                     ];
                 }
@@ -204,14 +180,14 @@ class HelperUtility
                     $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
                     $data = [
                         'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
-                        'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
+                        'icon' => $this->iconFactory->getIconForRecord($table, $record, IconSize::SMALL)->render(),
                     ];
                 } else {
                     $data = [
                         'text' => sprintf('%s', $linkData['uid']),
                         'icon' => $this->iconFactory->getIcon(
                             'tcarecords-' . $table . '-default',
-                            Icon::SIZE_SMALL,
+                            IconSize::SMALL,
                             'overlay-missing'
                         )->render(),
                     ];
@@ -223,7 +199,7 @@ class HelperUtility
                 if ($telephone) {
                     $data = [
                         'text' => $telephone,
-                        'icon' => $this->iconFactory->getIcon('actions-device-mobile', Icon::SIZE_SMALL)->render(),
+                        'icon' => $this->iconFactory->getIcon('actions-device-mobile', IconSize::SMALL)->render(),
                     ];
                 }
 
@@ -238,7 +214,7 @@ class HelperUtility
                 } elseif ($linkData['type'] === LinkService::TYPE_UNKNOWN) {
                     $data = [
                         'text' => $linkData['file'],
-                        'icon' => $this->iconFactory->getIcon('actions-link', Icon::SIZE_SMALL)->render(),
+                        'icon' => $this->iconFactory->getIcon('actions-link', IconSize::SMALL)->render(),
                     ];
                 } else {
                     $data = [
@@ -254,9 +230,6 @@ class HelperUtility
 
     public static function arraySome(array $array, callable $f): bool
     {
-        foreach ($array as $item)
-            if ($f($item))
-                return true;
-        return false;
+        return array_any($array, fn($item) => $f($item));
     }
 }

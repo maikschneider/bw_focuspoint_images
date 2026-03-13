@@ -12,7 +12,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 #[AsCommand('focuspoint:schema:repair', 'Repair the sys_file_reference.focus_points column')]
 final class FocuspointSchemaRepairCommand extends Command
 {
-    private const RECT_PROPS = ['x', 'y', 'width', 'height'];
+    private const array RECT_PROPS = ['x', 'y', 'width', 'height'];
 
     public function __construct(
         private readonly ConnectionPool $connection
@@ -41,22 +41,23 @@ final class FocuspointSchemaRepairCommand extends Command
         $imagesArray = $this->getImages();
 
         if ($input->getOption('dry-run')) {
-            if ($imagesArray)
-                $output->writeln('The next records with the corresponding value of sys_file_reference.uid_local will be updated: ' . join(
+            if ($imagesArray !== []) {
+                $output->writeln('The next records with the corresponding value of sys_file_reference.uid_local will be updated: ' . implode(
                     ', ',
                     array_map(
                         fn (array $imageMetadata): int => $imageMetadata['uid_local'],
                         $imagesArray
                     )
                 ));
-            else
+            } else {
                 $output->writeln('All records are up to date');
+            }
             return 0;
         }
 
         foreach ($imagesArray as $imageMetadata) {
             $imageMetadata['focus_points'] = array_map(
-                fn (array $focuspoint): array => self::repairSchema($focuspoint, $imageMetadata['width'], $imageMetadata['height']),
+                fn (array $focuspoint): array => $this->repairSchema($focuspoint, $imageMetadata['width'], $imageMetadata['height']),
                 $imageMetadata['focus_points']
             );
             $this->updateRecord($imageMetadata);
@@ -111,26 +112,24 @@ final class FocuspointSchemaRepairCommand extends Command
             array_map(
                 fn (array $imageMetadata): array => [
                     ...$imageMetadata,
-                    'focus_points' => json_decode($imageMetadata['focus_points'], true)
+                    'focus_points' => json_decode((string) $imageMetadata['focus_points'], true)
                 ],
                 $imagesArray
             ),
-            fn (array $imageMetadata): bool => HelperUtility::arraySome($imageMetadata['focus_points'], self::isOldRect(...))
+            fn (array $imageMetadata): bool => HelperUtility::arraySome($imageMetadata['focus_points'], $this->isOldRect(...))
         );
     }
 
-    private static function isOldRect(array $focuspoint): bool
+    private function isOldRect(array $focuspoint): bool
     {
-        foreach (self::RECT_PROPS as $prop)
-            if (!isset($focuspoint[$prop]) || (!is_float($focuspoint[$prop]) && !is_int($focuspoint[$prop])))
-                return false;
-        return true;
+        return array_all(self::RECT_PROPS, fn($prop) => isset($focuspoint[$prop]) && !(!is_float($focuspoint[$prop]) && !is_int($focuspoint[$prop])));
     }
 
-    private static function repairSchema(array $focuspoint, int $imageWidth, int $imageHeight): array
+    private function repairSchema(array $focuspoint, int $imageWidth, int $imageHeight): array
     {
-        if (!self::isOldRect($focuspoint))
+        if (!$this->isOldRect($focuspoint)) {
             return $focuspoint;
+        }
         $focuspoint['__shape'] = 'rect';
         $focuspoint['__data'] = [];
         foreach (self::RECT_PROPS as $prop) {

@@ -13,10 +13,14 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\CMS\Core\View\ViewFactoryData;
+use TYPO3\CMS\Core\View\ViewFactoryInterface;
 
 class InputFocuspointElement extends AbstractFormElement
 {
+    public function __construct(private readonly ResourceFactory $resourceFactory)
+    {
+    }
     /**
      * This will render an imageManipulation field
      *
@@ -91,8 +95,12 @@ class InputFocuspointElement extends AbstractFormElement
         ];
 
         // Build html
-        $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $templateView->setTemplatePathAndFilename('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html');
+        $viewFactoryData = new ViewFactoryData(
+            templatePathAndFilename: 'EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'
+        );
+        /** @var ViewFactoryInterface  $viewFactory */
+        $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);
+        $templateView = $viewFactory->create($viewFactoryData);
         $templateView->assignMultiple($arguments);
 
         $resultArray['html'] = $templateView->render();
@@ -115,9 +123,9 @@ class InputFocuspointElement extends AbstractFormElement
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
                 /** @var ResourceFactory $resourceFactory */
-                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+                $resourceFactory = $this->resourceFactory;
                 $file = $resourceFactory->getFileObject($fileUid);
-            } catch (FileDoesNotExistException|\InvalidArgumentException $e) {
+            } catch (FileDoesNotExistException|\InvalidArgumentException) {
             }
         }
 
@@ -127,7 +135,7 @@ class InputFocuspointElement extends AbstractFormElement
     protected function createErrorMessage(array $resultArray, string $messageLanguageKey): array
     {
         $resultArray['html'] = '<div class="callout callout-warning">';
-        $resultArray['html'] .= $this->getLanguageService()->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:' . $messageLanguageKey);
+        $resultArray['html'] .= $this->getLanguageService()->sL('bw_focuspoint_images.db:');
         $resultArray['html'] .= '</div>';
         return $resultArray;
     }

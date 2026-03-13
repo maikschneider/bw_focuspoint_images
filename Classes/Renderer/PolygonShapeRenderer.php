@@ -6,10 +6,10 @@ final readonly class PolygonShapeRenderer implements ShapeRendererInterface
 {
     public function render(array $data): string
     {
-        $points = join(
+        $points = implode(
             ' ',
             array_map(
-                fn (array $xy): string => join(',', $xy),
+                fn (array $xy): string => implode(',', $xy),
                 $data['points']
             )
         );

@@ -4,7 +4,7 @@ namespace Blueways\BwFocuspointImages\Renderer;
 
 final class ShapeRendererFactory
 {
-    private const MAPPING = [
+    private const array MAPPING = [
         'rect' => RectShapeRenderer::class,
         'polygon' => PolygonShapeRenderer::class
     ];
@@ -14,8 +14,9 @@ final class ShapeRendererFactory
     public function getRenderer(string $type): ?ShapeRendererInterface
     {
         $type = strtolower($type);
-        if (!isset(self::MAPPING[$type]))
+        if (!isset(self::MAPPING[$type])) {
             return null;
+        }
         if (!isset($this->renderers[$type])) {
             $RendererClass = self::MAPPING[$type];
             $this->renderers[$type] = new $RendererClass();

@@ -1,7 +1,7 @@
 <?php
 
+use TYPO3\CMS\Core\Resource\FileType;
 use Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer;
-use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 defined('TYPO3') || die();
@@ -11,9 +11,9 @@ ExtensionManagementUtility::addTcaSelectItem(
     'tt_content',
     'CType',
     [
-        'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title',
-        'bw_focuspoint_images_svg', // ctype value
-        'bw_focuspoint_images_svg', // icon-identifier
+        'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title',
+        'value' => 'bw_focuspoint_images_svg', // ctype value
+        'icon' => 'bw_focuspoint_images_svg', // icon-identifier
     ],
     'textmedia', // position in select box (=after textmedia)
     'after'
@@ -22,23 +22,23 @@ ExtensionManagementUtility::addTcaSelectItem(
 // set palettes and input fields
 $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg'] = [
     'showitem' => '
-        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:general,
+        --div--;core.form.tabs:general,
             --palette--;;general,
             --palette--;;headers,
             assets,
         --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.appearance,
             --palette--;;frames,
             --palette--;;appearanceLinks,
-        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:language,
+        --div--;core.form.tabs:language,
             --palette--;;language,
-        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:access,
+        --div--;core.form.tabs:access,
             --palette--;;hidden,
             --palette--;;access,
-        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:categories,
+        --div--;core.form.tabs:categories,
             categories,
-        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:notes,
+        --div--;core.form.tabs:notes,
             rowDescription,
-        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:extended,
+        --div--;core.form.tabs:extended,
     ',
     'previewRenderer' => FocuspointPreviewRenderer::class,
 ];
@@ -60,7 +60,7 @@ $GLOBALS['TCA']['tt_content']['types']['bw_focuspoint_images_svg']['columnsOverr
             ],
             'overrideChildTca' => [
                 'types' => [
-                    File::FILETYPE_IMAGE => [
+                    FileType::IMAGE->value => [
                         'showitem' => 'focus_points,--palette--;;filePalette',
                     ],
                 ],

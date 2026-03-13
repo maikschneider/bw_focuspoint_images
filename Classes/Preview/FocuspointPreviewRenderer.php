@@ -7,6 +7,7 @@ use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\Collection\LazyFileReferenceCollection;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -15,30 +16,33 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
     private readonly ShapeRendererFactory $shapeRendererFactory;
 
-    public function __construct()
+    public function __construct(private readonly PageRenderer $pageRenderer)
     {
         $this->shapeRendererFactory = GeneralUtility::makeInstance(ShapeRendererFactory::class);
     }
 
+    #[\Override]
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
         $content = '';
-        $row = $item->getRecord();
+        $record = $item->getRecord();
 
-        if (!$row['assets']) {
+        if (!$record->has('assets')) {
             return $content;
         }
 
-        $fileReferences = BackendUtility::resolveFileReferences('tt_content', 'assets', $row);
-        if ($fileReferences === null || $fileReferences === []) {
+        /** @var LazyFileReferenceCollection|null $fileReferences */
+        $fileReferences = $record->get('assets');
+
+        if ($fileReferences === null || $fileReferences->count() === 0) {
             return '';
         }
 
-        $fileReference = $fileReferences[array_key_first($fileReferences)];
+        $fileReference = $fileReferences->offsetGet(0);
 
         $focuspoints = $fileReference->getReferenceProperty('focus_points');
         if ($focuspoints === null || $focuspoints === '') {
-            return $this->linkEditContent($content, $row);
+            return $this->linkEditContent($content, $record);
         }
 
         $content .= '<div class="preview-thumbnails" style="--preview-thumbnails-size: 200px">';
@@ -73,10 +77,10 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $content .= '</div>';
 
         /** @var PageRenderer $pageRenderer */
-        $pageRenderer = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
+        $pageRenderer = $this->pageRenderer;
         $pageRenderer->addCssFile('EXT:bw_focuspoint_images/Resources/Public/Css/BackendPreview.css');
 
-        return $this->linkEditContent($content, $row);
+        return $this->linkEditContent($content, $record);
     }
 
     private function getSvgForFileReference(FileReference $fileReference): string
@@ -95,7 +99,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $height = $fileReference->getProperty('height');
         $uid = $fileReference->getUid();
         $viewBox = "0 0 {$width} {$height}";
-        $shapes = join(
+        $shapes = implode(
             '',
             array_map(
                 fn (array $focuspoint): string => $this->shapeRendererFactory->getRenderer(@$focuspoint['__shape'] ?? '')?->render($focuspoint['__data']),

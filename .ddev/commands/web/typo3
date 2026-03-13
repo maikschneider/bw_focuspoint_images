@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+## Description: Run TYPO3 CLI (typo3) command inside the web container
+## Usage: typo3 [args]
+## Example: "ddev typo3 site:list" or "ddev typo3 list" or "ddev typo3 extension:list"
+## ExecRaw: true
+
+/var/www/html/vendor/bin/typo3 "$@"

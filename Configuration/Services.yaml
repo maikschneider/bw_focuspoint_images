@@ -13,6 +13,9 @@ services:
   Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard:
     public: true
 
+  Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer:
+    public: true
+
   Blueways\BwFocuspointImages\EventListener\BeforeJavaScriptsRenderingEventListener:
     tags:
       - name: 'event.listener'
