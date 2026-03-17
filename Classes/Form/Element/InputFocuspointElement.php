@@ -135,7 +135,7 @@ class InputFocuspointElement extends AbstractFormElement
     protected function createErrorMessage(array $resultArray, string $messageLanguageKey): array
     {
         $resultArray['html'] = '<div class="callout callout-warning">';
-        $resultArray['html'] .= $this->getLanguageService()->sL('bw_focuspoint_images.db:');
+        $resultArray['html'] .= $this->getLanguageService()->sL('bw_focuspoint_images.db:' . $messageLanguageKey);
         $resultArray['html'] .= '</div>';
         return $resultArray;
     }

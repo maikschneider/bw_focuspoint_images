@@ -12,8 +12,10 @@ ExtensionManagementUtility::addTcaSelectItem(
     'CType',
     [
         'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title',
+        'description' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.description',
         'value' => 'bw_focuspoint_images_svg', // ctype value
         'icon' => 'bw_focuspoint_images_svg', // icon-identifier
+        'group' => 'default',
     ],
     'textmedia', // position in select box (=after textmedia)
     'after'
