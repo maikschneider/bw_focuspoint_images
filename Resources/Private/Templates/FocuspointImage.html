@@ -2,7 +2,9 @@
 
 <div class="focuspoint" style="width:{image.properties.width}px">
 
-    <f:image image="{image}"/>
+    <f:for each="{images}" as="image">
+		<f:image image="{image}" width="940c" alt="{image.alternative}" />
+	</f:for>
 
     <svg class="focuspoint__svg" xmlns="http://www.w3.org/2000/svg">
         <f:for each="{points}" as="point" iteration="i">
