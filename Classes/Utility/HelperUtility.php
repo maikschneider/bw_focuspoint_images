@@ -197,7 +197,7 @@ class HelperUtility
                 break;
             case LinkService::TYPE_RECORD:
                 $pageTS = static::getPagesTSconfig(0);
-                $table = $pageTS['TCEMAIN.']['linkHandler.'][$linkData['identifier'] . '.']['configuration.']['table'];
+                $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'];
                 $record = BackendUtility::getRecord($table, $linkData['uid']);
                 if ($record) {
                     $recordTitle = BackendUtility::getRecordTitle($table, $record);
