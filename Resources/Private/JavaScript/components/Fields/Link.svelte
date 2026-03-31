@@ -26,7 +26,7 @@
         let url = TYPO3.settings.ajaxUrls['wizard_focuspoint_linkbrowserurl'];
         url += `&inputName=${encodeURIComponent($wizardConfigStore.itemFormElName + '-hidden-link-field')}`;
         url += '&inputValue=' + encodeURIComponent($focuspoints[index][name] || '');
-        url += '&config=' + encodeURIComponent(JSON.stringify(config ||'{}'));
+        url += '&config=' + encodeURIComponent(JSON.stringify(config || {}));
 
         return (new AjaxRequest(url)).get().then(async (response) => {
             linkBrowserData = await response.resolve();
