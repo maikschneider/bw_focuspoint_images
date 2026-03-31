@@ -196,6 +196,7 @@ class HelperUtility
 
                 break;
             case LinkService::TYPE_RECORD:
+                // TODO load PageTS from actual relevant page
                 $pageTS = static::getPagesTSconfig(0);
                 $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'];
                 $record = BackendUtility::getRecord($table, $linkData['uid']);
