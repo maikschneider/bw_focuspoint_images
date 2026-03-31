@@ -196,18 +196,24 @@ class HelperUtility
 
                 break;
             case LinkService::TYPE_RECORD:
+                $data = null;
+
                 // TODO load PageTS from actual relevant page
                 $pageTS = static::getPagesTSconfig(0);
-                $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'];
-                $record = BackendUtility::getRecord($table, $linkData['uid']);
-                if ($record) {
-                    $recordTitle = BackendUtility::getRecordTitle($table, $record);
-                    $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
-                    $data = [
-                        'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
-                        'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
-                    ];
-                } else {
+                $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'] ?? false;
+                if ($table) {
+                    $record = BackendUtility::getRecord($table, $linkData['uid']);
+                    if ($record) {
+                        $recordTitle = BackendUtility::getRecordTitle($table, $record);
+                        $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
+                        $data = [
+                            'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
+                            'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
+                        ];
+                    }
+                }
+
+                if (is_null($data)) {
                     $data = [
                         'text' => sprintf('%s', $linkData['uid']),
                         'icon' => $this->iconFactory->getIcon(
