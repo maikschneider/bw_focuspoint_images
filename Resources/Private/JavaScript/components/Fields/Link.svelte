@@ -1,5 +1,5 @@
 <script>
-    import {focuspoints, getIcon, wizardConfigStore, iconStore} from '../../store.svelte.js'
+    import {focuspoints, getIcon, wizardConfigStore, iconStore, focuspointChannelName} from '../../store.svelte.js'
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
     import {onMount} from "svelte";
@@ -34,20 +34,24 @@
     }
 
     function openModal() {
-
         const modal = Modal.advanced({
             type: Modal.types.iframe,
             content: linkBrowserData.url,
             size: Modal.sizes.large,
         })
 
-        // listen for the link selection event (from FocuspointElement.svelte)
-        window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
+        // Receive link-selected from FocuspointElement via BroadcastChannel (frame-agnostic)
+        const linkChannel = new BroadcastChannel(focuspointChannelName($wizardConfigStore.itemFormElName))
+        linkChannel.onmessage = (e) => {
+            if (e.data.type === 'link-selected') {
+                handleLinkSelection({detail: {link: e.data.link}})
+                linkChannel.close()
+            }
+        }
 
-        // remove the event listener when the modal is closed
-        modal.addEventListener('typo3-modal-hidden', function () {
-            window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
-        });
+        modal.addEventListener('typo3-modal-hidden', () => {
+            linkChannel.close()
+        })
     }
 
     function onInputClear() {

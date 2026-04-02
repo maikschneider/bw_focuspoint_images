@@ -34,23 +34,25 @@
     import {onDestroy, onMount} from "svelte";
     import Image from './components/Image.svelte';
     import Sidebar from "./components/Sidebar.svelte";
-    import {initStores} from './store.svelte';
-    import {focuspoints} from './store.svelte';
+    import {initStores, focuspoints, focuspointChannelName} from './store.svelte';
     import interact from 'interactjs';
     import Settings from "./components/Settings.svelte";
 
-    let {itemFormElName, wizardConfig, image} = $props()
+    let {itemFormElName, wizardConfig, image, itemFormElValue} = $props()
     let isSettingsOpen = $state(false)
     let imageComponent
     let sidebarWidth = $state(300)
     const minSidebarWidth = 200
-
-    const hiddenInput = window.parent.frames.list_frame.document.querySelector(`[name="${itemFormElName}"]`)
+    let channel
 
     onMount(() => {
-        initStores(hiddenInput, wizardConfig)
-        window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-modal-save`, onModalSave)
-        window.parent.frames.list_frame.document.addEventListener(`${itemFormElName}-settings`, handleSettings)
+        initStores(itemFormElValue, wizardConfig)
+
+        channel = new BroadcastChannel(focuspointChannelName(itemFormElName))
+        channel.onmessage = (e) => {
+            if (e.data.type === 'modal-save') onModalSave()
+            if (e.data.type === 'settings') handleSettings()
+        }
 
         // Restore saved sidebar width if available
         const savedWidth = localStorage.getItem('focuspoint-sidebar-width')
@@ -74,14 +76,13 @@
     });
 
     onDestroy(() => {
-        window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-modal-save`, onModalSave)
-        window.parent.frames.list_frame.document.removeEventListener(`${itemFormElName}-settings`, handleSettings)
+        channel?.close()
         $focuspoints = []
         interact('.resize-handle').unset()
     });
 
     const onModalSave = () => {
-        window.parent.frames.list_frame.document.dispatchEvent(new CustomEvent(`${itemFormElName}-wizard-update`, {detail: {focuspoints: $focuspoints}}))
+        channel?.postMessage({type: 'wizard-update', focuspoints: $focuspoints})
     }
 
     const handleSettings = () => {
