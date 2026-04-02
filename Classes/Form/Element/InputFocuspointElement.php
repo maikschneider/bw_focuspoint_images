@@ -17,6 +17,9 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class InputFocuspointElement extends AbstractFormElement
 {
+    public function __construct(private readonly ResourceFactory $resourceFactory)
+    {
+    }
     /**
      * This will render an imageManipulation field
      *
@@ -115,9 +118,9 @@ class InputFocuspointElement extends AbstractFormElement
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
                 /** @var ResourceFactory $resourceFactory */
-                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+                $resourceFactory = $this->resourceFactory;
                 $file = $resourceFactory->getFileObject($fileUid);
-            } catch (FileDoesNotExistException|\InvalidArgumentException $e) {
+            } catch (FileDoesNotExistException|\InvalidArgumentException) {
             }
         }
 

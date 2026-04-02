@@ -1,16 +1,34 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Dead catch \- TYPO3\\CMS\\Core\\Resource\\Exception\\FileDoesNotExistException is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
+			message: '#^Call to method assignMultiple\(\) on an unknown class TYPO3\\CMS\\Fluid\\View\\StandaloneView\.$#'
+			identifier: class.notFound
 			count: 1
-			path: Classes/Utility/HelperUtility.php
+			path: Classes/Form/Element/InputFocuspointElement.php
 
 		-
-			message: '#^Dead catch \- TYPO3\\CMS\\Core\\Resource\\Exception\\FolderDoesNotExistException is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
+			message: '#^Call to method render\(\) on an unknown class TYPO3\\CMS\\Fluid\\View\\StandaloneView\.$#'
+			identifier: class.notFound
 			count: 1
-			path: Classes/Utility/HelperUtility.php
+			path: Classes/Form/Element/InputFocuspointElement.php
+
+		-
+			message: '#^Call to method setTemplatePathAndFilename\(\) on an unknown class TYPO3\\CMS\\Fluid\\View\\StandaloneView\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Form/Element/InputFocuspointElement.php
+
+		-
+			message: '#^Class TYPO3\\CMS\\Fluid\\View\\StandaloneView not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Form/Element/InputFocuspointElement.php
+
+		-
+			message: '#^Parameter \#3 \$element of static method TYPO3\\CMS\\Backend\\Utility\\BackendUtility\:\:resolveFileReferences\(\) expects array, TYPO3\\CMS\\Core\\Domain\\RecordInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Classes/Preview/FocuspointPreviewRenderer.php
 
 		-
 			message: '#^If condition is always true\.$#'

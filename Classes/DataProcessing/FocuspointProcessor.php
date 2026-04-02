@@ -57,7 +57,7 @@ class FocuspointProcessor extends FilesProcessor
                     }
 
                     // in case of typolinks with target, add a new field {$fieldName}Target='_blank'
-                    if (is_string($fieldValue) && strpos($fieldValue, 't3://') === 0) {
+                    if (is_string($fieldValue) && str_starts_with($fieldValue, 't3://')) {
                         $linkValues = $typoLinkCodecService->decode($fieldValue);
                         if ($linkValues['target']) {
                             $attributeName = $fieldName . 'Target';

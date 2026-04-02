@@ -12,6 +12,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
+    public function __construct(private readonly PageRenderer $pageRenderer)
+    {
+    }
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
         $content = '';
@@ -65,7 +68,7 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
         $content .= '</div>';
 
         /** @var PageRenderer $pageRenderer */
-        $pageRenderer = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Page\PageRenderer::class);
+        $pageRenderer = $this->pageRenderer;
         $pageRenderer->addCssFile('EXT:bw_focuspoint_images/Resources/Public/Css/BackendPreview.css');
 
         return $this->linkEditContent($content, $row);
