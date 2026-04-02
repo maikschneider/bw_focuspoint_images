@@ -40,7 +40,15 @@
             size: Modal.sizes.large,
         })
 
-        // Receive link-selected from FocuspointElement via BroadcastChannel (frame-agnostic)
+        // v14+: adapter fires 'typo3:form-engine:link-browser:set-link' on window.frameElement,
+        // which bubbles (composed: true) up to the modal element.
+        modal.addEventListener('typo3:form-engine:link-browser:set-link', (e) => {
+            handleLinkSelection({detail: {link: e.value}})
+            modal.hideModal()
+        })
+
+        // v13 fallback: adapter writes to the hidden input in FocuspointElement which relays
+        // the value via BroadcastChannel. Mutually exclusive with the v14 path above.
         const linkChannel = new BroadcastChannel(focuspointChannelName($wizardConfigStore.itemFormElName))
         linkChannel.onmessage = (e) => {
             if (e.data.type === 'link-selected') {
