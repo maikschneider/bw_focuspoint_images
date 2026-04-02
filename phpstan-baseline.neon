@@ -13,12 +13,6 @@ parameters:
 			path: Classes/Utility/HelperUtility.php
 
 		-
-			message: '#^Dead catch \- TYPO3\\CMS\\Core\\Resource\\Exception\\InvalidPathException is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: Classes/Utility/HelperUtility.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 2
