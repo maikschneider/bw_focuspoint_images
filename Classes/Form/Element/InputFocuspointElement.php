@@ -13,7 +13,8 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\CMS\Core\View\ViewFactoryData;
+use TYPO3\CMS\Core\View\ViewFactoryInterface;
 
 class InputFocuspointElement extends AbstractFormElement
 {
@@ -94,8 +95,12 @@ class InputFocuspointElement extends AbstractFormElement
         ];
 
         // Build html
-        $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $templateView->setTemplatePathAndFilename('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html');
+        $viewFactoryData = new ViewFactoryData(
+            templatePathAndFilename: 'EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'
+        );
+        /** @var ViewFactoryInterface  $viewFactory */
+        $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);
+        $templateView = $viewFactory->create($viewFactoryData);
         $templateView->assignMultiple($arguments);
 
         $resultArray['html'] = $templateView->render();
@@ -117,7 +122,6 @@ class InputFocuspointElement extends AbstractFormElement
 
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
-                /** @var ResourceFactory $resourceFactory */
                 $resourceFactory = $this->resourceFactory;
                 $file = $resourceFactory->getFileObject($fileUid);
             } catch (FileDoesNotExistException|\InvalidArgumentException) {
