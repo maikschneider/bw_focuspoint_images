@@ -81,6 +81,24 @@ class InputFocuspointElement extends AbstractFormElement
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
         $wizardConfig['typo3Version'] = $version['version_main'];
 
+        $langPrefix = 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:';
+        $langKeys = [
+            'wizard.button.settings',
+            'wizard.button.cancel',
+            'wizard.button.copy',
+            'wizard.button.paste',
+            'wizard.button.undo',
+            'wizard.button.accept',
+            'wizard.settings.copied',
+            'wizard.settings.copied.message',
+            'wizard.single_point.button.delete',
+            'wizard.single_point.button.addnew',
+        ];
+        $wizardConfig['lang'] = array_combine(
+            $langKeys,
+            array_map(fn($k) => $this->getLanguageService()->sL($langPrefix . $k), $langKeys)
+        );
+
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
         $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointElement.js');
 
