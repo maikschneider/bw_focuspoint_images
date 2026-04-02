@@ -30,8 +30,8 @@
     function onCopyButtonClick() {
         navigator.clipboard.writeText(focuspointArea.value);
         Notification.success(
-                $wizardConfigStore.lang['wizard.settings.copied'],
-                $wizardConfigStore.lang['wizard.settings.copied.message'],
+                $wizardConfigStore?.lang['wizard.settings.copied'],
+                $wizardConfigStore?.lang['wizard.settings.copied.message'],
                 3
         );
     }
@@ -74,10 +74,10 @@
 
     <fieldset class="form-section">
         <div class="d-flex justify-content-between">
-            <h3 class="form-section-headline">{$wizardConfigStore.lang['wizard.button.settings']}</h3>
+            <h3 class="form-section-headline">{$wizardConfigStore?.lang['wizard.button.settings']}</h3>
             <button onclick={() => isSettingsOpenValue = false} aria-label="Close settings" class="btn-close">
                 {@html $iconStore['actions-close']}
-                <span class="visually-hidden">{$wizardConfigStore.lang['wizard.button.cancel']}</span>
+                <span class="visually-hidden">{$wizardConfigStore?.lang['wizard.button.cancel']}</span>
             </button>
         </div>
         <div class="row">
@@ -95,18 +95,18 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <button class="btn btn-default" onclick={onCopyButtonClick}>
-                            {@html $iconStore['actions-clipboard']} {$wizardConfigStore.lang['wizard.button.copy']}
+                            {@html $iconStore['actions-clipboard']} {$wizardConfigStore?.lang['wizard.button.copy']}
                         </button>
                         <button class="btn btn-default" onclick={onPasteButtonClick}>
-                            {@html $iconStore['actions-clipboard-paste']} {$wizardConfigStore.lang['wizard.button.paste']}
+                            {@html $iconStore['actions-clipboard-paste']} {$wizardConfigStore?.lang['wizard.button.paste']}
                         </button>
                     </div>
                     <div>
                         <button disabled={!hasChange} class="btn btn-default" onclick={onUndoButtonClick}>
-                            {@html $iconStore['actions-undo']} {$wizardConfigStore.lang['wizard.button.undo']}
+                            {@html $iconStore['actions-undo']} {$wizardConfigStore?.lang['wizard.button.undo']}
                         </button>
                         <button disabled={!hasChange || hasError} class="btn btn-primary" onclick={onSaveButtonClick}>
-                            {@html $iconStore['actions-check']} {$wizardConfigStore.lang['wizard.button.accept']}
+                            {@html $iconStore['actions-check']} {$wizardConfigStore?.lang['wizard.button.accept']}
                         </button>
                     </div>
                 </div>

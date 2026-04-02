@@ -93,7 +93,7 @@
                         <button
                                 class="btn btn-danger" name="reset" title="Reset" on:click|preventDefault={() => deleteFocuspoint(index)}>
                             {@html $iconStore['actions-delete']}
-                            {$wizardConfigStore.lang['wizard.single_point.button.delete']}
+                            {$wizardConfigStore?.lang['wizard.single_point.button.delete']}
                         </button>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
     <div class="pt-3">
         <button class="btn btn-success w-100 " on:click|preventDefault={createNewFocuspoint}>
             {@html $iconStore['actions-add']}
-            {$wizardConfigStore.lang['wizard.single_point.button.addnew']}
+            {$wizardConfigStore?.lang['wizard.single_point.button.addnew']}
         </button>
     </div>
 
