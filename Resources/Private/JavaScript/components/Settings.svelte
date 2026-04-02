@@ -68,13 +68,9 @@
         padding-top: 0;
         color: var(--icon-color-primary, currentColor)
     }
-
-    .v12 fieldset {
-        color: #333;
-    }
 </style>
 
-<div class="d-flex justify-content-center align-items-center wrapper" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="d-flex justify-content-center align-items-center wrapper">
 
     <fieldset class="form-section">
         <div class="d-flex justify-content-between">

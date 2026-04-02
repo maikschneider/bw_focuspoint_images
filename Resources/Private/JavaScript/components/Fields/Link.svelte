@@ -60,30 +60,7 @@
     }
 </script>
 
-<style>
-    .v12 .form-wizards-wrap {
-        display: flex;
-        gap: 5px;
-    }
-
-    .v12 .form-wizards-element {
-        width: 100%;
-    }
-
-    .v12 .input-group-text {
-        min-width: 42px;
-    }
-
-    .v12 .btn-default {
-        height: 32px;
-    }
-
-    .v12 .form-control {
-        border-radius: 0;
-    }
-</style>
-
-<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="form-group">
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>
