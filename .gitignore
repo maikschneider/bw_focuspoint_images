@@ -8,7 +8,7 @@ var/
 Documentation-GENERATED-temp
 tscommand-*.tmp.txt
 .Build
-config/
+config/system
 .tscache
 package-lock.json
 Resources/Public/JavaScript/*.js.map
