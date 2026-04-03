@@ -14,10 +14,10 @@ ExtensionManagementUtility::addTcaSelectItem(
         'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title',
         'value' => 'bw_focuspoint_images_svg', // ctype value
         'icon' => 'bw_focuspoint_images_svg', // icon-identifier
-        'group' => 'default', // group
+        'group' => 'special', // group
         'description' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.description', // description
     ],
-    'textmedia', // position in select box (=after textmedia)
+    'html', // position in select box (=after textmedia)
     'after'
 );
 

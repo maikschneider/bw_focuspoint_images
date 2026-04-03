@@ -2,16 +2,16 @@ tt_content.bw_focuspoint_images_svg =<  lib.contentElement
 tt_content.bw_focuspoint_images_svg {
   templateName = FocuspointImage
 
-  templateRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Templates/
-  templateRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.templateRootPath}
-  partialRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Partials/
-  partialRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.partialRootPath}
-  layoutRootPaths.0 = EXT:bw_focuspoint_images/Resources/Private/Layouts/
-  layoutRootPaths.1 = {$plugin.tx_bwfocuspointimages.view.layoutRootPath}
+  templateRootPaths.1775211126 = EXT:bw_focuspoint_images/Resources/Private/Templates/
+  templateRootPaths.1775211133 = {$plugin.tx_bwfocuspointimages.view.templateRootPath}
+  partialRootPaths.1775211126 = EXT:bw_focuspoint_images/Resources/Private/Partials/
+  partialRootPaths.1775211133 = {$plugin.tx_bwfocuspointimages.view.partialRootPath}
+  layoutRootPaths.1775211126 = EXT:bw_focuspoint_images/Resources/Private/Layouts/
+  layoutRootPaths.1775211133 = {$plugin.tx_bwfocuspointimages.view.layoutRootPath}
 
   dataProcessing {
-    10 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
-    10 {
+    30 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+    30 {
       references.fieldName = assets
       as = images
     }
