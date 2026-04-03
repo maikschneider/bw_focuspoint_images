@@ -61,6 +61,10 @@
         grid-column: 1 / 4;
     }
 
+    .form-section {
+        container-type: unset;
+    }
+
     .btn-close {
         background: transparent;
         border: none;

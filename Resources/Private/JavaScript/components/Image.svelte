@@ -182,6 +182,9 @@
         --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);
     }
 
+    .opacity-0 {
+        opacity: 0;
+    }
 
     .style1.active {
         border-color: #ff8700;
