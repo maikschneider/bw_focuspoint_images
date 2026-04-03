@@ -130,6 +130,13 @@ export const activateFocuspoint = (index) => {
     })
 }
 
+export const deactivateAllFocuspoints = () => {
+  focuspoints.update((store) => {
+    store.forEach(focuspoint => focuspoint.active = false);
+    return store;
+  })
+}
+
 export const focusPointName = (index) => {
     const config = get(wizardConfigStore);
     const nameFields = Object.entries(config.fields).filter(([key, value]) => {

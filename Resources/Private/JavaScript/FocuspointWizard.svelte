@@ -34,7 +34,7 @@
     import {onDestroy, onMount} from "svelte";
     import Image from './components/Image.svelte';
     import Sidebar from "./components/Sidebar.svelte";
-    import {initStores, focuspoints, focuspointChannelName} from './store.svelte';
+    import {initStores, focuspoints, focuspointChannelName, activateFocuspoint, deactivateAllFocuspoints} from './store.svelte';
     import interact from 'interactjs';
     import Settings from "./components/Settings.svelte";
 
@@ -47,6 +47,11 @@
 
     onMount(() => {
         initStores(itemFormElValue, wizardConfig)
+
+        deactivateAllFocuspoints()
+        setTimeout(() => {
+            activateFocuspoint(0)
+        }, 300)
 
         channel = new BroadcastChannel(focuspointChannelName(itemFormElName))
         channel.onmessage = (e) => {

@@ -26,7 +26,7 @@
         let url = TYPO3.settings.ajaxUrls['wizard_focuspoint_linkbrowserurl'];
         url += `&inputName=${$wizardConfigStore.itemFormElName}-hidden-link-field`;
         url += '&inputValue=' + $focuspoints[index][name] || '';
-        url += '&config=' + JSON.stringify(config ||'{}');
+        url += '&config=' + JSON.stringify(config || '{}');
 
         return (new AjaxRequest(url)).get().then(async (response) => {
             linkBrowserData = await response.resolve();
@@ -62,7 +62,7 @@
         })
     }
 
-    function onInputClear() {
+    function onInputClear(index) {
         $focuspoints[index][name] = ''
         linkBrowserData.preview = null
     }
@@ -79,30 +79,30 @@
                 <input class="form-control" title="" value="" readonly="" hidden="">
                 <div class="form-control-clearable-wrapper">
                     <input
-                            type="text"
-                            id="input-{index}-{name}"
-                            class="form-control form-control-clearable"
-                            readonly
-                            value={previewText}
-                            class:hidden={!readOnly} />
+                        type="text"
+                        id="input-{index}-{name}"
+                        class="form-control form-control-clearable"
+                        readonly
+                        value={previewText}
+                        class:hidden={!readOnly} />
                     <input
-                            bind:value={$focuspoints[index][name]}
-                            class:hidden={readOnly}
-                            type="text"
-                            class="form-control form-control-clearable"
-                            id="input-{index}-{name}" />
+                        bind:value={$focuspoints[index][name]}
+                        class:hidden={readOnly}
+                        type="text"
+                        class="form-control form-control-clearable"
+                        id="input-{index}-{name}" />
                     <button
-                            on:click|preventDefault={onInputClear}
-                            class:hidden={$focuspoints[index][name] === ''}
-                            type="button"
-                            tabindex="-1"
-                            title="Clear input"
-                            aria-label="Clear input"
-                            class="close text-black">
+                        onclick={(e) => {e.preventDefault(); onInputClear(index); }}
+                        class:hidden={!$focuspoints[index][name] || $focuspoints[index][name] === ''}
+                        type="button"
+                        tabindex="-1"
+                        title="Clear input"
+                        aria-label="Clear input"
+                        class="close text-black">
                         {@html $iconStore['actions-close']}
                     </button>
                 </div>
-                <button class="btn btn-default" on:click|preventDefault={() => readOnly = !readOnly}>
+                <button class="btn btn-default" onclick={(e) => {e.preventDefault(); readOnly = !readOnly}}>
                     {@html $iconStore['actions-version-workspaces-preview-link']}
                 </button>
             </div>
@@ -110,7 +110,7 @@
         <div class="form-wizards-item-aside formwizards-item-aside--field-control">
             <div class="btn-group">
                 <button
-                        on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">
+                    onclick={(e) => {e.preventDefault(); openModal(); }} aria-label="Open link wizard" class="btn btn-default">
                     {@html $iconStore['actions-wizard-link']}
                 </button>
             </div>

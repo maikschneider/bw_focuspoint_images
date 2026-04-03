@@ -96,7 +96,7 @@ class InputFocuspointElement extends AbstractFormElement
         ];
         $wizardConfig['lang'] = array_combine(
             $langKeys,
-            array_map(fn($k) => $this->getLanguageService()->sL($langPrefix . $k), $langKeys)
+            array_map(fn ($k) => $this->getLanguageService()->sL($langPrefix . $k), $langKeys)
         );
 
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
