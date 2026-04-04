@@ -1,6 +1,6 @@
 base: 'https://bw-focuspoint-images.ddev.site/'
 dependencies:
-  - blueways/bw-focuspoint-images
+  - blueways/bw-focuspoint-images-example
   - bootstrap-package/full
 languages:
   -
