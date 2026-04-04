@@ -10,3 +10,5 @@ mod.tx_bwfocuspointimages.settings {
 mod.wizards.newContentElement.wizardItems {
   special.removeItems := addToList(bw_focuspoint_images_svg)
 }
+
+RTE.config.sys_file_reference.focus_points.preset = focuspoint-images

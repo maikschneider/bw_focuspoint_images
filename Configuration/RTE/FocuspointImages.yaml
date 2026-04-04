@@ -1,0 +1,18 @@
+editor:
+  config:
+    toolbar:
+      items:
+        - heading
+        - '|'
+        - bold
+        - italic
+        - underline
+        - '|'
+        - bulletedList
+        - numberedList
+        - insertTable
+        - blockQuote
+        - '|'
+        - clipboard
+        - undo
+        - redo
