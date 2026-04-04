@@ -5,7 +5,7 @@
     let {config, index, name} = $props()
 
     function handleChange(e) {
-        $focuspoints[index][name] = e.targetElement.value ?? ''
+        $focuspoints[index][name] = e.target.value ?? ''
     }
 </script>
 
