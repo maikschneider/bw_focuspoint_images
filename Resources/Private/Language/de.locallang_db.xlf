@@ -77,6 +77,10 @@
 				<source>Yes</source>
 				<target>Ja</target>
 			</trans-unit>
+			<trans-unit id="wizard.fields.notes">
+				<source>Notes</source>
+				<target>Notizen</target>
+			</trans-unit>
 			<trans-unit id="wizard.linkbrowser.page">
 				<source />
 				<target>Seite</target>

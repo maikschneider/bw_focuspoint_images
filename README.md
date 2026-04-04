@@ -83,7 +83,7 @@ image and start adding your focus areas.
 
 ### Configuration
 
-To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select**, **link** and **checkbox** inputs in the wizard.
+To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **rte**, **select**, **link** and **checkbox** inputs in the wizard.
 
 This example configuration is used to generate the output shown in Example 1
 
@@ -123,6 +123,11 @@ mod.tx_bwfocuspointimages.settings.fields {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
         type = link
         displayCond = FIELD:hasLink:REQ:true
+    }
+
+    notes {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.notes
+        type = rte
     }
 
 }
@@ -190,6 +195,14 @@ mod.tx_bwfocuspointimages.settings.fields {
     }
 
 }
+```
+
+##### Custom RTE preset
+
+To use a custom RTE preset, register your [own preset](https://docs.typo3.org/c/typo3/cms-rte-ckeditor/main/en-us/Configuration/Examples.html) and configure the focus point wizard to use it:
+
+```typo3_typoscript
+RTE.config.sys_file_reference.focus_points.preset = my-custom-preset
 ```
 
 #### Constants
