@@ -79,6 +79,9 @@ class InputFocuspointElement extends AbstractFormElement
                     $wizardConfig['fields'][$fieldName]['options'][$optionKey] = $this->getLanguageService()->sL($option);
                 }
             }
+            if (isset($fieldConfig['label']) && $fieldConfig['label']) {
+                $wizardConfig['fields'][$fieldName]['label'] = $this->getLanguageService()->sL($fieldConfig['label']);
+            }
         }
         if (ExtensionManagementUtility::isLoaded('rte_ckeditor')) {
             $richtext = GeneralUtility::makeInstance(Richtext::class);
