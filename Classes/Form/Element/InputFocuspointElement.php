@@ -6,12 +6,15 @@ use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Exception;
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\Richtext;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Core\View\ViewFactoryData;
 use TYPO3\CMS\Core\View\ViewFactoryInterface;
@@ -77,6 +80,25 @@ class InputFocuspointElement extends AbstractFormElement
                 }
             }
         }
+        if (ExtensionManagementUtility::isLoaded('rte_ckeditor')) {
+            $richtext = GeneralUtility::makeInstance(Richtext::class);
+            foreach ($wizardConfig['fields'] ?? [] as $fieldName => $fieldConfig) {
+                if (($fieldConfig['type'] ?? '') === 'rte') {
+                    $richtextConfigName = $fieldConfig['richtextConfiguration'] ?? 'default';
+                    $rteConfig = $richtext->getConfiguration(
+                        'sys_file_reference',
+                        'focus_points',
+                        (int)$this->data['effectivePid'],
+                        '',
+                        ['richtextConfiguration' => $richtextConfigName]
+                    );
+                    $editorConfig = $rteConfig['editor']['config'] ?? [];
+                    unset($editorConfig['importModules'], $editorConfig['removeImportModules']);
+                    $wizardConfig['fields'][$fieldName]['editorConfig'] = $this->resolveRteConfigPaths($editorConfig);
+                }
+            }
+        }
+
         $parameterArray = $this->data['parameterArray'];
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
         $wizardConfig['typo3Version'] = $version['version_main'];
@@ -155,6 +177,26 @@ class InputFocuspointElement extends AbstractFormElement
         $resultArray['html'] .= $this->getLanguageService()->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:' . $messageLanguageKey);
         $resultArray['html'] .= '</div>';
         return $resultArray;
+    }
+
+    protected function resolveRteConfigPaths(array $configuration): array
+    {
+        foreach ($configuration as $key => $value) {
+            if (is_array($value)) {
+                $configuration[$key] = $this->resolveRteConfigPaths($value);
+            } elseif (is_string($value) && PathUtility::isExtensionPath(strtoupper($value))) {
+                if (str_contains($value, '?')) {
+                    $configuration[$key] = PathUtility::getPublicResourceWebPath($value);
+                } else {
+                    $absolutePath = GeneralUtility::getFileAbsFileName($value);
+                    if ($absolutePath) {
+                        $absolutePath = GeneralUtility::createVersionNumberedFilename($absolutePath);
+                        $configuration[$key] = PathUtility::getAbsoluteWebPath($absolutePath);
+                    }
+                }
+            }
+        }
+        return $configuration;
     }
 
     /**

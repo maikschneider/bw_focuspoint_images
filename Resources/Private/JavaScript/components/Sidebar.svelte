@@ -14,6 +14,7 @@
     import Textarea from "./Fields/Textarea.svelte";
     import Link from "./Fields/Link.svelte";
     import Checkbox from "./Fields/Checkbox.svelte";
+    import Rte from "./Fields/Rte.svelte";
 
     onMount(() => {
         getIcon('actions-chevron-up')
@@ -32,7 +33,8 @@
         textarea: Textarea,
         select: Select,
         link: Link,
-        checkbox: Checkbox
+        checkbox: Checkbox,
+        rte: Rte
     };
 </script>
 
