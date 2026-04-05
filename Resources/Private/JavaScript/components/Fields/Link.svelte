@@ -9,6 +9,7 @@
     let readOnly = $state(true)
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
+    let previewAdditionalAttributes = $derived(linkBrowserData?.preview?.additionalAttributes ?? '')
 
     onMount(() => {
         updateLinkBrowserInfo()
@@ -117,4 +118,15 @@
             </div>
         </div>
     </div>
+    {#if previewAdditionalAttributes}
+        <div class="form-wizards-item-bottom">
+            <div class="callout callout-info mt-3 mb-0">
+                <div class="callout-content">
+                    <div class="callout-body">
+                        {@html previewAdditionalAttributes}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>

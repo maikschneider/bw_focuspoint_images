@@ -85,9 +85,9 @@ class HelperUtility
 
             if ($value !== '' && $value !== '0') {
                 $label = match ($key) {
-                    'class' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class'),
-                    'title' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:title'),
-                    'additionalParams' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params'),
+                    'class' => $languageService->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkattributes.class'),
+                    'title' => $languageService->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkattributes.title'),
+                    'additionalParams' => $languageService->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkattributes.additionalParams'),
                     default => $key,
                 };
                 $additionalAttributes[] = '<span><strong>' . htmlspecialchars((string)$label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
@@ -232,7 +232,7 @@ class HelperUtility
                 }
         }
 
-        $data['additionalAttributes'] = '<div class="help-block">' . implode(' - ', $additionalAttributes) . '</div>';
+        $data['additionalAttributes'] = implode(' - ', $additionalAttributes);
         return $data;
     }
 }

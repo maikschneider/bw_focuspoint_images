@@ -149,6 +149,18 @@
 				<source>Accept</source>
 				<target>Übernehmen</target>
 			</trans-unit>
+			<trans-unit id="wizard.linkattributes.class">
+				<source>CSS-Class</source>
+				<target>CSS-Klasse</target>
+			</trans-unit>
+			<trans-unit id="wizard.linkattributes.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="wizard.linkattributes.additionalParams">
+				<source>Additional link parameters</source>
+				<target>Zusätzliche Link-Parameter</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

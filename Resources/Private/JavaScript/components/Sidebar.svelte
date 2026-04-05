@@ -51,6 +51,10 @@
         margin-bottom: 0;
     }
 
+    :global(.callout) {
+        --typo3-component-border-radius: 4px;
+    }
+
 </style>
 
 <div class="modal-panel-sidebar">
