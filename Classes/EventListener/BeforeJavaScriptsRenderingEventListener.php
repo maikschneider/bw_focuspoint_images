@@ -2,9 +2,13 @@
 
 namespace Blueways\BwFocuspointImages\EventListener;
 
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Page\Event\BeforeJavaScriptsRenderingEvent;
 
+#[AsEventListener(
+    identifier: 'blueways/focuspoint-images-before-javascripts-rendering'
+)]
 class BeforeJavaScriptsRenderingEventListener
 {
     public function __invoke(BeforeJavaScriptsRenderingEvent $event): void

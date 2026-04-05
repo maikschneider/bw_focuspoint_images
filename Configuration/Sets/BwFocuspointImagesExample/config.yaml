@@ -1,0 +1,4 @@
+name: blueways/bw-focuspoint-images-example
+label: 'Bw Focuspoint Images'
+dependencies:
+  - blueways/bw-focuspoint-images

@@ -13,10 +13,14 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
+use TYPO3\CMS\Core\View\ViewFactoryData;
+use TYPO3\CMS\Core\View\ViewFactoryInterface;
 
 class InputFocuspointElement extends AbstractFormElement
 {
+    public function __construct(private readonly ResourceFactory $resourceFactory, private readonly ViewFactoryInterface $viewFactory)
+    {
+    }
     /**
      * This will render an imageManipulation field
      *
@@ -77,6 +81,24 @@ class InputFocuspointElement extends AbstractFormElement
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
         $wizardConfig['typo3Version'] = $version['version_main'];
 
+        $langPrefix = 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:';
+        $langKeys = [
+            'wizard.button.settings',
+            'wizard.button.cancel',
+            'wizard.button.copy',
+            'wizard.button.paste',
+            'wizard.button.undo',
+            'wizard.button.accept',
+            'wizard.settings.copied',
+            'wizard.settings.copied.message',
+            'wizard.single_point.button.delete',
+            'wizard.single_point.button.addnew',
+        ];
+        $wizardConfig['lang'] = array_combine(
+            $langKeys,
+            array_map(fn ($k) => $this->getLanguageService()->sL($langPrefix . $k), $langKeys)
+        );
+
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
         $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointElement.js');
 
@@ -91,8 +113,10 @@ class InputFocuspointElement extends AbstractFormElement
         ];
 
         // Build html
-        $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-        $templateView->setTemplatePathAndFilename('EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html');
+        $viewFactoryData = new ViewFactoryData(
+            templatePathAndFilename: 'EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'
+        );
+        $templateView = $this->viewFactory->create($viewFactoryData);
         $templateView->assignMultiple($arguments);
 
         $resultArray['html'] = $templateView->render();
@@ -114,10 +138,9 @@ class InputFocuspointElement extends AbstractFormElement
 
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
-                /** @var ResourceFactory $resourceFactory */
-                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+                $resourceFactory = $this->resourceFactory;
                 $file = $resourceFactory->getFileObject($fileUid);
-            } catch (FileDoesNotExistException|\InvalidArgumentException $e) {
+            } catch (FileDoesNotExistException|\InvalidArgumentException) {
             }
         }
 

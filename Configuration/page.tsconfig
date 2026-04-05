@@ -8,5 +8,5 @@ mod.tx_bwfocuspointimages.settings {
 }
 
 mod.wizards.newContentElement.wizardItems {
-  default.removeItems := addToList(bw_focuspoint_images_svg)
+  special.removeItems := addToList(bw_focuspoint_images_svg)
 }

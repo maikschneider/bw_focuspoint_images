@@ -51,42 +51,31 @@
         margin-bottom: 0;
     }
 
-    .v12 .panel-button {
-        border: 0;
-        color: #FFF;
-        background: none;
-        gap: 10px;
-        align-items: center;
-        justify-content: start !important;
-        width: 100%;
-    }
-
-    .v12 .panel-button[aria-expanded="true"] {
-        border-left: 2px solid #ff8700;
-    }
-
-    .v12 .caret {
-        border-top-color: #FFF;
+    :global(.callout) {
+        --typo3-component-border-radius: 4px;
     }
 
 </style>
 
-<div class="modal-panel-sidebar" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="modal-panel-sidebar">
     <div class="panel-group" role="tablist" aria-multiselectable="false">
-    {#each $focuspoints as focuspoint, index}
+        {#each $focuspoints as focuspoint, index}
 
-            <div class="panel panel-default" data-crop-variant-container="default">
+            <div class="panel panel-default">
                 <div class="panel-heading" role="tab">
                     <h4 class="panel-title" id="cropper-accordion-heading-{index}">
                         <button
-                                on:click={() => activateFocuspoint(index)}
-                                data-bs-toggle="collapse"
-                                aria-expanded={focuspoint.active}
-                                aria-controls="cropper-collapse-1"
-                                class:collapsed={!focuspoint.active}
-                                class="panel-button"
-                                data-crop-variant-id="default"
-                                data-crop-variant="">
+                            onclick={(e) => {
+                                e.preventDefault()
+                                activateFocuspoint(index)
+                            }}
+                            data-bs-toggle="collapse"
+                            data-bs-target="#cropper-collapse-{index}"
+                            aria-expanded={focuspoint.active}
+                            aria-controls="cropper-collapse-{index}"
+                            class:collapsed={!focuspoint.active}
+                            class:show={focuspoint.active}
+                            class="panel-button">
                             <span class="caret"></span>
                             <span class="panel-title">
                                 {focuspointName(focuspoint, index)}
@@ -95,12 +84,12 @@
                     </h4>
                 </div>
                 <div
-                        id="cropper-collapse-{index}"
-                        class="panel-collapse"
-                        class:collapse={!focuspoint.active}
-                        class:show={focuspoint.active}
-                        role="tabpanel"
-                        aria-labelledby="cropper-accordion-heading-{index}">
+                    id="cropper-collapse-{index}"
+                    class="panel-collapse"
+                    class:show={focuspoint.active}
+                    class:collapse={!focuspoint.active}
+                    role="tabpanel"
+                    aria-labelledby="cropper-accordion-heading-{index}">
                     <div class="panel-body">
                         {#each Object.entries($wizardConfigStore.fields) as [key, field]}
                             {#if fieldMeetsCondition(key, focuspoint)}
@@ -109,22 +98,29 @@
                         {/each}
 
                         <button
-                                class="btn btn-danger" name="reset" title="Reset" on:click|preventDefault={() => deleteFocuspoint(index)}>
+                            class="btn btn-danger" name="reset" title="Reset" onclick={(e) => {
+                                e.preventDefault()
+                                deleteFocuspoint(index)
+                            }}>
                             {@html $iconStore['actions-delete']}
-                            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.delete']}
+                            {$wizardConfigStore?.lang['wizard.single_point.button.delete']}
                         </button>
                     </div>
                 </div>
             </div>
 
 
-    {/each}
+        {/each}
     </div>
 
     <div class="pt-3">
-        <button class="btn btn-success w-100 " on:click|preventDefault={createNewFocuspoint}>
+        <button
+            class="btn btn-success w-100 " onclick={(e) => {
+            e.preventDefault()
+            createNewFocuspoint()
+        }}>
             {@html $iconStore['actions-add']}
-            {window.parent.frames.list_frame.TYPO3.lang['wizard.single_point.button.addnew']}
+            {$wizardConfigStore?.lang['wizard.single_point.button.addnew']}
         </button>
     </div>
 

@@ -5,9 +5,11 @@ export const wizardConfigStore = writable(null);
 
 export const focuspoints = writable([]);
 
-export const initStores = (hiddenInput, wizardConfig, hiddenElement) => {
+export const focuspointChannelName = (itemFormElName) => `focuspoint:${itemFormElName}`
+
+export const initStores = (initialValue, wizardConfig) => {
     wizardConfigStore.set(JSON.parse(wizardConfig));
-    focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : '[]'));
+    focuspoints.set(JSON.parse(initialValue && initialValue !== '' ? initialValue : '[]'));
 }
 
 /**
@@ -126,6 +128,13 @@ export const activateFocuspoint = (index) => {
         });
         return store;
     })
+}
+
+export const deactivateAllFocuspoints = () => {
+  focuspoints.update((store) => {
+    store.forEach(focuspoint => focuspoint.active = false);
+    return store;
+  })
 }
 
 export const focusPointName = (index) => {

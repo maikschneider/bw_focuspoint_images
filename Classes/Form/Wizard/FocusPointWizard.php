@@ -6,11 +6,13 @@ namespace Blueways\BwFocuspointImages\Form\Wizard;
 
 use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
+#[Autoconfigure(public: true)]
 class FocusPointWizard
 {
     public function __construct(protected UriBuilder $uriBuilder)

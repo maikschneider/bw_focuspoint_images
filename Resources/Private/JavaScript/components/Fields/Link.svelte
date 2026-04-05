@@ -1,5 +1,5 @@
 <script>
-    import {focuspoints, getIcon, wizardConfigStore, iconStore} from '../../store.svelte.js'
+    import {focuspoints, getIcon, wizardConfigStore, iconStore, focuspointChannelName} from '../../store.svelte.js'
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
     import {onMount} from "svelte";
@@ -9,6 +9,7 @@
     let readOnly = $state(true)
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
+    let previewAdditionalAttributes = $derived(linkBrowserData?.preview?.additionalAttributes ?? '')
 
     onMount(() => {
         updateLinkBrowserInfo()
@@ -35,52 +36,41 @@
     }
 
     function openModal() {
-
         const modal = Modal.advanced({
             type: Modal.types.iframe,
             content: linkBrowserData.url,
             size: Modal.sizes.large,
         })
 
-        // listen for the link selection event (from FocuspointElement.svelte)
-        window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
+        // v14+: adapter fires 'typo3:form-engine:link-browser:set-link' on window.frameElement,
+        // which bubbles (composed: true) up to the modal element.
+        modal.addEventListener('typo3:form-engine:link-browser:set-link', (e) => {
+            handleLinkSelection({detail: {link: e.value}})
+            modal.hideModal()
+        })
 
-        // remove the event listener when the modal is closed
-        modal.addEventListener('typo3-modal-hidden', function () {
-            window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
-        });
+        // v13 fallback: adapter writes to the hidden input in FocuspointElement which relays
+        // the value via BroadcastChannel. Mutually exclusive with the v14 path above.
+        const linkChannel = new BroadcastChannel(focuspointChannelName($wizardConfigStore.itemFormElName))
+        linkChannel.onmessage = (e) => {
+            if (e.data.type === 'link-selected') {
+                handleLinkSelection({detail: {link: e.data.link}})
+                linkChannel.close()
+            }
+        }
+
+        modal.addEventListener('typo3-modal-hidden', () => {
+            linkChannel.close()
+        })
     }
 
-    function onInputClear() {
+    function onInputClear(index) {
         $focuspoints[index][name] = ''
         linkBrowserData.preview = null
     }
 </script>
 
-<style>
-    .v12 .form-wizards-wrap {
-        display: flex;
-        gap: 5px;
-    }
-
-    .v12 .form-wizards-element {
-        width: 100%;
-    }
-
-    .v12 .input-group-text {
-        min-width: 42px;
-    }
-
-    .v12 .btn-default {
-        height: 32px;
-    }
-
-    .v12 .form-control {
-        border-radius: 0;
-    }
-</style>
-
-<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version < 13}>
+<div class="form-group">
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>
@@ -91,30 +81,30 @@
                 <input class="form-control" title="" value="" readonly="" hidden="">
                 <div class="form-control-clearable-wrapper">
                     <input
-                            type="text"
-                            id="input-{index}-{name}"
-                            class="form-control form-control-clearable"
-                            readonly
-                            value={previewText}
-                            class:hidden={!readOnly} />
+                        type="text"
+                        id="input-{index}-{name}"
+                        class="form-control form-control-clearable"
+                        readonly
+                        value={previewText}
+                        class:hidden={!readOnly} />
                     <input
-                            bind:value={$focuspoints[index][name]}
-                            class:hidden={readOnly}
-                            type="text"
-                            class="form-control form-control-clearable"
-                            id="input-{index}-{name}" />
+                        bind:value={$focuspoints[index][name]}
+                        class:hidden={readOnly}
+                        type="text"
+                        class="form-control form-control-clearable"
+                        id="input-{index}-{name}" />
                     <button
-                            on:click|preventDefault={onInputClear}
-                            class:hidden={$focuspoints[index][name] === ''}
-                            type="button"
-                            tabindex="-1"
-                            title="Clear input"
-                            aria-label="Clear input"
-                            class="close text-black">
+                        onclick={(e) => {e.preventDefault(); onInputClear(index); }}
+                        class:hidden={!$focuspoints[index][name] || $focuspoints[index][name] === ''}
+                        type="button"
+                        tabindex="-1"
+                        title="Clear input"
+                        aria-label="Clear input"
+                        class="close text-black">
                         {@html $iconStore['actions-close']}
                     </button>
                 </div>
-                <button class="btn btn-default" on:click|preventDefault={() => readOnly = !readOnly}>
+                <button class="btn btn-default" onclick={(e) => {e.preventDefault(); readOnly = !readOnly}}>
                     {@html $iconStore['actions-version-workspaces-preview-link']}
                 </button>
             </div>
@@ -122,10 +112,21 @@
         <div class="form-wizards-item-aside formwizards-item-aside--field-control">
             <div class="btn-group">
                 <button
-                        on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">
+                    onclick={(e) => {e.preventDefault(); openModal(); }} aria-label="Open link wizard" class="btn btn-default">
                     {@html $iconStore['actions-wizard-link']}
                 </button>
             </div>
         </div>
     </div>
+    {#if previewAdditionalAttributes}
+        <div class="form-wizards-item-bottom">
+            <div class="callout callout-info mt-3 mb-0">
+                <div class="callout-content">
+                    <div class="callout-body">
+                        {@html previewAdditionalAttributes}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
