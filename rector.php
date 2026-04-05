@@ -7,8 +7,8 @@ use Rector\PostRector\Rector\NameImportingPostRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
+use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 use Rector\ValueObject\PhpVersion;
-use Ssch\TYPO3Rector\CodeQuality\General\ConvertImplicitVariablesToExplicitGlobalsRector;
 use Ssch\TYPO3Rector\CodeQuality\General\ExtEmConfRector;
 use Ssch\TYPO3Rector\CodeQuality\General\RemoveTypo3VersionChecksRector;
 use Ssch\TYPO3Rector\Configuration\Typo3Option;
@@ -42,11 +42,10 @@ return RectorConfig::configure()
     ->withImportNames(true, true, false, true)
     ->withRules([
         AddVoidReturnTypeWhereNoReturnRector::class,
-        ConvertImplicitVariablesToExplicitGlobalsRector::class,
     ])
     ->withConfiguredRule(ExtEmConfRector::class, [
         ExtEmConfRector::PHP_VERSION_CONSTRAINT => '8.2.0-8.4.99',
-        ExtEmConfRector::TYPO3_VERSION_CONSTRAINT => '13.0.0-14.3.99',
+        ExtEmConfRector::TYPO3_VERSION_CONSTRAINT => '13.4.0-14.3.99',
         ExtEmConfRector::ADDITIONAL_VALUES_TO_BE_REMOVED => [],
     ])
     ->withConfiguredRule(
@@ -54,10 +53,9 @@ return RectorConfig::configure()
         [RemoveTypo3VersionChecksRector::TARGET_VERSION => 14]
     )
     ->withSkip([
-        // @see https://github.com/sabbelasichon/typo3-rector/issues/2536
-        __DIR__ . '/**/Configuration/ExtensionBuilder/*',
+        __DIR__ . '/config/system/settings.php',
+        SafeDeclareStrictTypesRector::class,
         NameImportingPostRector::class => [
             'ClassAliasMap.php',
         ],
-    ])
-;
+    ]);
