@@ -2,6 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\Utility;
 
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Imaging\IconSize;
@@ -16,6 +17,7 @@ use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\TypoScript\TypoScriptService;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
+#[Autoconfigure(public: true)]
 class HelperUtility
 {
     public function __construct(protected TypoScriptService $typoScriptService, protected LinkService $linkService, protected IconFactory $iconFactory, protected TypoLinkCodecService $typoLinkCodecService)
