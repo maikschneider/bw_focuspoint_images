@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 
 class FocusPointWizard
 {
@@ -19,6 +20,8 @@ class FocusPointWizard
     public function getLinkWizardUrlAction(ServerRequestInterface $request): JsonResponse
     {
         $queryParams = $request->getQueryParams();
+        $pid = $queryParams['pid'] ?? 0;
+        $pid = MathUtility::canBeInterpretedAsInteger($pid) ? (int)$pid : 0;
         $inputName = $queryParams['inputName'] ?? '';
         $inputValue = $queryParams['inputValue'] ?? '';
         $configJson = $queryParams['config'] ?? '{}';
@@ -53,7 +56,7 @@ class FocusPointWizard
         $url = (string)$this->uriBuilder->buildUriFromRoute('wizard_link', $urlParameters);
 
         $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
-        $preview = $inputValue ? $helperUtility->getLinkExplanation($inputValue) : [];
+        $preview = $inputValue ? $helperUtility->getLinkExplanation($inputValue, $pid) : [];
 
         return new JsonResponse([
             'url' => $url,

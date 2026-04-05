@@ -74,7 +74,7 @@ class HelperUtility
         return $pageTs;
     }
 
-    public function getLinkExplanation(string $itemValue): array
+    public function getLinkExplanation(string $itemValue, int $pid): array
     {
         if ($itemValue === '') {
             return [];
@@ -196,17 +196,23 @@ class HelperUtility
 
                 break;
             case LinkService::TYPE_RECORD:
-                $pageTS = static::getPagesTSconfig(0);
-                $table = $pageTS['TCEMAIN.']['linkHandler.'][$linkData['identifier'] . '.']['configuration.']['table'];
-                $record = BackendUtility::getRecord($table, $linkData['uid']);
-                if ($record) {
-                    $recordTitle = BackendUtility::getRecordTitle($table, $record);
-                    $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
-                    $data = [
-                        'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
-                        'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
-                    ];
-                } else {
+                $data = null;
+
+                $pageTS = static::getPagesTSconfig($pid);
+                $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'] ?? false;
+                if ($table) {
+                    $record = BackendUtility::getRecord($table, $linkData['uid']);
+                    if ($record) {
+                        $recordTitle = BackendUtility::getRecordTitle($table, $record);
+                        $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
+                        $data = [
+                            'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
+                            'icon' => $this->iconFactory->getIconForRecord($table, $record, Icon::SIZE_SMALL)->render(),
+                        ];
+                    }
+                }
+
+                if (is_null($data)) {
                     $data = [
                         'text' => sprintf('%s', $linkData['uid']),
                         'icon' => $this->iconFactory->getIcon(
