@@ -1,8 +1,12 @@
 <script>
     import {focuspoints} from '../../store.svelte.js'
-    import '@typo3/rte-ckeditor/ckeditor5.js'
+    import {onMount} from 'svelte'
 
     let {config, index, name} = $props()
+
+    onMount(() => {
+        import('../../ckeditor-rte.js')
+    })
 
     function handleChange(e) {
         $focuspoints[index][name] = e.target.value ?? ''
