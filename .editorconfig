@@ -77,7 +77,7 @@ trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
 
-[{Resources/Public/JavaScript/FocuspointElement.js,Resources/Public/JavaScript/FocuspointWizard.js}]
+[Resources/Public/JavaScript/**]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
