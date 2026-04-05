@@ -2,6 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\Utility;
 
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Imaging\IconSize;
@@ -16,6 +17,7 @@ use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\TypoScript\TypoScriptService;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
+#[Autoconfigure(public: true)]
 class HelperUtility
 {
     public function __construct(protected TypoScriptService $typoScriptService, protected LinkService $linkService, protected IconFactory $iconFactory, protected TypoLinkCodecService $typoLinkCodecService)
@@ -58,7 +60,7 @@ class HelperUtility
         return $pageTs;
     }
 
-    public function getLinkExplanation(string $itemValue): array
+    public function getLinkExplanation(string $itemValue, int $pid): array
     {
         if ($itemValue === '') {
             return [];
@@ -83,9 +85,9 @@ class HelperUtility
 
             if ($value !== '' && $value !== '0') {
                 $label = match ($key) {
-                    'class' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:class'),
-                    'title' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:title'),
-                    'additionalParams' => $languageService->sL('LLL:EXT:recordlist/Resources/Private/Language/locallang_browse_links.xlf:params'),
+                    'class' => $languageService->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkattributes.class'),
+                    'title' => $languageService->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkattributes.title'),
+                    'additionalParams' => $languageService->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.linkattributes.additionalParams'),
                     default => $key,
                 };
                 $additionalAttributes[] = '<span><strong>' . htmlspecialchars((string)$label) . ': </strong> ' . htmlspecialchars($value) . '</span>';
@@ -172,17 +174,23 @@ class HelperUtility
 
                 break;
             case LinkService::TYPE_RECORD:
-                $pageTS = static::getPagesTSconfig(0);
-                $table = $pageTS['TCEMAIN.']['linkHandler.'][$linkData['identifier'] . '.']['configuration.']['table'];
-                $record = BackendUtility::getRecord($table, $linkData['uid']);
-                if ($record) {
-                    $recordTitle = BackendUtility::getRecordTitle($table, $record);
-                    $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
-                    $data = [
-                        'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
-                        'icon' => $this->iconFactory->getIconForRecord($table, $record, IconSize::SMALL)->render(),
-                    ];
-                } else {
+                $data = null;
+
+                $pageTS = static::getPagesTSconfig($pid);
+                $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'] ?? false;
+                if ($table) {
+                    $record = BackendUtility::getRecord($table, $linkData['uid']);
+                    if ($record) {
+                        $recordTitle = BackendUtility::getRecordTitle($table, $record);
+                        $tableTitle = $languageService->sL($GLOBALS['TCA'][$table]['ctrl']['title']);
+                        $data = [
+                            'text' => sprintf('%s [%s:%d]', $recordTitle, $tableTitle, $linkData['uid']),
+                            'icon' => $this->iconFactory->getIconForRecord($table, $record, IconSize::SMALL)->render(),
+                        ];
+                    }
+                }
+
+                if (is_null($data)) {
                     $data = [
                         'text' => sprintf('%s', $linkData['uid']),
                         'icon' => $this->iconFactory->getIcon(
@@ -224,7 +232,7 @@ class HelperUtility
                 }
         }
 
-        $data['additionalAttributes'] = '<div class="help-block">' . implode(' - ', $additionalAttributes) . '</div>';
+        $data['additionalAttributes'] = implode(' - ', $additionalAttributes);
         return $data;
     }
 }

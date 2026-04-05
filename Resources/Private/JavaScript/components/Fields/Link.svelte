@@ -9,6 +9,7 @@
     let readOnly = $state(true)
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
+    let previewAdditionalAttributes = $derived(linkBrowserData?.preview?.additionalAttributes ?? '')
 
     onMount(() => {
         updateLinkBrowserInfo()
@@ -24,9 +25,10 @@
 
     async function updateLinkBrowserInfo() {
         let url = TYPO3.settings.ajaxUrls['wizard_focuspoint_linkbrowserurl'];
-        url += `&inputName=${$wizardConfigStore.itemFormElName}-hidden-link-field`;
-        url += '&inputValue=' + $focuspoints[index][name] || '';
-        url += '&config=' + JSON.stringify(config || '{}');
+        url += `&inputName=${encodeURIComponent($wizardConfigStore.itemFormElName + '-hidden-link-field')}`;
+        url += '&inputValue=' + encodeURIComponent($focuspoints[index][name] || '');
+        url += '&config=' + encodeURIComponent(JSON.stringify(config || {}));
+        url += '&pid=' + encodeURIComponent($wizardConfigStore.pid);
 
         return (new AjaxRequest(url)).get().then(async (response) => {
             linkBrowserData = await response.resolve();
@@ -116,4 +118,15 @@
             </div>
         </div>
     </div>
+    {#if previewAdditionalAttributes}
+        <div class="form-wizards-item-bottom">
+            <div class="callout callout-info mt-3 mb-0">
+                <div class="callout-content">
+                    <div class="callout-body">
+                        {@html previewAdditionalAttributes}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>

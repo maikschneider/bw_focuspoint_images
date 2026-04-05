@@ -117,6 +117,15 @@
 			<trans-unit id="wizard.button.accept">
 				<source>Accept</source>
 			</trans-unit>
+			<trans-unit id="wizard.linkattributes.class">
+				<source>CSS-Class</source>
+			</trans-unit>
+			<trans-unit id="wizard.linkattributes.title">
+				<source>Title</source>
+			</trans-unit>
+			<trans-unit id="wizard.linkattributes.additionalParams">
+				<source>Additional link parameters</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
