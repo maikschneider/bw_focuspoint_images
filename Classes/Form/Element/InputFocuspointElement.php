@@ -18,7 +18,7 @@ use TYPO3\CMS\Core\View\ViewFactoryInterface;
 
 class InputFocuspointElement extends AbstractFormElement
 {
-    public function __construct(private readonly ResourceFactory $resourceFactory)
+    public function __construct(private readonly ResourceFactory $resourceFactory, private readonly ViewFactoryInterface $viewFactory)
     {
     }
     /**
@@ -116,9 +116,7 @@ class InputFocuspointElement extends AbstractFormElement
         $viewFactoryData = new ViewFactoryData(
             templatePathAndFilename: 'EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'
         );
-        /** @var ViewFactoryInterface  $viewFactory */
-        $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);
-        $templateView = $viewFactory->create($viewFactoryData);
+        $templateView = $this->viewFactory->create($viewFactoryData);
         $templateView->assignMultiple($arguments);
 
         $resultArray['html'] = $templateView->render();
