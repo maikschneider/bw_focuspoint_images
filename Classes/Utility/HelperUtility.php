@@ -74,7 +74,7 @@ class HelperUtility
         return $pageTs;
     }
 
-    public function getLinkExplanation(string $itemValue): array
+    public function getLinkExplanation(string $itemValue, int $pid): array
     {
         if ($itemValue === '') {
             return [];
@@ -198,8 +198,7 @@ class HelperUtility
             case LinkService::TYPE_RECORD:
                 $data = null;
 
-                // TODO load PageTS from actual relevant page
-                $pageTS = static::getPagesTSconfig(0);
+                $pageTS = static::getPagesTSconfig($pid);
                 $table = $pageTS['TCEMAIN']['linkHandler'][$linkData['identifier']]['configuration']['table'] ?? false;
                 if ($table) {
                     $record = BackendUtility::getRecord($table, $linkData['uid']);
