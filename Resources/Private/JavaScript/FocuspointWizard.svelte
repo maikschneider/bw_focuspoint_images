@@ -40,7 +40,7 @@
 
     let {itemFormElName, wizardConfig, image, itemFormElValue} = $props()
     let isSettingsOpen = $state(false)
-    let imageComponent
+    let imageComponent = $state(null)
     let sidebarWidth = $state(300)
     const minSidebarWidth = 200
     let channel
@@ -48,10 +48,12 @@
     onMount(() => {
         initStores(itemFormElValue, wizardConfig)
 
-        deactivateAllFocuspoints()
-        setTimeout(() => {
-            activateFocuspoint(0)
-        }, 300)
+        if ($focuspoints.length > 0) {
+            deactivateAllFocuspoints()
+            setTimeout(() => {
+                activateFocuspoint(0)
+            }, 300)
+        }
 
         channel = new BroadcastChannel(focuspointChannelName(itemFormElName))
         channel.onmessage = (e) => {

@@ -12,12 +12,12 @@ ExtensionManagementUtility::addTcaSelectItem(
     'CType',
     [
         'label' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.title',
-        'value' => 'bw_focuspoint_images_svg', // ctype value
-        'icon' => 'bw_focuspoint_images_svg', // icon-identifier
-        'group' => 'special', // group
-        'description' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.description', // description
+        'value' => 'bw_focuspoint_images_svg',
+        'icon' => 'bw_focuspoint_images_svg',
+        'group' => 'special',
+        'description' => 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:tca.wizard.svg.description',
     ],
-    'html', // position in select box (=after textmedia)
+    'html',
     'after'
 );
 
