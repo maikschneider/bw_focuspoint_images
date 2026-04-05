@@ -3,4 +3,3 @@
 // deferred until actually needed. This file is a named esbuild entry point so the
 // output keeps a stable filename (ckeditor-rte.js) instead of a hash-based chunk name.
 import '@typo3/rte-ckeditor/ckeditor5.js'
-
