@@ -42,8 +42,7 @@ composer require blueways/bw-focuspoint-images
 Recommended TYPO3 setup:
 
 1. Add the site set `blueways/bw-focuspoint-images`.
-2. Optionally add `blueways/bw-focuspoint-images-example` for a ready-made demo
-   field configuration.
+2. Optionally add `blueways/bw-focuspoint-images-example` for a ready-made demo field configuration.
 3. Define your own PageTS field configuration if you do not use the example set.
 
 Fallback for older or manual setups:
@@ -62,33 +61,33 @@ for example:
 
 ```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
-  name {
-    title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
-    type = text
-    useAsName = 1
-  }
-
-  description {
-    title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.description
-    type = textarea
-  }
-
-  color {
-    title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color
-    type = select
-    options {
-      red = Red
-      green = Green
-      blue = Blue
+    name {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
+        type = text
+        useAsName = 1
     }
-    default = red
-  }
 
-  link {
-    title = Link
-    type = link
-    displayCond = FIELD:color:=:red
-  }
+    description {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.description
+        type = textarea
+    }
+
+    color {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color
+        type = select
+        options {
+            red = Red
+            green = Green
+            blue = Blue
+        }
+        default = red
+    }
+
+    link {
+        title = Link
+        type = link
+        displayCond = FIELD:color:=:red
+    }
 }
 ```
 
@@ -106,13 +105,13 @@ element, use the `FocuspointProcessor`:
 
 ```typoscript
 tt_content.your_list_type {
-  dataProcessing {
-    15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
-    15 {
-      references.fieldName = assets
-      as = images
+    dataProcessing {
+        15 = Blueways\BwFocuspointImages\DataProcessing\FocuspointProcessor
+        15 {
+            references.fieldName = assets
+            as = images
+        }
     }
-  }
 }
 ```
 
@@ -123,7 +122,7 @@ direct use in Fluid and SVG.
 ## Configuration Highlights
 
 - `displayCond` supports operators such as `REQ`, `=`, `!=`, `>`, `<`, `>=`,
-  `<=`, `IN`, `!IN`, `-`, and `!-`
+`<=`, `IN`, `!IN`, `-`, and `!-`
 - `types.<typeName>.*` lets you override field settings per parent content type
 - `linkPopup` customizes the TYPO3 link browser for `link` fields
 - `richtextConfiguration` can be used for `rte` fields
