@@ -11,85 +11,56 @@
 
 </div>
 
-This TYPO3 extension ships an image editor that can be used to add
-areas and information to an image.
+`bw_focuspoint_images` adds an interactive image editor to TYPO3. Editors can
+draw draggable focus areas on an image, enrich each area with custom metadata,
+and render the result in Fluid with a ready-to-use `DataProcessor`.
 
-![Backend Editor](Documentation/Images/example_backend.png)
+![Backend editor](Documentation/Images/example_backend.png)
 
-Screenshots
-===========
+## What It Does
 
-This extension can be used in various ways, depending on the configuration.
+- Adds the content element **Image with Focuspoints**
+- Stores focus areas as JSON on `sys_file_reference.focus_points`
+- Lets integrators define custom metadata fields in **PageTS**
+- Supports `text`, `textarea`, `rte`, `select`, `link`, and `checkbox`
+- Ships a default frontend rendering plus reusable `FocuspointProcessor`
+- Can also be integrated into your own FAL-based content elements
 
-Example 1: Default output
--------------------------
+## Requirements
 
-Frontend output with the [example configuration](#configuration).
+- TYPO3 `^13.4` or `^14.2`
+- Composer-based TYPO3 installation
 
-![Example 1](Documentation/Images/example_frontend.png)
+## Installation
 
-Example 2: SVG Animation
-------------------------
+Install the extension with Composer:
 
-In this example the focus areas are animated via SVG. The additional
-information are displayed next to the image with some delay.
+```bash
+composer require blueways/bw-focuspoint-images
+```
 
-![Example 2](Documentation/Images/example_animation.gif)
+Recommended TYPO3 setup:
 
-Example 3: Annotations for tutorials
-------------------------
+1. Add the site set `blueways/bw-focuspoint-images`.
+2. Optionally add `blueways/bw-focuspoint-images-example` for a ready-made demo field configuration.
+3. Define your own PageTS field configuration if you do not use the example set.
 
-The TYPO3 extension [xima_typo3_manual](https://github.com/xima-media/xima-typo3-manual) uses this extension to annotate screenshots.
+Fallback for older or manual setups:
 
-![Example 3](Documentation/Images/example_manual.png)
+1. Include the static TypoScript template **Bw Focuspoint Images**.
+2. Import the PageTS that enables the content element in the wizard:
 
-For administrators
-==================
+```typoscript
+@import 'EXT:bw_focuspoint_images/Configuration/TsConfig/Page/newContentElement.tsconfig'
+```
 
-### Installation
+## Quick Start
 
-1.  Install via composer
-
-    ``` {.bash}
-    composer require blueways/bw-focuspoint-images
-    ```
-
-2.  Include TypoScript
-
-    Enable the extension in the Extension Manager and include the
-    **static TypoScript template** or manually include setup and
-    constants.
-
-3.  Include PageTS
-
-    Add the static PageTS template **Focuspoint Images: Content Element** or manually
-    import the PageTS into your sitepackage:
-
-    ```typoscript
-    @import 'EXT:bw_focuspoint_images/Configuration/TsConfig/Page/newContentElement.tsconfig'
-    ```
-
-4.  Define your own wizard fields
-
-    There are **no default fields** defined! An example with working
-    frontend output can be found in the PageTS section.
-
-### Usage
-
-Add the new content element "Image with Focuspoints" to any page, link a new
-image and start adding your focus areas.
-
-![Backend view](https://bytebucket.org/blueways/bw_focuspoint_images/raw/master/Documentation/Images/backend-collage.jpg)
-
-### Configuration
-
-To configure the fields in the focus point wizard, use the following **PageTS** settings. You can choose between **text**, **textarea**, **select**, **link** and **checkbox** inputs in the wizard.
-
-This example configuration is used to generate the output shown in Example 1
+The extension ships with **no default wizard fields**. Define them in PageTS,
+for example:
 
 ```typoscript
 mod.tx_bwfocuspointimages.settings.fields {
-
     name {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
         type = text
@@ -105,144 +76,37 @@ mod.tx_bwfocuspointimages.settings.fields {
         title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color
         type = select
         options {
-            red = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.red
-            green = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.green
-            blue = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.color.blue
+            red = Red
+            green = Green
+            blue = Blue
         }
         default = red
     }
 
-    hasLink {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink
-        type = checkbox
-        label = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.hasLink.yes
-        default = true
-    }
-
     link {
-        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
+        title = Link
         type = link
-        displayCond = FIELD:hasLink:REQ:true
+        displayCond = FIELD:color:=:red
     }
 
-}
-```
-
-#### Field Display Conditions
-
-You can use `displayCond` in your wizard field configuration to control when a field should be visible, similar to [TYPO3's TCA displayCond feature](https://docs.typo3.org/m/typo3/reference-tca/main/en-us/Columns/DisplayConditions.html).
-
-```typoscript
-mod.tx_bwfocuspointimages.settings.fields {
-    description {
-        title = Description
-        type = textarea
-        displayCond = FIELD:name:REQ:true  # Show only if name field has a value
+    notes {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.notes
+        type = rte
     }
 }
 ```
 
-#### Field Overrides
+After that:
 
-You can override the default configuration of the fields on a per-element basis, similar to the TYPO3 TCEFORM configuration: `mod.tx_bwfocuspointimages.settings.fields.[fieldName].types.[typeName].[propertyName]`.
+1. Create the content element **Image with Focuspoints**.
+2. Add an image to the `assets` field.
+3. Open the focuspoint editor, draw rectangles, and fill in the metadata.
 
-```
-mod.tx_bwfocuspointimages.settings.fields {
-    description {
-        title = Description
-        type = textarea
-        types.my_custom_ctype.disabled = 1
-    }
+## Frontend Rendering
 
-    title {
-        title = Default Title
-        types.tx_myextension_domain_model_mytype.title {
-            title = Custom Title
-            default = Custom Default
-        }
-    }
-}
-```
-
-##### Adjusting the link wizard
-
-You can customize the display of the link wizard. Use the additional ```linkPopup``` to change the list of allowed file extensions, the displayed link fields or link options. The configuration is done like for [link inputs](https://docs.typo3.org/m/typo3/reference-tca/11.5/en-us/ColumnsConfig/Type/Input/Properties/LinkPopup.html#linkpopup).
-
-```typoscript
-mod.tx_bwfocuspointimages.settings.fields {
-
-    email {
-        title = Hide all wizard tabs but email
-        type = link
-        linkPopup {
-            blindLinkOptions = file, folder, page, spec, telephone, url
-        }
-    }
-
-    pdf {
-        title = Only files of .pdf or .docx extension
-        type = link
-        linkPopup {
-            blindLinkFields = pdf, docx
-            blindLinkOptions = email, folder, page, spec, telephone, url
-            blindLinkFields = class, params, target, title
-        }
-    }
-
-}
-```
-
-#### Constants
-
-To override templates set your own paths via constants:
-
-```typoscript
-plugin.tx_bwfocuspointimages {
-    view {
-        templateRootPath =
-        partialRootPath =
-        layoutRootPath =
-    }
-}
-```
-
-For developers
-==============
-
-The table `sys_file_references` becomes
-extended for the field `focus_points`. This field is used to save the settings made in the backend editor in json format.
-
-To use the editor in other content elements with FAL images, use the
-following TCA to activate the palette:
-
-```php
-$GLOBALS['TCA']['tt_content']['types']['your_list_type']['columnsOverrides'] = [
-    'assets' => [
-        'config' => [
-            'overrideChildTca' => [
-                'types' => [
-                    \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
-                        'showitem' => 'focus_points,--palette--;;filePalette'
-                    ],
-                ],
-                'columns' => [
-                    'uid_local' => [
-                        'config' => [
-                            'appearance' => [
-                                'elementBrowserAllowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-                            ],
-                        ],
-                    ],
-                ],
-            ]
-        ]
-    ]
-];
-```
-
-This snippet assumes that references are done via `assets` column. Change this to your needs.
-
-To decode the JSON data and use the information in your template, use the `FocuspointProcessor`:
+The extension already ships a default Fluid template and TypoScript setup for
+the bundled content element. If you want to reuse the data in your own content
+element, use the `FocuspointProcessor`:
 
 ```typoscript
 tt_content.your_list_type {
@@ -256,16 +120,59 @@ tt_content.your_list_type {
 }
 ```
 
-License
-=======
+The processor decodes the JSON data and exposes the focus areas as `points`.
+Coordinates are converted from normalized `0..1` values to percentages for
+direct use in Fluid and SVG.
 
-This project is licensed under [GNU General Public License 2.0 (or later)](LICENSE.md).
+## Configuration Highlights
 
-Contribute
-==========
+- `displayCond` supports operators such as `REQ`, `=`, `!=`, `>`, `<`, `>=`,
+`<=`, `IN`, `!IN`, `-`, and `!-`
+- `types.<typeName>.*` lets you override field settings per parent content type
+- `linkPopup` customizes the TYPO3 link browser for `link` fields
+- `richtextConfiguration` can be used for `rte` fields
+- `plugin.tx_bwfocuspointimages.view.*RootPath` lets you override templates
 
-This extension was made by Maik Schneider: Feel free to contribute!
+The canonical example configuration lives in
+[`Configuration/Sets/BwFocuspointImagesExample/page.tsconfig`](Configuration/Sets/BwFocuspointImagesExample/page.tsconfig).
 
-Please have a look at [`CONTRIBUTING.md`](CONTRIBUTING.md).
+## Screenshots
 
-Thanks to [blueways](https://www.blueways.de/) and [XIMA](https://www.xima.de/)!
+### Default frontend output
+
+![Default frontend output](Documentation/Images/example_frontend.png)
+
+### Animated SVG example
+
+![Animated SVG example](Documentation/Images/example_animation.gif)
+
+### Tutorial-style annotations
+
+![Tutorial annotations](Documentation/Images/example_manual.png)
+
+## Documentation
+
+Detailed TYPO3 documentation is available in
+[`Documentation/Index.rst`](Documentation/Index.rst).
+
+## Development
+
+```bash
+npm run build
+npm run start
+composer run sca
+composer run php:fixer
+composer run php:stan
+composer run rector
+```
+
+## License
+
+This project is licensed under the [GNU General Public License 2.0 or later](LICENSE.md).
+
+## Credits
+
+Created by Maik Schneider. Contributions are welcome via
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+Thanks to [blueways](https://www.blueways.de/) and [XIMA](https://www.xima.de/).
