@@ -88,6 +88,11 @@ mod.tx_bwfocuspointimages.settings.fields {
         type = link
         displayCond = FIELD:color:=:red
     }
+
+    notes {
+        title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.notes
+        type = rte
+    }
 }
 ```
 
