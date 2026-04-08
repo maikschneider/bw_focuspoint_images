@@ -4,8 +4,9 @@
     .wizard {
         display: grid;
         max-height: 100%;
+        min-height: 0;
         grid-template-columns: 1fr 1px var(--sidebar-width, 300px);
-        grid-template-rows: 100%;
+        grid-template-rows: minmax(0, 1fr);
     }
 
     .resize-handle {
