@@ -1,7 +1,7 @@
 plugin.tx_bwfocuspointimages {
   view {
-    templateRootPath =
-    partialRootPath =
-    layoutRootPath =
+    templateRootPath = EXT:bw_focuspoint_images/Resources/Private/Templates/
+    partialRootPath = EXT:bw_focuspoint_images/Resources/Private/Partial/
+    layoutRootPath = EXT:bw_focuspoint_images/Resources/Private/Layout/
   }
 }

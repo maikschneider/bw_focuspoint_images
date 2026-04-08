@@ -16,9 +16,10 @@ use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Core\View\ViewFactoryData;
 use TYPO3\CMS\Core\View\ViewFactoryInterface;
 
+#[Autoconfigure(public: true)]
 class InputFocuspointElement extends AbstractFormElement
 {
-    public function __construct(private readonly ResourceFactory $resourceFactory)
+    public function __construct(private readonly ResourceFactory $resourceFactory, private readonly ViewFactoryInterface $viewFactory)
     {
     }
     /**
@@ -81,6 +82,26 @@ class InputFocuspointElement extends AbstractFormElement
         $wizardConfig['itemFormElName'] = $parameterArray['itemFormElName'];
         $wizardConfig['typo3Version'] = $version['version_main'];
 
+        $langPrefix = 'LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:';
+        $langKeys = [
+            'wizard.button.settings',
+            'wizard.button.cancel',
+            'wizard.button.copy',
+            'wizard.button.paste',
+            'wizard.button.undo',
+            'wizard.button.accept',
+            'wizard.settings.copied',
+            'wizard.settings.copied.message',
+            'wizard.single_point.button.delete',
+            'wizard.single_point.button.new.rect',
+            'wizard.single_point.button.new.polygon'
+        ];
+
+        $wizardConfig['lang'] = array_combine(
+            $langKeys,
+            array_map(fn ($k) => $this->getLanguageService()->sL($langPrefix . $k), $langKeys)
+        );
+
         $resultArray['additionalInlineLanguageLabelFiles'][] = 'EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf';
         $resultArray['javaScriptModules'][] = JavaScriptModuleInstruction::create('@blueways/bw-focuspoint-images/FocuspointElement.js');
 
@@ -98,9 +119,7 @@ class InputFocuspointElement extends AbstractFormElement
         $viewFactoryData = new ViewFactoryData(
             templatePathAndFilename: 'EXT:bw_focuspoint_images/Resources/Private/Templates/FocuspointElement.html'
         );
-        /** @var ViewFactoryInterface  $viewFactory */
-        $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);
-        $templateView = $viewFactory->create($viewFactoryData);
+        $templateView = $this->viewFactory->create($viewFactoryData);
         $templateView->assignMultiple($arguments);
 
         $resultArray['html'] = $templateView->render();
@@ -135,7 +154,7 @@ class InputFocuspointElement extends AbstractFormElement
     protected function createErrorMessage(array $resultArray, string $messageLanguageKey): array
     {
         $resultArray['html'] = '<div class="callout callout-warning">';
-        $resultArray['html'] .= $this->getLanguageService()->sL('bw_focuspoint_images.db:' . $messageLanguageKey);
+        $resultArray['html'] .= $this->getLanguageService()->sL('LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:' . $messageLanguageKey);
         $resultArray['html'] .= '</div>';
         return $resultArray;
     }

@@ -6,17 +6,3 @@ services:
 
   Blueways\BwFocuspointImages\:
     resource: '../Classes/*'
-
-  Blueways\BwFocuspointImages\Utility\HelperUtility:
-    public: true
-
-  Blueways\BwFocuspointImages\Form\Wizard\FocusPointWizard:
-    public: true
-
-  Blueways\BwFocuspointImages\Preview\FocuspointPreviewRenderer:
-    public: true
-
-  Blueways\BwFocuspointImages\EventListener\BeforeJavaScriptsRenderingEventListener:
-    tags:
-      - name: 'event.listener'
-        identifier: 'blueways/focuspoint-images-before-javascripts-rendering'
