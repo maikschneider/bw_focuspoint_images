@@ -1,27 +1,39 @@
-declare type InteractjsDragEvent = {
+type InteractjsDragEvent = {
   dx: number;
   dy: number;
+  clientX: number;
+  clientY: number;
   target: Element;
-}
+};
 
 declare module "interactjs" {
+  type Modifier = Record<string, unknown>;
 
-  declare type Chainable = {
-    resizable(config: {}): Chainable;
-    draggable(config: {}): Chainable;
+  type DragConfig = {
+    modifiers?: Modifier[];
+    autoScroll?: boolean;
+    listeners?: {
+      start?: (event: InteractjsDragEvent) => void;
+      move?: (event: InteractjsDragEvent) => void;
+      end?: (event: InteractjsDragEvent) => void;
+    };
+    axis?: "x" | "y";
+  };
+
+  type Chainable = {
+    resizable(config: Record<string, unknown>): Chainable;
+    draggable(config: DragConfig): Chainable;
     unset(): void;
   };
 
-  declare interface Interact {
+  interface Interact {
     (selector: string): Chainable;
-
     modifiers: {
-      restrictEdges(config: {}): void;
-      restrictRect(config: {}): void;
-    }
-  };
+      restrictEdges(config: Record<string, unknown>): Modifier;
+      restrictRect(config: Record<string, unknown>): Modifier;
+    };
+  }
 
-  declare const interact: Interact;
-
+  const interact: Interact;
   export default interact;
 }
