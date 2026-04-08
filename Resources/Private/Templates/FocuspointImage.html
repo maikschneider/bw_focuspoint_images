@@ -10,12 +10,12 @@
             <f:image image="{image}"/>
             <svg viewBox="0 0 {points.{key}.width} {points.{key}.height}" class="focuspoint__svg">
                 <f:for each="{points.{key}.areas}" as="area" iteration="i">
-                    <a href="{f:uri.typolink(parameter: area.link)}" target="{area.linkTarget}">
+                    <f:link.typolink parameter="{area.link}">
                         <f:if condition="{area.title}">
                             <title>{area.title}</title>
                         </f:if>
                         <focuspoint:shape type="{area.__shape}" data="{area.__data}" />
-                    </a>
+                    </f:link.typolink>
                 </f:for>
             </svg>
         </div>
