@@ -13,8 +13,32 @@ declare module "@typo3/backend/modal.js" {
     iframe
   }
 
+  export interface ModalHiddenEvent extends Event {
+    type: "typo3-modal-hidden";
+  }
+
+  export interface LinkBrowserSetLinkEvent extends Event {
+    type: "typo3:form-engine:link-browser:set-link";
+    value: string;
+  }
+
+  export interface ModalEventMap {
+    "typo3-modal-hidden": ModalHiddenEvent;
+    "typo3:form-engine:link-browser:set-link": LinkBrowserSetLinkEvent;
+  }
+
   export declare interface Modal {
-    addEventListener(event: "typo3-modal-hidden", listener: () => void): void;
+    addEventListener<K extends keyof ModalEventMap>(
+      event: K,
+      listener: (event: ModalEventMap[K]) => void
+    ): void;
+
+    addEventListener(
+      event: string,
+      listener: (event: Event) => void
+    ): void;
+
+    hideModal(): void;
   }
 
   export function advanced(config: {
