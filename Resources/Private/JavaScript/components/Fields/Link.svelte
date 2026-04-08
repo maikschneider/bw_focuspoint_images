@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onMount} from "svelte";
-    import {focuspoints, wizardConfigStore} from '../../store.svelte.js';
+    import {focuspoints, wizardConfigStore, focuspointChannelName} from '../../store.svelte.js';
     import AjaxRequest from "@typo3/core/ajax/ajax-request.js";
     import Modal from "@typo3/backend/modal.js";
     import Icon from '../Icon.svelte';
@@ -20,8 +20,15 @@
     let previewText = $derived(linkBrowserData?.preview?.text ?? '')
     // @ts-ignore
     let previewIcon = $derived(linkBrowserData?.preview?.icon ?? '')
+    // @ts-ignore
+    let previewAdditionalAttributes = $derived(linkBrowserData?.preview?.additionalAttributes ?? '')
 
-    onMount(() => updateLinkBrowserInfo());
+
+    $effect(() => {
+        if ($focuspoints?.[index]?.[name]) {
+            updateLinkBrowserInfo()
+        }
+    })
 
     const handleLinkSelection = (event: FocuspointLinkSelectedEvent) => {
         $focuspoints[index][name] = event.detail.link
@@ -30,9 +37,11 @@
 
     async function updateLinkBrowserInfo() {
         let url = TYPO3.settings.ajaxUrls['wizard_focuspoint_linkbrowserurl'];
-        url += `&inputName=${$wizardConfigStore.itemFormElName}-hidden-link-field`;
-        url += '&inputValue=' + $focuspoints[index][name] || '';
-        url += '&config=' + JSON.stringify(config ||'{}');
+        url += `&inputName=${encodeURIComponent($wizardConfigStore.itemFormElName + '-hidden-link-field')}`;
+        url += '&inputValue=' + encodeURIComponent($focuspoints[index][name] || '');
+        url += '&config=' + encodeURIComponent(JSON.stringify(config || {}));
+        url += '&pid=' + encodeURIComponent($wizardConfigStore.pid);
+
 
         return (new AjaxRequest(url)).get().then(async (response) => {
             linkBrowserData = await response.resolve();
@@ -40,56 +49,45 @@
     }
 
     function openModal() {
-
         const modal = Modal.advanced({
             type: Modal.types.iframe,
             content: linkBrowserData!.url,
             size: Modal.sizes.large,
         })
 
-        // listen for the link selection event (from FocuspointElement.svelte)
-        window.parent.frames.list_frame.document.addEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
+        // v14+: adapter fires 'typo3:form-engine:link-browser:set-link' on window.frameElement,
+        // which bubbles (composed: true) up to the modal element.
+        modal.addEventListener('typo3:form-engine:link-browser:set-link', (e) => {
+            handleLinkSelection({detail: {link: e.value}})
+            modal.hideModal()
+        })
 
-        // remove the event listener when the modal is closed
-        modal.addEventListener('typo3-modal-hidden', function () {
-            window.parent.frames.list_frame.document.removeEventListener(`${$wizardConfigStore.itemFormElName}-link-selected`, handleLinkSelection)
-        });
+        // v13 fallback: adapter writes to the hidden input in FocuspointElement which relays
+        // the value via BroadcastChannel. Mutually exclusive with the v14 path above.
+        const itemFormElName = $wizardConfigStore.itemFormElName;
+        if (!itemFormElName) {
+            return;
+        }
+        const linkChannel = new BroadcastChannel(focuspointChannelName(itemFormElName))
+        linkChannel.onmessage = (e) => {
+            if (e.data.type === 'link-selected') {
+                handleLinkSelection({detail: {link: e.data.link}})
+                linkChannel.close()
+            }
+        }
+
+        modal.addEventListener('typo3-modal-hidden', () => {
+            linkChannel.close()
+        })
     }
 
-    function onInputClear() {
+    function onInputClear(index: number) {
         $focuspoints[index][name] = ''
         linkBrowserData!.preview = null
     }
 </script>
 
-<style>
-    .v12 .form-wizards-wrap {
-        display: flex;
-        gap: 5px;
-    }
-
-    .v12 .form-wizards-element {
-        width: 100%;
-    }
-
-    .v12 .input-group {
-        flex-wrap: unset;
-    }
-
-    .v12 .input-group-text {
-        min-width: 42px;
-    }
-
-    .v12 .btn-default {
-        height: 32px;
-    }
-
-    .v12 .form-control {
-        border-radius: 0;
-    }
-</style>
-
-<div class="form-group" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version! < 13}>
+<div class="form-group">
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
     </label>
@@ -113,7 +111,7 @@
                             class="form-control form-control-clearable"
                             id="input-{index}-{name}" />
                     <button
-                            on:click|preventDefault={onInputClear}
+                            onclick={(e) => {e.preventDefault(); onInputClear(index); }}
                             class:hidden={$focuspoints[index][name] === ''}
                             type="button"
                             tabindex="-1"
@@ -123,7 +121,7 @@
                         <Icon name="actions-close" />
                     </button>
                 </div>
-                <button class="btn btn-default" on:click|preventDefault={() => readOnly = !readOnly}>
+                <button class="btn btn-default" onclick={(e) => {e.preventDefault(); readOnly = !readOnly}}>
                     <Icon name="actions-version-workspaces-preview-link" />
                 </button>
             </div>
@@ -131,10 +129,21 @@
         <div class="form-wizards-item-aside formwizards-item-aside--field-control">
             <div class="btn-group">
                 <button
-                        on:click|preventDefault={openModal} aria-label="Open link wizard" class="btn btn-default">
+                    onclick={(e) => {e.preventDefault(); openModal(); }} aria-label="Open link wizard" class="btn btn-default">
                     <Icon name="actions-wizard-link" />
                 </button>
             </div>
         </div>
     </div>
+    {#if previewAdditionalAttributes}
+        <div class="form-wizards-item-bottom">
+            <div class="callout callout-info mt-3 mb-0">
+                <div class="callout-content">
+                    <div class="callout-body">
+                        {@html previewAdditionalAttributes}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
