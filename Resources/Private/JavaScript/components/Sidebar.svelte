@@ -6,6 +6,7 @@
         focusPointName, fieldMeetsCondition,
         activateFocuspoint,
         SHAPES, type Focuspoint,
+        detectionMode, deactivateAllFocuspoints
     } from '../store.svelte'
     import type {ShapeType} from "../store.svelte";
     import Select from "./Fields/Select.svelte";
@@ -37,6 +38,21 @@
     function toShapeType(key: string) {
         return key as ShapeType;
     }
+
+    const toggleDetectionMode = () => {
+        detectionMode.update((value) => !value);
+        if ($detectionMode) {
+            deactivateAllFocuspoints();
+        }
+    }
+
+    const detectionButtonClass = $derived($detectionMode ? 'btn-warning' : 'btn-success');
+    const detectionButtonIcon = $derived($detectionMode ? 'actions-ban' : 'actions-wand-sparkles');
+    const detectionButtonText = $derived(
+        $detectionMode
+            ? $wizardConfigStore?.lang['wizard.single_point.button.detection_mode.stop']
+            : $wizardConfigStore?.lang['wizard.single_point.button.detection_mode.start']
+    )
 
     $effect(() => {
         if (panelGroup) {
@@ -95,8 +111,9 @@
 
     .button-group {
         flex-shrink: 0;
+        margin-top: auto;
         padding: 12px;
-        border-top: 1px solid var( --typo3-state-primary-bg, #ff8700);
+        border-top: 1px solid var(--typo3-state-primary-bg, #ff8700);
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -120,8 +137,10 @@
                 <div class="panel-heading" role="tab">
                     <h4 class="panel-title" id="cropper-accordion-heading-{index}">
                         <button
+                            disabled={$detectionMode}
                             onclick={(e) => {
                                 e.preventDefault()
+                                if ($detectionMode) return
                                 activateFocuspoint(index)
                             }}
                             data-bs-toggle="collapse"
@@ -130,6 +149,7 @@
                             aria-controls="cropper-collapse-{index}"
                             class:collapsed={!focuspoint.active}
                             class:show={focuspoint.active}
+                            class:disabled={$detectionMode}
                             class="panel-button">
                             <span class="caret"></span>
                             <span class="panel-title">
@@ -150,7 +170,7 @@
                             {#if fieldMeetsCondition(key, focuspoint) && field.type && field.type in components}
                                 {@const FieldComponent = getFieldComponent(field.type)}
                                 {#if FieldComponent}
-                                    <FieldComponent index={index} name={key} config={field ?? {}} />
+                                    <FieldComponent index={index} name={key} config={field ?? {}}/>
                                 {/if}
                             {/if}
                         {/each}
@@ -159,7 +179,7 @@
                                 e.preventDefault()
                                 deleteFocuspoint(index)
                             }}>
-                            <Icon name="actions-delete" />
+                            <Icon name="actions-delete"/>
                             {$wizardConfigStore?.lang['wizard.single_point.button.delete']}
                         </button>
                     </div>
@@ -170,13 +190,24 @@
 
     <div class="button-group">
         {#each Object.entries(SHAPES) as [key]}
-            <button class="btn btn-success mt-3" onclick={(e) => {
-            e.preventDefault()
-            createNewFocuspoint(toShapeType(key))
-        }}>
-                <Icon name="actions-add" />
+            <button class="btn btn-success mt-3"
+                    class:disabled={$detectionMode}
+                    onclick={(e) => {
+                        e.preventDefault()
+                        createNewFocuspoint(toShapeType(key))
+            }}>
+                <Icon name="actions-add"/>
                 {$wizardConfigStore?.lang[`wizard.single_point.button.new.${key}`]}
             </button>
         {/each}
+        <button
+            class="btn mt-3 {detectionButtonClass}"
+            onclick={(e) => {
+                e.preventDefault();
+                toggleDetectionMode();
+        }}>
+            <Icon name={detectionButtonIcon}/>
+            {detectionButtonText}
+        </button>
     </div>
 </div>

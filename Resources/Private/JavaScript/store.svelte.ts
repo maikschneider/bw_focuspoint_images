@@ -8,6 +8,7 @@ export type ShapeType = "rect" | "polygon";
 export const imageMeta = writable<{ w: number; h: number } | null>(null);
 
 export const focuspointChannelName = (itemFormElName: string) => `focuspoint:${itemFormElName}`
+export const detectionMode = writable(false);
 
 export type Focuspoint = {[K in string]: string} & {
   __shape: ShapeType;

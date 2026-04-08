@@ -1,9 +1,10 @@
 <script lang="ts">
     import interact from 'interactjs';
     import {
-        focuspoints, getActiveIndex, setActiveIndex, SHAPES, imageMeta, focusPointName, activateFocuspoint
+        focuspoints, getActiveIndex, setActiveIndex, SHAPES, imageMeta, focusPointName, activateFocuspoint, detectionMode
     } from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
+    import {fade} from "svelte/transition";
 
     const {image}: {image: string} = $props();
 
@@ -240,26 +241,36 @@
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
     <div class="wrapper">
-        <svg bind:this={svgRoot} viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick} role="application" aria-label="editor">
-            {#each $focuspoints as focuspoint, index}
-                {@const ShapeComponent = getShapeComponent(focuspoint.__shape)}
+        {#if !$detectionMode}
+            <svg
+                bind:this={svgRoot}
+                viewBox="0 0 {imageWidth} {imageHeight}"
+                ondblclick={onSvgDblClick}
+                role="application"
+                aria-label="editor"
+                in:fade={{duration: 260}}
+                out:fade={{duration: 180}}
+            >
+                {#each $focuspoints as focuspoint, index}
+                    {@const ShapeComponent = getShapeComponent(focuspoint.__shape)}
 
-                <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => activateFocuspoint(index)} role="button" aria-label={`select ${focusPointName(index)}`} aria-pressed={index === getActiveIndex()} tabindex="0" onkeydown={(event) => onShapedown(event, index)}>
-                    <ShapeComponent
-                        bind:this={instanceArray[index]}
-                        index={index}
-                        imageWidth={imageWidth}
-                        imageHeight={imageHeight}
-                        canvasWidth={canvasWidth}
-                        canvasHeight={canvasHeight}
-                    />
+                    <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => activateFocuspoint(index)} role="button" aria-label={`select ${focusPointName(index)}`} aria-pressed={index === getActiveIndex()} tabindex="0" onkeydown={(event) => onShapedown(event, index)}>
+                        <ShapeComponent
+                            bind:this={instanceArray[index]}
+                            index={index}
+                            imageWidth={imageWidth}
+                            imageHeight={imageHeight}
+                            canvasWidth={canvasWidth}
+                            canvasHeight={canvasHeight}
+                        />
 
-                    {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
-                        <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" role="button" tabindex="0" aria-label={`Handle point of ${focusPointName(index)}`} />
-                    {/each}
-                </g>
-            {/each}
-        </svg>
+                        {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
+                            <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" role="button" tabindex="0" aria-label={`Handle point of ${focusPointName(index)}`} />
+                        {/each}
+                    </g>
+                {/each}
+            </svg>
+        #{/if}
         <img bind:this={imgElement} src={image} alt="Selected" unselectable="on" {onload} />
     </div>
 </div>

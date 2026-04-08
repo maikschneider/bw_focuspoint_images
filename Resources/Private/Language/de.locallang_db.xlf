@@ -48,6 +48,18 @@
 				<source>New Polygon</source>
 				<target>Neuer Pfad</target>
 			</trans-unit>
+			<trans-unit id="wizard.single_point.button.detection_mode.start">
+				<source>Start Object detection </source>
+				<target>Starte Objekterkennung</target>
+			</trans-unit>
+			<trans-unit id="wizard.single_point.button.detection_mode.stop">
+				<source>Stop Object detection </source>
+				<target>Stoppe Objekterkennung</target>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode">
+				<source>Object Detection Mode</source>
+				<target>Object Erkennungsmodus</target>
+			</trans-unit>
 			<trans-unit id="wizard.fields.title">
 				<source />
 				<target>Titel</target>

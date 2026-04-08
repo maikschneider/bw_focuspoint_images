@@ -1,12 +1,27 @@
 <svelte:options customElement={{tag: 'focuspoint-wizard', shadow: 'none'}} />
 
 <style>
+    .wizard-wrapper {
+        position: relative;
+        height: 100%;
+        min-height: 0;
+    }
+
     .wizard {
         display: grid;
         max-height: 100%;
         min-height: 0;
         grid-template-columns: 1fr 1px var(--sidebar-width, 300px);
         grid-template-rows: minmax(0, 1fr);
+    }
+
+    .detection-mode-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10001;
+        pointer-events: none;
     }
 
     .resize-handle {
@@ -33,12 +48,15 @@
 
 <script lang="ts">
     import {onDestroy, onMount} from "svelte";
+    import {cubicIn, cubicOut} from "svelte/easing";
+    import {fly} from 'svelte/transition';
     import Image from './components/Image.svelte';
     import Sidebar from "./components/Sidebar.svelte";
-    import {focuspointChannelName, initStores, activateFocuspoint, deactivateAllFocuspoints} from './store.svelte';
+    import {detectionMode, focuspointChannelName, initStores, activateFocuspoint, deactivateAllFocuspoints} from './store.svelte';
     import {focuspoints} from './store.svelte';
     import interact from 'interactjs';
     import Settings from "./components/Settings.svelte";
+    import DetectionModeIndicator from "./components/DetectionModeIndicator.svelte";
 
     let {itemFormElName, wizardConfig, image, itemFormElValue} = $props()
     let isSettingsOpen = $state(false)
@@ -100,12 +118,25 @@
     }
 </script>
 
-<div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
-    {#if isSettingsOpen}
-        <Settings itemFormElName={itemFormElName} bind:isSettingsOpenValue={isSettingsOpen} />
-    {:else}
-        <Image bind:this={imageComponent} image={image} />
-        <div class="resize-handle" aria-label="Resize sidebar"></div>
-        <Sidebar />
+<div class="wizard-wrapper">
+    {#if $detectionMode}
+        <div
+            class="detection-mode-overlay"
+            in:fly={{ y: -24, duration: 260, easing: cubicOut }}
+            out:fly={{ y: -16, duration: 180, easing: cubicIn }}
+        >
+            <DetectionModeIndicator />
+        </div>
     {/if}
+
+    <div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
+        {#if isSettingsOpen}
+            <Settings itemFormElName={itemFormElName} bind:isSettingsOpenValue={isSettingsOpen} />
+        {:else}
+            <Image bind:this={imageComponent} image={image} />
+            <div class="resize-handle" aria-label="Resize sidebar"></div>
+            <Sidebar />
+        {/if}
+    </div>
+
 </div>

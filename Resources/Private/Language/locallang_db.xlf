@@ -36,6 +36,15 @@
 			<trans-unit id="wizard.single_point.button.new.polygon">
 				<source>New Polygon</source>
 			</trans-unit>
+			<trans-unit id="wizard.single_point.button.detection_mode.start">
+				<source>Start Detect Object</source>
+			</trans-unit>
+			<trans-unit id="wizard.single_point.button.detection_mode.stop">
+				<source>Stop Detect Object</source>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode">
+				<source>Object Detection Mode</source>
+			</trans-unit>
 			<trans-unit id="wizard.fields.link">
 				<source>Link</source>
 			</trans-unit>
