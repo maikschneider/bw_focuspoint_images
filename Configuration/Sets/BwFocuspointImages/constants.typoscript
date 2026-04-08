@@ -1,1 +1,1 @@
-@import 'EXT:bw_focuspoint_images/Configuration/TypoScript/setup.typoscript'
+@import 'EXT:bw_focuspoint_images/Configuration/TypoScript/constants.typoscript'
