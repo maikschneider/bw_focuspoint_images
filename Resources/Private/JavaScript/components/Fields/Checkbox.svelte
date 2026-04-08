@@ -4,8 +4,10 @@
 
     let {config, index, name} = $props()
 
-    let isCheckbox = config?.renderType === 'check' || !Object.hasOwn(config, 'renderType')
-    let isToggle = config?.renderType === 'checkboxToggle'
+    let isCheckbox = $derived(
+        config?.renderType === 'check' || !Object.hasOwn(config, 'renderType')
+    );
+    let isToggle = $derived(config?.renderType === 'checkboxToggle');
 </script>
 
 <div class="form-group">
@@ -18,7 +20,10 @@
             type="checkbox"
             class="form-check-input me-1"
             id="input-{index}-{name}"
-            bind:checked={$focuspoints[index][name] as unknown as boolean}
+            checked={['1', 1, true, 'true'].includes($focuspoints[index]?.[name])}
+            onchange={e => {
+                $focuspoints[index][name] = e.currentTarget.checked ? '1' : '0'
+            }}
             aria-labelledby="label-{index}-{name}" />
         <label class="form-check-label" for="input-{index}-{name}">
             {#if isCheckbox}

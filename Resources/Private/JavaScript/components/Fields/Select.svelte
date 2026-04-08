@@ -2,7 +2,7 @@
     import {focuspoints} from '../../store.svelte.js'
 
     let {config, index, name} = $props()
-    let options = Object.entries(config.options).map(([value, label]) => ({value, label}))
+    let options = $derived(Object.entries(config.options).map(([value, label]) => ({value, label})))
 </script>
 
 <div class="form-group">

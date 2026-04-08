@@ -1,6 +1,7 @@
 <script lang="ts">
     import interact from 'interactjs';
-    import {focuspoints, getActiveIndex, setActiveIndex, SHAPES, imageMeta
+    import {
+        focuspoints, getActiveIndex, setActiveIndex, SHAPES, imageMeta, focusPointName, activateFocuspoint
     } from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
 
@@ -37,8 +38,10 @@
     }
 
     function normalizePositions(event: InteractjsDragEvent): any {
-        const svg = (event.target as Element)?.ownerSVGElement ?? svgRoot;
+        const target = event.target as Element | null;
+        const svg = (target instanceof SVGElement ? (target.ownerSVGElement ?? (target instanceof SVGSVGElement ? target : null)) : null) ?? svgRoot;
         if (!svg) return;
+
         const { ratioX, ratioY } = getSvgScale(svg);
         const [sx, sy] = clientToSvg(svg, event.clientX, event.clientY);
 
@@ -48,7 +51,14 @@
             dy: event.dy * ratioY,
             clientX: sx,
             clientY: sy
-        } as any;
+        };
+    }
+
+    function onShapedown(event: KeyboardEvent, index: number) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setActiveIndex(index);
+        }
     }
 
     interact(".shape").draggable({
@@ -156,6 +166,10 @@
         return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
     }
 
+    function getShapeComponent(shape: string) {
+        return SHAPES[shape as keyof typeof SHAPES].component;
+    }
+
     onDestroy(() => {
         window.removeEventListener('resize', updateCanvasSizes)
     })
@@ -211,16 +225,37 @@
         width: 100%;
         height: 100%;
     }
+
+    .shape-group:focus,
+    .shape-handle:focus {
+        outline: none;
+    }
+
+    .shape-handle:focus-visible {
+        outline: 2px solid #0d6efd;
+        outline-offset: 2px;
+    }
+
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
     <div class="wrapper">
-        <svg bind:this={svgRoot} viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick}>
+        <svg bind:this={svgRoot} viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick} role="application" aria-label="editor">
             {#each $focuspoints as focuspoint, index}
-                <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => setActiveIndex(index)}>
-                    <svelte:component bind:this={instanceArray[index]} this={SHAPES[focuspoint.__shape].component as ConstructorOfATypedSvelteComponent} index={index} imageWidth={imageWidth} imageHeight={imageHeight} canvasWidth={canvasWidth} canvasHeight={canvasHeight} />
+                {@const ShapeComponent = getShapeComponent(focuspoint.__shape)}
+
+                <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => activateFocuspoint(index)} role="button" aria-label={`select ${focusPointName(index)}`} aria-pressed={index === getActiveIndex()} tabindex="0" onkeydown={(event) => onShapedown(event, index)}>
+                    <ShapeComponent
+                        bind:this={instanceArray[index]}
+                        index={index}
+                        imageWidth={imageWidth}
+                        imageHeight={imageHeight}
+                        canvasWidth={canvasWidth}
+                        canvasHeight={canvasHeight}
+                    />
+
                     {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
-                        <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" />
+                        <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" role="button" tabindex="0" aria-label={`Handle point of ${focusPointName(index)}`} />
                     {/each}
                 </g>
             {/each}

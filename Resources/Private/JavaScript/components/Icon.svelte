@@ -8,9 +8,13 @@
     const {name}: Props = $props();
     let innerHtml: string = $state("");
 
-    Icons.getIcon(name, Icons.sizes.small).then((html: string) => {
-        innerHtml = html;
+    $effect(() => {
+        Icons.getIcon(name, Icons.sizes.small).then((html: string) => {
+            innerHtml = html;
+        });
     });
+
+
 </script>
 
 {@html innerHtml}
