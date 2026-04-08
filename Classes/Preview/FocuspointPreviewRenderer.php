@@ -3,49 +3,98 @@
 namespace Blueways\BwFocuspointImages\Preview;
 
 use Blueways\BwFocuspointImages\Renderer\ShapeRendererFactory;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use TYPO3\CMS\Backend\Preview\StandardContentPreviewRenderer;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\View\BackendLayout\Grid\GridColumnItem;
+use TYPO3\CMS\Core\Domain\RecordInterface;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Resource\Collection\LazyFileReferenceCollection;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[Autoconfigure(public: true)]
 class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 {
-    private readonly ShapeRendererFactory $shapeRendererFactory;
-
-    public function __construct(private readonly PageRenderer $pageRenderer)
+    public function __construct(private readonly PageRenderer $pageRenderer, private readonly ShapeRendererFactory $shapeRendererFactory)
     {
-        $this->shapeRendererFactory = GeneralUtility::makeInstance(ShapeRendererFactory::class);
+        $version = GeneralUtility::makeInstance(Typo3Version::class);
+        if ($version->getMajorVersion() > 13) {
+            parent::__construct();
+        }
     }
 
-    #[\Override]
     public function renderPageModulePreviewContent(GridColumnItem $item): string
     {
-        $content = '';
         $record = $item->getRecord();
 
+        // typo3 13
+       if (\is_array($record)) {
+           return $this->renderFromRow($record);
+       }
+
+       return $this->renderFromRecord($record);
+
+    }
+
+    private function renderFromRow(array $row): string
+    {
+        $content = '';
+
+        if (!$row['assets']) {
+            return '';
+        }
+
+        $fileReferences = BackendUtility::resolveFileReferences('tt_content', 'assets', $row);
+        if ($fileReferences === null || $fileReferences === []) {
+            return '';
+        }
+
+        $firstReference = $fileReferences[array_key_first($fileReferences)];
+        $focuspoints = $firstReference->getReferenceProperty('focus_points');
+        if ($focuspoints === null || $focuspoints === '') {
+            // @phpstan-ignore argument.type
+            return $this->linkEditContent($content, $row);
+        }
+
+        $content = $this->buildHtml($fileReferences);
+
+        // @phpstan-ignore argument.type
+        return $this->linkEditContent($content, $row);
+
+    }
+
+    private function renderFromRecord(RecordInterface $record): string
+    {
+        $content = '';
         if (!$record->has('assets')) {
             return $content;
         }
 
         /** @var LazyFileReferenceCollection|null $fileReferences */
         $fileReferences = $record->get('assets');
-
         if ($fileReferences === null || $fileReferences->count() === 0) {
             return '';
         }
 
-        $fileReference = $fileReferences->offsetGet(0);
-
-        $focuspoints = $fileReference->getReferenceProperty('focus_points');
+        $firstReference = $fileReferences->offsetGet(0);
+        $focuspoints = $firstReference->getReferenceProperty('focus_points');
         if ($focuspoints === null || $focuspoints === '') {
             return $this->linkEditContent($content, $record);
         }
 
-        $content .= '<div class="preview-thumbnails" style="--preview-thumbnails-size: 200px">';
+        $content = $this->buildHtml($fileReferences);
+        return $this->linkEditContent($content, $record);
+    }
+
+    /**
+     * @param iterable<FileReference> $fileReferences
+     */
+    private function buildHtml(iterable $fileReferences): string
+    {
+        $content = '<div class="preview-thumbnails" style="--preview-thumbnails-size: 200px">';
 
         foreach ($fileReferences as $reference) {
             $image = $reference->getOriginalFile()->process(
@@ -76,11 +125,10 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
 
         $content .= '</div>';
 
-        /** @var PageRenderer $pageRenderer */
-        $pageRenderer = $this->pageRenderer;
-        $pageRenderer->addCssFile('EXT:bw_focuspoint_images/Resources/Public/Css/BackendPreview.css');
 
-        return $this->linkEditContent($content, $record);
+        $this->pageRenderer->addCssFile('EXT:bw_focuspoint_images/Resources/Public/Css/BackendPreview.css');
+
+        return $content;
     }
 
     private function getSvgForFileReference(FileReference $fileReference): string
