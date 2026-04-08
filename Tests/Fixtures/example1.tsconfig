@@ -1,10 +1,31 @@
 mod.tx_bwfocuspointimages.settings.fields {
-  link {
-    title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
-    type = link
-  }
   title {
     title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.title
     type = text
+    useAsName = 1
+  }
+
+  color {
+    title = color
+    type = select
+    options {
+      red = red
+      green = green
+      blue = blue
+    }
+    default = red
+  }
+
+  hasLink {
+    title = hat link
+    type = checkbox
+    label = yes
+    default = true
+  }
+
+  link {
+    title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.link
+    type = link
+    displayCond = FIELD:hasLink:REQ:true
   }
 }
