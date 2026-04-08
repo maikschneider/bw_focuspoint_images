@@ -6,20 +6,28 @@
     import Icons from '@typo3/backend/icons.js'
     import {html} from "lit"
     import Preview from "./components/Preview.svelte";
+    import {focuspointChannelName} from './store.svelte.js'
 
     let {itemFormElName, itemFormElValue, wizardConfig, image} = $props()
     let icon = $state('')
     let previewPoints = $derived(itemFormElValue ? JSON.parse(itemFormElValue) : [])
+    let channel: BroadcastChannel|null = null
 
     onMount(() => {
         Icons.getIcon('content-target', Icons.sizes.small).then((html) => {
             icon = html
         })
-        window.document.addEventListener(`${itemFormElName}-wizard-update`, onWizardUpdate)
+
+        channel = new BroadcastChannel(focuspointChannelName(itemFormElName))
+        channel.onmessage = (e) => {
+            if (e.data.type === 'wizard-update') {
+                itemFormElValue = JSON.stringify(e.data.focuspoints)
+            }
+        }
     })
 
     onDestroy(() => {
-        window.document.removeEventListener(`${itemFormElName}-wizard-update`, onWizardUpdate)
+        channel?.close()
     })
 
     function onButtonClick(e: MouseEvent & {currentTarget: EventTarget & HTMLButtonElement}) {
@@ -57,6 +65,7 @@
                     style="height: 100%; width: 100%; display: grid;"
                     image="${image}"
                     itemFormElName="${itemFormElName}"
+                    itemFormElValue="${itemFormElValue}"
                     wizardConfig="${wizardConfig}"></focuspoint-wizard>`,
             size: Modal.sizes.full,
             title: TYPO3.lang['wizard.focuspoints.title'],
@@ -66,22 +75,15 @@
     }
 
     function onModalSave() {
-        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-modal-save`, {}))
-        window.parent.TYPO3.Modal.dismiss();
+        channel?.postMessage({type: 'modal-save'})
+        window.parent.TYPO3.Modal.dismiss()
     }
 
     function onModalSettings() {
-        document.dispatchEvent(new CustomEvent(`${itemFormElName}-settings`, {}))
+        channel?.postMessage({type: 'settings'})
     }
-
-    function onWizardUpdate(e: FocuspointWizardUpdateEvent) {
-        itemFormElValue = JSON.stringify(e.detail.focuspoints)
-    }
-
     function onLinkSelection(e: Event & {currentTarget: EventTarget & HTMLInputElement}) {
-        window.document.dispatchEvent(new CustomEvent(`${itemFormElName}-link-selected`, {
-            detail: {link: e.currentTarget.value}
-        }))
+        channel?.postMessage({type: 'link-selected', link: e.currentTarget.value})
     }
 </script>
 

@@ -23,8 +23,8 @@
     function onCopyButtonClick() {
         navigator.clipboard.writeText(focuspointArea.value);
         Notification.success(
-                window.parent.frames.list_frame.TYPO3.lang['wizard.settings.copied'],
-                window.parent.frames.list_frame.TYPO3.lang['wizard.settings.copied.message'],
+                $wizardConfigStore?.lang['wizard.settings.copied'],
+                $wizardConfigStore?.lang['wizard.settings.copied.message'],
                 3
         );
     }
@@ -62,19 +62,19 @@
         color: var(--icon-color-primary, currentColor)
     }
 
-    .v12 fieldset {
-        color: #333;
+    fieldset {
+        width: 600px;
     }
 </style>
 
-<div class="d-flex justify-content-center align-items-center wrapper" class:v12={$wizardConfigStore && $wizardConfigStore.typo3Version! < 13}>
+<div class="d-flex justify-content-center align-items-center wrapper">
 
     <fieldset class="form-section">
         <div class="d-flex justify-content-between">
-            <h3 class="form-section-headline">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.settings']}</h3>
+            <h3 class="form-section-headline">{$wizardConfigStore?.lang['wizard.button.settings']}</h3>
             <button onclick={() => isSettingsOpenValue = false} aria-label="Close settings" class="btn-close">
                 <Icon name="actions-close" />
-                <span class="visually-hidden">{window.parent.frames.list_frame.TYPO3.lang['wizard.button.cancel']}</span>
+                <span class="visually-hidden">{$wizardConfigStore?.lang['wizard.button.cancel']}</span>
             </button>
         </div>
         <div class="row">
@@ -92,18 +92,18 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <button class="btn btn-default" onclick={onCopyButtonClick}>
-                            <Icon name="actions-clipboard" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.copy']}
+                            <Icon name="actions-clipboard" /> {$wizardConfigStore?.lang['wizard.button.copy']}
                         </button>
                         <button class="btn btn-default" onclick={onPasteButtonClick}>
-                            <Icon name="actions-clipboard-paste" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.paste']}
+                            <Icon name="actions-clipboard-paste" /> {$wizardConfigStore?.lang['wizard.button.paste']}
                         </button>
                     </div>
                     <div>
                         <button disabled={!hasChange} class="btn btn-default" onclick={onUndoButtonClick}>
-                            <Icon name="actions-undo" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.undo']}
+                            <Icon name="actions-undo" /> {$wizardConfigStore?.lang['wizard.button.undo']}
                         </button>
                         <button disabled={!hasChange || hasError} class="btn btn-primary" onclick={onSaveButtonClick}>
-                            <Icon name="actions-check" /> {window.parent.frames.list_frame.TYPO3.lang['wizard.button.accept']}
+                            <Icon name="actions-check" /> {$wizardConfigStore?.lang['wizard.button.accept']}
                         </button>
                     </div>
                 </div>
