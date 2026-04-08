@@ -1,18 +1,22 @@
 import {writable, get} from 'svelte/store';
 import Polygon from "./shapes/Polygon.svelte";
 import Rect from "./shapes/Rect.svelte";
+import type {Component} from "svelte";
 
 export type ShapeType = "rect" | "polygon";
 
 export const imageMeta = writable<{ w: number; h: number } | null>(null);
 
-type Focuspoint = {[K in string]: string} & {
+export const focuspointChannelName = (itemFormElName: string) => `focuspoint:${itemFormElName}`
+
+export type Focuspoint = {[K in string]: string} & {
   __shape: ShapeType;
   __data: any;
+  active: boolean;
 }
 
 type ShapeConfig = {
-  component: Function;
+  component: Component<any>;
   constructor(config: WizardConfig): object;
 }
 
@@ -21,6 +25,8 @@ type WizardConfig = {
   defaultHeight?: string;
   itemFormElName?: string;
   typo3Version?: number;
+  pid: number;
+  lang: Record<string, string>,
   fields: {
     [K in string]: {
       displayCond?: string;
@@ -85,15 +91,15 @@ export const SHAPES: {[K in ShapeType]: ShapeConfig} = {
   }
 };
 
-export const wizardConfigStore = writable<WizardConfig>({fields: {}});
+export const wizardConfigStore = writable<WizardConfig>({fields: {}, lang: {}, pid: 0});
 
 export const focuspoints = writable<Focuspoint[]>([]);
 
 let activeIndex = $state(0);
 
-export const initStores = (hiddenInput: HTMLInputElement, wizardConfig: string): void => {
-    wizardConfigStore.set(JSON.parse(wizardConfig));
-    focuspoints.set(JSON.parse(hiddenInput.value ? hiddenInput.value : '[]'));
+export const initStores = (initialValue: string, wizardConfig: string): void => {
+  wizardConfigStore.set(JSON.parse(wizardConfig));
+  focuspoints.set(JSON.parse(initialValue && initialValue !== '' ? initialValue : '[]'));
 }
 
 /**
@@ -115,54 +121,93 @@ export const fieldMeetsCondition = (fieldName: string, point: {[K in string]: st
         return true;
     }
 
-    switch (operator) {
-        case 'REQ':
-            return point[field] !== null && point[field] !== '';
-        case '!=':
-            return point[field] !== value;
-        case '=':
-            return point[field] === value;
-        case '>': {
-            const pointVal = parseInt(point[field], 10);
-            const compareVal = parseInt(value, 10);
-            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal > compareVal;
-        }
-        case '<': {
-            const pointVal = parseInt(point[field], 10);
-            const compareVal = parseInt(value, 10);
-            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal < compareVal;
-        }
-        case '>=': {
-            const pointVal = parseInt(point[field], 10);
-            const compareVal = parseInt(value, 10);
-            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal >= compareVal;
-        }
-        case '<=': {
-            const pointVal = parseInt(point[field], 10);
-            const compareVal = parseInt(value, 10);
-            return !isNaN(pointVal) && !isNaN(compareVal) && pointVal <= compareVal;
-        }
-        case 'IN':
-            return value.split(',').includes(point[field]);
-        case '!IN':
-            return !value.split(',').includes(point[field]);
-        case '-': {
-            const range = value.split('-');
-            if (range.length !== 2) return false;
-            const [min, max] = range;
-            const pointVal = parseInt(point[field], 10);
-            return !isNaN(pointVal) && pointVal >= parseInt(min, 10) && pointVal <= parseInt(max, 10);
-        }
-        case '!-': {
-            const range = value.split('-');
-            if (range.length !== 2) return false;
-            const [min, max] = range;
-            const pointVal = parseInt(point[field], 10);
-            return !isNaN(pointVal) && (pointVal < parseInt(min, 10) || pointVal > parseInt(max, 10));
-        }
-        default:
-            return false;
+    const raw = point[field];
+    const normalizeRaw = (v: unknown): string => {
+      if (v === true) return '1';
+      if (v === false) return '0';
+      if (v === null || v === undefined) return '';
+      return String(v).trim();
     }
+
+    const normalizeCond = (v: string): string => {
+      const t = v.trim().toLowerCase();
+      if (t === 'true') return '1';
+      if (t === 'false') return '0';
+      return v.trim();
+    }
+
+    const toNumber = (v: unknown): number => Number(v);
+    const isFiniteNumber = (v: number): boolean => Number.isFinite(v);
+
+    const pointStr = normalizeRaw(raw);
+    const condStr = normalizeCond(value);
+
+  switch (operator) {
+    case 'REQ':
+      // "required" should be false for empty/false-ish checkbox values
+      return pointStr !== '' && pointStr !== '0' && pointStr.toLowerCase() !== 'false';
+
+    case '!=':
+      return pointStr !== condStr;
+
+    case '=':
+      return pointStr === condStr;
+
+    case '>': {
+      const pointVal = toNumber(raw);
+      const compareVal = toNumber(value);
+      return isFiniteNumber(pointVal) && isFiniteNumber(compareVal) && pointVal > compareVal;
+    }
+
+    case '<': {
+      const pointVal = toNumber(raw);
+      const compareVal = toNumber(value);
+      return isFiniteNumber(pointVal) && isFiniteNumber(compareVal) && pointVal < compareVal;
+    }
+
+    case '>=': {
+      const pointVal = toNumber(raw);
+      const compareVal = toNumber(value);
+      return isFiniteNumber(pointVal) && isFiniteNumber(compareVal) && pointVal >= compareVal;
+    }
+
+    case '<=': {
+      const pointVal = toNumber(raw);
+      const compareVal = toNumber(value);
+      return isFiniteNumber(pointVal) && isFiniteNumber(compareVal) && pointVal <= compareVal;
+    }
+
+    case 'IN': {
+      const list = value.split(',').map((v) => normalizeCond(v));
+      return list.includes(pointStr);
+    }
+
+    case '!IN': {
+      const list = value.split(',').map((v) => normalizeCond(v));
+      return !list.includes(pointStr);
+    }
+
+    case '-': {
+      const range = value.split('-');
+      if (range.length !== 2) return false;
+      const pointVal = toNumber(raw);
+      const min = toNumber(range[0]);
+      const max = toNumber(range[1]);
+      return isFiniteNumber(pointVal) && isFiniteNumber(min) && isFiniteNumber(max) && pointVal >= min && pointVal <= max;
+    }
+
+    case '!-': {
+      const range = value.split('-');
+      if (range.length !== 2) return false;
+      const pointVal = toNumber(raw);
+      const min = toNumber(range[0]);
+      const max = toNumber(range[1]);
+      return isFiniteNumber(pointVal) && isFiniteNumber(min) && isFiniteNumber(max) && (pointVal < min || pointVal > max);
+    }
+
+    default:
+      return false;
+  }
 }
 
 export const createNewFocuspoint = (shape: ShapeType): void => {
@@ -180,6 +225,7 @@ export const createNewFocuspoint = (shape: ShapeType): void => {
     // add the new focuspoint to the store and activate it
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
     activeIndex = get(focuspoints).length - 1;
+    activateFocuspoint(activeIndex);
 }
 
 export const setActiveIndex = (index: number) => {
@@ -188,6 +234,27 @@ export const setActiveIndex = (index: number) => {
 
 export const getActiveIndex = (): number => {
   return activeIndex;
+}
+
+export const activateFocuspoint = (index: number) => {
+  focuspoints.update((store) => {
+    store.forEach((focuspoint, i) => {
+      if (i === index) {
+        setActiveIndex(index)
+        focuspoint.active = true;
+      } else {
+        focuspoint.active = false;
+      }
+    });
+    return store;
+  })
+}
+
+export const deactivateAllFocuspoints = () => {
+  focuspoints.update((store) => {
+    store.forEach(focuspoint => focuspoint.active = false);
+    return store;
+  })
 }
 
 export const focusPointName = (index: number) => {
