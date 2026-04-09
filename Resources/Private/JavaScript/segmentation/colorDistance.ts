@@ -20,3 +20,15 @@ export function colorDistance (
 
   return Math.sqrt(redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta);
 }
+
+export function colorDistanceSquared (
+  pixelBuffer: Uint8ClampedArray,
+  byteOffsetPixelA: number,
+  byteOffsetPixelB: number
+): number {
+  const redDelta = pixelBuffer[byteOffsetPixelA] - pixelBuffer[byteOffsetPixelB];
+  const greenDelta = pixelBuffer[byteOffsetPixelA + 1] - pixelBuffer[byteOffsetPixelB + 1];
+  const blueDelta = pixelBuffer[byteOffsetPixelA + 2] - pixelBuffer[byteOffsetPixelB + 2];
+
+  return redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta;
+}

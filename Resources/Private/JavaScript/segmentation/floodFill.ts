@@ -1,4 +1,4 @@
-import {colorDistance} from "./colorDistance";
+import {colorDistanceSquared} from "./colorDistance";
 
 /**
  * Scanline stack entries: each entry is [leftColumnOfScanline, rightColumnOfScanline, rowIndex, parentRowDirection]
@@ -48,9 +48,10 @@ export function floodFill (
 
   const scanLineStack: ScanLineEntry[] = [];
 
+  const maxColorDistanceSquared = maxColorDistance * maxColorDistance;
   const isPixelWithinTolerance = (columnIndex: number, rowIndex: number): boolean => {
-    const candidateByOffset = (rowIndex * imageWidthInPixels + columnIndex) * 4;
-    return colorDistance(pixelBuffer, seedByteOffset, candidateByOffset) <= maxColorDistance;
+    const candidateByteOffset = (rowIndex * imageWidthInPixels + columnIndex) * 4;
+    return colorDistanceSquared(pixelBuffer, seedByteOffset, candidateByteOffset) <= maxColorDistanceSquared;
   }
 
   // start: find the fulll scanline extent at the seed row

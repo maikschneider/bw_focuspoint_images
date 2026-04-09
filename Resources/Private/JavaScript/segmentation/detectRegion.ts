@@ -1,7 +1,6 @@
 import {floodFill} from "./floodFill";
 import {traceContour} from "./contourTrace";
 import {simplifyPolygon} from "./simplify";
-import {closeMask} from "./morphology";
 
 export type DetectionResult =
   | { shapeType: 'rect', data: { x:number; y: number; width: number; height: number } }
@@ -64,11 +63,8 @@ export function detectRegion(
     colorToleranceThreshold
   );
 
-  // Morphological closing: fills anti-aliasing gaps at edges
-  const closedRegionMask = closeMask(filledRegionMask, naturalImageWidth, naturalImageHeight);
-
   // step 3: analyze bounding box + rectangularity
-  const boundingBox = computeBoundingBoxFromMask(closedRegionMask, naturalImageWidth, naturalImageHeight);
+  const boundingBox = computeBoundingBoxFromMask(filledRegionMask, naturalImageWidth, naturalImageHeight);
 
   offscreenCanvas.width = 0;
   offscreenCanvas.height = 0;
@@ -98,7 +94,7 @@ export function detectRegion(
   }
 
   // step4: Not rectangular -> trace contour + simplify to polygon
-  const rawContourPoints = traceContour(closedRegionMask, naturalImageWidth, naturalImageHeight);
+  const rawContourPoints = traceContour(filledRegionMask, naturalImageWidth, naturalImageHeight);
   if (rawContourPoints.length < 3) {
     return null;
   }
