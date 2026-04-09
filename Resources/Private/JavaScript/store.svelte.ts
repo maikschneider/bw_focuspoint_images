@@ -2,6 +2,7 @@ import {writable, get} from 'svelte/store';
 import Polygon from "./shapes/Polygon.svelte";
 import Rect from "./shapes/Rect.svelte";
 import type {Component} from "svelte";
+import type {DetectionResult} from "./segmentation/detectRegion";
 
 export type ShapeType = "rect" | "polygon";
 
@@ -279,4 +280,23 @@ export const focusPointName = (index: number) => {
     }
 
     return names.join(', ');
+}
+
+export const createFocuspointFromDetection = (detectionResult: DetectionResult): void => {
+  if (!detectionResult) {
+    return;
+  }
+
+ const config = get(wizardConfigStore);
+
+  const newFocuspoint: any = Object.keys(config.fields).reduce((acc: any, key) => {
+    acc[key] = config.fields[key].default ?? null;
+    return acc;
+  }, {});
+
+  newFocuspoint.__shape = detectionResult.shapeType;
+  newFocuspoint.__data = detectionResult.data;
+
+  focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
+  activateFocuspoint(activeIndex);
 }

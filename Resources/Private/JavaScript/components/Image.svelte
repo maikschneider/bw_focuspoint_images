@@ -1,10 +1,19 @@
 <script lang="ts">
     import interact from 'interactjs';
     import {
-        focuspoints, getActiveIndex, setActiveIndex, SHAPES, imageMeta, focusPointName, activateFocuspoint, detectionMode
+        focuspoints,
+        getActiveIndex,
+        setActiveIndex,
+        SHAPES,
+        imageMeta,
+        focusPointName,
+        activateFocuspoint,
+        detectionMode,
+        createFocuspointFromDetection
     } from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     import {fade} from "svelte/transition";
+    import {detectRegion} from "../segmentation/detectRegion";
 
     const {image}: {image: string} = $props();
 
@@ -186,6 +195,38 @@
         canvasWidth = imgElement.parentElement!.getBoundingClientRect().width
     }
 
+    function autoCreatePolygon(clickEvent: MouseEvent) {
+        if (!$detectionMode) {
+            return;
+        }
+
+        // Convert browser viewport coordinates → image-native pixel coordinates
+        // We use a temporary SVG-based conversion since the image may be scaled
+        const imageNaturalWidth = imgElement.naturalWidth;
+        const imageNaturalHeight = imgElement.naturalHeight;
+        const imageDisplayRect = imgElement.getBoundingClientRect();
+
+        const displayToNaturalScaleX = imageNaturalWidth / imageDisplayRect.width;
+        const displayToNaturalScaleY = imageNaturalHeight / imageDisplayRect.height;
+
+        const clickXRelativeToImage = clickEvent.clientX - imageDisplayRect.left;
+        const clickYRelativeToImage = clickEvent.clientY - imageDisplayRect.top;
+
+        const clickXInImagePixels = Math.round(clickXRelativeToImage * displayToNaturalScaleX);
+        const clickYInImagePixels = Math.round(clickYRelativeToImage * displayToNaturalScaleY);
+
+        const detectionResult = detectRegion(
+            imgElement,
+            clickXInImagePixels,
+            clickYInImagePixels
+        );
+
+        if (detectionResult) {
+            createFocuspointFromDetection(detectionResult);
+            detectionMode.set(false);
+        }
+    }
+
 </script>
 
 <style>
@@ -237,6 +278,11 @@
         outline-offset: 2px;
     }
 
+    .detection-cursor {
+        pointer-events: auto !important;
+        cursor: crosshair !important;
+    }
+
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
@@ -270,7 +316,14 @@
                     </g>
                 {/each}
             </svg>
-        #{/if}
-        <img bind:this={imgElement} src={image} alt="Selected" unselectable="on" {onload} />
+        {/if}
+        <img bind:this={imgElement}
+             src={image}
+             alt="Selected"
+             unselectable="on"
+             {onload}
+             onclick={autoCreatePolygon}
+             class:detection-cursor={$detectionMode}
+        />
     </div>
 </div>

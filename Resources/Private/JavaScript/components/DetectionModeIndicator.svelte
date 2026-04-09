@@ -1,5 +1,6 @@
 <script lang="ts">
     import {wizardConfigStore} from "../store.svelte";
+    import Icon from "./Icon.svelte";
 
      let langDetectionMode = $derived($wizardConfigStore?.lang['wizard.detection_mode'] ?? 'Detection Mode');
 </script>
@@ -49,7 +50,8 @@
 
 <div class="detection-mode-indicator">
     <span class="detection-mode-indicator-inner">
-        {langDetectionMode}
+        {langDetectionMode} <Icon name="actions-question-circle" />
+        <!-- @todo add popover or something like that to explain what detection mode is and how its works -->
     </span>
 </div>
 

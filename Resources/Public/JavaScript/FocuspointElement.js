@@ -30,9 +30,8 @@ var HYDRATION_END = "]";
 var HYDRATION_ERROR = {};
 var ELEMENT_PRESERVE_ATTRIBUTE_CASE = 1 << 1;
 var ELEMENT_IS_INPUT = 1 << 2;
-var UNINITIALIZED = Symbol();
-var FILENAME = Symbol("filename");
-var HMR = Symbol("hmr");
+var UNINITIALIZED = /* @__PURE__ */ Symbol();
+var FILENAME = /* @__PURE__ */ Symbol("filename");
 var NAMESPACE_HTML = "http://www.w3.org/1999/xhtml";
 var NAMESPACE_SVG = "http://www.w3.org/2000/svg";
 var NAMESPACE_MATHML = "http://www.w3.org/1998/Math/MathML";
@@ -98,10 +97,10 @@ var WAS_MARKED = 1 << 16;
 var REACTION_IS_UPDATING = 1 << 21;
 var ASYNC = 1 << 22;
 var ERROR_VALUE = 1 << 23;
-var STATE_SYMBOL = Symbol("$state");
-var LEGACY_PROPS = Symbol("legacy props");
-var LOADING_ATTR_SYMBOL = Symbol("");
-var PROXY_PATH_SYMBOL = Symbol("proxy path");
+var STATE_SYMBOL = /* @__PURE__ */ Symbol("$state");
+var LEGACY_PROPS = /* @__PURE__ */ Symbol("legacy props");
+var LOADING_ATTR_SYMBOL = /* @__PURE__ */ Symbol("");
+var PROXY_PATH_SYMBOL = /* @__PURE__ */ Symbol("proxy path");
 var STALE_REACTION = new class StaleReactionError extends Error {
   name = "StaleReactionError";
   message = "The reaction that called `getAbortSignal()` was re-run or destroyed";
@@ -871,7 +870,7 @@ function get(store) {
 // node_modules/svelte/src/internal/client/reactivity/store.js
 var legacy_is_updating_store = false;
 var is_store_binding = false;
-var IS_UNMOUNTED = Symbol();
+var IS_UNMOUNTED = /* @__PURE__ */ Symbol();
 function store_get(store, store_name, stores) {
   const entry = stores[store_name] ??= {
     store: null,
@@ -1025,6 +1024,11 @@ var Batch = class _Batch {
    * @type {Map<Effect, { d: Effect[], m: Effect[] }>}
    */
   #skipped_branches = /* @__PURE__ */ new Map();
+  /**
+   * Inverse of #skipped_branches which we need to tell prior batches to unskip them when committing
+   * @type {Set<Effect>}
+   */
+  #unskipped_branches = /* @__PURE__ */ new Set();
   is_fork = false;
   #decrement_queued = false;
   /** @type {Set<Batch>} */
@@ -1059,25 +1063,28 @@ var Batch = class _Batch {
     if (!this.#skipped_branches.has(effect2)) {
       this.#skipped_branches.set(effect2, { d: [], m: [] });
     }
+    this.#unskipped_branches.delete(effect2);
   }
   /**
    * Remove an effect from the #skipped_branches map and reschedule
    * any tracked dirty/maybe_dirty child effects
    * @param {Effect} effect
+   * @param {(e: Effect) => void} callback
    */
-  unskip_effect(effect2) {
+  unskip_effect(effect2, callback = (e4) => this.schedule(e4)) {
     var tracked = this.#skipped_branches.get(effect2);
     if (tracked) {
       this.#skipped_branches.delete(effect2);
       for (var e4 of tracked.d) {
         set_signal_status(e4, DIRTY);
-        this.schedule(e4);
+        callback(e4);
       }
       for (e4 of tracked.m) {
         set_signal_status(e4, MAYBE_DIRTY);
-        this.schedule(e4);
+        callback(e4);
       }
     }
+    this.#unskipped_branches.add(effect2);
   }
   #process() {
     if (flush_count++ > 1e3) {
@@ -1156,7 +1163,7 @@ var Batch = class _Batch {
       }
       next_batch.#process();
     }
-    if (!batches.has(this)) {
+    if (async_mode_flag && !batches.has(this)) {
       this.#commit();
     }
   }
@@ -1214,16 +1221,19 @@ var Batch = class _Batch {
    * Associate a change to a given source with the current
    * batch, noting its previous and current values
    * @param {Value} source
-   * @param {any} old_value
+   * @param {any} value
    * @param {boolean} [is_derived]
    */
-  capture(source2, old_value, is_derived = false) {
-    if (old_value !== UNINITIALIZED && !this.previous.has(source2)) {
-      this.previous.set(source2, old_value);
+  capture(source2, value, is_derived = false) {
+    if (source2.v !== UNINITIALIZED && !this.previous.has(source2)) {
+      this.previous.set(source2, source2.v);
     }
     if ((source2.f & ERROR_VALUE) === 0) {
-      this.current.set(source2, [source2.v, is_derived]);
-      batch_values?.set(source2, source2.v);
+      this.current.set(source2, [value, is_derived]);
+      batch_values?.set(source2, value);
+    }
+    if (!this.is_fork) {
+      source2.v = value;
     }
   }
   activate() {
@@ -1296,6 +1306,17 @@ var Batch = class _Batch {
       } else if (sources.length > 0) {
         if (dev_fallback_default) {
           invariant(batch.#roots.length === 0, "Batch has scheduled roots");
+        }
+        if (is_earlier) {
+          for (const unskipped of this.#unskipped_branches) {
+            batch.unskip_effect(unskipped, (e4) => {
+              if ((e4.f & (BLOCK_EFFECT | ASYNC)) !== 0) {
+                batch.schedule(e4);
+              } else {
+                batch.#defer_effects([e4]);
+              }
+            });
+          }
         }
         batch.activate();
         var marked = /* @__PURE__ */ new Set();
@@ -2414,13 +2435,15 @@ function execute_derived(derived3) {
   return value;
 }
 function update_derived(derived3) {
-  var old_value = derived3.v;
   var value = execute_derived(derived3);
   if (!derived3.equals(value)) {
     derived3.wv = increment_write_version();
     if (!current_batch?.is_fork || derived3.deps === null) {
-      derived3.v = value;
-      current_batch?.capture(derived3, old_value, true);
+      if (current_batch !== null) {
+        current_batch.capture(derived3, value, true);
+      } else {
+        derived3.v = value;
+      }
       if (derived3.deps === null) {
         set_signal_status(derived3, CLEAN);
         return;
@@ -2523,15 +2546,9 @@ function set(source2, value, should_proxy = false) {
 }
 function internal_set(source2, value, updated_during_traversal = null) {
   if (!source2.equals(value)) {
-    var old_value = source2.v;
-    if (is_destroying_effect) {
-      old_values.set(source2, value);
-    } else {
-      old_values.set(source2, old_value);
-    }
-    source2.v = value;
+    old_values.set(source2, is_destroying_effect ? value : source2.v);
     var batch = Batch.ensure();
-    batch.capture(source2, old_value);
+    batch.capture(source2, value);
     if (dev_fallback_default) {
       if (tracing_mode_flag || active_effect !== null) {
         source2.updated ??= /* @__PURE__ */ new Map();
@@ -3773,7 +3790,9 @@ function remove_reaction(signal, dependency) {
       derived3.f ^= CONNECTED;
       derived3.f &= ~WAS_MARKED;
     }
-    update_derived_status(derived3);
+    if (derived3.v !== UNINITIALIZED) {
+      update_derived_status(derived3);
+    }
     freeze_derived_effects(derived3);
     remove_reactions(derived3, 0);
   }
@@ -3982,7 +4001,7 @@ function untrack(fn) {
 }
 
 // node_modules/svelte/src/internal/client/dom/elements/events.js
-var event_symbol = Symbol("events");
+var event_symbol = /* @__PURE__ */ Symbol("events");
 var all_registered_events = /* @__PURE__ */ new Set();
 var root_event_handles = /* @__PURE__ */ new Set();
 function replay_events(dom) {
@@ -4893,9 +4912,6 @@ function if_block(node, fn, elseif = false) {
   }, flags2);
 }
 
-// node_modules/svelte/src/internal/client/dom/blocks/key.js
-var NAN = Symbol("NaN");
-
 // node_modules/svelte/src/internal/client/dom/blocks/each.js
 function index(_2, i5) {
   return i5;
@@ -4999,6 +5015,9 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
     var collection = get_collection();
     return is_array(collection) ? collection : collection == null ? [] : array_from(collection);
   });
+  if (dev_fallback_default) {
+    tag(each_array, "{#each ...}");
+  }
   var array;
   var pending2 = /* @__PURE__ */ new Map();
   var first_run = true;
@@ -5512,10 +5531,8 @@ function append_styles(anchor, css) {
 var whitespace = [..." 	\n\r\f\xA0\v\uFEFF"];
 
 // node_modules/svelte/src/internal/client/dom/elements/attributes.js
-var CLASS = Symbol("class");
-var STYLE = Symbol("style");
-var IS_CUSTOM_ELEMENT = Symbol("is custom element");
-var IS_HTML = Symbol("is html");
+var IS_CUSTOM_ELEMENT = /* @__PURE__ */ Symbol("is custom element");
+var IS_HTML = /* @__PURE__ */ Symbol("is html");
 var LINK_TAG = IS_XHTML ? "link" : "LINK";
 function remove_input_defaults(input) {
   if (!hydrating) return;
@@ -5774,7 +5791,7 @@ function prop(props, key2, flags2, fallback2) {
     var legacy_parent = props.$$legacy;
     return (
       /** @type {() => V} */
-      function(value, mutation) {
+      (function(value, mutation) {
         if (arguments.length > 0) {
           if (!runes || !mutation || legacy_parent || is_store_sub) {
             setter(mutation ? getter() : value);
@@ -5782,7 +5799,7 @@ function prop(props, key2, flags2, fallback2) {
           return value;
         }
         return getter();
-      }
+      })
     );
   }
   var overridden = false;
@@ -5800,7 +5817,7 @@ function prop(props, key2, flags2, fallback2) {
   );
   return (
     /** @type {() => V} */
-    function(value, mutation) {
+    (function(value, mutation) {
       if (arguments.length > 0) {
         const new_value = mutation ? get2(d3) : runes && bindable ? proxy(value) : value;
         set(d3, new_value);
@@ -5814,7 +5831,7 @@ function prop(props, key2, flags2, fallback2) {
         return d3.v;
       }
       return get2(d3);
-    }
+    })
   );
 }
 
@@ -6189,7 +6206,7 @@ import Icons from "@typo3/backend/icons.js";
 // node_modules/@lit/reactive-element/css-tag.js
 var t = globalThis;
 var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype;
-var s = Symbol();
+var s = /* @__PURE__ */ Symbol();
 var o = /* @__PURE__ */ new WeakMap();
 var n = class {
   constructor(t3, e4, o5) {
@@ -6261,7 +6278,7 @@ var u = { toAttribute(t3, s4) {
 } };
 var f = (t3, s4) => !i2(t3, s4);
 var b = { attribute: true, type: String, converter: u, reflect: false, useDefault: false, hasChanged: f };
-Symbol.metadata ??= Symbol("metadata"), a.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+Symbol.metadata ??= /* @__PURE__ */ Symbol("metadata"), a.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
 var y = class extends HTMLElement {
   static addInitializer(t3) {
     this._$Ei(), (this.l ??= []).push(t3);
@@ -6271,7 +6288,7 @@ var y = class extends HTMLElement {
   }
   static createProperty(t3, s4 = b) {
     if (s4.state && (s4.attribute = false), this._$Ei(), this.prototype.hasOwnProperty(t3) && ((s4 = Object.create(s4)).wrapped = true), this.elementProperties.set(t3, s4), !s4.noAccessor) {
-      const i5 = Symbol(), h3 = this.getPropertyDescriptor(t3, i5, s4);
+      const i5 = /* @__PURE__ */ Symbol(), h3 = this.getPropertyDescriptor(t3, i5, s4);
       void 0 !== h3 && e2(this.prototype, t3, h3);
     }
   }
@@ -6472,8 +6489,8 @@ var x = (t3) => (i5, ...s4) => ({ _$litType$: t3, strings: i5, values: s4 });
 var b2 = x(1);
 var w = x(2);
 var T = x(3);
-var E = Symbol.for("lit-noChange");
-var A = Symbol.for("lit-nothing");
+var E = /* @__PURE__ */ Symbol.for("lit-noChange");
+var A = /* @__PURE__ */ Symbol.for("lit-nothing");
 var C = /* @__PURE__ */ new WeakMap();
 var P = l2.createTreeWalker(l2, 129);
 function V(t3, i5) {
@@ -6758,6 +6775,7 @@ function Preview($$anchor, $$props) {
     set(height, e4.target.naturalHeight, true);
   }
   var $$exports = {
+    ...legacy_api(),
     get image() {
       return image();
     },
@@ -6778,8 +6796,7 @@ function Preview($$anchor, $$props) {
     set itemFormElName($$value) {
       itemFormElName($$value);
       flushSync();
-    },
-    ...legacy_api()
+    }
   };
   var div = root();
   var div_1 = child(div);
@@ -6875,6 +6892,7 @@ function Polygon($$anchor, $$props) {
     store_mutate(focuspoints, untrack($focuspoints)[index2()].__data.points = $focuspoints()[index2()].__data.points.filter((point, i5) => strict_equals(i5, handleIndex, false)), untrack($focuspoints));
   }
   var $$exports = {
+    ...legacy_api(),
     get getHandles() {
       return getHandles;
     },
@@ -6893,8 +6911,7 @@ function Polygon($$anchor, $$props) {
     set index($$value) {
       index2($$value);
       flushSync();
-    },
-    ...legacy_api()
+    }
   };
   var polygon = root2();
   template_effect(
@@ -6982,6 +6999,7 @@ function Rect($$anchor, $$props) {
     ];
   }
   var $$exports = {
+    ...legacy_api(),
     get onDrag() {
       return onDrag;
     },
@@ -6997,8 +7015,7 @@ function Rect($$anchor, $$props) {
     set index($$value) {
       index2($$value);
       flushSync();
-    },
-    ...legacy_api()
+    }
   };
   var rect = root3();
   template_effect(() => {
@@ -7097,6 +7114,7 @@ function FocuspointElement($$anchor, $$props) {
     channel?.postMessage({ type: "link-selected", link: e4.currentTarget.value });
   }
   var $$exports = {
+    ...legacy_api(),
     get itemFormElName() {
       return itemFormElName();
     },
@@ -7124,8 +7142,7 @@ function FocuspointElement($$anchor, $$props) {
     set image($$value) {
       image($$value);
       flushSync();
-    },
-    ...legacy_api()
+    }
   };
   var div = root4();
   var input = child(div);
@@ -7204,19 +7221,7 @@ export {
    *)
 
 @lit/reactive-element/reactive-element.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   * SPDX-License-Identifier: BSD-3-Clause
-   *)
-
 lit-html/lit-html.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   * SPDX-License-Identifier: BSD-3-Clause
-   *)
-
 lit-element/lit-element.js:
   (**
    * @license
