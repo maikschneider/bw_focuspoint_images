@@ -1,5 +1,3 @@
-import {colorDistanceSquared} from "./colorDistance";
-
 /**
  * Scanline stack entries: each entry is [leftColumnOfScanline, rightColumnOfScanline, rowIndex, parentRowDirection]
  * parentRowDirection: -1 = came from row below, +1 = came from row above, 0 = initial seed row
@@ -35,9 +33,6 @@ export function floodFill (
   const totalPixelCount = imageWidthInPixels * imageHeightInPixels;
   const regionMask = new Uint8Array(totalPixelCount);
 
-  // byte offset of the seed in the RGBA buffer (4 bytes / pixel)
-  const seedByteOffset = (seedPixelY * imageWidthInPixels + seedPixelX) * 4;
-
   // bounds check: seed must be inside the image
   if (
     seedPixelX < 0 || seedPixelX >= imageWidthInPixels ||
@@ -48,10 +43,34 @@ export function floodFill (
 
   const scanLineStack: ScanLineEntry[] = [];
 
+  const seedNeighborhoodRadius = 2; // 5×5
+  let totalRed = 0, totalGreen = 0, totalBlue = 0, sampleCount = 0;
+
+  for (let dy = -seedNeighborhoodRadius; dy <= seedNeighborhoodRadius; dy++) {
+    for (let dx = -seedNeighborhoodRadius; dx <= seedNeighborhoodRadius; dx++) {
+      const nx = seedPixelX + dx;
+      const ny = seedPixelY + dy;
+      if (nx >= 0 && nx < imageWidthInPixels && ny >= 0 && ny < imageHeightInPixels) {
+        const offset = (ny * imageWidthInPixels + nx) * 4;
+        totalRed   += pixelBuffer[offset];
+        totalGreen += pixelBuffer[offset + 1];
+        totalBlue  += pixelBuffer[offset + 2];
+        sampleCount++;
+      }
+    }
+  }
+
+  const seedRed   = Math.round(totalRed   / sampleCount);
+  const seedGreen = Math.round(totalGreen / sampleCount);
+  const seedBlue  = Math.round(totalBlue  / sampleCount);
   const maxColorDistanceSquared = maxColorDistance * maxColorDistance;
+
   const isPixelWithinTolerance = (columnIndex: number, rowIndex: number): boolean => {
     const candidateByteOffset = (rowIndex * imageWidthInPixels + columnIndex) * 4;
-    return colorDistanceSquared(pixelBuffer, seedByteOffset, candidateByteOffset) <= maxColorDistanceSquared;
+    const redDelta   = pixelBuffer[candidateByteOffset]     - seedRed;
+    const greenDelta = pixelBuffer[candidateByteOffset + 1] - seedGreen;
+    const blueDelta  = pixelBuffer[candidateByteOffset + 2] - seedBlue;
+    return (redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta) <= maxColorDistanceSquared;
   }
 
   // start: find the fulll scanline extent at the seed row
@@ -136,6 +155,15 @@ export function floodFill (
         // determine parent direction for the new scanline entry
         const directionFromParent = currentRowIndex < parentRow ? -1 : 1;
         scanLineStack.push([spanLeftColumn, spanRightColumn, currentRowIndex, directionFromParent]);
+
+        const returnDirection = -directionFromParent as -1 | 1;
+        if (spanLeftColumn < parentLeft) {
+          scanLineStack.push([spanLeftColumn, parentLeft -1, currentRowIndex, returnDirection]);
+        }
+
+        if (spanRightColumn > parentRight) {
+          scanLineStack.push([parentRight + 1, spanRightColumn, currentRowIndex, returnDirection]);
+        }
 
         // continue scanning for next span in this row
         currentColumnIndex = spanRightColumn + 1;

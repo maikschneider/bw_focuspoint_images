@@ -9,11 +9,13 @@
         focusPointName,
         activateFocuspoint,
         detectionMode,
-        createFocuspointFromDetection
+        createFocuspointFromDetection,
+        wizardConfigStore
     } from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     import {fade} from "svelte/transition";
     import {detectRegion} from "../segmentation/detectRegion";
+    import Notification from "@typo3/backend/notification.js";
 
     const {image}: {image: string} = $props();
 
@@ -224,6 +226,12 @@
         if (detectionResult) {
             createFocuspointFromDetection(detectionResult);
             detectionMode.set(false);
+        } else {
+            Notification.info(
+                $wizardConfigStore?.lang['wizard.detection_mode.no_region_found'] ?? 'No region found',
+                $wizardConfigStore?.lang['wizard.detection_mode.no_region_found_message'] ?? 'No region could be detected at the clicked position.',
+                60
+            );
         }
     }
 

@@ -67,7 +67,7 @@
                     wizardConfig="${wizardConfig}"></focuspoint-wizard>`,
             size: Modal.sizes.full,
             title: TYPO3.lang['wizard.focuspoints.title'],
-            staticBackdrop: true
+            staticBackdrop: false
         })
     }
 

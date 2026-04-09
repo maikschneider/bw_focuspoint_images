@@ -1,12 +1,6 @@
 <svelte:options customElement={{tag: 'focuspoint-wizard', shadow: 'none'}} />
 
 <style>
-    .wizard-wrapper {
-        position: relative;
-        height: 100%;
-        min-height: 0;
-    }
-
     .wizard {
         display: grid;
         max-height: 100%;
@@ -20,8 +14,7 @@
         top: 0;
         left: 0;
         right: 0;
-        z-index: 10001;
-        pointer-events: none;
+        z-index: 2;
     }
 
     .resize-handle {
@@ -118,25 +111,22 @@
     }
 </script>
 
-<div class="wizard-wrapper">
-    {#if $detectionMode}
-        <div
-            class="detection-mode-overlay"
-            in:fly={{ y: -24, duration: 260, easing: cubicOut }}
-            out:fly={{ y: -16, duration: 180, easing: cubicIn }}
-        >
-            <DetectionModeIndicator />
-        </div>
-    {/if}
-
-    <div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
-        {#if isSettingsOpen}
-            <Settings itemFormElName={itemFormElName} bind:isSettingsOpenValue={isSettingsOpen} />
-        {:else}
-            <Image bind:this={imageComponent} image={image} />
-            <div class="resize-handle" aria-label="Resize sidebar"></div>
-            <Sidebar />
-        {/if}
+{#if $detectionMode}
+    <div
+        class="detection-mode-overlay"
+        in:fly={{ y: -24, duration: 260, easing: cubicOut }}
+        out:fly={{ y: -16, duration: 180, easing: cubicIn }}
+    >
+        <DetectionModeIndicator />
     </div>
+{/if}
 
+<div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
+    {#if isSettingsOpen}
+        <Settings itemFormElName={itemFormElName} bind:isSettingsOpenValue={isSettingsOpen} />
+    {:else}
+        <Image bind:this={imageComponent} image={image} />
+        <div class="resize-handle" aria-label="Resize sidebar"></div>
+        <Sidebar />
+    {/if}
 </div>

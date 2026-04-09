@@ -15,8 +15,6 @@
         --indicator-badge-padding-y: .05rem;
         --indicator-badge-height:
             calc(var(--indicator-font-size) + var(--indicator-badge-padding-y) * 2);
-        --indicator-z-index: 10001;
-
         display: block;
         position: relative;
         color: var(--indicator-color);
@@ -24,7 +22,6 @@
         background-color: var(--indicator-bg);
         font-size: var(--indicator-font-size);
         line-height: 1;
-        z-index: var(--indicator-z-index);
         user-select: none;
         transition: margin-top .25s ease-out, background-color .25s ease-out, color .25s ease-out, display allow-discrete .25s ease-out;
     }
@@ -45,12 +42,17 @@
         white-space: nowrap;
         overflow: hidden;
         transition: background-color .25s ease-out;
+
+        .help-icon {
+            cursor: help;
+        }
     }
 </style>
 
 <div class="detection-mode-indicator">
     <span class="detection-mode-indicator-inner">
-        {langDetectionMode} <Icon name="actions-question-circle" />
+        {langDetectionMode}
+        <span class="help-icon"><Icon name="actions-question-circle" /></span>
         <!-- @todo add popover or something like that to explain what detection mode is and how its works -->
     </span>
 </div>

@@ -22,6 +22,7 @@
 
     function onCopyButtonClick() {
         navigator.clipboard.writeText(focuspointArea.value);
+
         Notification.success(
                 $wizardConfigStore?.lang['wizard.settings.copied'],
                 $wizardConfigStore?.lang['wizard.settings.copied.message'],
@@ -64,6 +65,9 @@
 
     fieldset {
         width: 600px;
+        border: solid var(--typo3-form-section-border-width) var(--typo3-form-section-border-color);
+        padding: 1rem 1rem;
+        border-radius: var(--typo3-component-border-radius);
     }
 </style>
 

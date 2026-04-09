@@ -114,5 +114,50 @@ export function traceContour(
     }
   } while (currentPixelX !== entryPixelX || currentPixelY !== entryPixelY);
 
-  return contourPoints;
+  return removeCollinearPoints(contourPoints);
 }
+
+/**
+ * Removes collinear points from a closed contour.
+ *
+ * Three consecutive points A → B → C are collinear when the cross product
+ * of vectors (A→B) and (A→C) is zero — meaning B lies exactly on the line
+ * from A to C and carries no shape information.
+ *
+ * Since the contour is a closed loop, the check wraps around: the last
+ * point is tested against the first and second, etc.
+ *
+ * Uses integer cross-product (no floating point, no epsilon needed)
+ * because all coordinates are whole pixel positions.
+ *
+ * @param contourPoints - Ordered [x, y] boundary points from tracing
+ * @returns Filtered array with only the direction-change points kept
+ */
+function removeCollinearPoints(contourPoints: [number, number][]): [number, number][] {
+  const pointCount = contourPoints.length;
+  if (pointCount <= 3) {
+    return contourPoints;
+  }
+
+  const reducedContour: [number, number][] = [];
+  for (let currentIndex = 0; currentIndex < pointCount; currentIndex++) {
+    const previousIndex = (currentIndex - 1 + pointCount) % pointCount;
+    const nextIndex = (currentIndex + 1) % pointCount;
+
+    const [previousX, previousY] = contourPoints[previousIndex];
+    const [currentX, currentY]   = contourPoints[currentIndex];
+    const [nextX, nextY]         = contourPoints[nextIndex];
+
+    // Cross product of vectors (prev→current) and (prev→next).
+    // Zero means all three points lie on the same straight line.
+    const crossProduct =
+      (currentX - previousX) * (nextY - previousY) -
+      (currentY - previousY) * (nextX - previousX);
+
+    if (crossProduct !== 0) {
+      reducedContour.push(contourPoints[currentIndex]);
+    }
+  }
+  return reducedContour;
+}
+

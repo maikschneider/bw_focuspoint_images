@@ -63,9 +63,10 @@ export function detectRegion(
     colorToleranceThreshold
   );
 
-  // step 3: analyze bounding box + rectangularity
-  const boundingBox = computeBoundingBoxFromMask(filledRegionMask, naturalImageWidth, naturalImageHeight);
+  const processedRegionMask = dilateRegionMask(filledRegionMask, naturalImageWidth, naturalImageHeight, 2, rawPixelBuffer);
 
+  // step 3: analyze bounding box + rectangularity
+  const boundingBox = computeBoundingBoxFromMask(processedRegionMask, naturalImageWidth, naturalImageHeight);
   offscreenCanvas.width = 0;
   offscreenCanvas.height = 0;
 
@@ -77,6 +78,13 @@ export function detectRegion(
   const boundingBoxWidth = maxX - minX + 1;
   const boundingBoxHeight = maxY - minY + 1;
   const boundingBoxArea = boundingBoxWidth * boundingBoxHeight;
+
+  // Ignore regions smaller than 100 pixels — these are typically
+  // single-pixel noise or JPEG artifacts, not intentional click targets.
+  const minimumRegionPixelCount = 100;
+  if (filledPixelCount < minimumRegionPixelCount) {
+    return null;
+  }
 
   // rectangularity = how much of the bounding box is filled
   // 1.0 = perfect rectangle 0.5 = triangle-ish, etc.
@@ -94,13 +102,20 @@ export function detectRegion(
   }
 
   // step4: Not rectangular -> trace contour + simplify to polygon
-  const rawContourPoints = traceContour(filledRegionMask, naturalImageWidth, naturalImageHeight);
+  const rawContourPoints = traceContour(processedRegionMask, naturalImageWidth, naturalImageHeight);
   if (rawContourPoints.length < 3) {
     return null;
   }
 
+  // Scale the simplification tolerance to the size of the detected region,
+  // not the whole image. For large regions the image diagonal works fine,
+  // but small regions (fine lines, icons) need a higher relative epsilon
+  // to smooth out dilation artifacts and pixel-level noise.
   const imageDiagonalLength = Math.sqrt(naturalImageWidth * naturalImageWidth + naturalImageHeight * naturalImageHeight);
-  const effectiveEpsilon = polygonSimplificationEpsilon ?? imageDiagonalLength * 0.0015;
+  const regionDiagonalLength = Math.sqrt(boundingBoxWidth * boundingBoxWidth + boundingBoxHeight * boundingBoxHeight);
+  const imageBasedEpsilon = imageDiagonalLength * 0.0015;
+  const regionBasedEpsilon = regionDiagonalLength * 0.01;
+  const effectiveEpsilon = polygonSimplificationEpsilon ?? Math.max(imageBasedEpsilon, regionBasedEpsilon);
   const simplifiedPolygonPoints = simplifyPolygon(rawContourPoints, Math.max(1.0, effectiveEpsilon));
 
   // Level 2 rectangle check: the pixel-based check (Level 1) can fail when
@@ -213,4 +228,103 @@ function computePolygonArea(polygonPoints: [number, number][]): number {
   }
 
   return Math.abs(twiceSignedArea) / 2;
+}
+
+/**
+ * Edge-aware morphological dilation of a binary region mask.
+ *
+ * Expands filled pixels outward by `radius`, but ONLY into pixels whose
+ * color is similar to the average color of their nearest filled neighbor.
+ * This prevents the dilation from bridging across thin lines or strong
+ * color edges (e.g. a 1px white outline on a dark background).
+ *
+ * Without edge-awareness, a radius of 2 would bridge any gap ≤ 4px,
+ * destroying thin-line boundaries completely.
+ *
+ * @param mask        - Binary region mask (1 = filled, 0 = empty)
+ * @param width       - Image width in pixels
+ * @param height      - Image height in pixels
+ * @param radius      - Max expansion distance in pixels (1–3 typical)
+ * @param pixelBuffer - Raw RGBA pixel data for color comparison
+ */
+function dilateRegionMask(
+  mask: Uint8Array,
+  width: number,
+  height: number,
+  radius: number,
+  pixelBuffer: Uint8ClampedArray
+): Uint8Array {
+  const dilated = new Uint8Array(mask);
+
+  // Squared color distance threshold for dilation.
+  // 30² = 900 — allows anti-aliased blending pixels through,
+  // but blocks pixels across a clear color edge (e.g. white line on blue).
+  const maxDilationColorDistanceSquared = 30 * 30;
+
+  // Iterative single-pixel expansion, repeated `radius` times.
+  // Each pass only expands by 1 pixel, ensuring every step is edge-checked.
+  for (let pass = 0; pass < radius; pass++) {
+    // snapshot of current state — we read from snapshot, write to dilated
+    const snapshot = new Uint8Array(dilated);
+
+    for (let row = 0; row < height; row++) {
+      for (let col = 0; col < width; col++) {
+        const pixelIndex = row * width + col;
+
+        // only process empty pixels (candidates for expansion)
+        if (snapshot[pixelIndex] === 1) {
+          continue;
+        }
+
+        // check if any of the 4 direct neighbors is filled
+        const hasFilledNeighbor =
+          (col > 0         && snapshot[pixelIndex - 1]     === 1) ||
+          (col < width - 1 && snapshot[pixelIndex + 1]     === 1) ||
+          (row > 0         && snapshot[pixelIndex - width]  === 1) ||
+          (row < height - 1 && snapshot[pixelIndex + width] === 1);
+
+        if (!hasFilledNeighbor) {
+          continue;
+        }
+
+        // Find the nearest filled neighbor's color to compare against
+        const candidateByteOffset = pixelIndex * 4;
+        const candidateRed   = pixelBuffer[candidateByteOffset];
+        const candidateGreen = pixelBuffer[candidateByteOffset + 1];
+        const candidateBlue  = pixelBuffer[candidateByteOffset + 2];
+
+        // Compare against the closest filled neighbor
+        let isColorCompatible = false;
+        const neighborOffsets = [
+          col > 0          ? pixelIndex - 1     : -1,
+          col < width - 1  ? pixelIndex + 1     : -1,
+          row > 0          ? pixelIndex - width  : -1,
+          row < height - 1 ? pixelIndex + width  : -1,
+        ];
+
+        for (const neighborIndex of neighborOffsets) {
+          if (neighborIndex === -1 || snapshot[neighborIndex] !== 1) {
+            continue;
+          }
+
+          const neighborByteOffset = neighborIndex * 4;
+          const redDelta   = candidateRed   - pixelBuffer[neighborByteOffset];
+          const greenDelta = candidateGreen - pixelBuffer[neighborByteOffset + 1];
+          const blueDelta  = candidateBlue  - pixelBuffer[neighborByteOffset + 2];
+          const colorDistSq = redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta;
+
+          if (colorDistSq <= maxDilationColorDistanceSquared) {
+            isColorCompatible = true;
+            break;
+          }
+        }
+
+        if (isColorCompatible) {
+          dilated[pixelIndex] = 1;
+        }
+      }
+    }
+  }
+
+  return dilated;
 }
