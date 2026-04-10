@@ -136,13 +136,18 @@ export function detectRegion(
       : 0;
 
     if (polygonRectangularityRatio >= 0.90) {
+      const x = Math.floor(polygonBoundsMinX);
+      const y = Math.floor(polygonBoundsMinY);
+      const maxX = Math.ceil(polygonBoundsMaxX);
+      const maxY = Math.ceil(polygonBoundsMaxY);
+
       return {
         shapeType: 'rect',
         data: {
-          x: polygonBoundsMinX,
-          y: polygonBoundsMinY,
-          width: polygonBoundsMaxX - polygonBoundsMinX,
-          height: polygonBoundsMaxY - polygonBoundsMinY,
+          x,
+          y,
+          width: maxX - x + 1,
+          height: maxY - y + 4,
         }
       };
     }
