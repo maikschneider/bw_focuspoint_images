@@ -20,6 +20,12 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 #[Autoconfigure(public: true)]
 class HelperUtility
 {
+    private const array POINT_STYLE_KEY_TSCONFIG = [
+        'color' => 'useAsOverlayColor',
+        'opacity' => 'useAsOverlayOpacity',
+        'opacityOnHover' => 'useAsOverlayOpacityOnHover',
+    ];
+
     public function __construct(protected TypoScriptService $typoScriptService, protected LinkService $linkService, protected IconFactory $iconFactory, protected TypoLinkCodecService $typoLinkCodecService)
     {
     }
@@ -234,5 +240,29 @@ class HelperUtility
 
         $data['additionalAttributes'] = implode(' - ', $additionalAttributes);
         return $data;
+    }
+
+    public function getPointStyles(array $point, int $pid, string $cType): array
+    {
+        $styles = [
+            'color' => null,
+            'opacity' => null,
+            'opacityOnHover' => null,
+        ];
+
+        $config = $this->getConfigForWizardAction($pid, $cType);
+        if (!isset($config['fields'])) {
+            return $styles;
+        }
+
+        foreach (self::POINT_STYLE_KEY_TSCONFIG as $styleName => $fieldDefinitionVar) {
+            foreach ($config['fields'] as $fieldName => $fieldConfig) {
+                if (($fieldConfig[$fieldDefinitionVar] ?? false) && isset($point[$fieldName])) {
+                    $styles[$styleName] = $point[$fieldName];
+                }
+            }
+        }
+
+        return $styles;
     }
 }

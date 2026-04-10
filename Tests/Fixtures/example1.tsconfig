@@ -5,15 +5,39 @@ mod.tx_bwfocuspointimages.settings.fields {
     useAsName = 1
   }
 
-  color {
-    title = color
-    type = select
-    options {
-      red = red
-      green = green
-      blue = blue
+  overlay_color {
+    title = Overlay Color
+    type = color
+    useAsOverlayColor = 1
+    default = #000000
+  }
+
+  opacity {
+    title = Overlay Opacity
+    type = number
+    slider {
+      step = 0.1
     }
-    default = red
+    range {
+      lower = 0
+      upper = 1
+    }
+    default = 0.3
+    useAsOverlayOpacity = 1
+  }
+
+  opacity_hover {
+    title = Overlay Opacity on Hover
+    type = number
+    slider {
+      step = 0.1
+    }
+    range {
+      lower = 0
+      upper = 1
+    }
+    default = 0.5
+    useAsOverlayOpacityOnHover = 1
   }
 
   hasLink {

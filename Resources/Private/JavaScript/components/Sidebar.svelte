@@ -14,8 +14,10 @@
     import Textarea from "./Fields/Textarea.svelte";
     import Link from "./Fields/Link.svelte";
     import Checkbox from "./Fields/Checkbox.svelte";
+    import Color from "./Fields/Color.svelte";
     import Icon from './Icon.svelte';
     import {fade} from "svelte/transition";
+    import Number from "./Fields/Number.svelte";
 
     let focuspointName = $derived((focuspoint: Focuspoint, index: number) => focusPointName(index))
     let panelGroup: HTMLDivElement
@@ -28,7 +30,9 @@
         textarea: Textarea,
         select: Select,
         link: Link,
-        checkbox: Checkbox
+        checkbox: Checkbox,
+        color: Color,
+        number: Number
     };
 
     function getFieldComponent(type ?: string) {

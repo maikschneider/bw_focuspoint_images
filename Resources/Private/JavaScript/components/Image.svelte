@@ -27,7 +27,7 @@
     let isDarkMode: boolean = $state(false);
     let instanceArray: any[] = $state([]);
     let imgElement: HTMLImageElement;
-    let svgRoot: SVGSVGElement | null = null;
+    let svgRoot: SVGSVGElement | null = $state(null);
 
     // convert pixel -> svg coordinates
     function clientToSvg(svg: SVGSVGElement, clientX: number, clientY: number): [number, number] {
@@ -218,7 +218,6 @@
         const clickXInImagePixels = Math.round(clickXRelativeToImage * displayToNaturalScaleX);
         const clickYInImagePixels = Math.round(clickYRelativeToImage * displayToNaturalScaleY);
 
-        console.log($detectionColorTolerance)
         const detectionResult = detectRegion(
             imgElement,
             clickXInImagePixels,
@@ -248,6 +247,16 @@
         user-select: none;
         max-width: 100%;
         max-height: calc(100vh - 200px);
+    }
+
+    .detection-hit-area {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        cursor: crosshair;
     }
 
     .cropper-bg {
@@ -288,12 +297,6 @@
         outline: 2px solid #0d6efd;
         outline-offset: 2px;
     }
-
-    .detection-cursor {
-        pointer-events: auto !important;
-        cursor: crosshair !important;
-    }
-
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
@@ -333,8 +336,15 @@
              alt="Selected"
              unselectable="on"
              {onload}
-             onclick={autoCreatePolygon}
-             class:detection-cursor={$detectionMode}
         />
+
+        {#if $detectionMode}
+            <button
+                class="detection-hit-area"
+                aria-label="Detect object region"
+                onclick={autoCreatePolygon}
+            >
+            </button>
+        {/if}
     </div>
 </div>

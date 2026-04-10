@@ -17,6 +17,7 @@
 	],
 	"require": {
 		"ext-json": "*",
+		"php": "^8.3",
 		"typo3/cms-core": "^13.4 || ^14.2",
 		"typo3/cms-fluid-styled-content": "^13.4 || ^14.2"
 	},

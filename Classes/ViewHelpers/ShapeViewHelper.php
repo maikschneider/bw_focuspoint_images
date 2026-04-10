@@ -31,12 +31,33 @@ final class ShapeViewHelper extends AbstractViewHelper
             'Shape data required to render',
             true
         );
+        $this->registerArgument(
+            'color',
+            'string',
+            'Shape color',
+            false
+        );
+        $this->registerArgument(
+            'opacity',
+            'string',
+            'Opacity',
+            false
+        );
+        $this->registerArgument(
+            'opacityOnHover',
+            'string',
+            'Opacity on hover',
+            false
+        );
     }
 
     public function render(): string
     {
         $type = $this->arguments['type'];
         $data = $this->arguments['data'];
-        return $this->shapeRendererFactory->getRenderer($type)?->render($data) ?? '';
+        $opacity = $this->arguments['opacity'] ?? null;
+        $opacityOnHover = $this->arguments['opacityOnHover'] ?? null;
+        $color = $this->arguments['color'] ?? null;
+        return $this->shapeRendererFactory->getRenderer($type)?->render($data, $color, $opacity, $opacityOnHover) ?? '';
     }
 }

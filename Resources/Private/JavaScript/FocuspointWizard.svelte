@@ -45,7 +45,10 @@
     import {fly} from 'svelte/transition';
     import Image from './components/Image.svelte';
     import Sidebar from "./components/Sidebar.svelte";
-    import {detectionMode, focuspointChannelName, initStores, activateFocuspoint, deactivateAllFocuspoints} from './store.svelte';
+    import {
+        detectionMode, focuspointChannelName, initStores, activateFocuspoint, deactivateAllFocuspoints,
+        hasNumberSliderField
+    } from './store.svelte';
     import {focuspoints} from './store.svelte';
     import interact from 'interactjs';
     import Settings from "./components/Settings.svelte";
@@ -55,7 +58,7 @@
     let isSettingsOpen = $state(false)
     let imageComponent = $state(<{updateCanvasSizes: () => void} | null>(null))
     let sidebarWidth = $state(300)
-    const minSidebarWidth = 238
+    let minSidebarWidth = 238
     let channel: BroadcastChannel|null = null
 
 
@@ -67,6 +70,10 @@
             setTimeout(() => {
                 activateFocuspoint(0)
             }, 300)
+        }
+
+        if (hasNumberSliderField()) {
+            minSidebarWidth = 300;
         }
 
         channel = new BroadcastChannel(focuspointChannelName(itemFormElName))

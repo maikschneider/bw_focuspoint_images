@@ -1,7 +1,11 @@
 <script lang="ts">
-    import {focuspoints} from "../store.svelte";
+    import {computeOverlayStyle, focuspoints, wizardConfigStore} from "../store.svelte";
 
     const {index} = $props();
+    let isHovered = $state(false);
+    const overlayStyle = $derived(
+        computeOverlayStyle($focuspoints[index], $wizardConfigStore.fields, isHovered)
+    )
 
     export function getHandles(): [number, number][] {
         return $focuspoints[index].__data.points;
@@ -23,4 +27,12 @@
     }
 </script>
 
-<polygon class="shape" points={$focuspoints[index].__data.points.map((point: [number, number]) => point.join(",")).join(" ")} data-index={index} />
+<polygon
+    class="shape"
+    role="presentation"
+    points={$focuspoints[index].__data.points.map((point: [number, number]) => point.join(",")).join(" ")}
+    data-index={index}
+    style={overlayStyle}
+    onmouseenter={() => isHovered = true}
+    onmouseleave={() => isHovered = false}
+/>

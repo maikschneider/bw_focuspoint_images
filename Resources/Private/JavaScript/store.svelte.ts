@@ -35,7 +35,12 @@ type WizardConfig = {
       displayCond?: string;
       default?: string;
       useAsName?: boolean | number | string;
+      useAsOverlayColor?: boolean | string;
+      useAsOverlayOpacity?: boolean | string;
+      useAsOverlayOpacityOnHover?: boolean | string;
       type?: string;
+      slider?: {step: number}
+      range?: { lower?: number, upper?: number }
     }
   }
 }
@@ -301,4 +306,49 @@ export const createFocuspointFromDetection = (detectionResult: DetectionResult):
 
   focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
   activateFocuspoint(activeIndex);
+}
+
+export const hasNumberSliderField = (): boolean => {
+  const config = get(wizardConfigStore);
+  for (let fieldName in config.fields) {
+    let fieldConfig = config.fields[fieldName];
+    if (fieldConfig.type !== 'number') {
+      continue;
+    }
+
+    if ("slider" in fieldConfig) {
+      return true;
+    }
+  }
+  return  false;
+}
+
+/**
+ * Computes an inline SVG style string for overlay color and opacity.
+ * Called reactively via $derived in shape components.
+ *
+ * @param focuspoint   - The current focuspoint object
+ * @param fields       - Field config from wizardConfigStore
+ * @param isHovered    - Whether the shape is currently hovered
+ * @returns            - CSS inline style string, e.g. "fill: #ff0000; fill-opacity: 0.5"
+ */
+export function computeOverlayStyle(
+  focuspoint: Focuspoint | undefined,
+  fields: WizardConfig['fields'],
+  isHovered: boolean
+): string {
+  const colorFieldName     = Object.entries(fields).find(([, f]) => f.useAsOverlayColor)?.[0];
+  const opacityFieldName   = Object.entries(fields).find(([, f]) => f.useAsOverlayOpacity)?.[0];
+  const hoverOpacityFieldName = Object.entries(fields).find(([, f]) => f.useAsOverlayOpacityOnHover)?.[0];
+
+  const color        = colorFieldName        ? (focuspoint?.[colorFieldName] || null)                           : null;
+  const opacity      = opacityFieldName      ? (parseFloat(focuspoint?.[opacityFieldName] ?? '') || null)      : null;
+  const hoverOpacity = hoverOpacityFieldName ? (parseFloat(focuspoint?.[hoverOpacityFieldName] ?? '') || null) : null;
+
+  const activeOpacity = isHovered && hoverOpacity !== null ? hoverOpacity : opacity;
+
+  return [
+    color         ? `fill: ${color}`               : null,
+    activeOpacity !== null ? `fill-opacity: ${activeOpacity}` : null,
+  ].filter(Boolean).join('; ');
 }

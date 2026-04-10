@@ -8,6 +8,10 @@
 }
 
 .focuspoint__svg {
+    --focuspoint-color: #000000;
+    --focuspoint-opacity: 0.3;
+    --focuspoint-opacity-hover: 0.5;
+
     position: absolute;
     left: 0;
     top: 0;
@@ -15,10 +19,11 @@
     height: 100%;
 
     polygon, rect {
-        opacity: .3;
+        fill: var(--focuspoint-color);
+        opacity: var(--focuspoint-opacity);
     }
 
     polygon:hover, rect:hover {
-        opacity: .5;
+        opacity: var(--focuspoint-opacity-hover);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Blueways\BwFocuspointImages\DataProcessing;
 
+use Blueways\BwFocuspointImages\Utility\HelperUtility;
 use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
@@ -28,6 +29,7 @@ class FocuspointProcessor extends FilesProcessor
         }
 
         $processedData['points'] = [];
+        $helperUtility = GeneralUtility::makeInstance(HelperUtility::class);
 
         /** @var TypoLinkCodecService $typoLinkCodecService */
         $typoLinkCodecService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
@@ -38,6 +40,7 @@ class FocuspointProcessor extends FilesProcessor
             $points = json_decode($points, true) ?: [];
 
             foreach ($points as &$point) {
+                $point['styles'] = $helperUtility->getPointStyles($point, $cObj->data['pid'], $cObj->data['CType']);
                 foreach ($point as $fieldName => &$fieldValue) {
                     // in case of old typolink syntax (v2.3.3): replace link field with typolink value
                     if (is_object($fieldValue) && property_exists($fieldValue, 'key')) {
