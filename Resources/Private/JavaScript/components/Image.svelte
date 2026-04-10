@@ -10,7 +10,8 @@
         activateFocuspoint,
         detectionMode,
         createFocuspointFromDetection,
-        wizardConfigStore
+        wizardConfigStore,
+        detectionColorTolerance
     } from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
     import {fade} from "svelte/transition";
@@ -217,10 +218,12 @@
         const clickXInImagePixels = Math.round(clickXRelativeToImage * displayToNaturalScaleX);
         const clickYInImagePixels = Math.round(clickYRelativeToImage * displayToNaturalScaleY);
 
+        console.log($detectionColorTolerance)
         const detectionResult = detectRegion(
             imgElement,
             clickXInImagePixels,
-            clickYInImagePixels
+            clickYInImagePixels,
+            $detectionColorTolerance
         );
 
         if (detectionResult) {

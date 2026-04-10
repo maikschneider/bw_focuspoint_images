@@ -6,7 +6,7 @@
         focusPointName, fieldMeetsCondition,
         activateFocuspoint,
         SHAPES, type Focuspoint,
-        detectionMode, deactivateAllFocuspoints
+        detectionMode, detectionColorTolerance, deactivateAllFocuspoints
     } from '../store.svelte'
     import type {ShapeType} from "../store.svelte";
     import Select from "./Fields/Select.svelte";
@@ -15,6 +15,7 @@
     import Link from "./Fields/Link.svelte";
     import Checkbox from "./Fields/Checkbox.svelte";
     import Icon from './Icon.svelte';
+    import {fade} from "svelte/transition";
 
     let focuspointName = $derived((focuspoint: Focuspoint, index: number) => focusPointName(index))
     let panelGroup: HTMLDivElement
@@ -120,9 +121,22 @@
         gap: 8px;
     }
 
-    .button-group button {
+    .button-group button:not(.rest-color-tolerance) {
         flex: 1 1 auto;
         min-width: 120px;
+    }
+
+    .detection-settings-panel {
+        flex-basis: 100%;
+
+        .form-label {
+            display: inline;
+            margin-bottom: 0;
+        }
+    }
+
+    .rest-color-tolerance {
+        min-width: fit-content;
     }
 
     :global(.callout) {
@@ -189,17 +203,57 @@
     </div>
 
     <div class="button-group">
-        {#each Object.entries(SHAPES) as [key]}
-            <button class="btn btn-success mt-3"
-                    class:disabled={$detectionMode}
-                    onclick={(e) => {
+        {#if $detectionMode}
+            <div class="detection-settings-panel"
+                 in:fade={{duration: 200, delay: 200}}
+                 out:fade={{duration: 200}}
+            >
+                <div class="d-flex justify-content-between">
+                    <span>
+                        <label for="color-tolerance" class="form-label">
+                            {$wizardConfigStore?.lang['wizard.detection_mode.color_tolerance'] ?? 'Color Tolerance'}:
+                        </label>
+                        <span class="tolerance-display">{$detectionColorTolerance}</span>
+                    </span>
+                    <button class="btn btn-link rest-color-tolerance text-decoration-none"
+                            tabindex="0"
+                            aria-label="Reset color tolerance"
+                          onclick={(e) => {
+                              e.preventDefault();
+                              detectionColorTolerance.set(32);
+                          }}
+                    >
+                        <small>{$wizardConfigStore?.lang['wizard.detection_mode.color_tolerance.reset'] ?? 'Reset'}</small>
+                    </button>
+                </div>
+
+
+
+                <input
+                    id="color-tolerance"
+                    class="form-range"
+                    type="range"
+                    min="5"
+                    max="80"
+                    step="1"
+                    bind:value={$detectionColorTolerance}
+                />
+            </div>
+        {:else}
+            {#each Object.entries(SHAPES) as [key]}
+                <button class="btn btn-success mt-3"
+                        in:fade={{duration: 200, delay: 400}}
+                        out:fade={{duration: 200}}
+                        class:disabled={$detectionMode}
+                        onclick={(e) => {
                         e.preventDefault()
                         createNewFocuspoint(toShapeType(key))
             }}>
-                <Icon name="actions-add"/>
-                {$wizardConfigStore?.lang[`wizard.single_point.button.new.${key}`]}
-            </button>
-        {/each}
+                    <Icon name="actions-add"/>
+                    {$wizardConfigStore?.lang[`wizard.single_point.button.new.${key}`]}
+                </button>
+            {/each}
+        {/if}
         <button
             class="btn mt-3 {detectionButtonClass}"
             onclick={(e) => {

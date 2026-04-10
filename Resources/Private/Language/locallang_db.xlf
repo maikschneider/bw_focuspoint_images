@@ -108,6 +108,12 @@
 			<trans-unit id="wizard.detection_mode.help">
 				<source>Click anywhere on the image to automatically detect and outline a region. A focuspoint will be created around the detected area. If no region is found, try clicking closer to the center of the object.</source>
 			</trans-unit>
+			<trans-unit id="wizard.detection_mode.color_tolerance">
+				<source>Color Tolerance</source>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode.color_tolerance.reset">
+				<source>Reset</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

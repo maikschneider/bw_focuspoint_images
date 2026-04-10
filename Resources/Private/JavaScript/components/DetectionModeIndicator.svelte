@@ -1,12 +1,13 @@
 <script lang="ts">
-    import {wizardConfigStore, detectionMode} from "../store.svelte";
+    import {wizardConfigStore} from "../store.svelte";
     import Icon from "./Icon.svelte";
     import {onDestroy, onMount} from "svelte";
     import {Popover} from "bootstrap";
 
-     let langDetectionMode = $derived($wizardConfigStore?.lang['wizard.detection_mode'] ?? 'Detection Mode');
-     let helpPopover: HTMLElement;
-     let popoverInstance: Popover|null = null;
+    let langDetectionMode = $derived($wizardConfigStore?.lang['wizard.detection_mode'] ?? 'Detection Mode');
+    let helpPopover: HTMLElement;
+    let popoverInstance: Popover|null = null;
+
     onMount(() => {
         const modalContainer = helpPopover.closest('typo3-backend-modal dialog');
         if (helpPopover && modalContainer) {
@@ -14,7 +15,7 @@
                 container: modalContainer
             });
         }
-    })
+    });
 
     onDestroy(() => {
         popoverInstance?.dispose();

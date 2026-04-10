@@ -63,8 +63,7 @@ export function detectRegion(
     colorToleranceThreshold
   );
 
-  const processedRegionMask = dilateRegionMask(filledRegionMask, naturalImageWidth, naturalImageHeight, 2, rawPixelBuffer);
-
+  const processedRegionMask = majorityVoteSmoothMask(filledRegionMask, naturalImageWidth, naturalImageHeight, 1);
   // step 3: analyze bounding box + rectangularity
   const boundingBox = computeBoundingBoxFromMask(processedRegionMask, naturalImageWidth, naturalImageHeight);
   offscreenCanvas.width = 0;
@@ -113,8 +112,8 @@ export function detectRegion(
   // to smooth out dilation artifacts and pixel-level noise.
   const imageDiagonalLength = Math.sqrt(naturalImageWidth * naturalImageWidth + naturalImageHeight * naturalImageHeight);
   const regionDiagonalLength = Math.sqrt(boundingBoxWidth * boundingBoxWidth + boundingBoxHeight * boundingBoxHeight);
-  const imageBasedEpsilon = imageDiagonalLength * 0.0015;
-  const regionBasedEpsilon = regionDiagonalLength * 0.01;
+  const imageBasedEpsilon = imageDiagonalLength * 0.002;
+  const regionBasedEpsilon = regionDiagonalLength * 0.015;
   const effectiveEpsilon = polygonSimplificationEpsilon ?? Math.max(imageBasedEpsilon, regionBasedEpsilon);
   const simplifiedPolygonPoints = simplifyPolygon(rawContourPoints, Math.max(1.0, effectiveEpsilon));
 
@@ -231,100 +230,56 @@ function computePolygonArea(polygonPoints: [number, number][]): number {
 }
 
 /**
- * Edge-aware morphological dilation of a binary region mask.
+ * Majority-vote binary mask smoothing.
  *
- * Expands filled pixels outward by `radius`, but ONLY into pixels whose
- * color is similar to the average color of their nearest filled neighbor.
- * This prevents the dilation from bridging across thin lines or strong
- * color edges (e.g. a 1px white outline on a dark background).
+ * For each pixel, counts how many pixels in a (2·radius+1)² window
+ * are filled. If the majority (>50%) are filled, the pixel becomes/stays
+ * filled; otherwise it becomes/stays empty.
  *
- * Without edge-awareness, a radius of 2 would bridge any gap ≤ 4px,
- * destroying thin-line boundaries completely.
+ * This smooths jagged pixel-level boundaries without systematically
+ * growing or shrinking the region — unlike dilate+erode (morphological
+ * close), which can shrink the mask at color edges where dilation
+ * was blocked but erosion still applies uniformly.
  *
- * @param mask        - Binary region mask (1 = filled, 0 = empty)
- * @param width       - Image width in pixels
- * @param height      - Image height in pixels
- * @param radius      - Max expansion distance in pixels (1–3 typical)
- * @param pixelBuffer - Raw RGBA pixel data for color comparison
+ * @param mask   - Binary region mask (1 = filled, 0 = empty)
+ * @param width  - Image width in pixels
+ * @param height - Image height in pixels
+ * @param radius - Smoothing window radius (1–3 typical). Window = (2·radius+1)²
+ * @returns New smoothed binary mask
  */
-function dilateRegionMask(
+function majorityVoteSmoothMask(
   mask: Uint8Array,
   width: number,
   height: number,
-  radius: number,
-  pixelBuffer: Uint8ClampedArray
+  radius: number
 ): Uint8Array {
-  const dilated = new Uint8Array(mask);
+  const smoothed = new Uint8Array(mask.length);
+  const windowSideLength = 2 * radius + 1;
+  // Majority means more than half the pixels in the window are filled
+  const majorityThreshold = Math.floor((windowSideLength * windowSideLength) / 2);
 
-  // Squared color distance threshold for dilation.
-  // 30² = 900 — allows anti-aliased blending pixels through,
-  // but blocks pixels across a clear color edge (e.g. white line on blue).
-  const maxDilationColorDistanceSquared = 30 * 30;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      let filledNeighborCount = 0;
 
-  // Iterative single-pixel expansion, repeated `radius` times.
-  // Each pass only expands by 1 pixel, ensuring every step is edge-checked.
-  for (let pass = 0; pass < radius; pass++) {
-    // snapshot of current state — we read from snapshot, write to dilated
-    const snapshot = new Uint8Array(dilated);
+      for (let offsetY = -radius; offsetY <= radius; offsetY++) {
+        const neighborRow = row + offsetY;
+        if (neighborRow < 0 || neighborRow >= height) continue;
 
-    for (let row = 0; row < height; row++) {
-      for (let col = 0; col < width; col++) {
-        const pixelIndex = row * width + col;
+        for (let offsetX = -radius; offsetX <= radius; offsetX++) {
+          const neighborCol = col + offsetX;
+          if (neighborCol < 0 || neighborCol >= width) continue;
 
-        // only process empty pixels (candidates for expansion)
-        if (snapshot[pixelIndex] === 1) {
-          continue;
-        }
-
-        // check if any of the 4 direct neighbors is filled
-        const hasFilledNeighbor =
-          (col > 0         && snapshot[pixelIndex - 1]     === 1) ||
-          (col < width - 1 && snapshot[pixelIndex + 1]     === 1) ||
-          (row > 0         && snapshot[pixelIndex - width]  === 1) ||
-          (row < height - 1 && snapshot[pixelIndex + width] === 1);
-
-        if (!hasFilledNeighbor) {
-          continue;
-        }
-
-        // Find the nearest filled neighbor's color to compare against
-        const candidateByteOffset = pixelIndex * 4;
-        const candidateRed   = pixelBuffer[candidateByteOffset];
-        const candidateGreen = pixelBuffer[candidateByteOffset + 1];
-        const candidateBlue  = pixelBuffer[candidateByteOffset + 2];
-
-        // Compare against the closest filled neighbor
-        let isColorCompatible = false;
-        const neighborOffsets = [
-          col > 0          ? pixelIndex - 1     : -1,
-          col < width - 1  ? pixelIndex + 1     : -1,
-          row > 0          ? pixelIndex - width  : -1,
-          row < height - 1 ? pixelIndex + width  : -1,
-        ];
-
-        for (const neighborIndex of neighborOffsets) {
-          if (neighborIndex === -1 || snapshot[neighborIndex] !== 1) {
-            continue;
+          if (mask[neighborRow * width + neighborCol] === 1) {
+            filledNeighborCount++;
           }
-
-          const neighborByteOffset = neighborIndex * 4;
-          const redDelta   = candidateRed   - pixelBuffer[neighborByteOffset];
-          const greenDelta = candidateGreen - pixelBuffer[neighborByteOffset + 1];
-          const blueDelta  = candidateBlue  - pixelBuffer[neighborByteOffset + 2];
-          const colorDistSq = redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta;
-
-          if (colorDistSq <= maxDilationColorDistanceSquared) {
-            isColorCompatible = true;
-            break;
-          }
-        }
-
-        if (isColorCompatible) {
-          dilated[pixelIndex] = 1;
         }
       }
+
+      // More than 50% filled → pixel stays/becomes filled
+      smoothed[row * width + col] = filledNeighborCount > majorityThreshold ? 1 : 0;
     }
   }
 
-  return dilated;
+  return smoothed;
 }

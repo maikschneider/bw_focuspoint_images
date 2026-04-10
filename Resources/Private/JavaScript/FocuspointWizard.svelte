@@ -55,7 +55,7 @@
     let isSettingsOpen = $state(false)
     let imageComponent = $state(<{updateCanvasSizes: () => void} | null>(null))
     let sidebarWidth = $state(300)
-    const minSidebarWidth = 200
+    const minSidebarWidth = 238
     let channel: BroadcastChannel|null = null
 
 

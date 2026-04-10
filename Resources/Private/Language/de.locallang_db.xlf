@@ -140,6 +140,14 @@
 				<source>Click anywhere on the image to automatically detect and outline a region. A focuspoint will be created around the detected area. If no region is found, try clicking closer to the center of the object.</source>
 				<target>Klicken Sie auf eine beliebige Stelle des Bildes, um automatisch eine Region zu erkennen und zu umreißen. Es wird ein Fokuspunkt um die erkannte Fläche erstellt. Wenn keine Region gefunden wird, versuchen Sie, näher an der Mitte des Objekts zu klicken.</target>
 			</trans-unit>
+			<trans-unit id="wizard.detection_mode.color_tolerance">
+				<source>Color Tolerance</source>
+				<target>Farbtoleranz</target>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode.color_tolerance.reset">
+				<source>Reset</source>
+				<target>Zurücksetzen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
