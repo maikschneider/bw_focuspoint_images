@@ -97,6 +97,7 @@ export const wizardConfigStore = writable<WizardConfig>({fields: {}, lang: {}, p
 
 export const focuspoints = writable<Focuspoint[]>([]);
 
+
 let activeIndex = $state(0);
 
 export const initStores = (initialValue: string, wizardConfig: string): void => {

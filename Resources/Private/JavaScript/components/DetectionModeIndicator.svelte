@@ -1,8 +1,24 @@
 <script lang="ts">
-    import {wizardConfigStore} from "../store.svelte";
+    import {wizardConfigStore, detectionMode} from "../store.svelte";
     import Icon from "./Icon.svelte";
+    import {onDestroy, onMount} from "svelte";
+    import {Popover} from "bootstrap";
 
      let langDetectionMode = $derived($wizardConfigStore?.lang['wizard.detection_mode'] ?? 'Detection Mode');
+     let helpPopover: HTMLElement;
+     let popoverInstance: Popover|null = null;
+    onMount(() => {
+        const modalContainer = helpPopover.closest('typo3-backend-modal dialog');
+        if (helpPopover && modalContainer) {
+             popoverInstance = new Popover(helpPopover, {
+                container: modalContainer
+            });
+        }
+    })
+
+    onDestroy(() => {
+        popoverInstance?.dispose();
+    });
 </script>
 
 <style>
@@ -52,8 +68,15 @@
 <div class="detection-mode-indicator">
     <span class="detection-mode-indicator-inner">
         {langDetectionMode}
-        <span class="help-icon"><Icon name="actions-question-circle" /></span>
-        <!-- @todo add popover or something like that to explain what detection mode is and how its works -->
+        <span class="help-icon"
+              data-bs-toggle="popover"
+              data-bs-content="{$wizardConfigStore?.lang['wizard.detection_mode.help']}"
+              data-bs-placement="bottom"
+              data-bs-trigger="click hover"
+              bind:this={helpPopover}
+        >
+            <Icon name="actions-question-circle" />
+        </span>
     </span>
 </div>
 

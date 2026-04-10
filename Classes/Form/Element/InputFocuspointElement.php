@@ -97,7 +97,8 @@ class InputFocuspointElement extends AbstractFormElement
             'wizard.single_point.button.new.polygon',
             'wizard.single_point.button.detection_mode.start',
             'wizard.single_point.button.detection_mode.stop',
-            'wizard.detection_mode'
+            'wizard.detection_mode',
+            'wizard.detection_mode.help'
         ];
 
         $wizardConfig['lang'] = array_combine(

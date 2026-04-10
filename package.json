@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"description": "",
 	"dependencies": {
+		"@types/bootstrap": "^5.2.10",
 		"bootstrap": "^5.3.3",
 		"esbuild": "^0.28.0",
 		"esbuild-svelte": "^0.9.4",

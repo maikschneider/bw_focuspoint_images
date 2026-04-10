@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-	<file source-language="en" datatype="plaintext" original="messages" date="2023-04-04T09:23:21Z"
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2023-04-04T09:23:21Z"
 		  product-name="bw_focuspoint_images">
 		<header/>
 		<body>
@@ -135,6 +135,10 @@
 			<trans-unit id="wizard.button.accept">
 				<source>Accept</source>
 				<target>Übernehmen</target>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode.help">
+				<source>Click anywhere on the image to automatically detect and outline a region. A focuspoint will be created around the detected area. If no region is found, try clicking closer to the center of the object.</source>
+				<target>Klicken Sie auf eine beliebige Stelle des Bildes, um automatisch eine Region zu erkennen und zu umreißen. Es wird ein Fokuspunkt um die erkannte Fläche erstellt. Wenn keine Region gefunden wird, versuchen Sie, näher an der Mitte des Objekts zu klicken.</target>
 			</trans-unit>
 		</body>
 	</file>
