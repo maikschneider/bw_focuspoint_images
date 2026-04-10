@@ -21,6 +21,7 @@
 
     let focuspointName = $derived((focuspoint: Focuspoint, index: number) => focusPointName(index))
     let panelGroup: HTMLDivElement
+    const showDetectionIcon = $derived(($wizardConfigStore?.typo3Version ?? 0) > 13);
     function deleteFocuspoint(index: number) {
         $focuspoints = $focuspoints.filter((focuspoint, i) => i !== index)
     }
@@ -264,7 +265,9 @@
                 e.preventDefault();
                 toggleDetectionMode();
         }}>
-            <Icon name={detectionButtonIcon}/>
+            {#if showDetectionIcon}
+                <Icon name={detectionButtonIcon}/>
+            {/if}
             {detectionButtonText}
         </button>
     </div>
