@@ -9,6 +9,10 @@
     .form-range-input {
         min-width: 120px;
     }
+
+    .form-control-clearable-wrapper {
+        z-index: 0;
+    }
 </style>
 
 <div class="form-group">
