@@ -23,6 +23,7 @@
     // @ts-ignore
     let previewAdditionalAttributes = $derived(linkBrowserData?.preview?.additionalAttributes ?? '')
 
+    onMount(() => updateLinkBrowserInfo());
 
     $effect(() => {
         if ($focuspoints?.[index]?.[name]) {
