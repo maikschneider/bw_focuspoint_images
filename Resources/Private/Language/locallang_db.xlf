@@ -36,6 +36,15 @@
 			<trans-unit id="wizard.single_point.button.new.polygon">
 				<source>New Polygon</source>
 			</trans-unit>
+			<trans-unit id="wizard.single_point.button.detection_mode.start">
+				<source>Start Detect Object</source>
+			</trans-unit>
+			<trans-unit id="wizard.single_point.button.detection_mode.stop">
+				<source>Stop Detect Object</source>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode">
+				<source>Object Detection Mode</source>
+			</trans-unit>
 			<trans-unit id="wizard.fields.link">
 				<source>Link</source>
 			</trans-unit>
@@ -95,6 +104,15 @@
 			</trans-unit>
 			<trans-unit id="wizard.button.accept">
 				<source>Accept</source>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode.help">
+				<source>Click anywhere on the image to automatically detect and outline a region. A focuspoint will be created around the detected area. If no region is found, try clicking closer to the center of the object.</source>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode.color_tolerance">
+				<source>Color Tolerance</source>
+			</trans-unit>
+			<trans-unit id="wizard.detection_mode.color_tolerance.reset">
+				<source>Reset</source>
 			</trans-unit>
 		</body>
 	</file>

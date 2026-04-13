@@ -2,12 +2,15 @@ import {writable, get} from 'svelte/store';
 import Polygon from "./shapes/Polygon.svelte";
 import Rect from "./shapes/Rect.svelte";
 import type {Component} from "svelte";
+import type {DetectionResult} from "./segmentation/detectRegion";
 
 export type ShapeType = "rect" | "polygon";
 
 export const imageMeta = writable<{ w: number; h: number } | null>(null);
 
 export const focuspointChannelName = (itemFormElName: string) => `focuspoint:${itemFormElName}`
+export const detectionMode = writable(false);
+export const detectionColorTolerance = writable(32);
 
 export type Focuspoint = {[K in string]: string} & {
   __shape: ShapeType;
@@ -32,7 +35,12 @@ type WizardConfig = {
       displayCond?: string;
       default?: string;
       useAsName?: boolean | number | string;
+      useAsOverlayColor?: boolean | string;
+      useAsOverlayOpacity?: boolean | string;
+      useAsOverlayOpacityOnHover?: boolean | string;
       type?: string;
+      slider?: {step: number}
+      range?: { lower?: number, upper?: number }
     }
   }
 }
@@ -94,6 +102,7 @@ export const SHAPES: {[K in ShapeType]: ShapeConfig} = {
 export const wizardConfigStore = writable<WizardConfig>({fields: {}, lang: {}, pid: 0});
 
 export const focuspoints = writable<Focuspoint[]>([]);
+
 
 let activeIndex = $state(0);
 
@@ -278,4 +287,68 @@ export const focusPointName = (index: number) => {
     }
 
     return names.join(', ');
+}
+
+export const createFocuspointFromDetection = (detectionResult: DetectionResult): void => {
+  if (!detectionResult) {
+    return;
+  }
+
+ const config = get(wizardConfigStore);
+
+  const newFocuspoint: any = Object.keys(config.fields).reduce((acc: any, key) => {
+    acc[key] = config.fields[key].default ?? null;
+    return acc;
+  }, {});
+
+  newFocuspoint.__shape = detectionResult.shapeType;
+  newFocuspoint.__data = detectionResult.data;
+
+  focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
+  activateFocuspoint(activeIndex);
+}
+
+export const hasNumberSliderField = (): boolean => {
+  const config = get(wizardConfigStore);
+  for (let fieldName in config.fields) {
+    let fieldConfig = config.fields[fieldName];
+    if (fieldConfig.type !== 'number') {
+      continue;
+    }
+
+    if ("slider" in fieldConfig) {
+      return true;
+    }
+  }
+  return  false;
+}
+
+/**
+ * Computes an inline SVG style string for overlay color and opacity.
+ * Called reactively via $derived in shape components.
+ *
+ * @param focuspoint   - The current focuspoint object
+ * @param fields       - Field config from wizardConfigStore
+ * @param isHovered    - Whether the shape is currently hovered
+ * @returns            - CSS inline style string, e.g. "fill: #ff0000; fill-opacity: 0.5"
+ */
+export function computeOverlayStyle(
+  focuspoint: Focuspoint | undefined,
+  fields: WizardConfig['fields'],
+  isHovered: boolean
+): string {
+  const colorFieldName     = Object.entries(fields).find(([, f]) => f.useAsOverlayColor)?.[0];
+  const opacityFieldName   = Object.entries(fields).find(([, f]) => f.useAsOverlayOpacity)?.[0];
+  const hoverOpacityFieldName = Object.entries(fields).find(([, f]) => f.useAsOverlayOpacityOnHover)?.[0];
+
+  const color        = colorFieldName        ? (focuspoint?.[colorFieldName] || null)                           : null;
+  const opacity      = opacityFieldName      ? (parseFloat(focuspoint?.[opacityFieldName] ?? '') || null)      : null;
+  const hoverOpacity = hoverOpacityFieldName ? (parseFloat(focuspoint?.[hoverOpacityFieldName] ?? '') || null) : null;
+
+  const activeOpacity = isHovered && hoverOpacity !== null ? hoverOpacity : opacity;
+
+  return [
+    color         ? `fill: ${color}`               : null,
+    activeOpacity !== null ? `fill-opacity: ${activeOpacity}` : null,
+  ].filter(Boolean).join('; ');
 }

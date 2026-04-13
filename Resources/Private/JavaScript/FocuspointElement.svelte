@@ -33,8 +33,6 @@
     function onButtonClick(e: MouseEvent & {currentTarget: EventTarget & HTMLButtonElement}) {
         e.preventDefault()
 
-        const typo3Version = JSON.parse(wizardConfig).typo3Version
-
         Modal.advanced({
             additionalCssClasses: ['modal-image-manipulation', 'cropper'],
             buttons: [
@@ -69,8 +67,7 @@
                     wizardConfig="${wizardConfig}"></focuspoint-wizard>`,
             size: Modal.sizes.full,
             title: TYPO3.lang['wizard.focuspoints.title'],
-            style: typo3Version < 13 ? Modal.styles.dark : null,
-            staticBackdrop: true
+            staticBackdrop: false
         })
     }
 

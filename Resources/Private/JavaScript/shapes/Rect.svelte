@@ -1,7 +1,11 @@
 <script lang="ts">
-    import {focuspoints} from "../store.svelte";
+    import {focuspoints, computeOverlayStyle, wizardConfigStore} from "../store.svelte";
 
     const {index} = $props();
+    let isHovered = $state(false);
+    const overlayStyle = $derived(
+        computeOverlayStyle($focuspoints[index], $wizardConfigStore.fields, isHovered)
+    )
 
     export function onDrag(event: InteractjsDragEvent): void {
         $focuspoints[index].__data.x = $focuspoints[index].__data.x + event.dx;
@@ -64,4 +68,15 @@
     }
 </script>
 
-<rect class="draggable shape" x={$focuspoints[index].__data.x} y={$focuspoints[index].__data.y} width={$focuspoints[index].__data.width} height={$focuspoints[index].__data.height} data-index={index} />
+<rect
+    class="draggable shape"
+    role="presentation"
+    x={$focuspoints[index].__data.x}
+    y={$focuspoints[index].__data.y}
+    width={$focuspoints[index].__data.width}
+    height={$focuspoints[index].__data.height}
+    data-index={index}
+    style={overlayStyle}
+    onmouseenter={() => isHovered = true}
+    onmouseleave={() => isHovered = false}
+/>

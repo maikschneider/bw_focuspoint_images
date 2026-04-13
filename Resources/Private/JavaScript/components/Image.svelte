@@ -1,9 +1,22 @@
 <script lang="ts">
     import interact from 'interactjs';
     import {
-        focuspoints, getActiveIndex, setActiveIndex, SHAPES, imageMeta, focusPointName, activateFocuspoint
+        focuspoints,
+        getActiveIndex,
+        setActiveIndex,
+        SHAPES,
+        imageMeta,
+        focusPointName,
+        activateFocuspoint,
+        detectionMode,
+        createFocuspointFromDetection,
+        wizardConfigStore,
+        detectionColorTolerance
     } from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
+    import {fade} from "svelte/transition";
+    import {detectRegion} from "../segmentation/detectRegion";
+    import Notification from "@typo3/backend/notification.js";
 
     const {image}: {image: string} = $props();
 
@@ -14,7 +27,7 @@
     let isDarkMode: boolean = $state(false);
     let instanceArray: any[] = $state([]);
     let imgElement: HTMLImageElement;
-    let svgRoot: SVGSVGElement | null = null;
+    let svgRoot: SVGSVGElement | null = $state(null);
 
     // convert pixel -> svg coordinates
     function clientToSvg(svg: SVGSVGElement, clientX: number, clientY: number): [number, number] {
@@ -185,6 +198,45 @@
         canvasWidth = imgElement.parentElement!.getBoundingClientRect().width
     }
 
+    function autoCreatePolygon(clickEvent: MouseEvent) {
+        if (!$detectionMode) {
+            return;
+        }
+
+        // Convert browser viewport coordinates → image-native pixel coordinates
+        // We use a temporary SVG-based conversion since the image may be scaled
+        const imageNaturalWidth = imgElement.naturalWidth;
+        const imageNaturalHeight = imgElement.naturalHeight;
+        const imageDisplayRect = imgElement.getBoundingClientRect();
+
+        const displayToNaturalScaleX = imageNaturalWidth / imageDisplayRect.width;
+        const displayToNaturalScaleY = imageNaturalHeight / imageDisplayRect.height;
+
+        const clickXRelativeToImage = clickEvent.clientX - imageDisplayRect.left;
+        const clickYRelativeToImage = clickEvent.clientY - imageDisplayRect.top;
+
+        const clickXInImagePixels = Math.round(clickXRelativeToImage * displayToNaturalScaleX);
+        const clickYInImagePixels = Math.round(clickYRelativeToImage * displayToNaturalScaleY);
+
+        const detectionResult = detectRegion(
+            imgElement,
+            clickXInImagePixels,
+            clickYInImagePixels,
+            $detectionColorTolerance
+        );
+
+        if (detectionResult) {
+            createFocuspointFromDetection(detectionResult);
+            detectionMode.set(false);
+        } else {
+            Notification.info(
+                $wizardConfigStore?.lang['wizard.detection_mode.no_region_found'] ?? 'No region found',
+                $wizardConfigStore?.lang['wizard.detection_mode.no_region_found_message'] ?? 'No region could be detected at the clicked position.',
+                60
+            );
+        }
+    }
+
 </script>
 
 <style>
@@ -195,6 +247,16 @@
         user-select: none;
         max-width: 100%;
         max-height: calc(100vh - 200px);
+    }
+
+    .detection-hit-area {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        cursor: crosshair;
     }
 
     .cropper-bg {
@@ -235,31 +297,54 @@
         outline: 2px solid #0d6efd;
         outline-offset: 2px;
     }
-
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode}>
     <div class="wrapper">
-        <svg bind:this={svgRoot} viewBox="0 0 {imageWidth} {imageHeight}" ondblclick={onSvgDblClick} role="application" aria-label="editor">
-            {#each $focuspoints as focuspoint, index}
-                {@const ShapeComponent = getShapeComponent(focuspoint.__shape)}
+        {#if !$detectionMode}
+            <svg
+                bind:this={svgRoot}
+                viewBox="0 0 {imageWidth} {imageHeight}"
+                ondblclick={onSvgDblClick}
+                role="application"
+                aria-label="editor"
+                in:fade={{duration: 260}}
+                out:fade={{duration: 180}}
+            >
+                {#each $focuspoints as focuspoint, index}
+                    {@const ShapeComponent = getShapeComponent(focuspoint.__shape)}
 
-                <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => activateFocuspoint(index)} role="button" aria-label={`select ${focusPointName(index)}`} aria-pressed={index === getActiveIndex()} tabindex="0" onkeydown={(event) => onShapedown(event, index)}>
-                    <ShapeComponent
-                        bind:this={instanceArray[index]}
-                        index={index}
-                        imageWidth={imageWidth}
-                        imageHeight={imageHeight}
-                        canvasWidth={canvasWidth}
-                        canvasHeight={canvasHeight}
-                    />
+                    <g class={["shape-group", index === getActiveIndex() && "active"]} onclick={() => activateFocuspoint(index)} role="button" aria-label={`select ${focusPointName(index)}`} aria-pressed={index === getActiveIndex()} tabindex="0" onkeydown={(event) => onShapedown(event, index)}>
+                        <ShapeComponent
+                            bind:this={instanceArray[index]}
+                            index={index}
+                            imageWidth={imageWidth}
+                            imageHeight={imageHeight}
+                            canvasWidth={canvasWidth}
+                            canvasHeight={canvasHeight}
+                        />
 
-                    {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
-                        <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" role="button" tabindex="0" aria-label={`Handle point of ${focusPointName(index)}`} />
-                    {/each}
-                </g>
-            {/each}
-        </svg>
-        <img bind:this={imgElement} src={image} alt="Selected" unselectable="on" {onload} />
+                        {#each instanceArray[index]?.getHandles?.() as [x, y], handleIndex}
+                            <circle cx={x} cy={y} r="3" data-shape-index={index} data-index={handleIndex} ondblclick={instanceArray[index]?.onHandleDoubleClick} class="shape-handle" role="button" tabindex="0" aria-label={`Handle point of ${focusPointName(index)}`} />
+                        {/each}
+                    </g>
+                {/each}
+            </svg>
+        {/if}
+        <img bind:this={imgElement}
+             src={image}
+             alt="Selected"
+             unselectable="on"
+             {onload}
+        />
+
+        {#if $detectionMode}
+            <button
+                class="detection-hit-area"
+                aria-label="Detect object region"
+                onclick={autoCreatePolygon}
+            >
+            </button>
+        {/if}
     </div>
 </div>

@@ -14,7 +14,13 @@
                         <f:if condition="{area.title}">
                             <title>{area.title}</title>
                         </f:if>
-                        <focuspoint:shape type="{area.__shape}" data="{area.__data}" />
+                        <focuspoint:shape
+                            type="{area.__shape}"
+                            data="{area.__data}"
+                            color="{area.styles.color}"
+                            opacity="{area.styles.opacity}"
+                            opacityOnHover="{area.styles.opacityOnHover}"
+                        />
                     </f:link.typolink>
                 </f:for>
             </svg>

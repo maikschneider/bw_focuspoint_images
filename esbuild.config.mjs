@@ -31,7 +31,7 @@ const buildConfig = {
         })],
     logLevel: "info",
     sourcemap: true,
-    external: ["@typo3/*", "interactjs"],
+    external: ["@typo3/*", "interactjs", "bootstrap"],
 };
 
 if (process.argv.includes('--build')) {

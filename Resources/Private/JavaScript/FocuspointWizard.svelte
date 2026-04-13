@@ -4,8 +4,17 @@
     .wizard {
         display: grid;
         max-height: 100%;
+        min-height: 0;
         grid-template-columns: 1fr 1px var(--sidebar-width, 300px);
-        grid-template-rows: 100%;
+        grid-template-rows: minmax(0, 1fr);
+    }
+
+    .detection-mode-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 2;
     }
 
     .resize-handle {
@@ -32,18 +41,24 @@
 
 <script lang="ts">
     import {onDestroy, onMount} from "svelte";
+    import {cubicIn, cubicOut} from "svelte/easing";
+    import {fly} from 'svelte/transition';
     import Image from './components/Image.svelte';
     import Sidebar from "./components/Sidebar.svelte";
-    import {focuspointChannelName, initStores, activateFocuspoint, deactivateAllFocuspoints} from './store.svelte';
+    import {
+        detectionMode, focuspointChannelName, initStores, activateFocuspoint, deactivateAllFocuspoints,
+        hasNumberSliderField
+    } from './store.svelte';
     import {focuspoints} from './store.svelte';
     import interact from 'interactjs';
     import Settings from "./components/Settings.svelte";
+    import DetectionModeIndicator from "./components/DetectionModeIndicator.svelte";
 
     let {itemFormElName, wizardConfig, image, itemFormElValue} = $props()
     let isSettingsOpen = $state(false)
     let imageComponent = $state(<{updateCanvasSizes: () => void} | null>(null))
     let sidebarWidth = $state(300)
-    const minSidebarWidth = 200
+    let minSidebarWidth = 238
     let channel: BroadcastChannel|null = null
 
 
@@ -55,6 +70,10 @@
             setTimeout(() => {
                 activateFocuspoint(0)
             }, 300)
+        }
+
+        if (hasNumberSliderField()) {
+            minSidebarWidth = 300;
         }
 
         channel = new BroadcastChannel(focuspointChannelName(itemFormElName))
@@ -98,6 +117,16 @@
         isSettingsOpen = !isSettingsOpen
     }
 </script>
+
+{#if $detectionMode}
+    <div
+        class="detection-mode-overlay"
+        in:fly={{ y: -24, duration: 260, easing: cubicOut }}
+        out:fly={{ y: -16, duration: 180, easing: cubicIn }}
+    >
+        <DetectionModeIndicator />
+    </div>
+{/if}
 
 <div class="wizard" style="--sidebar-width: {sidebarWidth}px;">
     {#if isSettingsOpen}

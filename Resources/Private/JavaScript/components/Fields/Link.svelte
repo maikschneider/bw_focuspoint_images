@@ -88,6 +88,12 @@
     }
 </script>
 
+<style>
+    .form-wizards-element {
+        z-index: 0;
+    }
+</style>
+
 <div class="form-group">
     <label class="form-label" for="input-{index}-{name}">
         {config.title}
