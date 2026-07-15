@@ -153,37 +153,113 @@ class FocuspointPreviewRenderer extends StandardContentPreviewRenderer
             <mask id="mask' . $fileReference->getUid() . '"><rect x="0" y="0" width="200" height="200" fill="#FFF" fill-opacity="0.5" />';
 
         foreach ($points as $point) {
-            $x = $point->x * 100;
-            $y = $point->y * 100;
-            $height = $point->height * 100;
-            $width = $point->width * 100;
-
-            $svg .= '<rect x="' . $x . '%"
-                y="' . $y . '%"
-                width="' . $width . '%"
-                height="' . $height . '%"
-                fill="#000"/>';
+            $svg .= $this->renderMaskShape($point);
         }
 
         $svg .= '</mask>';
         $svg .= '<rect x="0" y="0" width="200" height="200" fill="#000" mask="url(#mask' . $fileReference->getUid() . ')" />';
 
         foreach ($points as $point) {
-            $x = $point->x * 100;
-            $y = $point->y * 100;
-            $height = $point->height * 100;
-            $width = $point->width * 100;
-
-            $svg .= '<rect x="' . $x . '%"
-                y="' . $y . '%"
-                stroke="#ff8700"
-                stroke-width="1.5px"
-                width="' . $width . '%"
-                height="' . $height . '%"
-                fill="none"/>';
+            $svg .= $this->renderOutlineShape($point);
         }
 
         $svg .= '</svg>';
         return $svg;
+    }
+
+    private function renderMaskShape(object $point): string
+    {
+        $shape = $point->shape ?? 'rectangle';
+
+        return match ($shape) {
+            'circle', 'ellipse' => $this->renderEllipse($point, 'fill="#000"'),
+            'line' => $this->renderLine($point, 'stroke="#000" stroke-width="4" stroke-linecap="round"'),
+            'crosshair' => $this->renderCrosshair($point, 'stroke="#000" stroke-width="4" stroke-linecap="round"'),
+            default => $this->renderRectangle($point, 'fill="#000"'),
+        };
+    }
+
+    private function renderOutlineShape(object $point): string
+    {
+        $shape = $point->shape ?? 'rectangle';
+
+        return match ($shape) {
+            'circle', 'ellipse' => $this->renderEllipse($point, 'stroke="#ff8700" stroke-width="1.5px" fill="none"'),
+            'line' => $this->renderLine($point, 'stroke="#ff8700" stroke-width="2" stroke-linecap="round" fill="none"'),
+            'crosshair' => $this->renderCrosshair($point, 'stroke="#ff8700" stroke-width="2" stroke-linecap="round" fill="none"'),
+            default => $this->renderRectangle($point, 'stroke="#ff8700" stroke-width="1.5px" fill="none"'),
+        };
+    }
+
+    private function renderRectangle(object $point, string $attributes): string
+    {
+        $x = ($point->x ?? 0) * 100;
+        $y = ($point->y ?? 0) * 100;
+        $width = ($point->width ?? 0) * 100;
+        $height = ($point->height ?? 0) * 100;
+
+        return '<rect x="' . $x . '%"
+        y="' . $y . '%"
+        width="' . $width . '%"
+        height="' . $height . '%"
+        ' . $attributes . '/>';
+    }
+
+    private function renderEllipse(object $point, string $attributes): string
+    {
+        $x = ($point->x ?? 0) * 100;
+        $y = ($point->y ?? 0) * 100;
+        $width = ($point->width ?? 0) * 100;
+        $height = ($point->height ?? 0) * 100;
+
+        $cx = $x + ($width / 2);
+        $cy = $y + ($height / 2);
+        $rx = $width / 2;
+        $ry = $height / 2;
+
+        return '<ellipse cx="' . $cx . '%"
+        cy="' . $cy . '%"
+        rx="' . $rx . '%"
+        ry="' . $ry . '%"
+        ' . $attributes . '/>';
+    }
+
+    private function renderLine(object $point, string $attributes): string
+    {
+        $x1 = ($point->x ?? 0) * 100;
+        $y1 = ($point->y ?? 0) * 100;
+
+        $x2 = isset($point->x2)
+            ? $point->x2 * 100
+            : $x1 + (($point->width ?? 0.2) * 100);
+
+        $y2 = isset($point->y2)
+            ? $point->y2 * 100
+            : $y1 + (($point->height ?? 0.2) * 100);
+
+        return '<line x1="' . $x1 . '%"
+        y1="' . $y1 . '%"
+        x2="' . $x2 . '%"
+        y2="' . $y2 . '%"
+        ' . $attributes . '/>';
+    }
+
+    private function renderCrosshair(object $point, string $attributes): string
+    {
+        $x = ($point->x ?? 0) * 100;
+        $y = ($point->y ?? 0) * 100;
+
+        $size = 5;
+
+        return '<line x1="' . ($x - $size) . '%"
+            y1="' . $y . '%"
+            x2="' . ($x + $size) . '%"
+            y2="' . $y . '%"
+            ' . $attributes . '/>
+        <line x1="' . $x . '%"
+            y1="' . ($y - $size) . '%"
+            x2="' . $x . '%"
+            y2="' . ($y + $size) . '%"
+            ' . $attributes . '/>';
     }
 }

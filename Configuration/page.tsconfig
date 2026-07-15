@@ -3,8 +3,6 @@ mod.tx_bwfocuspointimages.settings {
   defaultWidth = 0.2
   defaultHeight = 0.2
   fields {
-
-  }
 }
 
 mod.wizards.newContentElement.wizardItems {

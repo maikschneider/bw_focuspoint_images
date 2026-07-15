@@ -1,5 +1,17 @@
 mod.tx_bwfocuspointimages.settings.fields {
 
+  shape {
+      title = Shape
+      type = shape
+      options {
+        rectangle = Rectangle
+        circle = Circle
+        line = Line
+        crosshair = Crosshair
+      }
+      default = rectangle
+  }
+
   name {
     title = LLL:EXT:bw_focuspoint_images/Resources/Private/Language/locallang_db.xlf:wizard.fields.name
     type = text

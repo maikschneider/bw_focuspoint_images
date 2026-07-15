@@ -2,6 +2,9 @@
     import interact from 'interactjs';
     import {activateFocuspoint, focusPointName, focuspoints} from "../store.svelte";
     import {onDestroy, onMount} from "svelte";
+    import FocuspointShape from "./Shapes/FocuspointShape.svelte";
+
+    import {initFocuspointInteractions} from "../interactions/focuspointInteractions";
 
     let {image} = $props()
     let canvasHeight = $state(0)
@@ -10,6 +13,8 @@
     let img
     let initialized = $state(false)
     let isDarkMode = $state(false)
+
+    let cleanupFocuspointInteractions
 
     // Handle keyboard navigation
     function handleKeyDown(event) {
@@ -45,6 +50,11 @@
                 movePoint(activeIndex, step, 0);
                 break;
         }
+    }
+
+    // Helper function to clamps a value to the normalized range between 0 and 1.
+    function clamp(value) {
+        return Math.max(0, Math.min(1, value))
     }
 
     // Helper function to move a point by x,y pixels
@@ -115,6 +125,110 @@
                 }
             }
         })
+    interact('.line-handle')
+        .draggable({
+            modifiers: [
+                interact.modifiers.restrictRect({
+                    restriction: 'parent',
+                    endOnly: false,
+                }),
+            ],
+            listeners: {
+                start(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'), 10)
+
+                    if (Number.isNaN(index)) {
+                        return
+                    }
+
+                    activateFocuspoint(index)
+                },
+                move(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'), 10)
+                    const handle = event.target.getAttribute('data-handle')
+
+                    if (Number.isNaN(index) || !handle || canvasWidth <= 0 || canvasHeight <= 0) {
+                        return
+                    }
+
+                    focuspoints.update((items) => items.map((point, currentIndex) => {
+                        if (currentIndex !== index) {
+                            return point
+                        }
+
+                        const fallbackX2 = clamp((point.x ?? 0) + (point.width ?? 0.2))
+                        const fallbackY2 = clamp((point.y ?? 0) + (point.height ?? 0.2))
+
+                        const currentX = handle === 'start'
+                            ? (point.x ?? 0) * canvasWidth
+                            : (point.x2 ?? fallbackX2) * canvasWidth
+
+                        const currentY = handle === 'start'
+                            ? (point.y ?? 0) * canvasHeight
+                            : (point.y2 ?? fallbackY2) * canvasHeight
+
+                        const nextX = clamp((currentX + event.dx) / canvasWidth)
+                        const nextY = clamp((currentY + event.dy) / canvasHeight)
+
+                        if (handle === 'start') {
+                            return {
+                                ...point,
+                                x: nextX,
+                                y: nextY,
+                            }
+                        }
+
+                        return {
+                            ...point,
+                            x2: nextX,
+                            y2: nextY,
+                        }
+                    }))
+                },
+            },
+        })
+    interact('.crosshair-handle')
+        .draggable({
+            modifiers: [
+                interact.modifiers.restrictRect({
+                    restriction: 'parent',
+                    endOnly: false,
+                }),
+            ],
+            listeners: {
+                start(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'), 10)
+
+                    if (Number.isNaN(index)) {
+                        return
+                    }
+
+                    activateFocuspoint(index)
+                },
+                move(event) {
+                    const index = parseInt(event.target.getAttribute('data-index'), 10)
+
+                    if (Number.isNaN(index) || canvasWidth <= 0 || canvasHeight <= 0) {
+                        return
+                    }
+
+                    focuspoints.update((items) => items.map((point, currentIndex) => {
+                        if (currentIndex !== index) {
+                            return point
+                        }
+
+                        const currentX = (point.x ?? 0) * canvasWidth
+                        const currentY = (point.y ?? 0) * canvasHeight
+
+                        return {
+                            ...point,
+                            x: clamp((currentX + event.dx) / canvasWidth),
+                            y: clamp((currentY + event.dy) / canvasHeight),
+                        }
+                    }))
+                },
+            },
+        })
 
     onMount(() => {
         if (img.complete) {
@@ -122,6 +236,14 @@
         } else {
             img.addEventListener('load', setCanvasSizes)
         }
+        cleanupFocuspointInteractions = initFocuspointInteractions({
+            focuspoints,
+            activateFocuspoint,
+            getCanvasDimensions: () => ({
+                canvasWidth,
+                canvasHeight,
+            }),
+        })
 
         window.addEventListener('resize', updateCanvasSizes)
         window.addEventListener('keydown', handleKeyDown)
@@ -170,34 +292,7 @@
 </script>
 
 <style>
-    .draggable {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.15s ease;
-        user-select: none;
-    }
 
-    .style1 {
-        display: inline-grid;
-        background-color: rgba(0, 0, 0, 0.6);
-        border: 1px dashed rgba(255, 255, 255, 0.8);
-        color: white;
-        padding: 10px;
-        --typo3-state-primary-bg: rgba(255, 255, 255, 0.8);
-    }
-
-    .opacity-0 {
-        opacity: 0;
-    }
-
-    .style1.active {
-        border-color: #ff8700;
-        --typo3-state-primary-bg: #ff8700;
-        border-style: solid;
-        background-color: rgba(0, 0, 0, 0.8);
-    }
 
     img {
         pointer-events: none;
@@ -225,44 +320,27 @@
     }
 
     .wrapper {
+        position: relative;
         align-self: center;
     }
 
-    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-ne {
-        top: -3px;
-    }
 
-    .ui-resizable-handle.ui-resizable-sw, .ui-resizable-handle.ui-resizable-se {
-        bottom: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-ne, .ui-resizable-handle.ui-resizable-se {
-        right: -3px;
-    }
-
-    .ui-resizable-handle.ui-resizable-nw, .ui-resizable-handle.ui-resizable-sw {
-        left: -3px;
-    }
 </style>
 
 <div class="cropper-bg" class:cropper-bg--dark={isDarkMode} touch-action="none">
     <div class="wrapper">
         {#each $focuspoints as focuspoint, index}
-            <div
-                onclick={() => activateFocuspoint(index)}
-                class:active={focuspoint.active}
-                class:opacity-0={!initialized}
-                data-index={index}
-                class="draggable style1 resizable"
-                style="transform:translate3d({getPositionX(index)}px, {getPositionY(index)}px, 0); width: {getFocuspointWidth(index)}px; height: {getFocuspointHeight(index)}px;"
-                data-x="{getPositionX(index)}"
-                data-y="{getPositionY(index)}">
-                <span class="text-break">{focuspointName(focuspoint, index)}</span>
-                <span class="ui-resizable-handle ui-resizable-nw"></span>
-                <span class="ui-resizable-handle ui-resizable-ne"></span>
-                <span class="ui-resizable-handle ui-resizable-sw"></span>
-                <span class="ui-resizable-handle ui-resizable-se"></span>
-            </div>
+            <FocuspointShape
+                {focuspoint}
+                {index}
+                {initialized}
+                {canvasWidth}
+                {canvasHeight}
+                {getPositionX}
+                {getPositionY}
+                {getFocuspointWidth}
+                {getFocuspointHeight}
+            />
         {/each}
         <img bind:this={img} src={image} alt="Selected" unselectable="on" />
     </div>

@@ -8,8 +8,19 @@ export const focuspoints = writable([]);
 export const focuspointChannelName = (itemFormElName) => `focuspoint:${itemFormElName}`
 
 export const initStores = (initialValue, wizardConfig) => {
-    wizardConfigStore.set(JSON.parse(wizardConfig));
-    focuspoints.set(JSON.parse(initialValue && initialValue !== '' ? initialValue : '[]'));
+  const parsedWizardConfig = JSON.parse(wizardConfig)
+
+  wizardConfigStore.set({
+    ...parsedWizardConfig,
+    enabledShapes: parsedWizardConfig.enabledShapes ? parsedWizardConfig.enabledShapes.split(',').map((shape)=>shape.trim()).filter(Boolean) : ['rectangle']
+  })
+
+  const initalFocuspoints = JSON.parse(initialValue && initialValue !== '' ? initialValue : '[]').map(focuspoint => ({
+    ...focuspoint,
+    shape: focuspoint.shape ?? 'rectangle'
+  }))
+
+    focuspoints.set(initalFocuspoints);
 }
 
 /**
@@ -94,6 +105,7 @@ export const createNewFocuspoint = () => {
       return acc;
     }, {});
 
+    newFocuspoint.shape ??= 'rectangle'
     // set default values
     newFocuspoint.x = 0.333;
     newFocuspoint.y =  0.333;
@@ -101,8 +113,9 @@ export const createNewFocuspoint = () => {
     newFocuspoint.height = parseFloat(config.defaultHeight);
 
     // add the new focuspoint to the store and activate it
+    const newFocuspointIndex = get(focuspoints).length
     focuspoints.update(focuspoints => [...focuspoints, newFocuspoint]);
-    activateFocuspoint(get(focuspoints).length - 1);
+    activateFocuspoint(newFocuspointIndex);
 }
 
 export const iconStore = writable({});
