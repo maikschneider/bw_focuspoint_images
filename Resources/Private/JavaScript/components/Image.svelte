@@ -13,6 +13,12 @@
 
     // Handle keyboard navigation
     function handleKeyDown(event) {
+        // Ignore moving by arrow key when typing in a text field / editable element
+        const el = event.target;
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable)) {
+            return;
+        }
+
         // Find the active focuspoint
         const activeIndex = $focuspoints.findIndex(point => point.active);
         if (activeIndex === -1) return;
